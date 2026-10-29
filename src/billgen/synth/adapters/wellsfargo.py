@@ -33,6 +33,13 @@ def build(ledger: LedgerDocument, defaults: dict[str, Any]) -> dict[str, Any]:
             }
         )
         bank.update(bank_contact(ledger))
+    # 富国的模板字段叫 `legal_na`，契约要 `legal`；两者必须同时存在，
+    # 否则「账本没定行」时封面行名会被判成空值。
+    legal = bank.get("legal") or bank.get("legal_na") or "Wells Fargo Bank, N.A."
+    bank["legal"] = legal
+    bank["legal_na"] = bank.get("legal_na") or legal
+    bank.setdefault("name", "Wells Fargo")
+    bank.setdefault("domain", "wellsfargo.com")
 
     transactions = []
     for row in ledger.rows:
