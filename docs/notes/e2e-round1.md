@@ -144,3 +144,16 @@ U.S. Bank 的「金额列 `$` 独立成列」「负数尾随减号 `1,650.00-`�
    `docs/e2e/README.md` 记录重跑命令与指标口径。提交 `fae7093`。
 
 回滚：`git revert 1b1fa4e f67e7ca fae7093`。
+
+## 第六轮（元数据指纹闸门）
+
+肉眼复核看不到元数据，但它是「一眼假」里最容易被抓的一层——`pdfinfo` 一跑就露：
+- `tools/realism_rules.py` 新增 `pdf_fingerprint_problems(template, pdf)`：
+  - `FINGERPRINTS`：扫原始字节，拒绝 `billgen|PyMuPDF|pymupdf|MuPDF|mupdf|pdfpost`；
+  - `EXPECTED_PRODUCER`：11 套版式的 producer 必须与真实账单一致
+    （chase→OpenText、usbank→AFP2PDF、capitalone→openhtmltopdf、mercury→react-pdf、
+    sofi→LibreOffice、wellsfargo→iText、amex→Smart Communications、boa→TargetStream）。
+  - `check_template()` 现在先渲染一次拿 bytes，再取文本，顺带跑指纹规则。
+- 实测当前 11 套全绿；注入 `producer=billgen 0.9 / PyMuPDF 1.24` 的实验件会被同时报
+  `generator` 与 `producer` 两条（`tests/test_realism_rules.py::test_pdf_fingerprint_rule_catches_injected_producer`）。
+- 提交 `dc445ea`。回滚：`git revert dc445ea`。
