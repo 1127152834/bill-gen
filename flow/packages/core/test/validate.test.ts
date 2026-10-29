@@ -52,6 +52,7 @@ describe('runRules', () => {
       ['R11_credit_within_limit', 'lifeModel'],
       ['R12_no_placeholder_names', 'lifeModel'],
       ['R13_occupation_category_fit', 'lifeModel'],
+      ['R14_variety_floor', 'schedule'],
     ]);
   });
 

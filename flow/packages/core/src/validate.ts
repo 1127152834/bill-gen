@@ -222,8 +222,13 @@ const r7Geo: Check = (statements, { norm, meta }) => {
   return [...wrongState, ...tooMuchTravel];
 };
 
-/** R8: within a statement, no two rows share posted date, description, amount and direction. */
-const r8Duplicates: Check = (statements) =>
+/**
+ * R8: within a statement, no two rows share posted date, description, amount and direction.
+ *
+ * Noise rows are exempt: a double charge that came back is one of the most common things a real
+ * statement shows, and flagging it would send the schedule back for looking too human.
+ */
+const r8Duplicates: Check = (statements, { meta }) =>
   statements.flatMap((s) => {
     const groups = new Map<string, Transaction[]>();
     for (const t of s.transactions) {
@@ -231,7 +236,7 @@ const r8Duplicates: Check = (statements) =>
       groups.set(key, [...(groups.get(key) ?? []), t]);
     }
     return [...groups.values()]
-      .filter((g) => g.length > 1)
+      .filter((g) => g.length > 1 && g.some((t) => meta[t.id]?.source !== 'noise'))
       .map((g) => ({ transactionIds: ids(g), message: `${named(s)}: ${g.length} identical rows (${g[0]!.postedDate} ${g[0]!.description} ${g[0]!.amountCents})` }));
   });
 
@@ -309,6 +314,50 @@ const r13OccupationFit: Check = (statements, { norm, meta, facts }) => {
   ];
 };
 
+/**
+ * R14: 每个账期要有足够多的不同抬头。
+ *
+ * 一个只有八九个商户、每月都一模一样的账单不像人的生活，像一张表格。这里只设下限，不设上限：
+ * 多样性越高越真实，不能因为「太杂」把一份好账单打回。
+ */
+const MIN_MERCHANTS_PER_CYCLE = 4;
+/** 整份账单（≥2 个账期）至少这么多不同抬头，防止「每月就那几家」。 */
+const MIN_MERCHANTS_PER_STATEMENT = 10;
+
+const r14VarietyFloor: Check = (statements) =>
+  statements.flatMap((s) => {
+    const merchantsOf = (from: string, to: string): Set<string> => {
+      const keys = new Set<string>();
+      for (const t of s.transactions) {
+        if (t.postedDate < from || t.postedDate > to) continue;
+        // 还款、利息、手续费不是「去哪里花了钱」。
+        if (t.type === 'PAYMENT' || t.type === 'INTEREST' || t.type === 'FEE') continue;
+        keys.add(t.merchant?.name ?? t.description);
+      }
+      return keys;
+    };
+    const out: Violation[] = s.months.flatMap((m) => {
+      const size = merchantsOf(m.cycleStart, m.cycleEnd).size;
+      if (size >= MIN_MERCHANTS_PER_CYCLE) return [];
+      return [
+        {
+          transactionIds: [],
+          message: `${named(s)}: ${m.cycleStart.slice(0, 7)} 只有 ${size} 个不同商户，至少要 ${MIN_MERCHANTS_PER_CYCLE} 个`,
+        },
+      ];
+    });
+    if (s.months.length >= 2) {
+      const size = merchantsOf(s.periodStart, s.periodEnd).size;
+      if (size < MIN_MERCHANTS_PER_STATEMENT) {
+        out.push({
+          transactionIds: [],
+          message: `${named(s)}: 整份账单只有 ${size} 个不同商户，至少要 ${MIN_MERCHANTS_PER_STATEMENT} 个`,
+        });
+      }
+    }
+    return out;
+  });
+
 const RULES: readonly { id: RuleId; target: RuleResult['target']; check: Check }[] = [
   { id: 'R1_count_in_range', target: 'schedule', check: r1Count },
   { id: 'R2_balance_continuity', target: 'schedule', check: r2Balance },
@@ -323,6 +372,7 @@ const RULES: readonly { id: RuleId; target: RuleResult['target']; check: Check }
   { id: 'R11_credit_within_limit', target: 'lifeModel', check: r11CreditLimit },
   { id: 'R12_no_placeholder_names', target: 'lifeModel', check: r12NoPlaceholders },
   { id: 'R13_occupation_category_fit', target: 'lifeModel', check: r13OccupationFit },
+  { id: 'R14_variety_floor', target: 'schedule', check: r14VarietyFloor },
 ];
 
 /** Runs R1-R11 in order; a rule with no violations passes. */

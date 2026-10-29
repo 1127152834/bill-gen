@@ -179,9 +179,25 @@ function discretionaryTxn(item: DiscretionaryItem, ctx: FillCtx, cycle: Cycle, v
 }
 
 /** One ATM withdrawal (posts next bank business day) plus its same-day fee when `feeCents > 0`. */
+/** Amount drawn: weighted when the model gives weights, uniform otherwise. */
+function atmAmount(atm: AtmConfig, rng: Rng): number {
+  const choices = atm.amountChoicesCents;
+  const weights = atm.amountWeights;
+  if (weights === undefined || weights.length !== choices.length) return rng.pick(choices);
+  return rng.weighted(choices.map((item, i) => ({ item, weight: weights[i]! })));
+}
+
+/** What this withdrawal costs: waived sometimes, drawn from a spread when the model gives one. */
+function atmFee(atm: AtmConfig, rng: Rng): number {
+  if (atm.waivedProbability !== undefined && rng.chance(atm.waivedProbability)) return 0;
+  if (atm.feeRange !== undefined) return rng.int(atm.feeRange.min, atm.feeRange.max);
+  return atm.feeCents;
+}
+
 function addAtmWithdrawal(ledger: Ledger, ctx: FillCtx, atm: AtmConfig, cycle: Cycle): void {
   const day = ctx.rng.pick(swipeDays(cycle));
   const posted = postingDate(day, 'ATM', ctx.rng);
+  const fee = atmFee(atm, ctx.rng);
   const withdrawal: ScheduledTxn = {
     id: ctx.nextId('atm', 'atm', day),
     account: ctx.account,
@@ -189,12 +205,12 @@ function addAtmWithdrawal(ledger: Ledger, ctx: FillCtx, atm: AtmConfig, cycle: C
     postedDate: posted,
     type: 'ATM',
     direction: 'debit',
-    amountCents: ctx.rng.pick(atm.amountChoicesCents),
+    amountCents: atmAmount(atm, ctx.rng),
     merchantKey: 'atm',
     source: 'atm',
     priority: DISCRETIONARY_PRIORITY,
   };
-  if (atm.feeCents === 0) {
+  if (fee === 0) {
     ledger.add(withdrawal);
     return;
   }
@@ -205,7 +221,7 @@ function addAtmWithdrawal(ledger: Ledger, ctx: FillCtx, atm: AtmConfig, cycle: C
     postedDate: posted,
     type: 'FEE',
     direction: 'debit',
-    amountCents: atm.feeCents,
+    amountCents: fee,
     merchantKey: 'fee-atm',
     source: 'fee',
     priority: DISCRETIONARY_PRIORITY,

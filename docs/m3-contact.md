@@ -87,7 +87,7 @@ BOA 促销框与法务段落里的商品名（`Balance Connect™`、`SafeBalanc
 ## 7. 正文里的域名：整行重画（M5 补）
 
 底稿把 `at chase.com/disclosures or call us…` 这一行按「定位单元」拆成十几个元素
-（`h` `a` `r` `b` `or` `lin` …），每个单元都带自己的 x。替换成 `harborline-bank.example`
+（`h` `a` `r` `b` `or` `lin` …），每个单元都带自己的 x。替换成 `harborline-bank.com`
 之后单元数变多、字宽变长，但每个单元仍按原 x 落笔，于是渲染成
 `harb orline-b ank.example`——文本层看着是对的，画面上是断开的。
 

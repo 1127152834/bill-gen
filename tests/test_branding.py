@@ -114,7 +114,7 @@ def test_every_mapped_template_actually_replaces_logo(template_id):
     renderer = registry.get_renderer(template_id)
     result = renderer.render(renderer.default_data(), renderer.spec.default_options)
     placements = branding.PLACEMENTS[template_id]
-    brand = branding.brand_for("Harborline Bank", "Harborline Bank, N.A.", "harborline-bank.example")
+    brand = branding.brand_for("Harborline Bank", "Harborline Bank, N.A.", "harborline-bank.com")
 
     with fitz.open(stream=result.pdf, filetype="pdf") as doc:
         before = [header_images(doc, doc[0], fitz.Rect(*placements[0]))]
@@ -227,7 +227,8 @@ def branded_pdf():
         if template_id not in cache:
             account = "business_checking" if "business" in template_id else "checking"
             bank = BANK_BY_TEMPLATE.get(template_id, "Bank of America")
-            led = from_game_result(payload(account, bank), account=account, cycle=0)
+            # 显式点名行名：这些审计测的就是「重绘后文本可读」，不点名则模板原样保留。
+            led = from_game_result(payload(account, bank), account=account, cycle=0, bank_name=bank)
             cache[template_id] = render(template_id, led).pdf
         return cache[template_id]
 

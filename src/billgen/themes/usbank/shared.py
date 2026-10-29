@@ -47,6 +47,117 @@ def parse_cmap(txt):
     return out
 
 
+_DONOR_NAMES = {
+    "ArialMT": "Arial.ttf",
+    "Arial-BoldMT": "Arial Bold.ttf",
+    "Arial-ItalicMT": "Arial Italic.ttf",
+    "Arial-BoldItalicMT": "Arial Bold Italic.ttf",
+}
+_DONORS: dict[str, object] = {}
+
+
+def _donor(base_font: str):
+    """按子集名找系统里的同族字体当「字形供体」（子集只收过原稿用到的字）。"""
+    name = (base_font or "").split("+")[-1]
+    fname = _DONOR_NAMES.get(name)
+    if not fname:
+        return None
+    if fname not in _DONORS:
+        import os
+
+        path = f"/System/Library/Fonts/Supplemental/{fname}"
+        _DONORS[fname] = TTFont(path) if os.path.exists(path) else None
+    return _DONORS[fname]
+
+
+def _descendant(doc, font_xref):
+    obj = doc.xref_object(font_xref)
+    m = re.search(r"/DescendantFonts \[\s*(\d+) 0 R", obj)
+    return int(m.group(1)) if m else None
+
+
+def _fontfile2_xref(doc, font_xref):
+    df = _descendant(doc, font_xref)
+    if df is None:
+        return None
+    m = re.search(r"/FontDescriptor (\d+) 0 R", doc.xref_object(df))
+    if not m:
+        return None
+    m2 = re.search(r"/FontFile2 (\d+) 0 R", doc.xref_object(int(m.group(1))))
+    return int(m2.group(1)) if m2 else None
+
+
+def _fill_font_outlines(doc, font_xref, base_font) -> int:
+    """给「有码位但轮廓为空」的字补上真轮廓。
+
+    原稿是银行自己打印的账单，PDF 只嵌了它用到的字（`Sep`, `Aug`…），`Jan` 里的
+    'J' 在子集 cmap 里有码位、glyf 里却是空壳 —— 主题把日期换成 `Jan 05` 后文本层
+    对、像素却缺字（实测肉眼 `an 05`）。这里从系统 Arial 取同字轮廓补进去，再把
+    FontFile2 流写回。必须作用在**最终要保存的那个 doc** 上。
+    """
+    donor = _donor(base_font)
+    ff2 = _fontfile2_xref(doc, font_xref)
+    if donor is None or ff2 is None:
+        return 0
+    from fontTools.pens.recordingPen import DecomposingRecordingPen
+    from fontTools.pens.ttGlyphPen import TTGlyphPen
+
+    try:
+        tt = TTFont(io.BytesIO(doc.xref_stream(ff2)), fontNumber=0, lazy=True)
+    except Exception:
+        return 0
+    glyf = tt["glyf"]
+    order = tt.getGlyphOrder()
+    subset_set = tt.getGlyphSet()
+    donor_set = donor.getGlyphSet()
+    donor_cmap = donor.getBestCmap() or {}
+    cid2ch = {}
+    obj = doc.xref_object(font_xref)
+    mt = re.search(r"/ToUnicode (\d+) 0 R", obj)
+    if mt:
+        cid2ch = parse_cmap(doc.xref_stream(int(mt.group(1))).decode("latin1"))
+    fixed = 0
+    for cid, ch in cid2ch.items():
+        if cid >= len(order):
+            continue
+        gname = order[cid]
+        try:
+            if glyf[gname].numberOfContours != 0:
+                continue
+        except Exception:
+            continue
+        dname = donor_cmap.get(ord(ch))
+        if not dname or dname not in donor_set:
+            continue
+        pen = TTGlyphPen(subset_set)
+        rec = DecomposingRecordingPen(donor_set)
+        donor_set[dname].draw(rec)
+        rec.replay(pen)
+        glyf[gname] = pen.glyph()
+        fixed += 1
+    if not fixed:
+        return 0
+    out = io.BytesIO()
+    tt.save(out)
+    doc.update_stream(ff2, out.getvalue())
+    return fixed
+
+
+def patch_outlines(doc) -> dict[str, int]:
+    """把整份 PDF 里所有 Type0 字体都查一遍空轮廓补齐（返回 {子集名: 补字数}）。"""
+    done, report = set(), {}
+    for pno in range(len(doc)):
+        for f in doc[pno].get_fonts(full=True):
+            xref, ftype, base = f[0], f[2], f[3]
+            if ftype != "Type0" or xref in done:
+                continue
+            done.add(xref)
+            n = _fill_font_outlines(doc, xref, base)
+            if n:
+                report[base] = n
+    return report
+
+
 class UsFont:
     """Type0 全量字体程序：char→GID(CID)、per-1000 宽度、ToUnicode/W 增量补写。"""
 
@@ -55,14 +166,15 @@ class UsFont:
         self.cmap, self.widths = {}, {}
         self.new_cids = set()
         obj = doc.xref_object(font_xref)
+        mb = re.search(r"/BaseFont /([^\s/]+)", obj)
+        self.base = mb.group(1) if mb else ""
         m = re.search(r"/DescendantFonts \[ (\d+) 0 R", obj)
         self.df = int(m.group(1)) if m else None
         mu = re.search(r"/ToUnicode (\d+) 0 R", obj)
         self.tou = int(mu.group(1)) if mu else None
         self.cid2ch = {}
         if self.tou:
-            self.cid2ch = parse_cmap(doc.xref_stream(self.tou).decode(
-                "latin1"))
+            self.cid2ch = parse_cmap(doc.xref_stream(self.tou).decode("latin1"))
         buf = doc.extract_font(font_xref)[-1]
         self.tt = TTFont(io.BytesIO(buf), fontNumber=0, lazy=True)
         upm = self.tt["head"].unitsPerEm
@@ -87,6 +199,7 @@ class UsFont:
         return self.widths.get(self.cmap.get(ch), 500)
 
     def commit(self, doc):
+
         """收尾：新用字符补 ToUnicode bfchar + DescendantFonts /W。"""
         if not self.new_cids or self.tou is None or self.df is None:
             return

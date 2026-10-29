@@ -7,6 +7,7 @@ import { createApp } from './app.js';
 import { openDb } from './db.js';
 import { makeDeps } from './deps.js';
 import { EnvError, loadEnv, secretsOf } from './env.js';
+import { resolveLlm } from './settings.js';
 import { createEventBus } from './events.js';
 import { createJobRunner } from './jobs.js';
 
@@ -28,15 +29,17 @@ function main(): void {
     bus,
     makeDeps: () => deps(),
     concurrency: 2,
+    logProgress: env.logProgress,
+    logResearch: env.logResearch,
     secrets: secretsOf(env),
   });
   runner.recoverOnStartup();
 
   const webDist = process.env.WEB_DIST ? resolve(REPO_ROOT, process.env.WEB_DIST) : undefined;
-  const app = createApp({ db, runner, bus, makeDeps: deps, apiKey: env.apiKey, ...(webDist ? { webDist } : {}) });
+  const app = createApp({ db, env, runner, bus, makeDeps: deps, apiKey: env.apiKey, ...(webDist ? { webDist } : {}) });
   if (webDist) console.log(`[server] serving web UI from ${webDist}`);
   const server = serve({ fetch: app.fetch, hostname: env.host, port: env.port }, (info) => {
-    console.log(`[server] listening on http://${info.address}:${info.port}${env.llmFake ? ' (LLM_FAKE)' : ''}`);
+    console.log(`[server] listening on http://${info.address}:${info.port}${resolveLlm(db, env).ready ? '' : ' (offline fixtures: no model configured)'}`);
   });
 
   const shutdown = (): void => {

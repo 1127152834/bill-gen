@@ -2,6 +2,7 @@ import { Navigate, NavLink, Route, Routes } from 'react-router-dom'
 import Generation from './pages/Generation'
 import History from './pages/History'
 import New from './pages/New'
+import Settings from './pages/Settings'
 
 const navClass = ({ isActive }: { isActive: boolean }) =>
   `rounded-md px-3 py-1.5 text-sm font-medium ${isActive ? 'bg-accent-soft text-accent-strong' : 'text-muted hover:text-ink'}`
@@ -19,6 +20,9 @@ export default function App() {
             <NavLink to="/history" className={navClass}>
               历史
             </NavLink>
+            <NavLink to="/settings" className={navClass}>
+              模型
+            </NavLink>
           </nav>
         </div>
       </header>
@@ -35,6 +39,7 @@ export default function App() {
           />
           <Route path="/g/:id" element={<Generation />} />
           <Route path="/history" element={<History />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<Navigate to="/new" replace />} />
         </Routes>
       </main>

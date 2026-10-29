@@ -15,7 +15,7 @@ function Header({ statement: s }: { statement: Statement }) {
       <div className="h-1.5 bg-accent" aria-hidden="true" />
       <div className="flex flex-wrap items-start justify-between gap-x-8 gap-y-3 p-4 sm:p-5">
         <div>
-          <h2 className="text-lg font-semibold tracking-tight">{s.bankName}</h2>
+          <h2 className="text-lg font-semibold tracking-tight">{s.bankName || `${label.zh}对账单`}</h2>
           <p className="text-sm text-muted">
             {label.zh} · {label.en}
           </p>

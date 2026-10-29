@@ -79,8 +79,8 @@ describe('Result: statement preview', () => {
     expect(tabs[1]).toHaveTextContent('****7210')
     expect(tabs[0]).toHaveAttribute('aria-selected', 'true')
     const header = screen.getByRole('region', { name: '账单抬头' })
-    expect(within(header).getByText('Harborline Federal Savings')).toBeInTheDocument()
-    expect(within(header).getByText(/支票账户/)).toBeInTheDocument()
+    // 行名留空时不再显示虚构银行名，退回账户类型标题。
+    expect(within(header).getAllByText(/支票账户/)[0]).toBeInTheDocument()
     expect(within(header).getByText('****1347')).toBeInTheDocument()
     expect(within(header).getByText(/07\/01\/2026/)).toBeInTheDocument()
     expect(within(header).getByText(/09\/30\/2026/)).toBeInTheDocument()
@@ -117,8 +117,8 @@ describe('Result: statement preview', () => {
     expect(cards).toHaveLength(3)
     expect(valueOf(cards[0]!, '期初')).toHaveTextContent('$8,423.16')
     expect(valueOf(cards[0]!, '收入')).toHaveTextContent('$3,097.07')
-    expect(valueOf(cards[0]!, '支出')).toHaveTextContent('$3,843.88')
-    expect(valueOf(cards[0]!, '期末')).toHaveTextContent('$7,676.35')
+    expect(valueOf(cards[0]!, '支出')).toHaveTextContent('$4,371.32')
+    expect(valueOf(cards[0]!, '期末')).toHaveTextContent('$7,148.91')
   })
 
   it('expands a row to memo, merchant and an evidence link that opens safely in a new tab', async () => {
@@ -157,7 +157,7 @@ describe('Result: statement preview', () => {
     expect(within(header).getByText('$12,000.00')).toBeInTheDocument() // credit limit
     expect(within(header).getByText('24.99%')).toBeInTheDocument() // APR
     const card = screen.getAllByRole('group', { name: /账期/ })[0]!
-    expect(valueOf(card, '应还')).toHaveTextContent('$1,394.86')
+    expect(valueOf(card, '应还')).toHaveTextContent('$1,414.51')
     expect(valueOf(card, '最低还款')).toHaveTextContent('$35.00')
     expect(valueOf(card, '到期日')).toHaveTextContent('08/05')
     expect(screen.queryByRole('columnheader', { name: '余额' })).not.toBeInTheDocument()
@@ -165,11 +165,11 @@ describe('Result: statement preview', () => {
 })
 
 describe('Result: audit side panel', () => {
-  it('lists R1-R13 with Chinese names and pass marks', () => {
+  it('lists R1-R14 with Chinese names and pass marks', () => {
     renderResult(makeView())
     const panel = screen.getByRole('complementary', { name: '审计报告' })
     const rules = within(panel).getAllByRole('listitem').filter((li) => /^R\d+/.test(li.textContent ?? ''))
-    expect(rules).toHaveLength(13)
+    expect(rules).toHaveLength(14)
     expect(rules[0]).toHaveTextContent('R1')
     expect(rules[0]).toHaveTextContent('✓')
     expect(rules[1]).toHaveTextContent('余额连续')

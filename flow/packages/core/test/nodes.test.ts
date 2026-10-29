@@ -120,6 +120,23 @@ describe('lifeModelNode', () => {
     expect(model.openingBalanceCents).toBe(777_777);
   });
 
+  it('accepts a patch reply on retry and keeps the parts that were already fine', async () => {
+    const bad = good();
+    bad.discretionaryPool[0]!.factId = 'fact-made-up-diner';
+    const fixed = good();
+    // A patch replaces the named array only; everything else must survive from the first reply.
+    const llm = createFakeLlm({
+      lifeModel: [bad, { patch: { discretionaryPool: fixed.discretionaryPool, openingBalanceCents: 654_321 } }],
+    });
+    const model = await lifeModelNode(input, { llm, skills });
+    expect(llm.calls).toHaveLength(2);
+    expect(userText(llm, 1)).toMatch(/"patch"/);
+    expect(userText(llm, 1)).toMatch(/Omit everything that does not need to change/);
+    expect(model.openingBalanceCents).toBe(654_321);
+    expect(model.discretionaryPool.map((d) => d.factId)).toEqual(fixed.discretionaryPool.map((d) => d.factId));
+    expect(model.recurring).toHaveLength(bad.recurring.length);
+  });
+
   it('rejects payroll for a personal persona (LifeModelError after the retry)', async () => {
     const payroll = withRecurring(good(), 'adobe-cc', { kind: 'payroll' });
     const llm = createFakeLlm({ lifeModel: [payroll, payroll] });
@@ -366,8 +383,13 @@ describe('lifeModelNode', () => {
     expect(sys).toMatch(/only.*provided facts/i);
     expect(sys).toMatch(/never.*(salary|payroll)/i);
     expect(sys).toMatch(/English/);
-    expect(sys).toContain(String(both.location.combinedSalesTaxRate));
+    // The system prompt is the cacheable half: it must not carry anything request-specific
+    // (subject, city, tax rate), which now travels in the user turn.
+    expect(sys).not.toContain(String(both.location.combinedSalesTaxRate));
+    expect(sys).not.toContain(profile.address.city);
     const user = userText(llm);
+    expect(user).toContain(String(both.location.combinedSalesTaxRate));
+    expect(user).toContain(profile.address.city);
     expect(user).toContain('fact-shell-burnet-rd-austin');
     expect(user).toContain(both.cycles.checking![0]!.start);
     expect(user).toMatch(/"max":\s*14/);

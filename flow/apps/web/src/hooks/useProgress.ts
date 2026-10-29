@@ -52,6 +52,9 @@ export function progressReducer(state: ProgressState, action: Action): ProgressS
     }
     case 'warning':
       return { ...next, warnings: [...state.warnings, e.message] }
+    case 'step':
+      // 节点内部的一步（第几次尝试、第几条检索）：当备注显示，一行一条
+      return { ...next, notes: [...state.notes, `${e.node}: ${e.message}`] }
     case 'progress':
       return { ...next, notes: [...state.notes, e.message] }
   }

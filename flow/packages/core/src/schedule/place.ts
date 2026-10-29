@@ -20,7 +20,7 @@ export type ScheduledTxn = {
   direction: 'credit' | 'debit';
   amountCents: number;
   merchantKey: string;
-  source: 'recurring' | 'income' | 'discretionary' | 'card_payment' | 'interest' | 'fee' | 'atm';
+  source: 'recurring' | 'income' | 'discretionary' | 'card_payment' | 'interest' | 'fee' | 'atm' | 'noise';
   /** 1 = least deletable … 5 = most deletable; discretionary is always 5. */
   priority: number;
   factId?: string;

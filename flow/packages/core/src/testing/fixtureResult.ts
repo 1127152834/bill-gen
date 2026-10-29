@@ -27,7 +27,7 @@ const RESULT: GenerationResult = {
   },
   "statements": [
     {
-      "bankName": "Harborline Federal Savings",
+      "bankName": "",
       "accountLast4": "1347",
       "periodStart": "2026-07-01",
       "periodEnd": "2026-09-30",
@@ -55,6 +55,17 @@ const RESULT: GenerationResult = {
           }
         },
         {
+          "id": "noise-lt-redcross-2026-07-04-0",
+          "transactionDate": "2026-07-04",
+          "postedDate": "2026-07-06",
+          "description": "AMERICAN RED CROSS",
+          "memo": "Donation",
+          "type": "POS",
+          "direction": "debit",
+          "amountCents": 1900,
+          "runningBalanceCents": 675416
+        },
+        {
           "id": "recurring-fact-blue-cross-and-blue-shield-of-texas-richardson-2026-07-06-0",
           "transactionDate": "2026-07-06",
           "postedDate": "2026-07-06",
@@ -63,7 +74,7 @@ const RESULT: GenerationResult = {
           "type": "ACH",
           "direction": "debit",
           "amountCents": 41237,
-          "runningBalanceCents": 636079,
+          "runningBalanceCents": 634179,
           "merchant": {
             "name": "Blue Cross and Blue Shield of Texas",
             "category": "insurance",
@@ -77,6 +88,17 @@ const RESULT: GenerationResult = {
           }
         },
         {
+          "id": "noise-lt-brake-2026-07-10-0",
+          "transactionDate": "2026-07-10",
+          "postedDate": "2026-07-10",
+          "description": "TST* AUTO REPAIR",
+          "memo": "Brake service",
+          "type": "CHECK",
+          "direction": "debit",
+          "amountCents": 48879,
+          "runningBalanceCents": 585300
+        },
+        {
           "id": "income-client-ach-2026-07-15-0",
           "transactionDate": "2026-07-15",
           "postedDate": "2026-07-15",
@@ -85,29 +107,29 @@ const RESULT: GenerationResult = {
           "type": "ACH",
           "direction": "credit",
           "amountCents": 309707,
-          "runningBalanceCents": 945786
+          "runningBalanceCents": 895007
         },
         {
           "id": "atm-atm-2026-07-15-0",
           "transactionDate": "2026-07-15",
           "postedDate": "2026-07-15",
-          "description": "ATM WITHDRAWAL 0715 TERMINAL 7Z5LUIMGNT",
+          "description": "ATM WITHDRAWAL 0715 JEOR3EXT54",
           "memo": "Cash withdrawal",
           "type": "ATM",
           "direction": "debit",
           "amountCents": 4000,
-          "runningBalanceCents": 941786
+          "runningBalanceCents": 891007
         },
         {
           "id": "fee-fee-atm-2026-07-15-0",
           "transactionDate": "2026-07-15",
           "postedDate": "2026-07-15",
-          "description": "ATM FEE REF OGY39P8A2F",
+          "description": "ATM SURCHARGE 0715 JL4HDYXF79",
           "memo": "ATM withdrawal fee",
           "type": "FEE",
           "direction": "debit",
           "amountCents": 300,
-          "runningBalanceCents": 941486
+          "runningBalanceCents": 890707
         },
         {
           "id": "recurring-fact-austin-energy-austin-2026-07-20-0",
@@ -118,7 +140,7 @@ const RESULT: GenerationResult = {
           "type": "ACH",
           "direction": "debit",
           "amountCents": 24065,
-          "runningBalanceCents": 917421,
+          "runningBalanceCents": 866642,
           "merchant": {
             "name": "Austin Energy",
             "category": "utilities",
@@ -135,23 +157,23 @@ const RESULT: GenerationResult = {
           "id": "atm-atm-2026-07-21-0",
           "transactionDate": "2026-07-21",
           "postedDate": "2026-07-21",
-          "description": "ATM WITHDRAWAL 0721 TERMINAL 0IYFDOB22E",
+          "description": "ATM WITHDRAWAL 0721 FAC58IGBTQ",
           "memo": "Cash withdrawal",
           "type": "ATM",
           "direction": "debit",
           "amountCents": 10000,
-          "runningBalanceCents": 907421
+          "runningBalanceCents": 856642
         },
         {
           "id": "fee-fee-atm-2026-07-21-0",
           "transactionDate": "2026-07-21",
           "postedDate": "2026-07-21",
-          "description": "ATM FEE REF RCOFT0GIPM",
+          "description": "ATM SURCHARGE 0721 N9F4XFD2WW",
           "memo": "ATM withdrawal fee",
           "type": "FEE",
           "direction": "debit",
           "amountCents": 300,
-          "runningBalanceCents": 907121
+          "runningBalanceCents": 856342
         },
         {
           "id": "card_payment-card-payment-2026-07-28-1",
@@ -161,8 +183,8 @@ const RESULT: GenerationResult = {
           "memo": "Credit card payment",
           "type": "ACH",
           "direction": "debit",
-          "amountCents": 139486,
-          "runningBalanceCents": 767635
+          "amountCents": 141451,
+          "runningBalanceCents": 714891
         },
         {
           "id": "income-client-ach-2026-08-03-0",
@@ -173,18 +195,29 @@ const RESULT: GenerationResult = {
           "type": "ACH",
           "direction": "credit",
           "amountCents": 246470,
-          "runningBalanceCents": 1014105
+          "runningBalanceCents": 961361
+        },
+        {
+          "id": "noise-lt-foodbank-2026-08-01-0",
+          "transactionDate": "2026-08-01",
+          "postedDate": "2026-08-03",
+          "description": "SQ * FOOD BANK",
+          "memo": "Donation",
+          "type": "POS",
+          "direction": "debit",
+          "amountCents": 3035,
+          "runningBalanceCents": 958326
         },
         {
           "id": "discretionary-fact-whole-foods-market-austin-2026-08-02-0",
           "transactionDate": "2026-08-02",
           "postedDate": "2026-08-03",
-          "description": "WHOLEFDS LMR 7925 AUSTIN TX",
+          "description": "WHOLEFDS LMR 1387 AUSTIN TX",
           "memo": "Groceries",
           "type": "POS",
           "direction": "debit",
           "amountCents": 2739,
-          "runningBalanceCents": 1011366,
+          "runningBalanceCents": 955587,
           "merchant": {
             "name": "Whole Foods Market",
             "category": "grocery",
@@ -206,7 +239,7 @@ const RESULT: GenerationResult = {
           "type": "ACH",
           "direction": "debit",
           "amountCents": 165000,
-          "runningBalanceCents": 846366,
+          "runningBalanceCents": 790587,
           "merchant": {
             "name": "Camden Lamar Heights",
             "category": "rent",
@@ -228,7 +261,7 @@ const RESULT: GenerationResult = {
           "type": "ACH",
           "direction": "debit",
           "amountCents": 41237,
-          "runningBalanceCents": 805129,
+          "runningBalanceCents": 749350,
           "merchant": {
             "name": "Blue Cross and Blue Shield of Texas",
             "category": "insurance",
@@ -250,18 +283,18 @@ const RESULT: GenerationResult = {
           "type": "ACH",
           "direction": "credit",
           "amountCents": 381995,
-          "runningBalanceCents": 1187124
+          "runningBalanceCents": 1131345
         },
         {
           "id": "discretionary-fact-whole-foods-market-austin-2026-08-05-0",
           "transactionDate": "2026-08-05",
           "postedDate": "2026-08-07",
-          "description": "WHOLEFDS LMR 7925 AUSTIN TX",
+          "description": "WHOLEFDS LMR 1387 AUSTIN TX",
           "memo": "Groceries",
           "type": "POS",
           "direction": "debit",
           "amountCents": 3247,
-          "runningBalanceCents": 1183877,
+          "runningBalanceCents": 1128098,
           "merchant": {
             "name": "Whole Foods Market",
             "category": "grocery",
@@ -278,12 +311,12 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-whole-foods-market-austin-2026-08-10-0",
           "transactionDate": "2026-08-10",
           "postedDate": "2026-08-11",
-          "description": "WHOLEFDS LMR 7925 AUSTIN TX",
+          "description": "WHOLEFDS LMR 1387 AUSTIN TX",
           "memo": "Groceries",
           "type": "POS",
           "direction": "debit",
           "amountCents": 4276,
-          "runningBalanceCents": 1179601,
+          "runningBalanceCents": 1123822,
           "merchant": {
             "name": "Whole Foods Market",
             "category": "grocery",
@@ -300,12 +333,12 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-walgreens-austin-2026-08-12-0",
           "transactionDate": "2026-08-12",
           "postedDate": "2026-08-13",
-          "description": "WALGREENS #7505 AUSTIN TX",
+          "description": "WALGREENS #4159 AUSTIN TX",
           "memo": "Pharmacy and household items",
           "type": "POS",
           "direction": "debit",
           "amountCents": 4473,
-          "runningBalanceCents": 1175128,
+          "runningBalanceCents": 1119349,
           "merchant": {
             "name": "Walgreens",
             "category": "pharmacy",
@@ -319,6 +352,28 @@ const RESULT: GenerationResult = {
           }
         },
         {
+          "id": "noise-lt-redcross-2026-08-13-0",
+          "transactionDate": "2026-08-13",
+          "postedDate": "2026-08-17",
+          "description": "AMERICAN RED CROSS",
+          "memo": "Donation",
+          "type": "POS",
+          "direction": "debit",
+          "amountCents": 3999,
+          "runningBalanceCents": 1115350
+        },
+        {
+          "id": "noise-lt-redcross-2026-08-14-0",
+          "transactionDate": "2026-08-14",
+          "postedDate": "2026-08-17",
+          "description": "AMERICAN RED CROSS",
+          "memo": "Donation",
+          "type": "POS",
+          "direction": "debit",
+          "amountCents": 2510,
+          "runningBalanceCents": 1112840
+        },
+        {
           "id": "recurring-fact-austin-energy-austin-2026-08-18-0",
           "transactionDate": "2026-08-18",
           "postedDate": "2026-08-18",
@@ -327,7 +382,7 @@ const RESULT: GenerationResult = {
           "type": "ACH",
           "direction": "debit",
           "amountCents": 21682,
-          "runningBalanceCents": 1153446,
+          "runningBalanceCents": 1091158,
           "merchant": {
             "name": "Austin Energy",
             "category": "utilities",
@@ -344,56 +399,12 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-walgreens-austin-2026-08-20-0",
           "transactionDate": "2026-08-20",
           "postedDate": "2026-08-24",
-          "description": "WALGREENS #7505 AUSTIN TX",
+          "description": "WALGREENS #4159 AUSTIN TX",
           "memo": "Pharmacy and household items",
           "type": "POS",
           "direction": "debit",
           "amountCents": 4367,
-          "runningBalanceCents": 1149079,
-          "merchant": {
-            "name": "Walgreens",
-            "category": "pharmacy",
-            "city": "Austin",
-            "state": "TX"
-          },
-          "evidence": {
-            "factId": "fact-walgreens-austin",
-            "sourceUrl": "https://www.walgreens.com/storelocator/find.jsp",
-            "note": "Walgreens (pharmacy), Austin, TX"
-          }
-        },
-        {
-          "id": "discretionary-fact-blick-art-materials-austin-2026-08-26-0",
-          "transactionDate": "2026-08-26",
-          "postedDate": "2026-08-28",
-          "description": "BLICK ART MATERIALS 4896 AUSTIN TX",
-          "memo": "Art supplies",
-          "type": "POS",
-          "direction": "debit",
-          "amountCents": 4652,
-          "runningBalanceCents": 1144427,
-          "merchant": {
-            "name": "Blick Art Materials",
-            "category": "art supplies",
-            "city": "Austin",
-            "state": "TX"
-          },
-          "evidence": {
-            "factId": "fact-blick-art-materials-austin",
-            "sourceUrl": "https://www.dickblick.com/stores/texas/austin/",
-            "note": "Blick Art Materials (art supplies), Austin, TX"
-          }
-        },
-        {
-          "id": "discretionary-fact-walgreens-austin-2026-08-27-0",
-          "transactionDate": "2026-08-27",
-          "postedDate": "2026-08-31",
-          "description": "WALGREENS #7505 AUSTIN TX",
-          "memo": "Pharmacy and household items",
-          "type": "POS",
-          "direction": "debit",
-          "amountCents": 2265,
-          "runningBalanceCents": 1142162,
+          "runningBalanceCents": 1086791,
           "merchant": {
             "name": "Walgreens",
             "category": "pharmacy",
@@ -415,7 +426,7 @@ const RESULT: GenerationResult = {
           "type": "ACH",
           "direction": "credit",
           "amountCents": 339020,
-          "runningBalanceCents": 1481182
+          "runningBalanceCents": 1425811
         },
         {
           "id": "recurring-fact-camden-lamar-heights-austin-2026-09-01-0",
@@ -426,7 +437,7 @@ const RESULT: GenerationResult = {
           "type": "ACH",
           "direction": "debit",
           "amountCents": 165000,
-          "runningBalanceCents": 1316182,
+          "runningBalanceCents": 1260811,
           "merchant": {
             "name": "Camden Lamar Heights",
             "category": "rent",
@@ -447,8 +458,8 @@ const RESULT: GenerationResult = {
           "memo": "Credit card payment",
           "type": "ACH",
           "direction": "debit",
-          "amountCents": 169150,
-          "runningBalanceCents": 1147032
+          "amountCents": 139238,
+          "runningBalanceCents": 1121573
         },
         {
           "id": "recurring-fact-blue-cross-and-blue-shield-of-texas-richardson-2026-09-08-0",
@@ -459,7 +470,7 @@ const RESULT: GenerationResult = {
           "type": "ACH",
           "direction": "debit",
           "amountCents": 41237,
-          "runningBalanceCents": 1105795,
+          "runningBalanceCents": 1080336,
           "merchant": {
             "name": "Blue Cross and Blue Shield of Texas",
             "category": "insurance",
@@ -476,34 +487,34 @@ const RESULT: GenerationResult = {
           "id": "atm-atm-2026-09-13-0",
           "transactionDate": "2026-09-13",
           "postedDate": "2026-09-14",
-          "description": "ATM WITHDRAWAL 0913 TERMINAL I4P9U6FW6G",
+          "description": "ATM WITHDRAWAL 0913 YLI7U5OY1C",
           "memo": "Cash withdrawal",
           "type": "ATM",
           "direction": "debit",
           "amountCents": 4000,
-          "runningBalanceCents": 1101795
+          "runningBalanceCents": 1076336
         },
         {
           "id": "fee-fee-atm-2026-09-14-0",
           "transactionDate": "2026-09-14",
           "postedDate": "2026-09-14",
-          "description": "ATM FEE REF 5TL77F7WM0",
+          "description": "ATM SURCHARGE 0914 D1RT9RJZ7Z",
           "memo": "ATM withdrawal fee",
           "type": "FEE",
           "direction": "debit",
           "amountCents": 300,
-          "runningBalanceCents": 1101495
+          "runningBalanceCents": 1076036
         },
         {
           "id": "recurring-fact-irs-direct-pay-washington-2026-09-15-0",
           "transactionDate": "2026-09-15",
           "postedDate": "2026-09-15",
-          "description": "IRS USATAXPYMT 270629940220986",
+          "description": "IRS USATAXPYMT 270663968752143",
           "memo": "Quarterly estimated federal tax payment",
           "type": "ACH",
           "direction": "debit",
           "amountCents": 240000,
-          "runningBalanceCents": 861495,
+          "runningBalanceCents": 836036,
           "merchant": {
             "name": "IRS Direct Pay",
             "category": "tax",
@@ -525,7 +536,7 @@ const RESULT: GenerationResult = {
           "type": "ACH",
           "direction": "debit",
           "amountCents": 19596,
-          "runningBalanceCents": 841899,
+          "runningBalanceCents": 816440,
           "merchant": {
             "name": "Austin Energy",
             "category": "utilities",
@@ -542,12 +553,12 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-walgreens-austin-2026-09-22-0",
           "transactionDate": "2026-09-22",
           "postedDate": "2026-09-24",
-          "description": "WALGREENS #7505 AUSTIN TX",
+          "description": "WALGREENS #3145 AUSTIN TX",
           "memo": "Pharmacy and household items",
           "type": "POS",
           "direction": "debit",
           "amountCents": 2292,
-          "runningBalanceCents": 839607,
+          "runningBalanceCents": 814148,
           "merchant": {
             "name": "Walgreens",
             "category": "pharmacy",
@@ -559,6 +570,17 @@ const RESULT: GenerationResult = {
             "sourceUrl": "https://www.walgreens.com/storelocator/find.jsp",
             "note": "Walgreens (pharmacy), Austin, TX"
           }
+        },
+        {
+          "id": "noise-lt-parkmobile-2026-09-24-0",
+          "transactionDate": "2026-09-24",
+          "postedDate": "2026-09-25",
+          "description": "PARKMOBILE",
+          "memo": "Parking",
+          "type": "POS",
+          "direction": "debit",
+          "amountCents": 600,
+          "runningBalanceCents": 813548
         }
       ],
       "accountType": "checking",
@@ -567,37 +589,37 @@ const RESULT: GenerationResult = {
           "cycleStart": "2026-07-01",
           "cycleEnd": "2026-07-31",
           "openingBalanceCents": 842316,
-          "closingBalanceCents": 767635,
+          "closingBalanceCents": 714891,
           "totalCreditsCents": 309707,
-          "totalDebitsCents": 384388,
-          "transactionCount": 9
+          "totalDebitsCents": 437132,
+          "transactionCount": 11
         },
         {
           "cycleStart": "2026-08-01",
           "cycleEnd": "2026-08-31",
-          "openingBalanceCents": 767635,
-          "closingBalanceCents": 1142162,
+          "openingBalanceCents": 714891,
+          "closingBalanceCents": 1086791,
           "totalCreditsCents": 628465,
-          "totalDebitsCents": 253938,
-          "transactionCount": 12
+          "totalDebitsCents": 256565,
+          "transactionCount": 13
         },
         {
           "cycleStart": "2026-09-01",
           "cycleEnd": "2026-09-30",
-          "openingBalanceCents": 1142162,
-          "closingBalanceCents": 839607,
+          "openingBalanceCents": 1086791,
+          "closingBalanceCents": 813548,
           "totalCreditsCents": 339020,
-          "totalDebitsCents": 641575,
-          "transactionCount": 9
+          "totalDebitsCents": 612263,
+          "transactionCount": 10
         }
       ],
       "checking": {
         "openingBalanceCents": 842316,
-        "closingBalanceCents": 839607
+        "closingBalanceCents": 813548
       }
     },
     {
-      "bankName": "Harborline Federal Savings",
+      "bankName": "",
       "accountLast4": "7210",
       "periodStart": "2026-06-12",
       "periodEnd": "2026-09-11",
@@ -606,7 +628,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-h-e-b-austin-2026-06-13-0",
           "transactionDate": "2026-06-13",
           "postedDate": "2026-06-16",
-          "description": "H-E-B #2604 AUSTIN TX",
+          "description": "H-E-B #1666 AUSTIN TX",
           "memo": "Groceries",
           "type": "POS",
           "direction": "debit",
@@ -648,7 +670,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-h-e-b-austin-2026-06-15-0",
           "transactionDate": "2026-06-15",
           "postedDate": "2026-06-17",
-          "description": "H-E-B #2604 AUSTIN TX",
+          "description": "H-E-B #1666 AUSTIN TX",
           "memo": "Groceries",
           "type": "POS",
           "direction": "debit",
@@ -711,7 +733,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-shell-austin-2026-06-18-0",
           "transactionDate": "2026-06-18",
           "postedDate": "2026-06-22",
-          "description": "SHELL OIL 4244 AUSTIN TX",
+          "description": "SHELL OIL 5757 AUSTIN TX",
           "memo": "Fuel",
           "type": "POS",
           "direction": "debit",
@@ -732,7 +754,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-buc-ee-s-new-braunfels-2026-06-20-0",
           "transactionDate": "2026-06-20",
           "postedDate": "2026-06-22",
-          "description": "BUC-EE'S #3758 NEW BRAUNFELS TX",
+          "description": "BUC-EE'S #1000 NEW BRAUNFELS TX",
           "memo": "Road trip stop",
           "type": "POS",
           "direction": "debit",
@@ -795,7 +817,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-h-e-b-austin-2026-06-19-0",
           "transactionDate": "2026-06-19",
           "postedDate": "2026-06-23",
-          "description": "H-E-B #2604 AUSTIN TX",
+          "description": "H-E-B #1666 AUSTIN TX",
           "memo": "Groceries",
           "type": "POS",
           "direction": "debit",
@@ -837,7 +859,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-shell-austin-2026-06-22-0",
           "transactionDate": "2026-06-22",
           "postedDate": "2026-06-23",
-          "description": "SHELL OIL 4244 AUSTIN TX",
+          "description": "SHELL OIL 5757 AUSTIN TX",
           "memo": "Fuel",
           "type": "POS",
           "direction": "debit",
@@ -853,6 +875,16 @@ const RESULT: GenerationResult = {
             "sourceUrl": "https://www.shell.us/motorists/shell-station-locator.html",
             "note": "Shell, Austin, TX: Regular unleaded per gallon $2.89"
           }
+        },
+        {
+          "id": "noise-lt-gofundme-2026-06-22-0",
+          "transactionDate": "2026-06-22",
+          "postedDate": "2026-06-23",
+          "description": "GOFUNDME *MVHUN4Q27S",
+          "memo": "Donation",
+          "type": "POS",
+          "direction": "debit",
+          "amountCents": 2529
         },
         {
           "id": "recurring-fact-spotify-premium-new-york-2026-06-22-0",
@@ -879,7 +911,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-h-e-b-austin-2026-06-23-0",
           "transactionDate": "2026-06-23",
           "postedDate": "2026-06-24",
-          "description": "H-E-B #2604 AUSTIN TX",
+          "description": "H-E-B #1666 AUSTIN TX",
           "memo": "Groceries",
           "type": "POS",
           "direction": "debit",
@@ -931,7 +963,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-shell-austin-2026-06-26-0",
           "transactionDate": "2026-06-26",
           "postedDate": "2026-06-29",
-          "description": "SHELL OIL 4244 AUSTIN TX",
+          "description": "SHELL OIL 5757 AUSTIN TX",
           "memo": "Fuel",
           "type": "POS",
           "direction": "debit",
@@ -994,7 +1026,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-h-e-b-austin-2026-06-27-0",
           "transactionDate": "2026-06-27",
           "postedDate": "2026-06-29",
-          "description": "H-E-B #2604 AUSTIN TX",
+          "description": "H-E-B #1666 AUSTIN TX",
           "memo": "Groceries",
           "type": "POS",
           "direction": "debit",
@@ -1010,6 +1042,16 @@ const RESULT: GenerationResult = {
             "sourceUrl": "https://www.heb.com/heb-store/US/tx/austin",
             "note": "H-E-B (grocery), Austin, TX"
           }
+        },
+        {
+          "id": "noise-lt-gofundme-2026-06-27-0",
+          "transactionDate": "2026-06-27",
+          "postedDate": "2026-06-29",
+          "description": "GOFUNDME *7Z5LUIMGNT",
+          "memo": "Donation",
+          "type": "POS",
+          "direction": "debit",
+          "amountCents": 3049
         },
         {
           "id": "discretionary-fact-epoch-coffee-austin-2026-06-28-0",
@@ -1036,7 +1078,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-shell-austin-2026-06-28-0",
           "transactionDate": "2026-06-28",
           "postedDate": "2026-06-29",
-          "description": "SHELL OIL 4244 AUSTIN TX",
+          "description": "SHELL OIL 5757 AUSTIN TX",
           "memo": "Fuel",
           "type": "POS",
           "direction": "debit",
@@ -1057,7 +1099,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-h-e-b-austin-2026-06-29-0",
           "transactionDate": "2026-06-29",
           "postedDate": "2026-06-30",
-          "description": "H-E-B #2604 AUSTIN TX",
+          "description": "H-E-B #1666 AUSTIN TX",
           "memo": "Groceries",
           "type": "POS",
           "direction": "debit",
@@ -1073,6 +1115,16 @@ const RESULT: GenerationResult = {
             "sourceUrl": "https://www.heb.com/heb-store/US/tx/austin",
             "note": "H-E-B (grocery), Austin, TX"
           }
+        },
+        {
+          "id": "noise-fact-shell-austin-2026-06-29-0",
+          "transactionDate": "2026-06-29",
+          "postedDate": "2026-07-01",
+          "description": "SHELL OIL 5757",
+          "memo": "Fuel",
+          "type": "REFUND",
+          "direction": "credit",
+          "amountCents": 3912
         },
         {
           "id": "discretionary-fact-epoch-coffee-austin-2026-07-01-0",
@@ -1096,10 +1148,20 @@ const RESULT: GenerationResult = {
           }
         },
         {
+          "id": "noise-lt-vending-2026-07-01-0",
+          "transactionDate": "2026-07-01",
+          "postedDate": "2026-07-03",
+          "description": "VENDING",
+          "memo": "Vending",
+          "type": "POS",
+          "direction": "debit",
+          "amountCents": 299
+        },
+        {
           "id": "discretionary-fact-h-e-b-austin-2026-07-02-0",
           "transactionDate": "2026-07-02",
           "postedDate": "2026-07-03",
-          "description": "H-E-B #2604 AUSTIN TX",
+          "description": "H-E-B #6843 AUSTIN TX",
           "memo": "Groceries",
           "type": "POS",
           "direction": "debit",
@@ -1141,7 +1203,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-shell-austin-2026-07-05-0",
           "transactionDate": "2026-07-05",
           "postedDate": "2026-07-07",
-          "description": "SHELL OIL 4244 AUSTIN TX",
+          "description": "SHELL OIL 3605 AUSTIN TX",
           "memo": "Fuel",
           "type": "POS",
           "direction": "debit",
@@ -1162,7 +1224,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-h-e-b-austin-2026-07-06-0",
           "transactionDate": "2026-07-06",
           "postedDate": "2026-07-08",
-          "description": "H-E-B #2604 AUSTIN TX",
+          "description": "H-E-B #6843 AUSTIN TX",
           "memo": "Groceries",
           "type": "POS",
           "direction": "debit",
@@ -1225,7 +1287,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-amazon-com-seattle-2026-07-13-0",
           "transactionDate": "2026-07-13",
           "postedDate": "2026-07-14",
-          "description": "AMAZON.COM*MVHUN4Q27S AMZN.COM/BILL WA",
+          "description": "AMAZON.COM*OGY39P8A2F AMZN.COM/BILL WA",
           "memo": "Online purchase",
           "type": "POS",
           "direction": "debit",
@@ -1246,7 +1308,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-h-e-b-austin-2026-07-13-0",
           "transactionDate": "2026-07-13",
           "postedDate": "2026-07-14",
-          "description": "H-E-B #2604 AUSTIN TX",
+          "description": "H-E-B #6843 AUSTIN TX",
           "memo": "Groceries",
           "type": "POS",
           "direction": "debit",
@@ -1309,7 +1371,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-h-e-b-austin-2026-07-15-0",
           "transactionDate": "2026-07-15",
           "postedDate": "2026-07-17",
-          "description": "H-E-B #2604 AUSTIN TX",
+          "description": "H-E-B #6843 AUSTIN TX",
           "memo": "Groceries",
           "type": "POS",
           "direction": "debit",
@@ -1330,7 +1392,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-amazon-com-seattle-2026-07-16-0",
           "transactionDate": "2026-07-16",
           "postedDate": "2026-07-17",
-          "description": "AMAZON.COM*JEOR3EXT54 AMZN.COM/BILL WA",
+          "description": "AMAZON.COM*0IYFDOB22E AMZN.COM/BILL WA",
           "memo": "Online purchase",
           "type": "POS",
           "direction": "debit",
@@ -1351,7 +1413,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-shell-austin-2026-07-19-0",
           "transactionDate": "2026-07-19",
           "postedDate": "2026-07-21",
-          "description": "SHELL OIL 4244 AUSTIN TX",
+          "description": "SHELL OIL 3605 AUSTIN TX",
           "memo": "Fuel",
           "type": "POS",
           "direction": "debit",
@@ -1372,7 +1434,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-amazon-com-seattle-2026-07-20-0",
           "transactionDate": "2026-07-20",
           "postedDate": "2026-07-21",
-          "description": "AMAZON.COM*JL4HDYXF79 AMZN.COM/BILL WA",
+          "description": "AMAZON.COM*RCOFT0GIPM AMZN.COM/BILL WA",
           "memo": "Online purchase",
           "type": "POS",
           "direction": "debit",
@@ -1414,7 +1476,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-amazon-com-seattle-2026-07-22-0",
           "transactionDate": "2026-07-22",
           "postedDate": "2026-07-24",
-          "description": "AMAZON.COM*FAC58IGBTQ AMZN.COM/BILL WA",
+          "description": "AMAZON.COM*UJXLDIXXEK AMZN.COM/BILL WA",
           "memo": "Online purchase",
           "type": "POS",
           "direction": "debit",
@@ -1435,7 +1497,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-shell-austin-2026-07-23-0",
           "transactionDate": "2026-07-23",
           "postedDate": "2026-07-27",
-          "description": "SHELL OIL 4244 AUSTIN TX",
+          "description": "SHELL OIL 3605 AUSTIN TX",
           "memo": "Fuel",
           "type": "POS",
           "direction": "debit",
@@ -1456,7 +1518,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-shell-austin-2026-07-26-0",
           "transactionDate": "2026-07-26",
           "postedDate": "2026-07-27",
-          "description": "SHELL OIL 4244 AUSTIN TX",
+          "description": "SHELL OIL 3605 AUSTIN TX",
           "memo": "Fuel",
           "type": "POS",
           "direction": "debit",
@@ -1498,7 +1560,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-h-e-b-austin-2026-07-24-0",
           "transactionDate": "2026-07-24",
           "postedDate": "2026-07-28",
-          "description": "H-E-B #2604 AUSTIN TX",
+          "description": "H-E-B #6843 AUSTIN TX",
           "memo": "Groceries",
           "type": "POS",
           "direction": "debit",
@@ -1519,7 +1581,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-shell-austin-2026-07-25-0",
           "transactionDate": "2026-07-25",
           "postedDate": "2026-07-28",
-          "description": "SHELL OIL 4244 AUSTIN TX",
+          "description": "SHELL OIL 3605 AUSTIN TX",
           "memo": "Fuel",
           "type": "POS",
           "direction": "debit",
@@ -1561,7 +1623,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-h-e-b-austin-2026-07-26-0",
           "transactionDate": "2026-07-26",
           "postedDate": "2026-07-28",
-          "description": "H-E-B #2604 AUSTIN TX",
+          "description": "H-E-B #6843 AUSTIN TX",
           "memo": "Groceries",
           "type": "POS",
           "direction": "debit",
@@ -1577,6 +1639,16 @@ const RESULT: GenerationResult = {
             "sourceUrl": "https://www.heb.com/heb-store/US/tx/austin",
             "note": "H-E-B (grocery), Austin, TX"
           }
+        },
+        {
+          "id": "noise-lt-foodbank-2026-07-26-0",
+          "transactionDate": "2026-07-26",
+          "postedDate": "2026-07-28",
+          "description": "SQ * FOOD BANK",
+          "memo": "Donation",
+          "type": "POS",
+          "direction": "debit",
+          "amountCents": 2000
         },
         {
           "id": "discretionary-fact-epoch-coffee-austin-2026-07-27-0",
@@ -1603,7 +1675,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-h-e-b-austin-2026-07-28-0",
           "transactionDate": "2026-07-28",
           "postedDate": "2026-07-29",
-          "description": "H-E-B #2604 AUSTIN TX",
+          "description": "H-E-B #6843 AUSTIN TX",
           "memo": "Groceries",
           "type": "POS",
           "direction": "debit",
@@ -1628,7 +1700,7 @@ const RESULT: GenerationResult = {
           "memo": "Payment received, thank you",
           "type": "PAYMENT",
           "direction": "credit",
-          "amountCents": 139486
+          "amountCents": 141451
         },
         {
           "id": "discretionary-fact-epoch-coffee-austin-2026-07-28-0",
@@ -1652,10 +1724,20 @@ const RESULT: GenerationResult = {
           }
         },
         {
+          "id": "noise-lt-foodbank-2026-07-30-0",
+          "transactionDate": "2026-07-30",
+          "postedDate": "2026-08-03",
+          "description": "SQ * FOOD BANK",
+          "memo": "Donation",
+          "type": "POS",
+          "direction": "debit",
+          "amountCents": 3279
+        },
+        {
           "id": "discretionary-fact-amazon-com-seattle-2026-08-01-0",
           "transactionDate": "2026-08-01",
           "postedDate": "2026-08-03",
-          "description": "AMAZON.COM*N9F4XFD2WW AMZN.COM/BILL WA",
+          "description": "AMAZON.COM*KIOPVWLIKD AMZN.COM/BILL WA",
           "memo": "Online purchase",
           "type": "POS",
           "direction": "debit",
@@ -1697,7 +1779,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-h-e-b-austin-2026-08-01-0",
           "transactionDate": "2026-08-01",
           "postedDate": "2026-08-04",
-          "description": "H-E-B #2604 AUSTIN TX",
+          "description": "H-E-B #9026 AUSTIN TX",
           "memo": "Groceries",
           "type": "POS",
           "direction": "debit",
@@ -1739,7 +1821,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-h-e-b-austin-2026-08-03-0",
           "transactionDate": "2026-08-03",
           "postedDate": "2026-08-04",
-          "description": "H-E-B #2604 AUSTIN TX",
+          "description": "H-E-B #9026 AUSTIN TX",
           "memo": "Groceries",
           "type": "POS",
           "direction": "debit",
@@ -1760,7 +1842,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-amazon-com-seattle-2026-08-05-0",
           "transactionDate": "2026-08-05",
           "postedDate": "2026-08-06",
-          "description": "AMAZON.COM*UJXLDIXXEK AMZN.COM/BILL WA",
+          "description": "AMAZON.COM*8F3U64T75C AMZN.COM/BILL WA",
           "memo": "Online purchase",
           "type": "POS",
           "direction": "debit",
@@ -1799,67 +1881,24 @@ const RESULT: GenerationResult = {
           }
         },
         {
-          "id": "discretionary-fact-shell-austin-2026-08-06-0",
+          "id": "noise-fact-epoch-coffee-austin-2026-08-06-0",
           "transactionDate": "2026-08-06",
-          "postedDate": "2026-08-07",
-          "description": "SHELL OIL 4244 AUSTIN TX",
-          "memo": "Fuel",
-          "type": "POS",
-          "direction": "debit",
-          "amountCents": 3820,
-          "merchant": {
-            "name": "Shell",
-            "category": "fuel",
-            "city": "Austin",
-            "state": "TX"
-          },
-          "evidence": {
-            "factId": "fact-shell-austin",
-            "sourceUrl": "https://www.shell.us/motorists/shell-station-locator.html",
-            "note": "Shell, Austin, TX: Regular unleaded per gallon $2.89"
-          }
+          "postedDate": "2026-08-10",
+          "description": "TST* EPOCH COFFEE",
+          "memo": "Coffee and food",
+          "type": "REFUND",
+          "direction": "credit",
+          "amountCents": 939
         },
         {
-          "id": "discretionary-fact-h-e-b-austin-2026-08-09-0",
+          "id": "noise-fact-amazon-com-seattle-2026-08-09-0",
           "transactionDate": "2026-08-09",
           "postedDate": "2026-08-10",
-          "description": "H-E-B #2604 AUSTIN TX",
-          "memo": "Groceries",
-          "type": "POS",
-          "direction": "debit",
-          "amountCents": 9749,
-          "merchant": {
-            "name": "H-E-B",
-            "category": "grocery",
-            "city": "Austin",
-            "state": "TX"
-          },
-          "evidence": {
-            "factId": "fact-h-e-b-austin",
-            "sourceUrl": "https://www.heb.com/heb-store/US/tx/austin",
-            "note": "H-E-B (grocery), Austin, TX"
-          }
-        },
-        {
-          "id": "discretionary-fact-uchiko-austin-2026-08-09-0",
-          "transactionDate": "2026-08-09",
-          "postedDate": "2026-08-10",
-          "description": "TST* UCHIKO AUSTIN TX",
-          "memo": "Dinner out",
-          "type": "POS",
-          "direction": "debit",
-          "amountCents": 14145,
-          "merchant": {
-            "name": "Uchiko",
-            "category": "restaurant",
-            "city": "Austin",
-            "state": "TX"
-          },
-          "evidence": {
-            "factId": "fact-uchiko-austin",
-            "sourceUrl": "https://uchiaustin.com/",
-            "note": "Uchiko, Austin, TX: Omakase tasting $95.00"
-          }
+          "description": "AMAZON.COM*WT7WC5U967 AMZN.COM/BILL WA",
+          "memo": "Online purchase",
+          "type": "REFUND",
+          "direction": "credit",
+          "amountCents": 6538
         },
         {
           "id": "recurring-fact-adobe-creative-cloud-san-jose-2026-08-09-0",
@@ -1904,10 +1943,20 @@ const RESULT: GenerationResult = {
           }
         },
         {
+          "id": "noise-fact-epoch-coffee-austin-2026-08-16-0",
+          "transactionDate": "2026-08-16",
+          "postedDate": "2026-08-17",
+          "description": "TST* EPOCH COFFEE",
+          "memo": "Coffee and food",
+          "type": "REFUND",
+          "direction": "credit",
+          "amountCents": 555
+        },
+        {
           "id": "discretionary-fact-amazon-com-seattle-2026-08-15-0",
           "transactionDate": "2026-08-15",
           "postedDate": "2026-08-17",
-          "description": "AMAZON.COM*KIOPVWLIKD AMZN.COM/BILL WA",
+          "description": "AMAZON.COM*4J05OMDNFT AMZN.COM/BILL WA",
           "memo": "Online purchase",
           "type": "POS",
           "direction": "debit",
@@ -1928,7 +1977,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-h-e-b-austin-2026-08-16-0",
           "transactionDate": "2026-08-16",
           "postedDate": "2026-08-17",
-          "description": "H-E-B #2604 AUSTIN TX",
+          "description": "H-E-B #9026 AUSTIN TX",
           "memo": "Groceries",
           "type": "POS",
           "direction": "debit",
@@ -1970,7 +2019,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-shell-austin-2026-08-14-0",
           "transactionDate": "2026-08-14",
           "postedDate": "2026-08-18",
-          "description": "SHELL OIL 4244 AUSTIN TX",
+          "description": "SHELL OIL 0671 AUSTIN TX",
           "memo": "Fuel",
           "type": "POS",
           "direction": "debit",
@@ -2054,7 +2103,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-amazon-com-seattle-2026-08-19-0",
           "transactionDate": "2026-08-19",
           "postedDate": "2026-08-20",
-          "description": "AMAZON.COM*8F3U64T75C AMZN.COM/BILL WA",
+          "description": "AMAZON.COM*JGQ94LJPPK AMZN.COM/BILL WA",
           "memo": "Online purchase",
           "type": "POS",
           "direction": "debit",
@@ -2117,7 +2166,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-h-e-b-austin-2026-08-21-0",
           "transactionDate": "2026-08-21",
           "postedDate": "2026-08-25",
-          "description": "H-E-B #2604 AUSTIN TX",
+          "description": "H-E-B #9026 AUSTIN TX",
           "memo": "Groceries",
           "type": "POS",
           "direction": "debit",
@@ -2133,6 +2182,16 @@ const RESULT: GenerationResult = {
             "sourceUrl": "https://www.heb.com/heb-store/US/tx/austin",
             "note": "H-E-B (grocery), Austin, TX"
           }
+        },
+        {
+          "id": "noise-lt-spothero-2026-08-22-0",
+          "transactionDate": "2026-08-22",
+          "postedDate": "2026-08-25",
+          "description": "SPOTHERO* PARKING",
+          "memo": "Parking",
+          "type": "POS",
+          "direction": "debit",
+          "amountCents": 399
         },
         {
           "id": "recurring-fact-spotify-premium-new-york-2026-08-22-0",
@@ -2159,7 +2218,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-h-e-b-austin-2026-08-23-0",
           "transactionDate": "2026-08-23",
           "postedDate": "2026-08-25",
-          "description": "H-E-B #2604 AUSTIN TX",
+          "description": "H-E-B #9026 AUSTIN TX",
           "memo": "Groceries",
           "type": "POS",
           "direction": "debit",
@@ -2198,6 +2257,16 @@ const RESULT: GenerationResult = {
           }
         },
         {
+          "id": "noise-lt-parkmobile-2026-08-24-0",
+          "transactionDate": "2026-08-24",
+          "postedDate": "2026-08-26",
+          "description": "PARKMOBILE",
+          "memo": "Parking",
+          "type": "POS",
+          "direction": "debit",
+          "amountCents": 979
+        },
+        {
           "id": "discretionary-fact-epoch-coffee-austin-2026-08-25-0",
           "transactionDate": "2026-08-25",
           "postedDate": "2026-08-26",
@@ -2222,7 +2291,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-h-e-b-austin-2026-08-26-0",
           "transactionDate": "2026-08-26",
           "postedDate": "2026-08-28",
-          "description": "H-E-B #2604 AUSTIN TX",
+          "description": "H-E-B #9026 AUSTIN TX",
           "memo": "Groceries",
           "type": "POS",
           "direction": "debit",
@@ -2240,10 +2309,20 @@ const RESULT: GenerationResult = {
           }
         },
         {
+          "id": "noise-lt-vending-2026-08-27-0",
+          "transactionDate": "2026-08-27",
+          "postedDate": "2026-08-31",
+          "description": "VENDING",
+          "memo": "Vending",
+          "type": "POS",
+          "direction": "debit",
+          "amountCents": 299
+        },
+        {
           "id": "discretionary-fact-amazon-com-seattle-2026-08-30-0",
           "transactionDate": "2026-08-30",
           "postedDate": "2026-09-01",
-          "description": "AMAZON.COM*WT7WC5U967 AMZN.COM/BILL WA",
+          "description": "AMAZON.COM*I4P9U6FW6G AMZN.COM/BILL WA",
           "memo": "Online purchase",
           "type": "POS",
           "direction": "debit",
@@ -2264,7 +2343,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-h-e-b-austin-2026-08-30-0",
           "transactionDate": "2026-08-30",
           "postedDate": "2026-09-01",
-          "description": "H-E-B #2604 AUSTIN TX",
+          "description": "H-E-B #9026 AUSTIN TX",
           "memo": "Groceries",
           "type": "POS",
           "direction": "debit",
@@ -2310,13 +2389,13 @@ const RESULT: GenerationResult = {
           "memo": "Payment received, thank you",
           "type": "PAYMENT",
           "direction": "credit",
-          "amountCents": 169150
+          "amountCents": 139238
         },
         {
           "id": "discretionary-fact-amazon-com-seattle-2026-09-01-0",
           "transactionDate": "2026-09-01",
           "postedDate": "2026-09-03",
-          "description": "AMAZON.COM*4J05OMDNFT AMZN.COM/BILL WA",
+          "description": "AMAZON.COM*5TL77F7WM0 AMZN.COM/BILL WA",
           "memo": "Online purchase",
           "type": "POS",
           "direction": "debit",
@@ -2337,7 +2416,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-h-e-b-austin-2026-09-01-0",
           "transactionDate": "2026-09-01",
           "postedDate": "2026-09-03",
-          "description": "H-E-B #2604 AUSTIN TX",
+          "description": "H-E-B #0626 AUSTIN TX",
           "memo": "Groceries",
           "type": "POS",
           "direction": "debit",
@@ -2358,7 +2437,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-shell-austin-2026-09-03-0",
           "transactionDate": "2026-09-03",
           "postedDate": "2026-09-08",
-          "description": "SHELL OIL 4244 AUSTIN TX",
+          "description": "SHELL OIL 9260 AUSTIN TX",
           "memo": "Fuel",
           "type": "POS",
           "direction": "debit",
@@ -2379,7 +2458,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-shell-austin-2026-09-04-0",
           "transactionDate": "2026-09-04",
           "postedDate": "2026-09-08",
-          "description": "SHELL OIL 4244 AUSTIN TX",
+          "description": "SHELL OIL 9260 AUSTIN TX",
           "memo": "Fuel",
           "type": "POS",
           "direction": "debit",
@@ -2400,7 +2479,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-amazon-com-seattle-2026-09-05-0",
           "transactionDate": "2026-09-05",
           "postedDate": "2026-09-08",
-          "description": "AMAZON.COM*JGQ94LJPPK AMZN.COM/BILL WA",
+          "description": "AMAZON.COM*I87PCJHB62 AMZN.COM/BILL WA",
           "memo": "Online purchase",
           "type": "POS",
           "direction": "debit",
@@ -2421,7 +2500,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-h-e-b-austin-2026-09-06-0",
           "transactionDate": "2026-09-06",
           "postedDate": "2026-09-08",
-          "description": "H-E-B #2604 AUSTIN TX",
+          "description": "H-E-B #0626 AUSTIN TX",
           "memo": "Groceries",
           "type": "POS",
           "direction": "debit",
@@ -2442,7 +2521,7 @@ const RESULT: GenerationResult = {
           "id": "discretionary-fact-shell-austin-2026-09-07-0",
           "transactionDate": "2026-09-07",
           "postedDate": "2026-09-08",
-          "description": "SHELL OIL 4244 AUSTIN TX",
+          "description": "SHELL OIL 9260 AUSTIN TX",
           "memo": "Fuel",
           "type": "POS",
           "direction": "debit",
@@ -2457,27 +2536,6 @@ const RESULT: GenerationResult = {
             "factId": "fact-shell-austin",
             "sourceUrl": "https://www.shell.us/motorists/shell-station-locator.html",
             "note": "Shell, Austin, TX: Regular unleaded per gallon $2.89"
-          }
-        },
-        {
-          "id": "discretionary-fact-h-e-b-austin-2026-09-04-0",
-          "transactionDate": "2026-09-04",
-          "postedDate": "2026-09-09",
-          "description": "H-E-B #2604 AUSTIN TX",
-          "memo": "Groceries",
-          "type": "POS",
-          "direction": "debit",
-          "amountCents": 12654,
-          "merchant": {
-            "name": "H-E-B",
-            "category": "grocery",
-            "city": "Austin",
-            "state": "TX"
-          },
-          "evidence": {
-            "factId": "fact-h-e-b-austin",
-            "sourceUrl": "https://www.heb.com/heb-store/US/tx/austin",
-            "note": "H-E-B (grocery), Austin, TX"
           }
         },
         {
@@ -2499,27 +2557,6 @@ const RESULT: GenerationResult = {
             "factId": "fact-epoch-coffee-austin",
             "sourceUrl": "https://www.epochcoffee.com/",
             "note": "Epoch Coffee, Austin, TX: Latte $5.75"
-          }
-        },
-        {
-          "id": "discretionary-fact-shell-austin-2026-09-06-0",
-          "transactionDate": "2026-09-06",
-          "postedDate": "2026-09-09",
-          "description": "SHELL OIL 4244 AUSTIN TX",
-          "memo": "Fuel",
-          "type": "POS",
-          "direction": "debit",
-          "amountCents": 4579,
-          "merchant": {
-            "name": "Shell",
-            "category": "fuel",
-            "city": "Austin",
-            "state": "TX"
-          },
-          "evidence": {
-            "factId": "fact-shell-austin",
-            "sourceUrl": "https://www.shell.us/motorists/shell-station-locator.html",
-            "note": "Shell, Austin, TX: Regular unleaded per gallon $2.89"
           }
         },
         {
@@ -2571,12 +2608,12 @@ const RESULT: GenerationResult = {
           "cycleStart": "2026-06-12",
           "cycleEnd": "2026-07-11",
           "openingBalanceCents": 184237,
-          "closingBalanceCents": 139486,
-          "totalCreditsCents": 184237,
-          "totalDebitsCents": 139486,
-          "transactionCount": 28,
+          "closingBalanceCents": 141451,
+          "totalCreditsCents": 188149,
+          "totalDebitsCents": 145363,
+          "transactionCount": 32,
           "credit": {
-            "statementBalanceCents": 139486,
+            "statementBalanceCents": 141451,
             "minimumDueCents": 3500,
             "dueDate": "2026-08-05",
             "interestChargedCents": 0
@@ -2585,13 +2622,13 @@ const RESULT: GenerationResult = {
         {
           "cycleStart": "2026-07-12",
           "cycleEnd": "2026-08-11",
-          "openingBalanceCents": 139486,
-          "closingBalanceCents": 169150,
-          "totalCreditsCents": 139486,
-          "totalDebitsCents": 169150,
-          "transactionCount": 34,
+          "openingBalanceCents": 141451,
+          "closingBalanceCents": 139238,
+          "totalCreditsCents": 148928,
+          "totalDebitsCents": 146715,
+          "transactionCount": 35,
           "credit": {
-            "statementBalanceCents": 169150,
+            "statementBalanceCents": 139238,
             "minimumDueCents": 3500,
             "dueDate": "2026-09-08",
             "interestChargedCents": 0
@@ -2600,13 +2637,13 @@ const RESULT: GenerationResult = {
         {
           "cycleStart": "2026-08-12",
           "cycleEnd": "2026-09-11",
-          "openingBalanceCents": 169150,
-          "closingBalanceCents": 157745,
-          "totalCreditsCents": 169150,
-          "totalDebitsCents": 157745,
-          "transactionCount": 33,
+          "openingBalanceCents": 139238,
+          "closingBalanceCents": 141634,
+          "totalCreditsCents": 139793,
+          "totalDebitsCents": 142189,
+          "transactionCount": 35,
           "credit": {
-            "statementBalanceCents": 157745,
+            "statementBalanceCents": 141634,
             "minimumDueCents": 3500,
             "dueDate": "2026-10-06",
             "interestChargedCents": 0
@@ -2698,6 +2735,12 @@ const RESULT: GenerationResult = {
         "passed": true,
         "violations": [],
         "target": "lifeModel"
+      },
+      {
+        "ruleId": "R14_variety_floor",
+        "passed": true,
+        "violations": [],
+        "target": "schedule"
       }
     ],
     "findings": [

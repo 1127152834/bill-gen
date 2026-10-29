@@ -56,6 +56,82 @@ def _rgb(hexc):
     return tuple(int(h[i:i + 2], 16) / 255 for i in (0, 2, 4))
 
 
+#: 底稿抽出来的字体是子集，个别字母只有编码没有轮廓（`FG.otf` 缺 F/H/J/K/N/O/Q/W/X/Z，
+#: `HS.otf` 缺一半大写）。直接 insert_text 时这些字会**整字消失**（实测页脚控制串
+#: 的 `SPEC: F` 印成 `SPEC:`）。这里兜一层：缺字形的字符改用 Helvetica 补画，
+#: 位置按 Helvetica 字宽推进，至少字母不会凭空不见。
+_MISSING_CACHE: dict[str, set[str]] = {}
+_FALLBACK_ADV = 0.56
+
+
+def _missing_chars(fname):
+    if fname in _MISSING_CACHE:
+        return _MISSING_CACHE[fname]
+    from fontTools.ttLib import TTFont as _TTFont
+    from fontTools.pens.recordingPen import RecordingPen as _Pen
+    path = FONTS.get(fname)
+    missing = set()
+    if path:
+        font = _TTFont(path, lazy=True)
+        cmap = font.getBestCmap()
+        glyphs = font.getGlyphSet()
+        for code in range(32, 127):
+            glyph = cmap.get(code)
+            if not glyph:
+                missing.add(chr(code))
+                continue
+            pen = _Pen()
+            glyphs[glyph].draw(pen)
+            if not pen.value:
+                missing.add(chr(code))
+    _MISSING_CACHE[fname] = missing
+    return missing
+
+
+def _draw_with_fallback(page, x, bl, text, fname, size, color):
+    """整段绘制；缺字形的字符用 Helvetica 顶上，空格只推进不画。"""
+    missing = _missing_chars(fname)
+    if not text or not (missing & set(text)):
+        page.insert_text(fitz.Point(x, bl), text, fontsize=size,
+                         fontname=f"f{fname}", fontfile=FONTS[fname], color=color)
+        return
+    cx = x
+    run: list[str] = []
+    run_missing = False
+
+    def flush():
+        nonlocal cx, run
+        if not run:
+            return
+        piece = "".join(run)
+        if piece.strip():
+            if run_missing:
+                page.insert_text(fitz.Point(cx, bl), piece, fontsize=size,
+                                 fontname="helv", color=color)
+                cx += len(piece) * size * _FALLBACK_ADV
+            else:
+                page.insert_text(fitz.Point(cx, bl), piece, fontsize=size,
+                                 fontname=f"f{fname}", fontfile=FONTS[fname], color=color)
+                cx += tlen(piece, fname, size)
+        else:
+            cx += len(piece) * size * _FALLBACK_ADV
+        run = []
+
+    for ch in text:
+        if ch == " ":
+            run.append(ch)
+            continue
+        miss = ch in missing
+        if run and any(c != " " for c in run) and miss != run_missing:
+            flush()
+        if not run:
+            run_missing = miss
+        elif not any(c != " " for c in run):
+            run_missing = miss
+        run.append(ch)
+    flush()
+
+
 def txt(page, x, bl, text, fname, size, color, fit_x1=None):
     color = color if isinstance(color, tuple) else _rgb(color)
     if fit_x1 is not None:
@@ -67,9 +143,7 @@ def txt(page, x, bl, text, fname, size, color, fit_x1=None):
                              color=color,
                              morph=(fitz.Point(x, bl), fitz.Matrix(hsc, 1)))
             return
-    page.insert_text(fitz.Point(x, bl), text, fontsize=size,
-                     fontname=f"f{fname}", fontfile=FONTS[fname],
-                     color=color)
+    _draw_with_fallback(page, x, bl, text, fname, size, color)
 
 
 def txt_r(page, x1, bl, text, fname, size, color):
@@ -104,7 +178,7 @@ def add_watermark(page):
     y = cy - w / 2 * dy + 17.65
     page.insert_text(fitz.Point(x, y), t, fontsize=size,
                      fontname="fBol", fontfile=FONTS["Bol"],
-                     color=(0.78, 0.78, 0.78), fill_opacity=0.32,
+                     color=(0.78, 0.78, 0.78), fill_opacity=0.32, overlay=False,
                      morph=(fitz.Point(x, y), fitz.Matrix(45)))
 
 
@@ -121,6 +195,22 @@ _PROMO_KEYS = (
     ("SSM-03-25-0560.B", "form_code"),
     ("Merrill", "brokerage_brand"),
 )
+
+
+# 个人支票账单底部广告位：底稿来自商业账户套件，讲的是小微企业经营贷。
+# 这里默认换成人个版的钱管家/安全工具文案（promo 显式给了就按 promo 走）。
+_PERSONAL_COPY = {
+    "Products and solutions to move your business forward":
+        "Tools to help you stay in control of your money",
+    "- Business Fundamentals\u00ae Checking - now with no monthly fee on new accounts for 12 months":
+        "- Set real-time alerts for balances, deposits and large purchases",
+    "- Business credit cards":
+        "- Lock and unlock your debit card instantly from the app",
+    "- Named among Best Banks for Small Business by SmartAsset*":
+        "- Pay bills and move money with Zelle\u00ae in Online Banking",
+    "* SmartAsset.com 2025":
+        "* Mobile and online alerts require an active account.",
+}
 
 
 def build_subs(d):
@@ -142,6 +232,8 @@ def build_subs(d):
         value = promo.get(key)
         if value:
             subs[original] = str(value)
+    for k, v in _PERSONAL_COPY.items():
+        subs.setdefault(k, v)
     return sorted(subs.items(), key=lambda kv: -len(kv[0]))
 
 
@@ -184,14 +276,14 @@ def apply_auto_calc(d):
     dep = sum(_cents(r["amount"]) for r in d.get("deposits", []))
     wd = sum(_cents(r["amount"]) for r in d.get("withdrawals", []))
     fee = sum(_cents(r["amount"]) for r in d.get("fees", []))
-    chk = 0  # 支票支出汇总只支持 0
+    chk = 0  # 本版式没有独立的支票分表，支票行并入 withdrawals，故单独一栏只印 0
     d["summary"] = {
         "begin": _fmt(begin, dollar=True), "deposits": _fmt(dep), "withdrawals": _fmt(wd),
-        "checks": "-0.00", "fees": _fmt(fee),
+        "checks": "0.00", "fees": _fmt(fee),
         "ending": _fmt(begin + dep + wd + fee + chk, dollar=True),
     }
     d["totals"] = {"deposits": _fmt(dep, dollar=True), "withdrawals": _fmt(wd, dollar=True),
-                   "checks": "-$0.00", "fees": _fmt(fee, dollar=True)}
+                   "checks": "$0.00", "fees": _fmt(fee, dollar=True)}
     d["stats_auto"] = {
         "deposits_n": len(d.get("deposits", [])),
         "withdrawals_n": len(d.get("withdrawals", [])),
@@ -631,10 +723,27 @@ def _cycle_ctrls(L, tag, d):
     year = int(period[:4]) if period[:4].isdigit() else 2026
     month = int(period[5:7]) if period[5:7].isdigit() else 1
     cycle_no = (month + 11) % 60 or 1
-    spec = "ABCDEF"[(year + month) % 6]
+    spec = "ABCDEGILM"[((year * 7 + month) % 8)]   # 只用 FG 子集里真有轮廓的字母
     L = json.loads(_SPEC_RE.sub(lambda m: m.group(1) + spec,
                                 _CTRL_RE.sub(lambda m: m.group(1) + str(cycle_no), text)))
-    return L
+    return _flatten_ctrl_line(L)
+
+
+def _flatten_ctrl_line(node):
+    """把页脚那行印刷控制串的逐字坐标去掉，改成整段单次绘制。
+
+    底稿抓到的是每个字的绝对 x，小字号下本身带 0.2~0.6pt 抖动，沿用会印出
+    `DELI VERY`、`I MAGE` 这种断词（实测首屏就这样）。真印件是均匀字距。
+    """
+    if isinstance(node, dict):
+        if isinstance(node.get("text"), str) and "PULL:" in node["text"]:
+            node.pop("chars_x", None)
+        for v in node.values():
+            _flatten_ctrl_line(v)
+    elif isinstance(node, list):
+        for v in node:
+            _flatten_ctrl_line(v)
+    return node
 
 
 def build_pdf(d, out_path, watermark=True):

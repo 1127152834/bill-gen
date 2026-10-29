@@ -17,6 +17,7 @@ from billgen.themes.usbank import imb_us as IMB
 
 from billgen.themes.usbank.shared import (
     parse_cmap,
+    patch_outlines,
     UsFont,
     esc,
     _build_layouts,
@@ -367,7 +368,8 @@ def add_watermark(doc, page):
                              old[:-2] + f" {ent}>>")
     cts = page.get_contents()
     if cts:
-        doc.update_stream(cts[0], doc.xref_stream(cts[0]) + ops)
+        # 前置：水印在内容之下，不压金额
+        doc.update_stream(cts[0], ops + b"\n" + doc.xref_stream(cts[0]))
     else:
         # 页内容全在 XObject（无页级 contents）——新建 Contents 流画水印
         nx = doc.get_new_xref()
@@ -807,9 +809,29 @@ def _materialize(doc, pages, plans, d, sum_lines):
         _emit_page_items(pages, plan, d, snaps)
 
 
+def _stamp_page_no(pg, k, total):
+    """续页/披露页/尾页在原稿里没有页码 span，按首页样式（x=550、bl=126.9、9pt）补打。
+
+    真实 Uni-Statement 每页都在同一位置印 "Page k of total"，只有首页有可替换
+    span 时其余页会漏印——这是最容易被一眼看穿的版式硬伤。
+    """
+    doc = pg.doc
+    try:                                  # 披露页/尾页资源里没有 F6，先从首页借一个
+        kind, val = doc.xref_get_key(doc.load_page(0).xref, "Resources/Font/F6")
+        if kind == "xref":
+            doc.xref_set_key(pg.page.xref, "Resources/Font/F6", val)
+    except Exception:
+        pass
+    raw = make_units(pg.page.number, "F6", f"Page {k} of {total}",
+                     9.0, 550.0, 126.9)
+    if raw:
+        pg.append_text(raw)
+
+
 def _replace_fields(pages, d, n_stmt):
     """字段替换（同文跳过保回放字节）：账号/期间/客户/页码，含克隆续页。"""
     L = LAYOUTS["us"]
+    total = len(pages)                      # 物理页数：披露页与尾页也算一页
     dashed = str(d.get("account_display", "")).strip()
     spaced = dashed.replace("-", " ")
     account_pattern = r"\d[ -]\d{3}[ -]\d{4}[ -]\d{4}"
@@ -817,9 +839,11 @@ def _replace_fields(pages, d, n_stmt):
         pi = pg.page.number
         if pi == 1 or pi == len(pages) - 1 and pi > 2:
             if pi == 1:
+                _stamp_page_no(pg, pi + 1, total)
                 continue                      # 静态披露页
         lay = 2 if (pi >= 2 and pi != len(pages) - 1) else pi
         if pi == len(pages) - 1 and pi >= 2:
+            _stamp_page_no(pg, pi + 1, total)
             continue                          # 尾空白页
         lsp = L[lay]["spans"]
         # 账号（两种格式）+ 期间两日期 + 客户三行 + 页码
@@ -875,12 +899,16 @@ def _replace_fields(pages, d, n_stmt):
                                                - lead - len(core)))
             except Exception as e:
                 print(f"[IMB] 生成失败保留原样: {e}", file=sys.stderr)
-        # 页码：物理 p1=账单页1；物理续页 pi(≥2)=账单页 pi
-        k = 1 if pi == 0 else pi
+        # 页码：一律用物理页码，总数用物理页数（原稿的 span 只存在于首页）
+        k = pi + 1
+        stamped = False
         for s in lsp:
             if re.fullmatch(r"Page \d of \d", s["text"].strip()):
-                pg.replace_span(s, f"Page {k} of {n_stmt}")
+                pg.replace_span(s, f"Page {k} of {total}")
+                stamped = True
                 break
+        if not stamped:
+            _stamp_page_no(pg, k, total)
 
 
 # ===== 元数据（缺省=原稿值，时间为实时；显式填写优先）=====
@@ -926,6 +954,9 @@ def build_pdf(d, out_path, watermark=True):
         if pi in (0, 2) and uf.tou not in committed and uf.new_cids:
             uf.commit(doc)
             committed.add(uf.tou)
+    # 空壳字形补写：底稿子集只收过原稿用到的字，`Jan` 的 'J' 有码位无轮廓，
+    # 替换期间后文本层正常但像素空白（实测 `an 05`）。这里按系统 Arial 补轮廓。
+    patch_outlines(doc)
     # 多余物理页删除
     for pi in range(len(doc) - 1, n_phys - 1, -1):
         doc.delete_page(pi)

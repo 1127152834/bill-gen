@@ -15,7 +15,15 @@ export const SKILL_NAMES = [
 
 export type SkillName = (typeof SKILL_NAMES)[number];
 
-export type SkillStore = { get(names: readonly SkillName[]): string };
+export type SkillStore = {
+  /** 整套技能文本（历史行为：全部注入）。 */
+  get(names: readonly SkillName[]): string;
+  /**
+   * 只注入与主体相关的章节。技能文件里 `### Trade: …` / `### Industry: …` 各有十几块，
+   * 一个主体只对应其中一块，其余全是噪声——每轮都重发一遍，白等输入处理时间。
+   */
+  getSelective(names: readonly SkillName[], keywords: readonly string[]): string;
+};
 
 /** Which skills each LLM node receives. */
 export const SKILLS_BY_NODE = {
@@ -27,6 +35,65 @@ export const SKILLS_BY_NODE = {
 
 export type SkillNode = keyof typeof SKILLS_BY_NODE;
 
+/**
+ * 生活模型这一节点的知识文本。
+ *
+ * 四个技能文件加起来 ~53KB（≈14k token），每轮都会重发一次，是 lifeModel 最慢的一段输入。
+ * 个人主体的「行业成本结构」只在做企业账时才有用（个人消费的价格已经由 researched facts 给出），
+ * 所以个人档不再带它——省下 ~14KB，规则强度不变。
+ */
+/**
+ * 把一份技能文件裁到「和这个主体有关」的章节。
+ *
+ * 规则很简单，但能把 15KB 的 trades 列表裁成 5KB：
+ * - `## ` 一级小节整体保留（它们是通用规则）；
+ * - 含 `### ` 子块的小节（Trade / Industry）里，只留标题命中 keywords 的那一块；
+ *   一块都不命中时保留该小节的引导段（子块之前的文字），并留一句「本类目不适用」的说明。
+ */
+export function selectSkillSections(body: string, keywords: readonly string[]): string {
+  const words = keywords.map((k) => k.trim().toLowerCase()).filter((k) => k.length >= 3);
+  const lines = body.split('\n');
+  const out: string[] = [];
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i]!;
+    if (!line.startsWith('## ') && !line.startsWith('# ')) {
+      out.push(line);
+      i++;
+      continue;
+    }
+    // 收集这个小节（直到下一个 `## ` / `# `）
+    const start = i;
+    i++;
+    while (i < lines.length && !lines[i]!.startsWith('## ') && !lines[i]!.startsWith('# ')) i++;
+    const block = lines.slice(start, i);
+    const subStarts = block.flatMap((l, idx) => (l.startsWith('### ') ? [idx] : []));
+    // A `## Sources` block is a citation list: it tells the reader where a number came from, not
+    // what to do with it. Dropping it keeps the provenance in the file while the prompt stays lean.
+    if (/^##\s*(\d+\.\s*)?sources\b/i.test(block[0] ?? '')) continue;
+    if (subStarts.length === 0 || words.length === 0) {
+      out.push(...block);
+      continue;
+    }
+    const intro = block.slice(0, subStarts[0]!);
+    const subs: string[][] = subStarts.map((from, idx) => block.slice(from, subStarts[idx + 1] ?? block.length));
+    const picked = subs.filter((sub) => {
+      const heading = (sub[0] ?? '').toLowerCase();
+      return words.some((w) => heading.includes(w));
+    });
+    out.push(...intro);
+    if (picked.length > 0) out.push(...picked.flat());
+    else out.push('（本小节没有与该主体匹配的条目，按上面的通用规则处理。）', '');
+  }
+  return out.join('\n');
+}
+
+export function lifeModelSkills(isBusiness: boolean): readonly SkillName[] {
+  return isBusiness
+    ? SKILLS_BY_NODE.lifeModel
+    : (['self-employed-patterns', 'us-calendar-seasonality', 'consumer-habits'] as const);
+}
+
 const isSkillName = (name: string): name is SkillName => (SKILL_NAMES as readonly string[]).includes(name);
 
 /** Reads every skill file from `dir`; throws if any is missing so a bad deploy fails at startup. */
@@ -36,7 +103,15 @@ export function loadSkills(dir: string): SkillStore {
     const body = readFileSync(join(dir, `${name}.md`), 'utf8').trim();
     sections.set(name, `## skill: ${name}\n\n${body}\n`);
   }
+  const section = (name: SkillName): string => {
+    const body = sections.get(name);
+    if (body === undefined) throw new Error(`Unknown skill: ${String(name)}`);
+    return body;
+  };
   return {
+    getSelective(names, keywords) {
+      return names.map((name) => `## skill: ${name}\n\n${selectSkillSections(section(name), keywords)}\n`).join('\n');
+    },
     get(names) {
       return names
         .map((name) => {

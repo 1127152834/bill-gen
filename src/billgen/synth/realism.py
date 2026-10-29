@@ -107,8 +107,36 @@ def amounts(ledger: LedgerDocument) -> tuple[list[LedgerRow], int]:
     return out, changed
 
 
+#: 商户类型 → 真账单上常见的收单方前缀。前缀是收单机构（Square/Toast/PayPal…）
+#: 打在描述前的标记，与商户类别强相关 —— 随机抽一个会拼出
+#: `AMZN Mktp US*TRADER JOES`、`PAYPAL *UBER *TRIP` 这种一眼假的组合（实测件）。
+_PREFIX_RULES: tuple[tuple[tuple[str, ...], tuple[str, ...]], ...] = (
+    (("STARBUCKS", "COFFEE", "CAFE", "BAKERY", "DONUT", "TEA HOUSE", "JUICE"), ("SQ *", "TST* ")),
+    (("RESTAURANT", "GRILL", "PIZZA", "TACO", "BURGER", "KITCHEN", "BBQ", "SUSHI",
+      "THAI", "BISTRO", "DELI", "NOODLE", "RAMEN", "CANTINA", "DINER"), ("TST* ", "SQ *")),
+    (("WHOLE FOODS", "WHOLEFDS", "TRADER JOE", "KROGER", "SAFEWAY", "H-E-B", "HEB ",
+      "COSTCO", "ALDI", "PUBLIX", "SPROUTS"), ("",)),
+    (("AMAZON", "AMZN"), ("AMZN Mktp US*",)),
+    (("PAYPAL", "EBAY", "ETSY", "VENMO"), ("PAYPAL *",)),
+    (("SHELL", "CHEVRON", "EXXON", "MOBIL", "CIRCLE K", "VALERO", "SUNOCO", "76 "),
+     ("SP ",)),
+    (("UBER", "LYFT", "DOORDASH", "GRUBHUB", "INSTACART", "AIRBNB"), ("",)),
+)
+
+
+def _prefix_for(ledger: LedgerDocument, row: LedgerRow, text: str) -> str:
+    """商户名命中类别就取该类的收单方前缀；对不上类别一律不加。"""
+    up = text.upper()
+    for keys, prefixes in _PREFIX_RULES:
+        if any(k in up for k in keys):
+            if not prefixes:
+                return ""
+            return prefixes[_stem(ledger, row, "prefix") % len(prefixes)]
+    return ""
+
+
 def descriptors(ledger: LedgerDocument) -> tuple[list[LedgerRow], int]:
-    """POS 行补收单方前缀；已经带前缀的不动。"""
+    """POS 行补收单方前缀：只给「该类商户真会带前缀」的行加，且绝不叠两个前缀。"""
     out: list[LedgerRow] = []
     changed = 0
     for row in ledger.rows:
@@ -116,7 +144,10 @@ def descriptors(ledger: LedgerDocument) -> tuple[list[LedgerRow], int]:
         if row.type != "POS" or not text or text.startswith(_POS_PREFIXES):
             out.append(row)
             continue
-        prefix = _POS_PREFIXES[_stem(ledger, row, "prefix") % len(_POS_PREFIXES)]
+        prefix = _prefix_for(ledger, row, text)
+        if not prefix:
+            out.append(row)
+            continue
         out.append(replace(row, description=f"{prefix}{text}"))
         changed += 1
     return out, changed
@@ -130,12 +161,48 @@ _CITY_CODES = ("AUS", "CHI", "NYC", "SFO", "SEA", "DEN", "ATL", "DFW", "PHX", "B
 #: 不是一串无源字母（旧实现会拼出 `725LUIMG` 这种一眼假的串）。
 _ATM_TAIL = re.compile(r"\s+(?:TERMINAL\s+)?[A-Z0-9]{5,}$")
 
+#: 已经规范的尾巴（`5923 PDX` / `TERMINAL 5923 PDX`）：上游自己给的终端号 + 城市码，不再二次加工。
+_ATM_CANON = re.compile(r"\s+(?:TERMINAL\s+)?\d{3,6}(?:\s+[A-Z]{3})?$")
+
+
+#: 美国主要城市 → 真账单上用的三字母城市码（ATM 行尾）
+_CITY_CODE_BY_NAME = {
+    "austin": "AUS", "houston": "HOU", "dallas": "DFW", "fort worth": "DFW",
+    "san antonio": "SAT", "chicago": "CHI", "new york": "NYC", "brooklyn": "NYC",
+    "queens": "NYC", "los angeles": "LAX", "san francisco": "SFO", "oakland": "OAK",
+    "san jose": "SJC", "san diego": "SAN", "sacramento": "SMF", "seattle": "SEA",
+    "portland": "PDX", "denver": "DEN", "atlanta": "ATL", "phoenix": "PHX",
+    "boston": "BOS", "miami": "MIA", "minneapolis": "MSP", "st. louis": "STL",
+    "saint louis": "STL", "charlotte": "CLT", "salt lake city": "SLC",
+    "las vegas": "LAS", "detroit": "DET", "tampa": "TPA", "orlando": "MCO",
+    "philadelphia": "PHL", "pittsburgh": "PIT", "cleveland": "CLE",
+    "cincinnati": "CVG", "columbus": "CMH", "nashville": "BNA", "raleigh": "RDU",
+    "washington": "WAS", "baltimore": "BWI", "indianapolis": "IND",
+    "kansas city": "MCI", "milwaukee": "MKE", "omaha": "OMA", "tucson": "TUS",
+}
+
+
+def _holder_city_code(ledger: LedgerDocument) -> str:
+    """开户人所在城市的三字母码（客户住 Austin，ATM 行的城市码就该是 AUS）。"""
+    city = (ledger.holder.city_state or "").split(",")[0].strip().lower()
+    if city.endswith(" tx") or " " in city:
+        city = " ".join(city.split()[:-1]) if city.split()[-1].isalpha() and len(city.split()[-1]) == 2 else city
+    code = _CITY_CODE_BY_NAME.get(city)
+    if code:
+        return code
+    return ""
+
 
 def _atm_tail(ledger: LedgerDocument, row: LedgerRow) -> str:
+    """`5923 PDX`：终端号 + 城市码。
+
+    真账单的 ATM 行就是这么短（``ATM WITHDRAWAL 0925 AUSTIN TX``）。这里不写 ``TERMINAL``
+    这个词：描述列按像素裁宽度，多这 9 个字符就会把终端号截成半截（``TERMINAL 59``）。
+    """
     digest = _stem(ledger, row, "atm")
     terminal = 1000 + digest % 9000
-    city = _CITY_CODES[(digest // 9000) % len(_CITY_CODES)]
-    return f"TERMINAL {terminal} {city}"
+    city = _holder_city_code(ledger) or _CITY_CODES[(digest // 9000) % len(_CITY_CODES)]
+    return f"{terminal} {city}"
 
 
 def atm_tails(ledger: LedgerDocument) -> tuple[list[LedgerRow], int]:
@@ -144,6 +211,9 @@ def atm_tails(ledger: LedgerDocument) -> tuple[list[LedgerRow], int]:
     changed = 0
     for row in ledger.rows:
         if row.type != "ATM" or not row.description.strip():
+            out.append(row)
+            continue
+        if _ATM_CANON.search(row.description.strip()):
             out.append(row)
             continue
         head = _ATM_TAIL.sub("", row.description.strip()).rstrip()

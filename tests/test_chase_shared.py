@@ -219,7 +219,7 @@ def _case(tag, case):
                 data[key] = []
         if case == "many":
             rows = [{"date": f"01/{i % 28 + 1:02}",
-                     "desc": f"SAMPLE ROW {i}\nCONTINUATION", "amount": "1.00",
+                     "desc": f"ACME ROW {i}\nCONTINUATION", "amount": "1.00",
                      "type": "deposit"} for i in range(70)]
             data["transactions" if tag == "personal" else "deposits"] = rows
     return data

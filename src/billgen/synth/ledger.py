@@ -28,6 +28,7 @@ __all__ = [
     "LedgerRow",
     "Period",
     "from_game_result",
+    "refresh_references",
 ]
 
 
@@ -63,7 +64,7 @@ def _fiction_toll_free(seed: str, tag: str) -> str:
 
 
 # 已知真实银行的联系信息。整合版模板印的是真行名，账本这边也得跟上：
-# 命中这张表就用真实法务名/域名/客服线/信箱，不再拼 `{slug}.example` + 555 号段。
+# 命中这张表就用真实法务名/域名/客服线/信箱，不再拼 `{slug}.com` + 555 号段。
 _REAL_TRAITS: dict[str, dict[str, str]] = {
     "bank of america": {
         "legal": "Bank of America, N.A.", "domain": "bankofamerica.com",
@@ -181,15 +182,47 @@ _REAL_ROUTING.update({
 })
 
 
+#: 行名里可以去掉的法定后缀（"JPMorgan Chase Bank, N.A." → "jpmorgan chase bank"）
+_LEGAL_TAIL = {"n", "a", "na", "n a", "national", "association", "bank", "f", "s", "b",
+               "fsb", "inc", "llc", "corp", "corporation", "company"}
+
+
+def _bank_key(name: str) -> str:
+    import re as _re
+
+    s = _re.sub(r"[^a-z0-9 ]+", " ", (name or "").lower())
+    return _re.sub(r"\s+", " ", s).strip()
+
+
+_ROUTING_NORM: dict[str, tuple[str, ...]] = {}
+
+
 def routing_for(name: str, seed: str) -> str:
-    """有真路由就用真的（同一行名固定挑一个，别每份账单都换），否则派生一个自洽的。"""
+    """有真路由就用真的（同一行名固定挑一个，别每份账单都换），否则派生一个自洽的。
+
+    行名是模板自带的法定全称（``JPMorgan Chase Bank, N.A.``、``U.S. Bank National
+    Association``），直接查表会错过 —— 这里逐级剥掉尾部法定后缀再查。
+    """
     from .money import aba_routing
 
-    pool = _REAL_ROUTING.get((name or "").strip().lower())
-    if pool:
-        pick = int(hashlib.sha256(f"routing-pick:{seed}".encode()).hexdigest()[:8], 16)
-        return pool[pick % len(pool)]
+    key = _bank_key(name)
+    words = key.split()
+    while True:
+        pool = _ROUTING_NORM.get(" ".join(words))
+        if pool:
+            pick = int(hashlib.sha256(f"routing-pick:{seed}".encode()).hexdigest()[:8], 16)
+            return pool[pick % len(pool)]
+        if len(words) > 1 and words[-1] in _LEGAL_TAIL:
+            words.pop()
+            continue
+        if len(words) > 2 and words[-2] in _LEGAL_TAIL:
+            words.pop(-2)
+            continue
+        break
     return aba_routing(seed)
+
+
+_ROUTING_NORM.update({_bank_key(k): v for k, v in _REAL_ROUTING.items()})
 
 
 @dataclass(frozen=True, slots=True)
@@ -208,7 +241,12 @@ class BankIdentity:
 
     @classmethod
     def derive(cls, name: str, seed: str) -> BankIdentity:
-        traits = _REAL_TRAITS.get((name or "").strip().lower())
+        name = (name or "").strip()
+        if not name:
+            # 未指定行名：中性占位，build_data() 会替换成模板自带的名字。
+            return cls(name="", legal="", domain="", phone="", po_box="", po_box_alt="",
+                       city_state_zip="", phone_service="", phone_es="", phone_intl="", phone_metro="")
+        traits = _REAL_TRAITS.get(name.lower())
         if traits is not None:
             return cls(name=name, **traits)
         legal = name if name.endswith((".", "N.A.", "Bank")) and "," in name else f"{name}, N.A."
@@ -217,7 +255,9 @@ class BankIdentity:
         return cls(
             name=name,
             legal=legal,
-            domain=f"{_slug(name)}.example",
+            # 虚构行也要有个看起来像真银行的站点：`.example` 是 RFC 2606 保留域名，
+            # 一行 `harborline-bank.example` 出现在账单页脚上就是「这是假的」的自白。
+            domain=f"{_slug(name)}.com",
             phone=_fiction_phone(seed),
             po_box=f"P O Box {40000 + digest % 20000}",
             po_box_alt=f"P O Box {40000 + (digest // 7) % 20000}",
@@ -491,6 +531,19 @@ def _attach_references(rows: list[LedgerRow], seed: str,
     return out
 
 
+def refresh_references(ledger: "LedgerDocument") -> "LedgerDocument":
+    """银行身份落定后重挂一遍行内号码。
+
+    ACH trace 的前 8 位必须是本行路由号；``from_game_result`` 里银行名可能还是空的
+    （等 ``bridge`` 用模板自带银行补齐），那时派生出的路由号与最终印在账单上的对不上。
+    所以银行身份一确定就调这里，按 ``ledger.account.routing`` 重算全部 reference。
+    """
+    rows = _attach_references(list(ledger.rows), ledger.seed,
+                              routing=ledger.account.routing,
+                              last4=ledger.account.last4)
+    return replace(ledger, rows=tuple(rows))
+
+
 def _anchor_delta(period: Period, seed: str) -> int:
     """账期整体要平移的天数（让结单日落在 seed 派生的「开户日」上）。"""
     import hashlib
@@ -572,7 +625,11 @@ def from_game_result(
     kind = _account_kind(statement)
     seed = str(payload.get("seed") or payload.get("id") or "seed")
     last4 = str(statement.get("accountLast4", "0000"))
-    routing = routing_for(str(bank_name or statement.get("bankName") or "Bank of America"), seed)
+    # 行名只认调用方显式传的 bank_name。留空时先按种子派生一个自洽路由号（不能是空串，
+    # 否则账户路由号与 ACH trace 前 8 位会印成 00000000）；build_data() 换成模板自带的
+    # 那家银行后，再用 refresh_references() 按真路由号重挂一次（见 bridge._adopt_template_bank）。
+    wanted_bank = (bank_name or "").strip()
+    routing = routing_for(wanted_bank, seed)
 
     rows: list[LedgerRow] = []
     balance = opening
@@ -596,7 +653,9 @@ def from_game_result(
     rows = _assign_check_numbers(rows, seed)
     rows = _attach_references(rows, seed, routing=routing, last4=last4)
 
-    name = bank_name or str(statement.get("bankName") or "Bank of America")
+    # 行名只认调用方显式传的 bank_name：不再读结果包里的 bankName，也不再兜一个写死的银行名。
+    # 留空时账本用空名占位，build_data() 会换成模板自带的银行名（见 bridge._adopt_template_bank）。
+    name = wanted_bank
     ledger = LedgerDocument(
         bank=BankIdentity.derive(name, seed),
         holder=_holder(payload),

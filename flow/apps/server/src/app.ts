@@ -8,14 +8,18 @@ import { requireApiKey } from './auth.js';
 import type { MakeDeps } from './deps.js';
 import { describeIssues, fail, limitBody, parseJson } from './http.js';
 import { miscRoutes } from './routes/misc.js';
+import { settingsRoutes } from './routes/settings.js';
 import { mountWeb } from './static.js';
 import { rejectForeignOrigin, requireJsonForMutations } from './guard.js';
 import { SETTLED_STATUSES, getGeneration, insertGeneration, type Db, type GenerationRow } from './db.js';
 import type { BusMessage, EventBus } from './events.js';
+import type { Env } from './env.js';
 import type { JobRunner } from './jobs.js';
 
 export type AppDeps = {
   db: Db;
+  /** 只在模型设置路由里用到：给设置表兜底默认值，并把改动写回。 */
+  env: Env;
   runner: JobRunner;
   bus: EventBus;
   /** Builds fresh dependencies (own `Budget`) for the random-persona route. */
@@ -93,6 +97,7 @@ export function createApp(deps: AppDeps): Hono {
   );
 
   app.route('/', miscRoutes({ db, runner, makeDeps: deps.makeDeps, today }));
+  app.route('/', settingsRoutes({ db, env: deps.env }));
 
   app.get('/api/generations/:id', (c) => {
     const row = getGeneration(db, c.req.param('id'));

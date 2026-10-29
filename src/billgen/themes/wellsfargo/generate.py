@@ -260,7 +260,7 @@ def add_watermark(page):
     page.insert_text(
         fitz.Point(x, y), txt, fontsize=size,
         fontname=f, fontfile=os.path.join(BASE, "fonts", FONT_FILES[f]),
-        color=(0.78, 0.78, 0.78), fill_opacity=0.32,
+        color=(0.78, 0.78, 0.78), fill_opacity=0.32, overlay=False,
         morph=(fitz.Point(x, y), fitz.Matrix(45)),
     )
 

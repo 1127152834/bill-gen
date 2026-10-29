@@ -70,9 +70,9 @@ describe('parseJsonLoose', () => {
 });
 
 describe('Budget', () => {
-  it('allows 40 llm calls and throws BudgetExceededError on the 41st', () => {
+  it('allows 60 llm calls and throws BudgetExceededError on the 61st', () => {
     const b = new Budget();
-    for (let i = 0; i < 40; i++) b.chargeLlm();
+    for (let i = 0; i < 60; i++) b.chargeLlm();
     expect(() => b.chargeLlm()).toThrow(BudgetExceededError);
     try {
       b.chargeLlm();
@@ -80,16 +80,16 @@ describe('Budget', () => {
       expect((e as BudgetExceededError).code).toBe('BUDGET_EXCEEDED');
     }
   });
-  it('allows 25 tavily queries and throws on the 26th', () => {
+  it('allows 60 tavily queries and throws on the 61st', () => {
     const b = new Budget();
-    for (let i = 0; i < 25; i++) b.chargeTavily();
+    for (let i = 0; i < 60; i++) b.chargeTavily();
     expect(() => b.chargeTavily()).toThrow(BudgetExceededError);
   });
-  it('throws once the injected clock passes 600000ms', () => {
+  it('throws once the injected clock passes 900000ms', () => {
     let t = 1_000;
     const b = new Budget(undefined, () => t);
     b.chargeLlm();
-    t += 600_000;
+    t += 900_000;
     b.chargeLlm(); // exactly at the limit is still fine
     t += 1;
     expect(() => b.chargeLlm()).toThrow(BudgetExceededError);

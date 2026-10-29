@@ -6,13 +6,23 @@ export type LlmNode = 'persona' | 'planResearch' | 'extractFacts' | 'lifeModel' 
 export type LlmMessage = { role: 'system' | 'user'; content: string };
 
 export interface StructuredLlm {
-  invoke<T>(node: LlmNode, schema: z.ZodType<T>, messages: LlmMessage[]): Promise<T>;
+  invoke<T>(node: LlmNode, schema: z.ZodType<T>, messages: LlmMessage[], opts?: LlmCallOptions): Promise<T>;
 }
+
+export type LlmCallOptions = {
+  /**
+   * Upper bound on the reply. Structured output is bounded by the schema anyway, but a model that
+   * starts rambling inside a long string field burns the whole call budget before the timeout.
+   */
+  maxTokens?: number;
+};
 
 export type LlmEnv = {
   baseUrl: string;
   apiKey: string;
   model: string;
+  /** Per-node model override (see `MODEL_BY_NODE_ENV`). */
+  modelByNode?: Partial<Record<LlmNode, string>>;
   structuredMode: 'json_schema' | 'function_calling' | 'json_mode';
 };
 
@@ -26,6 +36,7 @@ export type CallModel = (
   signal: AbortSignal,
   /** Report token usage when the provider returns it. */
   onTokens?: (tokens: number) => void,
+  opts?: LlmCallOptions,
 ) => Promise<unknown>;
 
 export type LlmDeps = {
@@ -112,16 +123,34 @@ function matchingClose(s: string, start: number): number {
 
 export function createOpenAiStructuredLlm(env: LlmEnv, budget: Budget, deps: LlmDeps = {}): StructuredLlm {
   const method = METHOD_BY_MODE[env.structuredMode];
-  const callModel = deps.callModel ?? createLangChainCall(env);
+  // One call per node that overrides the model, so a slow node can run on a different model
+  // without changing the others; nodes without an override share the default call.
+  const defaultCall = deps.callModel ?? createLangChainCall(env);
+  const calls = new Map<LlmNode, CallModel>();
+  const callFor = (node: LlmNode): CallModel => {
+    const model = env.modelByNode?.[node];
+    if (deps.callModel || !model) return defaultCall;
+    let call = calls.get(node);
+    if (!call) {
+      call = createLangChainCall({ ...env, model });
+      calls.set(node, call);
+    }
+    return call;
+  };
   const sleep = deps.sleep ?? ((ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms)));
 
   /** One logical request: every real attempt is charged; transient failures back off and retry. */
-  async function request(schema: z.ZodType, messages: LlmMessage[]): Promise<unknown> {
+  async function request(node: LlmNode, schema: z.ZodType, messages: LlmMessage[], opts?: LlmCallOptions): Promise<unknown> {
     for (let attempt = 0; ; attempt++) {
       budget.chargeLlm();
       try {
-        return await callModel(method, schema, messages, AbortSignal.timeout(CALL_TIMEOUT_MS), (n) =>
-          budget.addTokens(n),
+        return await callFor(node)(
+          method,
+          schema,
+          messages,
+          AbortSignal.timeout(CALL_TIMEOUT_MS),
+          (n) => budget.addTokens(n),
+          opts,
         );
       } catch (err) {
         if (err instanceof BudgetExceededError) throw err;
@@ -133,9 +162,9 @@ export function createOpenAiStructuredLlm(env: LlmEnv, budget: Budget, deps: Llm
   }
 
   return {
-    async invoke<T>(node: LlmNode, schema: z.ZodType<T>, messages: LlmMessage[]): Promise<T> {
+    async invoke<T>(node: LlmNode, schema: z.ZodType<T>, messages: LlmMessage[], opts?: LlmCallOptions): Promise<T> {
       const root = toObjectRoot(schema);
-      const first = validate(root.schema, await request(root.schema, messages), root.coerce);
+      const first = validate(root.schema, await request(node, root.schema, messages, opts), root.coerce);
       if (first.ok) return root.unwrap(first.value);
       const repair: LlmMessage = {
         role: 'user',
@@ -143,7 +172,7 @@ export function createOpenAiStructuredLlm(env: LlmEnv, budget: Budget, deps: Llm
           `Your previous reply did not match the required JSON format: ${truncate(first.reason, 1500)}\n` +
           'Reply again with only the corrected JSON, matching the schema exactly.',
       };
-      const second = validate(root.schema, await request(root.schema, [...messages, repair]), root.coerce);
+      const second = validate(root.schema, await request(node, root.schema, [...messages, repair], opts), root.coerce);
       if (second.ok) return root.unwrap(second.value);
       throw new LlmOutputError(node, redact(truncate(second.reason, 300), env.apiKey));
     },
@@ -247,21 +276,30 @@ function redact(text: string, apiKey: string): string {
 
 /** Default model call: ChatOpenAI via LangChain, loaded lazily so importing core stays light. */
 function createLangChainCall(env: LlmEnv): CallModel {
-  let chat: Promise<import('@langchain/openai').ChatOpenAI> | undefined;
-  const getChat = () =>
-    (chat ??= import('@langchain/openai').then(
-      ({ ChatOpenAI }) =>
-        new ChatOpenAI({
-          model: env.model,
-          apiKey: env.apiKey,
-          configuration: { baseURL: env.baseUrl },
-          timeout: CALL_TIMEOUT_MS,
-          maxRetries: 0,
-        }),
-    ));
+  // One client per token cap: ChatOpenAI takes maxTokens at construction time.
+  const chats = new Map<number, Promise<import('@langchain/openai').ChatOpenAI>>();
+  const getChat = (maxTokens?: number) => {
+    const key = maxTokens ?? 0;
+    let chat = chats.get(key);
+    if (!chat) {
+      chat = import('@langchain/openai').then(
+        ({ ChatOpenAI }) =>
+          new ChatOpenAI({
+            model: env.model,
+            apiKey: env.apiKey,
+            configuration: { baseURL: env.baseUrl },
+            timeout: CALL_TIMEOUT_MS,
+            maxRetries: 0,
+            ...(maxTokens !== undefined && { maxTokens }),
+          }),
+      );
+      chats.set(key, chat);
+    }
+    return chat;
+  };
 
-  return async (method, schema, messages, signal, onTokens) => {
-    const llm = await getChat();
+  return async (method, schema, messages, signal, onTokens, opts) => {
+    const llm = await getChat(opts?.maxTokens);
     // includeRaw: if LangChain's own parsing fails we still get the raw text for lenient parsing.
     // json_schema: send plain JSON Schema (non-strict) — see toProviderJsonSchema; our zod check still applies.
     const wire = method === 'jsonSchema' ? toProviderJsonSchema(schema) : schema;

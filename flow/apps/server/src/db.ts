@@ -45,6 +45,11 @@ CREATE TABLE IF NOT EXISTS research_cache (
   facts_json TEXT NOT NULL,
   fetched_at INTEGER NOT NULL
 );
+CREATE TABLE IF NOT EXISTS settings (
+  key TEXT PRIMARY KEY,
+  value_json TEXT NOT NULL,
+  updated_at INTEGER NOT NULL
+);
 `;
 
 /** Opens (creating if needed) the SQLite database and its tables. `:memory:` is allowed. */
@@ -155,4 +160,24 @@ export function createSqliteCache(db: Db): ResearchCache {
       upsert.run(key, JSON.stringify(facts), now);
     },
   };
+}
+
+/** One row of the `settings` key-value table (JSON values, written from the browser UI). */
+export type SettingRow = { key: string; value_json: string };
+
+/** All stored settings. Unknown keys are ignored by the readers, so old rows never break a start. */
+export function listSettings(db: Db): SettingRow[] {
+  return db.prepare(`SELECT key, value_json FROM settings`).all() as SettingRow[];
+}
+
+/** Upserts one setting; `null` deletes the row (back to the env/config default). */
+export function setSetting(db: Db, key: string, value: unknown): void {
+  if (value === null) {
+    db.prepare(`DELETE FROM settings WHERE key = ?`).run(key);
+    return;
+  }
+  db.prepare(
+    `INSERT INTO settings (key, value_json, updated_at) VALUES (?, ?, ?)
+     ON CONFLICT(key) DO UPDATE SET value_json = excluded.value_json, updated_at = excluded.updated_at`,
+  ).run(key, JSON.stringify(value), Date.now());
 }

@@ -14,8 +14,13 @@ export type BillgenConfig = {
   templates: string[];
   /** Where the server writes PDFs and PNGs. */
   outDir: string;
-  /** Let the model edit the ledger draft before validating (false = render the deterministic draft). */
-  modelFill: boolean;
+  /**
+   * 让模型改草稿的力度：
+   * - `true`（默认）草稿先过校验，**通过就直接出片**，只在草稿不合格时才让模型补——省一次整对象输出；
+   * - `'always'` 每次都让模型改（最像人写，也最慢）；
+   * - `false` 从不让模型碰，纯确定性草稿。
+   */
+  modelFill: boolean | 'always';
   /** How many templates `auto` keeps per statement (default 2). */
   templateLimit?: number;
 };
@@ -28,7 +33,6 @@ export type GraphDeps = {
   skills: SkillStore;
   budget: Budget;
   /** Fictional bank shown on every statement. */
-  bankName: string;
   /** `YYYY-MM-DD`; the default end month is the month before it. */
   today: string;
   /** Epoch milliseconds (research cache ages, `createdAt`). */
@@ -61,7 +65,12 @@ export type GraphNodeName = (typeof GRAPH_NODES)[number] | 'billgen';
 export type RetryTarget = 'lifeModel' | 'schedule' | 'descriptors';
 
 export type ProgressEvent =
-  | { type: 'node_start' | 'node_end'; node: string }
+  /** `detail` 是给日志看的补充（例如 research 的「8 查询」）。 */
+  | { type: 'node_start'; node: string; detail?: string }
+  /** `ms` 是这个节点真正花掉的时间；前端只用 node 字段也照旧能跑。 */
+  | { type: 'node_end'; node: string; ms?: number; detail?: string }
+  /** 节点内部的一步（第几次尝试、第几条检索……），控制台日志靠它把黑盒拆开。 */
+  | { type: 'step'; node: string; message: string }
   | { type: 'research'; query: string; sources: string[] }
   | { type: 'rules'; results: RuleResult[] }
   | { type: 'retry'; target: string; reason: string }

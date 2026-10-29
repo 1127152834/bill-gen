@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { IRS_TEMPLATE, type DescriptorTemplate } from '../../descriptors.js';
+import { isLongTail } from '../../longtail.js';
 import type { NormalizedRequest } from '../../normalize.js';
 import { compactFact } from '../../prompts/common.js';
 import { buildDescriptorsMessages, type DescriptorRequestItem } from '../../prompts/descriptors.js';
@@ -75,7 +76,9 @@ function sanitize(template: string, ctx: SanitizeCtx): string {
 export async function descriptorsNode(input: DescriptorsInput, deps: NodeDeps): Promise<DescriptorTemplate[]> {
   const { norm, profile, facts, model, merchantKeys, feedback } = input;
   const incomeIds = new Set(model.incomeStreams.map((s) => s.id));
-  const keys = [...new Set(merchantKeys)].filter((k) => !BUILTIN_KEYS.has(k) && !incomeIds.has(k));
+  // The long tail carries its descriptor in the table; asking the model about a merchant nobody
+  // researched only burns calls and invents names.
+  const keys = [...new Set(merchantKeys)].filter((k) => !BUILTIN_KEYS.has(k) && !incomeIds.has(k) && !isLongTail(k));
   if (keys.length === 0) return [];
 
   const factById = new Map(facts.map((f) => [f.id, f]));

@@ -36,7 +36,7 @@ def load_editor(monkeypatch, path, generator_name):
 
 def write_pdf(data, path, **kwargs):
     with fitz.open() as doc:
-        doc.new_page().insert_text((20, 20), data.get("name", "SAMPLE"))
+        doc.new_page().insert_text((20, 20), data.get("name", "Maya Okafor"))
         doc.save(path)
 
 

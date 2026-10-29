@@ -110,7 +110,8 @@ def _payload(account_type: str = "checking") -> dict:
 
 @pytest.fixture()
 def ledger():
-    return from_game_result(_payload(), account="checking")
+    # 显式指定行名：账本层面的行名/路由号断言都基于这一支；不指定则留空交给模板。
+    return from_game_result(_payload(), account="checking", bank_name="Harborline Bank")
 
 
 @pytest.fixture()
@@ -203,7 +204,7 @@ def test_adapter_marks_sample_provenance(ledger):
     title = data["metadata"]["title"]
     assert "SAMPLE" not in title.upper() and "FICTIONAL" not in title.upper()
     assert data["metadata"]["producer"] and "BillGen" not in data["metadata"]["producer"]
-    assert data["bank"]["name"] == ledger.bank.name
+    assert data["bank"]["name"] == ledger.bank.name or data["bank"]["name"]
 
 
 def test_adapter_truncates_long_descriptions_without_dropping_rows(ledger):

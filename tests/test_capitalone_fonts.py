@@ -56,8 +56,14 @@ def test_subset_preserves_text_glyphs_pixels_fonts_and_metadata(name):
         small_fonts = {f[0] for p in after for f in p.get_fonts() if f[4] == "cjk"}
         full_size = sum(len(before.extract_font(x)[-1]) for x in full_fonts)
         small_size = sum(len(after.extract_font(x)[-1]) for x in small_fonts)
-        assert small_size < full_size
-        assert len(optimized) < len(golden)
+        if not full_fonts:
+            # 这条用例不含 CJK：字体按需插入，两张 PDF 都不该带 CJK 字体，
+            # 也就没有可缩的字体程序（早期是每页无条件嵌 CJK，才会恒有收益）。
+            assert small_fonts == set()
+            assert len(optimized) == len(golden)
+        else:
+            assert small_size < full_size
+            assert len(optimized) < len(golden)
 
 
 def test_subset_failure_keeps_original_document():

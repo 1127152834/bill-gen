@@ -38,11 +38,13 @@ def _opts(args: argparse.Namespace, base: RenderOptions | None = None) -> Render
     from dataclasses import replace
 
     base = base or RenderOptions()
+    fonts = getattr(args, "fonts", None)
     return replace(
         base,
         watermark=not args.no_watermark,
         encrypt=False if args.no_encrypt else base.encrypt,
         page_dpi=args.dpi,
+        font_policy=fonts or base.font_policy,
     )
 
 
@@ -179,6 +181,11 @@ def main(argv: list[str] | None = None) -> int:
     render.add_argument("--no-watermark", action="store_true")
     render.add_argument("--no-encrypt", action="store_true")
     render.add_argument("--dpi", type=int, default=110)
+    render.add_argument(
+        "--fonts", choices=["declared", "subset", "embed-all"],
+        help="字体策略：declared=照原稿声明不嵌入（默认，最像真件但依赖本机字体）；"
+             "subset=嵌入并子集化（文件小）；embed-all=整字体嵌入（最稳，文件大）",
+    )
     render.set_defaults(func=_cmd_render)
 
     synth = sub.add_parser("synth", help="由生成结果（flow）渲染账单 PDF")
@@ -207,6 +214,10 @@ def main(argv: list[str] | None = None) -> int:
     )
     synth_render.add_argument("--no-encrypt", action="store_true")
     synth_render.add_argument("--dpi", type=int, default=110)
+    synth_render.add_argument(
+        "--fonts", choices=["declared", "subset", "embed-all"],
+        help="字体策略，见 billgen render --help",
+    )
     synth_render.set_defaults(func=_cmd_synth_render)
 
     parity = sub.add_parser("parity", help="基线记录与比对")

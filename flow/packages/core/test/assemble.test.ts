@@ -37,7 +37,8 @@ describe('assembleStatements', () => {
       expect(statements.map((s) => s.accountType)).toEqual([name === 'cafe-business' ? 'business_checking' : 'checking', 'credit']);
       for (const s of statements) {
         expect(() => StatementSchema.parse(s)).not.toThrow();
-        expect(s.bankName).toBe(BANK);
+        // 行名不再由 flow 决定：留空表示用渲染模板自带的那家。
+        expect(s.bankName).toBe('');
         expect(s.accountLast4).toMatch(/^\d{4}$/);
         const credit = s.accountType === 'credit';
         expect(s.checking !== undefined).toBe(!credit);
@@ -73,7 +74,7 @@ describe('assembleStatements', () => {
     const model = loadModel('rideshare');
     const norm = makeNormAt({ fixture: 'rideshare', seed, accounts: 'credit', months: 6 });
     const out = schedule(model, norm, createRng(seed));
-    const { statements } = assembleStatements(out, loadTemplates('rideshare'), norm, model, loadFacts('rideshare'), BANK, createRng('x'));
+    const { statements } = assembleStatements(out, loadTemplates('rideshare'), norm, model, loadFacts('rideshare'), createRng('x'));
     const s = statements[0]!;
     expect(s.credit).toEqual({ creditLimitCents: model.creditLimitCents, apr: model.apr });
     expect(s.transactions.every((t) => t.runningBalanceCents === undefined)).toBe(true);
@@ -116,11 +117,18 @@ describe('assembleStatements', () => {
     }
   });
 
-  it('keeps the same {STORE} number for a merchant on every row', () => {
+  it('keeps one {STORE} number per month and lets it drift between cycles', () => {
     const { statements } = build('freelancer', 'alpha', 'credit', 6);
     const heb = statements[0]!.transactions.filter((t) => t.merchant?.name === 'H-E-B');
     expect(heb.length).toBeGreaterThan(1);
-    expect(new Set(heb.map((t) => /#(\d{4})/.exec(t.description)![1])).size).toBe(1);
+    const byMonth = new Map<string, Set<string>>();
+    for (const t of heb) {
+      const month = t.transactionDate.slice(0, 7);
+      const store = /#(\d{4})/.exec(t.description)![1]!;
+      byMonth.set(month, new Set([...(byMonth.get(month) ?? []), store]));
+    }
+    // 同一账期内是一家分店（重复扣款看起来才像同一台收银机）。
+    for (const stores of byMonth.values()) expect(stores.size).toBe(1);
   });
 
   it('names the linked account on both sides of a card payment', () => {
@@ -163,7 +171,7 @@ describe('assembleStatements', () => {
           ? { ...f, priceItems: [{ item: 'Catering box', priceCents: 9500, sourceUrl: url(f.id) }, ...f.priceItems] }
           : f,
     );
-    const { statements, meta } = assembleStatements(out, loadTemplates('freelancer'), norm, model, facts, BANK, createRng('x'));
+    const { statements, meta } = assembleStatements(out, loadTemplates('freelancer'), norm, model, facts, createRng('x'));
     const rows = statements.flatMap((s) => s.transactions);
     const rent = rows.find((t) => meta[t.id]!.factId === 'fact-camden-lamar-heights-austin')!;
     expect(rent.evidence!.note).toContain('1 bedroom monthly rent $1650.00');
@@ -198,7 +206,7 @@ describe('assembleStatements', () => {
     const model = loadModel('freelancer');
     const norm = makeNormAt({ fixture: 'freelancer', seed, accounts: 'checking', months: 1 });
     const out = schedule(model, norm, createRng(seed));
-    const { statements, meta } = assembleStatements(out, [], norm, model, loadFacts('freelancer'), BANK, createRng('x'));
+    const { statements, meta } = assembleStatements(out, [], norm, model, loadFacts('freelancer'), createRng('x'));
     const rows = statements[0]!.transactions;
     expect(rows.every((t) => t.description.length > 0 && t.description.length <= 60)).toBe(true);
     const income = rows.find((t) => meta[t.id]!.source === 'income')!;
@@ -213,6 +221,6 @@ describe('assembleStatements', () => {
     delete model.creditLimitCents;
     const norm = makeNormAt({ fixture: 'freelancer', seed, accounts: 'credit', months: 1 });
     const out = schedule(loadModel('freelancer'), norm, createRng(seed));
-    expect(() => assembleStatements(out, [], norm, model, [], BANK, createRng('x'))).toThrow(/creditLimitCents/);
+    expect(() => assembleStatements(out, [], norm, model, [], createRng('x'))).toThrow(/creditLimitCents/);
   });
 });

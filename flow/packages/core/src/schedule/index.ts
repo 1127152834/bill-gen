@@ -28,7 +28,18 @@ import {
   statementBalanceCents,
   type CardPayment,
 } from './card.js';
-import { Ledger, PROTECTED_PRIORITY, cycleOf, fillCycle, fixCount, trimToTarget, type Account, type FillCtx } from './fill.js';
+import {
+  Ledger,
+  PROTECTED_PRIORITY,
+  cycleOf,
+  deletionOrder,
+  fillCycle,
+  fixCount,
+  trimToTarget,
+  type Account,
+  type FillCtx,
+} from './fill.js';
+import { injectCycleNoise } from './noise.js';
 import { idAllocator, incomeOccurrences, recurringOccurrences, type IdAllocator, type ScheduledTxn } from './place.js';
 
 export type { ScheduledTxn } from './place.js';
@@ -98,7 +109,11 @@ function fillCtx(run: Run, account: Account, rng: Rng): FillCtx {
   };
 }
 
-/** Draws the cycle's target, trims required rows down to it, then fills up to it. */
+/**
+ * Draws the cycle's target, trims required rows down to it, fills up to it, then lets the noise
+ * layer take some of those slots back. Noise rows outrank discretionary purchases (priority 4 vs 5),
+ * so a cycle that overflows drops a purchase, never the refund that came with it.
+ */
 function settleCycle(run: Run, ctx: FillCtx, cycle: Cycle, range: CountRange): void {
   const target = ctx.rng.int(range.min, range.max);
   for (const r of trimToTarget(run.ledger, ctx.account, cycle, target)) {
@@ -108,6 +123,35 @@ function settleCycle(run: Run, ctx: FillCtx, cycle: Cycle, range: CountRange): v
     throw infeasible(run, ctx.account, cycle, `priority <= ${PROTECTED_PRIORITY} rows alone exceed max ${range.max}`);
   }
   run.notes.push(...fillCycle(run.ledger, ctx, cycle, target));
+
+  // One noise stream per (account, cycle): `fork` reseeds from the label, so cycle 2 must not
+  // replay cycle 1's draws.
+  // Noise competes for slots with discretionary purchases, never with a paired ATM + fee row:
+  // dropping one of those would take two rows and break the cycle's count. Purchases give way
+  // first; whatever still does not fit is handed back.
+  const noise = injectCycleNoise({
+    ledger: run.ledger,
+    account: ctx.account,
+    cycle,
+    nextId: run.nextId,
+    rng: ctx.rng.fork(`noise:${ctx.account}:${cycle.index}`),
+  });
+  run.notes.push(...noise.notes);
+  for (let guard = 40; guard > 0; guard--) {
+    const rows = run.ledger.inCycle(ctx.account, cycle);
+    if (rows.length <= range.max) break;
+    const victim = rows
+      .filter((t) => t.priority > PROTECTED_PRIORITY && !run.ledger.isPaired(t))
+      .sort(deletionOrder)[0];
+    if (!victim) break;
+    run.ledger.remove(victim);
+    run.notes.push(`${ctx.account} cycle ${cycle.index}: dropped ${victim.merchantKey} (priority ${victim.priority}) to make room for noise`);
+  }
+  while (run.ledger.inCycle(ctx.account, cycle).length > range.max && noise.rows.length > 0) {
+    const spare = noise.rows.pop()!;
+    run.ledger.remove(spare);
+    run.notes.push(`${ctx.account} cycle ${cycle.index}: rolled back noise ${spare.merchantKey} to stay within ${range.max} rows`);
+  }
   if (run.ledger.inCycle(ctx.account, cycle).length < range.min) {
     throw infeasible(run, ctx.account, cycle, `no ${ctx.account} discretionary items to reach min ${range.min}`);
   }

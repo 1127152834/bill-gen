@@ -5,6 +5,7 @@
  */
 import type { Rng } from './rng.js';
 import type { FinancialModel, IncomeStream, MerchantFact } from './schemas/index.js';
+import { longTailMerchant } from './longtail.js';
 import type { ScheduledTxn } from './schedule/place.js';
 
 /** Placeholders: {STORE} {CITY} {ST} {MMDD} {REF} {ID} {LAST4}. `memo` is plain English, used as-is. */
@@ -30,9 +31,15 @@ const PLACEHOLDER = /\{(STORE|CITY|ST|MMDD|REF|ID|LAST4)\}/g;
 /** A template for an IRS payment (its {REF} is the numeric trace). */
 export const IRS_TEMPLATE = /\bIRS\b|USATAXPYMT/;
 
-/** Store number: 4 digits, a pure function of the rng's seed and the merchantKey. */
-function storeNumber(merchantKey: string, rng: Rng): string {
-  return String(rng.fork(merchantKey).int(0, 9999)).padStart(4, '0');
+/**
+ * Store number: 4 digits, a pure function of the rng's seed, the merchantKey and the month.
+ *
+ * A real person does not visit the same branch of a chain for three months straight, so the number
+ * drifts per statement cycle; it stays put within a month so a double charge still looks like the
+ * same till.
+ */
+function storeNumber(merchantKey: string, rng: Rng, month: string): string {
+  return String(rng.fork(`${merchantKey}:${month}`).int(0, 9999)).padStart(4, '0');
 }
 
 /** Account / customer number: 6-10 digits (no leading 0), a pure function of the rng's seed and the merchantKey. */
@@ -66,7 +73,7 @@ export function renderDescriptor(t: DescriptorTemplate, ctx: DescriptorCtx, rng:
   const fill = (key: string): string => {
     switch (key) {
       case 'STORE':
-        return fact?.storeNumber ?? storeNumber(txn.merchantKey, rng);
+        return fact?.storeNumber ?? storeNumber(txn.merchantKey, rng, txn.transactionDate.slice(0, 7));
       case 'ID':
         return accountId(txn.merchantKey, rng);
       case 'CITY':
@@ -98,8 +105,8 @@ const BUILTIN: Record<string, { checking?: Omit<DescriptorTemplate, 'merchantKey
   interest: { both: { template: 'PURCHASE INTEREST CHARGED', memo: 'Interest charged on purchases' } },
   'fee-overdraft': { both: { template: 'OVERDRAFT FEE', memo: 'Overdraft fee' } },
   // Terminal references keep two same-day withdrawals (and their fees) from reading as duplicates.
-  'fee-atm': { both: { template: 'ATM FEE REF {REF}', memo: 'ATM withdrawal fee' } },
-  atm: { both: { template: 'ATM WITHDRAWAL {MMDD} TERMINAL {REF}', memo: 'Cash withdrawal' } },
+  'fee-atm': { both: { template: 'ATM SURCHARGE {MMDD} {REF}', memo: 'ATM withdrawal fee' } },
+  atm: { both: { template: 'ATM WITHDRAWAL {MMDD} {REF}', memo: 'Cash withdrawal' } },
 };
 
 /**
@@ -143,6 +150,9 @@ export function resolveTemplate(
 ): DescriptorTemplate {
   const supplied = templates.get(txn.merchantKey);
   if (supplied) return supplied;
+  // The long tail carries its own descriptor: nobody researched these, so the table is the source.
+  const longTail = longTailMerchant(txn.merchantKey);
+  if (longTail) return { merchantKey: txn.merchantKey, template: longTail.template, memo: longTail.memo };
   const builtin = BUILTIN[txn.merchantKey];
   const chosen = builtin?.[txn.account] ?? builtin?.both;
   if (chosen) return { merchantKey: txn.merchantKey, ...chosen };

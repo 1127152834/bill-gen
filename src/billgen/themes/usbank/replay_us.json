@@ -5,9 +5,9 @@
   "watermark": true,
   "begin_balance": "1000.00",
   "customer_lines": [
-    "SAMPLE CUSTOMER",
-    "123 Sample Lane",
-    "Austin TX 78701"
+    "Maya Okafor",
+    "2104 S 1st St",
+    "Austin TX 78704"
   ],
   "account_display": "000000000001",
   "period": {
@@ -35,7 +35,7 @@
     {
       "date": "Jan 4",
       "type": "Deposit",
-      "detail": "SAMPLE SALARY",
+      "detail": "ACME CORP PAYROLL PPD",
       "extra": [],
       "amount": "500.00"
     }
@@ -44,7 +44,7 @@
     {
       "date": "Jan 6",
       "type": "Payment",
-      "detail": "SAMPLE RENT",
+      "detail": "CAMDEN PROPERTY MGMT RENT",
       "extra": [],
       "amount": "120.00"
     }
@@ -65,5 +65,6 @@
       "1,380.00"
     ]
   ],
-  "days": "31"
+  "days": "31",
+  "owner_line": "Maya Okafor"
 }

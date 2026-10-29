@@ -16,14 +16,13 @@ describe('loadEnv', () => {
       llm: { baseUrl: full.LLM_BASE_URL, apiKey: full.LLM_API_KEY, model: 'gpt-6.1-sol', structuredMode: 'json_schema' },
       tavilyApiKey: full.TAVILY_API_KEY,
       apiKey: full.API_KEY,
-      bankName: 'Harborline Bank',
       databasePath: './data/app.db',
       host: '127.0.0.1',
       port: 8797,
     });
   });
 
-  it('names every missing variable but never prints a value', () => {
+  it('names an invalid value without ever printing it', () => {
     let error: unknown;
     try {
       loadEnv({ LLM_BASE_URL: 'https://llm.example.test/v1', API_KEY: 'server-secret', PORT: 'not-a-port-SECRETISH' });
@@ -32,14 +31,18 @@ describe('loadEnv', () => {
     }
     expect(error).toBeInstanceOf(EnvError);
     const message = (error as Error).message;
-    expect(message).toContain('LLM_API_KEY');
-    expect(message).toContain('TAVILY_API_KEY');
     expect(message).toContain('PORT');
     for (const secret of ['server-secret', 'SECRETISH', 'llm.example.test']) expect(message).not.toContain(secret);
   });
 
+  it('starts without model credentials: the web UI fills them in at run time', () => {
+    const env = loadEnv({ API_KEY: 'k' });
+    expect(env.llm).toBeUndefined();
+    expect(env.tavilyApiKey).toBeUndefined();
+  });
+
   it('treats empty strings as unset', () => {
-    expect(() => loadEnv({ ...full, LLM_API_KEY: '' })).toThrow(/LLM_API_KEY/);
+    expect(loadEnv({ ...full, LLM_API_KEY: '' }).llm).toBeUndefined();
     expect(loadEnv({ ...full, LLM_MODEL: '' }).llm?.model).toBe('gpt-6.1-sol');
   });
 

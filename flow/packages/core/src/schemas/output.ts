@@ -76,8 +76,8 @@ export const MonthSummarySchema = z.object({
 export type MonthSummary = z.infer<typeof MonthSummarySchema>;
 
 export const StatementSchema = z.object({
-  /** Fictional bank. */
-  bankName: z.string().min(1),
+  /** 空串 = 用渲染模板自带的那家银行（flow 不决定印哪家）。 */
+  bankName: z.string(),
   accountType: z.enum(['checking', 'business_checking', 'credit']),
   accountLast4: z.string().regex(/^\d{4}$/, 'expected 4 digits'),
   periodStart: DateStringSchema,
@@ -107,6 +107,7 @@ export const RuleIdSchema = z.enum([
   'R11_credit_within_limit',
   'R12_no_placeholder_names',
   'R13_occupation_category_fit',
+  'R14_variety_floor',
 ]);
 export type RuleId = z.infer<typeof RuleIdSchema>;
 

@@ -22,6 +22,7 @@ from ._common import (
     holder_upper,
     metadata,
     split_rows,
+    zelle_party,
 )
 
 __all__ = ["build"]
@@ -44,7 +45,7 @@ def _descriptor(ledger: LedgerDocument, row: LedgerRow) -> str:
         co = digits(f"coid:{key}", 5)
         return f"DES:{text} ID:{row.reference} INDN:{holder} CO ID:{co} {orig}"
     if row.type == "ZELLE":
-        who = text.replace("ZELLE ", "").strip() or holder
+        who = zelle_party(row, holder)
         return f"Zelle payment to {who} Conf# {refs.zelle_conf(key)}"
     if row.type == "POS":
         return f"{text} {row.date:%m/%d} Card {ledger.account.last4}"
@@ -117,14 +118,14 @@ def build(ledger: LedgerDocument, defaults: dict[str, Any]) -> dict[str, Any]:
                 "begin": cents_to_currency(ledger.opening_cents),
                 "deposits": cents_to_grouped(deposits_cents),
                 "withdrawals": cents_to_grouped(withdrawals_cents),
-                "checks": "-0.00",
+                "checks": "0.00",
                 "fees": cents_to_grouped(fees_cents),
                 "ending": cents_to_currency(ledger.closing_cents),
             },
             "totals": {
                 "deposits": cents_to_currency(deposits_cents),
                 "withdrawals": cents_to_currency(withdrawals_cents),
-                "checks": "-$0.00",
+                "checks": "$0.00",
                 "fees": cents_to_currency(fees_cents),
             },
             "stats": {

@@ -7,7 +7,9 @@ export type GenerationStatus = 'queued' | 'running' | 'completed' | 'completed_w
 
 /** Mirrors the server's `ProgressEvent` (kept local: the type lives in the root `@bh/core`). */
 export type ProgressEvent =
-  | { type: 'node_start' | 'node_end'; node: string }
+  | { type: 'node_start'; node: string; detail?: string }
+  | { type: 'node_end'; node: string; ms?: number; detail?: string }
+  | { type: 'step'; node: string; message: string }
   | { type: 'research'; query: string; sources: string[] }
   | { type: 'rules'; results: RuleResult[] }
   | { type: 'retry'; target: string; reason: string }
@@ -149,4 +151,43 @@ export function subscribeEvents(
   })
   source.onerror = () => handlers.onError?.()
   return () => source.close()
+}
+
+/** Effective model configuration (keys are masked server-side; no plaintext ever reaches the browser). */
+export type ModelSettings = {
+  llmFake: boolean
+  baseUrl: string | null
+  model: string | null
+  structuredMode: 'json_schema' | 'function_calling' | 'json_mode'
+  apiKeyMasked: string | null
+  tavilyKeyMasked: string | null
+  hasApiKey: boolean
+  hasTavilyKey: boolean
+  /** True when baseUrl + apiKey + tavilyKey are all present and fixtures are off. */
+  ready: boolean
+  source: { apiKey: 'db' | 'env' | 'none'; baseUrl: 'db' | 'env' | 'none'; tavily: 'db' | 'env' | 'none' }
+}
+
+/** Only the fields the form touched; `null` clears a stored secret and falls back to `.env`. */
+export type ModelSettingsPatch = {
+  llmFake?: boolean
+  baseUrl?: string
+  apiKey?: string | null
+  model?: string
+  structuredMode?: ModelSettings['structuredMode']
+  tavilyApiKey?: string | null
+}
+
+export function getSettings(): Promise<ModelSettings> {
+  return call('/api/settings')
+}
+
+export function updateSettings(patch: ModelSettingsPatch): Promise<ModelSettings> {
+  return call('/api/settings', { method: 'PUT', headers: JSON_HEADERS, body: JSON.stringify(patch) })
+}
+
+export type ModelTestResult = { ok: boolean; ms: number; model: string; tokens: number }
+
+export function testModel(patch: ModelSettingsPatch = {}): Promise<ModelTestResult> {
+  return post('/api/settings/test', patch)
 }

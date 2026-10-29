@@ -92,7 +92,9 @@ CLI 在 stdout 打一行 JSON（`template/account/period/rows/pages/bytes/elapse
 
 `adapters/_common.py` 统一给出样例标记，任何适配器都不会漏：
 
-- PDF 元数据：`title = "SAMPLE — NOT A REAL BANK STATEMENT"`、`producer/creator = BillGen Sample Editor`；
+- PDF 元数据：`title` 取模板族的真实出件标题（`_common.metadata()`，如 `Chase Online Statement`），
+  `producer/creator` 用该行真实单据供应商（`OpenText Output Transformation Engine`、`Ricoh AFP2PDF` 等）；
+  样例身份只由可见水印表达 —— 元数据里再写 SAMPLE 会与供应商指纹自相矛盾，等同一行 `pdfinfo` 就能验伪；
 - 页面水印：默认 `watermark=True`，即每页可见的 `SAMPLE`；
 - 银行身份：由场景生成器给出的虚构行名（上游提示词本身就禁止使用真实银行名）。
 

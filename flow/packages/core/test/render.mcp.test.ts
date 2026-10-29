@@ -61,7 +61,6 @@ function depsWith(llm: StructuredLlm, modelFill = true, templates: string[] = ['
   return {
     ...createFixtureDeps(),
     llm,
-    bankName: 'Harborline Bank',
     billgen: {
       command: BILLGEN ?? 'billgen',
       args: ['mcp'],

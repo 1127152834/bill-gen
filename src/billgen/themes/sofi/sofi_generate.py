@@ -80,7 +80,43 @@ FOOTER_Y      = 744.8           # 页脚 y
 LOGO_RECT = (470.85, 49.85, 574.40, 77.45)
 
 # ---------------------------------------------------------------- data
-DATA = {'holder_name': 'ALEX EXAMPLE',
+DEMO_DATA = {'holder_name': 'Maya Okafor',
+ 'member_since': 'May 2024',
+ 'address_lines': ['2104 S 1st St', 'Austin TX 78704', '', ''],
+ 'account_number': '410737211347',
+ 'statement_period': '10/01/2026 - 10/31/2026',
+ 'account_type': 'Checking',
+ 'account_last4': '0001',
+ 'current_balance': 1214.5,
+ 'current_as_of': '10/31/2026',
+ 'monthly_interest': 0.0,
+ 'apy': '0.00%',
+ 'beginning_balance': 1000.0,
+ 'beginning_as_of': '10/01/2026',
+ 'ytd_interest': 0.0,
+ 'balance_note': 'Balance details for this statement period',
+ 'transactions': [{'date': '10/07/2026',
+                   'desc': 'H-E-B #0611 AUSTIN TX',
+                   'amount': -35.5,
+                   'id': '9401882741',
+                   'txid': '9401882741',
+                   'memo': '',
+                   'type': 'Withdrawal'},
+                  {'date': '10/02/2026',
+                   'desc': 'ACME CORP PAYROLL PPD ID:4289126633',
+                   'amount': 250.0,
+                   'id': '9401882733',
+                   'txid': '9401882733',
+                   'memo': '',
+                   'type': 'Deposit'}],
+ 'contact_website': 'sofi.com',
+ 'contact_address': ['2104 S 1st St', 'Austin TX 78704', ''],
+ 'contact_phone': '1-855-456-7634',
+ 'legal_footer': 'SoFi Bank, N.A. Member FDIC',
+ 'footnote1': '©2026 SoFi Bank, N.A. All rights reserved.'}
+
+# 原稿基线：与 asset 里的样张一字不差，供 parity 回归比对（不要改）。
+PARITY_DATA = {'holder_name': 'ALEX EXAMPLE',
  'member_since': 'October 2026',
  'address_lines': ['100 EXAMPLE STREET', 'DEMO CITY CA 90000', '', ''],
  'account_number': '000000000001',
@@ -114,6 +150,11 @@ DATA = {'holder_name': 'ALEX EXAMPLE',
  'contact_phone': '1-855-456-7634',
  'legal_footer': 'SoFi Bank, N.A. Member FDIC',
  'footnote1': '©2026 SoFi Bank, N.A. All rights reserved.'}
+
+#: 引擎默认数据 = 原稿基线（`build()` 不带 data 时用它，parity 回归依赖这一点）。
+DATA = PARITY_DATA
+
+
 
 WATERMARK = True
 TX_PER_PAGE = 6               # 页1 最大交易行数（联系区固定 581.8，第6行子行 561.4 不重叠）
@@ -176,7 +217,12 @@ def _kern(font, c1, c2, size):
     if ck not in _KCACHE:
         _KCACHE[ck] = min(tab.keys(), key=lambda k: abs(float(k) - sz)) if tab else None
     bucket = tab.get(_KCACHE[ck]) or {}
-    return bucket.get(f"{c1}|{c2}", 0.0) * size
+    v = bucket.get(f"{c1}|{c2}", 0.0)
+    # 表是从底稿量出来的字距，个别对（`i|.` = +0.349em、`f|i` = -0.311em）其实量到了
+    # 底稿排版里的空隙，照抄会在 `sofi.com` 中间留出一个空格。超过 0.12em 一律当噪声丢掉。
+    if abs(v) > 0.12:
+        return 0.0
+    return v * size
 
 # ================================================================ shaping
 _fonts = {}
@@ -261,6 +307,20 @@ def prepare(page, *, ctx=None):
     if ctx.font_cjk:
         page.insert_font(fontname="cjk", fontfile=ctx.font_cjk)
 
+def _wm_to_back(page):
+    """把刚写入的水印内容流挪到 /Contents 最前面（画在正文之下）。
+
+    PyMuPDF 的 TextWriter.write_text 总是追加一条新的内容流 → 水印会盖在金额和
+    表格上（实测首屏大数字被压住，一眼假）。这里重排 /Contents 数组顺序即可。
+    """
+    xrefs = page.get_contents()
+    if len(xrefs) < 2:
+        return
+    order = [xrefs[-1]] + xrefs[:-1]
+    page.parent.xref_set_key(page.xref, "Contents",
+                             "[" + " ".join(f"{x} 0 R" for x in order) + "]")
+
+
 def watermark(page, *, ctx=None):
     ctx = ctx if ctx is not None else _render_context()
     if not ctx.watermark: return
@@ -271,6 +331,7 @@ def watermark(page, *, ctx=None):
     pt = fitz.Point((612 - w * 0.707) / 2, 792 * 0.62)
     tw.append(pt, txt, font=f, fontsize=sz)
     tw.write_text(page, color=(0.93, 0.93, 0.95), morph=(pt, fitz.Matrix(45)))
+    _wm_to_back(page)
 
 # ================================================================ logo
 _logo = None
@@ -278,6 +339,69 @@ def _logo_doc():
     global _logo
     if _logo is None: _logo = fitz.open(A("logo.pdf"))
     return _logo
+
+# ---------------------------------------------------------------- 联系图标
+# 原稿是 32×32 的 PNG，渲染到 29pt 大约 79dpi —— 300dpi 扫描下一眼是糊的。
+# 改成矢量线条（同色 #32C5F3），任意缩放下都是实心锐边。
+_ICON_BLUE = (50 / 255, 197 / 255, 243 / 255)
+
+
+def _contact_icon(page, kind, rect):
+    """画一个 SoFi 风格线性图标：耳麦 / 定位针 / 手机。"""
+    x0, y0, x1, y1 = rect.x0, rect.y0, rect.x1, rect.y1
+    cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+    w, lw = x1 - x0, 1.05
+    sh = page.new_shape()
+
+    if kind == "web":                       # 耳麦：头梁 + 两侧耳罩 + 麦克风臂
+        r = w / 2 - 2.2
+        top = cy - r * 0.55
+        sh.draw_bezier(fitz.Point(cx - r, cy - r * 0.15), fitz.Point(cx - r, top - r * 0.75),
+                       fitz.Point(cx + r, top - r * 0.75), fitz.Point(cx + r, cy - r * 0.15))
+        cup_h, cup_w = w * 0.34, w * 0.20
+        sh.draw_rect(fitz.Rect(cx - r - cup_w / 2, cy - r * 0.20, cx - r + cup_w / 2,
+                               cy - r * 0.20 + cup_h), radius=0.5)
+        sh.draw_rect(fitz.Rect(cx + r - cup_w / 2, cy - r * 0.20, cx + r + cup_w / 2,
+                               cy - r * 0.20 + cup_h), radius=0.5)
+        sh.draw_bezier(fitz.Point(cx + r - cup_w * 0.10, cy + cup_h * 0.62),
+                       fitz.Point(cx + r - cup_w * 0.20, cy + r * 0.92),
+                       fitz.Point(cx + 1.0, cy + r * 1.02),
+                       fitz.Point(cx - cup_w * 0.30, cy + r * 0.99))
+        sh.finish(color=_ICON_BLUE, width=lw, lineCap=1, lineJoin=1, closePath=False)
+        sh.commit()
+        dot = page.new_shape()
+        dot.draw_circle(fitz.Point(cx - cup_w * 0.55, cy + r * 0.99), cup_w * 0.40)
+        dot.finish(color=_ICON_BLUE, fill=_ICON_BLUE, closePath=True)
+        dot.commit()
+
+    elif kind == "mail":                    # 定位针：外轮廓 + 中心点
+        r = w * 0.235                      # 圆头 + 下方两条切线收成针尖
+        head_c = fitz.Point(cx, cy - w * 0.10)
+        tip = fitz.Point(cx, cy + w * 0.52)
+        k = r * 0.7071
+        sh.draw_circle(head_c, r)
+        sh.draw_line(fitz.Point(cx + k, cy - w * 0.10 + k), tip)
+        sh.draw_line(fitz.Point(cx - k, cy - w * 0.10 + k), tip)
+        sh.finish(color=_ICON_BLUE, width=lw, lineCap=1, lineJoin=1, closePath=False)
+        sh.commit()
+        dot = page.new_shape()
+        dot.draw_circle(head_c, w * 0.075)
+        dot.finish(color=_ICON_BLUE, fill=_ICON_BLUE, closePath=True)
+        dot.commit()
+
+    else:                                   # 手机：圆角外框 + 听筒横线 + Home 点
+        bw, bh = w * 0.42, w * 0.78
+        sh.draw_rect(fitz.Rect(cx - bw / 2, cy - bh / 2, cx + bw / 2, cy + bh / 2),
+                     radius=0.16)
+        sh.draw_line(fitz.Point(cx - bw * 0.22, cy - bh / 2 + w * 0.10),
+                     fitz.Point(cx + bw * 0.22, cy - bh / 2 + w * 0.10))
+        sh.finish(color=_ICON_BLUE, width=lw, lineCap=1, lineJoin=1, closePath=False)
+        sh.commit()
+        dot = page.new_shape()
+        dot.draw_circle(fitz.Point(cx, cy + bh / 2 - w * 0.10), w * 0.045)
+        dot.finish(color=_ICON_BLUE, fill=_ICON_BLUE, closePath=True)
+        dot.commit()
+
 
 # ================================================================ 交易表（页1/续页共用）
 def _tx_account_label(page, bl, *, ctx=None):
@@ -343,7 +467,9 @@ def page_statement(doc, page_num, total_pages, txs=None, balances=None, *, ctx=N
 
     put(page, COL_X[1], 38.6, "Address", SZ8)
     addr_txt = [l for l in ctx.data["address_lines"] if l.strip()][:3]
-    for i, (line_txt, y) in enumerate(zip(addr_txt, (52.7, 95.2, 123.5))):
+    # 原稿三行基线是 52.7/95.2/123.5（底稿那三行不是同一段地址），换成整段地址后
+    # 行距会被撑成 42pt 的空档；这里按与左侧持卡人列一致的 14.2pt 行距排。
+    for i, (line_txt, y) in enumerate(zip(addr_txt, (52.7, 66.9, 81.1))):
         put(page, COL_X[1], y, line_txt, SZ8, color=GRAY_909)
 
     put(page, COL_X[2], 38.6, "Account Number", SZ8)
@@ -416,12 +542,9 @@ def page_statement(doc, page_num, total_pages, txs=None, balances=None, *, ctx=N
     hline(page, sep_y)
     put(page, 18.1, contact_y, "Contact Information", SZ11, "thin", ins_name="thinD")
 
-    page.insert_image(fitz.Rect(15.75, icon_y, 45.05, icon_y + 29.3),
-                      filename=A("icon_web.png"))
-    page.insert_image(fitz.Rect(212.2, icon_y + 0.45, 239.95, icon_y + 27.75),
-                      filename=A("icon_mail.png"))
-    page.insert_image(fitz.Rect(405.45, icon_y + 0.30, 434.5, icon_y + 29.35),
-                      filename=A("icon_phone.png"))
+    _contact_icon(page, "web", fitz.Rect(15.75, icon_y, 45.05, icon_y + 29.3))
+    _contact_icon(page, "mail", fitz.Rect(212.2, icon_y + 0.45, 239.95, icon_y + 27.75))
+    _contact_icon(page, "phone", fitz.Rect(405.45, icon_y + 0.30, 434.5, icon_y + 29.35))
 
     put(page, 20.9, label_y, "Website", SZ8, "thin")
     put(page, 20.9, value_y, ctx.data["contact_website"], SZ8, "thin", color=GRAY_909,

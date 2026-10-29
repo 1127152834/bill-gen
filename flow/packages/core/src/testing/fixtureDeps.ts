@@ -125,7 +125,6 @@ export function createFixtureDeps(opts: FixtureDepsOptions = {}): FixtureDeps {
     cache: createMemoryCache(),
     skills: loadSkills(opts.skillsDir ?? fileURLToPath(SKILLS_DIR)),
     budget,
-    bankName: FIXTURE_BANK,
     today: FIXTURE_TODAY,
     now: () => FIXTURE_NOW,
     // The canned research / model answers only cover Austin, but `randomPersona` picks a random metro and overrides

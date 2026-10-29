@@ -18,6 +18,8 @@ import { sharedMcpPool, type McpStdioClient } from '../../mcp/client.js';
 
 /** Rounds of "draft → fill → validate" per template before giving up on that template. */
 const MAX_FILL_ATTEMPTS = 3;
+/** 同时出片的模板数。 */
+const RENDER_CONCURRENCY = 2;
 
 /** `BILLGEN_TEMPLATES=auto` asks the recommender instead of a hand-written list. */
 const AUTO_TEMPLATES = 'auto';
@@ -29,7 +31,6 @@ async function recommendFor(
   client: McpStdioClient,
   result: GenerationResult,
   statement: Statement,
-  bankName: string,
   limit: number,
 ): Promise<{ candidates: z.infer<typeof RecommendSchema>['candidates']; errors: string[] }> {
   try {
@@ -37,7 +38,6 @@ async function recommendFor(
       result,
       account: statement.accountType,
       cycle: -1,
-      bank_name: bankName,
       limit,
     });
     return { candidates: answer.ok ? answer.candidates : [], errors: answer.ok ? [] : (answer.errors ?? []) };
@@ -157,6 +157,8 @@ function fillMessages(contract: Contract, draft: Record<string, unknown>, brief:
         '',
         'Hard rules:',
         rules,
+        '- 人名、地址、公司、账号、路由号必须是具体值；SAMPLE / EXAMPLE / DEMO / TEST / DUMMY / 占位地址一律不行。',
+        '- Only reuse merchants from the ledger; never invent a merchant, a price or a bank.',
         '',
         'Field notes (path: meaning):',
         notes,
@@ -175,9 +177,22 @@ function fillMessages(contract: Contract, draft: Record<string, unknown>, brief:
         'Here is the draft the deterministic adapter produced (a valid starting point; amounts are already closed):',
         JSON.stringify(draft, null, 2),
         '',
-        'Adjust it so a human reviewer sees a coherent statement: period labels and dates in the layout\'s format,',
-        'product names and promo copy that belong to this bank, metadata that says it is a sample, memo/memo-ish',
-        'fields consistent with the transactions, and no leftover placeholder text. Do not change the arithmetic.',
+        'Fill it so a banker or landlord reading the PDF sees an ordinary statement:',
+        '- Dates and period labels in exactly this layout\'s format (see the draft); copy them instead of inventing a new style.',
+        '- Every identity field (account holder, address lines, company, EIN) comes from the ledger and stays concrete:',
+        '  a real-looking personal name, street number + street name, city + two-letter state + ZIP. Never write',
+        '  SAMPLE, EXAMPLE, DEMO, TEST, DUMMY, lorem ipsum, "John Doe", "123 Main St", "00000", or a masked account number',
+        '  where the layout prints a full one.',
+        '- Transaction descriptions read like the acquirer wrote them: ACH keeps DES:/INDN:/CO ID:/PPD|WEB, card rows keep',
+        '  "MERCHANT NAME CITY ST Card 1234", Zelle keeps "Zelle payment to <full name> Conf# <reference>". Keep the',
+        '  merchant names the ledger already has; do not invent new ones and do not pad with placeholder cities.',
+        '- Product names, promo copy and the service-information block belong to this bank; reuse the draft\'s wording',
+        '  unless the ledger makes it wrong.',
+        '- Metadata title is the real title this bank prints on its statements (e.g. "Chase Online Statement"),',
+        '  producer/creator are the real statement vendors, never "SAMPLE".',
+        '- No leftover placeholder text anywhere: no "Sample checking", no "Your Name", no empty memo fields that the',
+        '  layout shows as a dash.',
+        'Do not change the arithmetic, the row count, or the dates themselves.',
       ].join('\n'),
     },
   ];
@@ -200,7 +215,6 @@ async function renderOne(
     result,
     account: statement.accountType,
     cycle: -1,
-    bank_name: deps.bankName,
   });
   if (!draft.ok || !draft.data) {
     return { warning: `${templateId}: ledger draft failed (${(draft.errors ?? []).join('; ') || 'no detail'})` };
@@ -214,67 +228,82 @@ async function renderOne(
   let modelFilled = false;
   let lastErrors: string[] = [];
 
-  const maxAttempts = deps.billgen?.modelFill === false ? 1 : MAX_FILL_ATTEMPTS;
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    attempts = attempt + 1;
-    if (deps.billgen?.modelFill !== false) {
-      const messages = fillMessages(contract, base, ledgerBrief(statement));
-      if (lastErrors.length > 0) {
-        messages.push({
-          role: 'user',
-          content: [
-            'Your previous answer did not validate. Its problems were:',
-            ...lastErrors.map((e) => `- ${e}`),
-            'Return the full object again, starting from the draft above (do not drop keys).',
-          ].join('\n'),
-        });
-      }
-      const filled = await deps.llm.invoke('render', FilledDataSchema, messages);
-      data = filled as Record<string, unknown>;
-      modelFilled = true;
-    }
-    const checked = await client.callTool<z.infer<typeof ValidateSchema>>('validate', {
+  const policy = deps.billgen?.modelFill ?? true;
+
+  /** 出片：不管走的是快路径还是模型补全，收尾只有这一处。 */
+  const finish = async (): Promise<{ artifact?: RenderArtifact; warning?: string }> => {
+    const rendered = await client.callTool<z.infer<typeof RenderSchema>>('render', {
       template_id: templateId,
       data,
+      filename: `${templateId}-${statement.accountType}-${result.id.slice(0, 8)}.pdf`,
+      watermark: true,
+      encrypt: false,
     });
-    if (checked.ok) break;
+    if (!rendered.ok || !rendered.path) {
+      return { warning: `${templateId}: render failed (${(rendered.errors ?? []).join('; ') || 'no detail'})` };
+    }
+    return {
+      artifact: {
+        template: templateId,
+        account: statement.accountType,
+        path: rendered.path,
+        pages: rendered.pages ?? 0,
+        bytes: rendered.bytes ?? 0,
+        sha256: rendered.sha256 ?? '',
+        attempts,
+        modelFilled,
+        ...(recommend ? { reasons: recommend.reasons, score: recommend.score } : {}),
+      },
+    };
+  };
+
+  // 快路径：确定性草稿本来就是闭合的，先让服务端校验一次。合格就不用再花一次整对象输出的
+  // 模型调用（一次 fill 动辄几千 token、几秒），只有草稿不合格才让模型补。
+  if (policy !== 'always') {
+    const pre = await client.callTool<z.infer<typeof ValidateSchema>>('validate', { template_id: templateId, data });
+    if (pre.ok) {
+      attempts = 1;
+      return finish();
+    }
+    if (policy === false) {
+      return { warning: `${templateId}: draft failed validation (${pre.errors.slice(0, 3).join('; ')})` };
+    }
+    emit({
+      type: 'step',
+      node: 'billgen',
+      message: `${templateId}: 草稿未通过校验（${pre.errors.length} 项），交给模型补`,
+    });
+  }
+
+  const maxAttempts = MAX_FILL_ATTEMPTS;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    attempts = attempt + 1;
+    emit({
+      type: 'step',
+      node: 'billgen',
+      message: `${templateId}: 模型补全第 ${attempts}/${maxAttempts} 次`,
+    });
+    const messages = fillMessages(contract, base, ledgerBrief(statement));
+    if (lastErrors.length > 0) {
+      messages.push({
+        role: 'user',
+        content: [
+          'Your previous answer did not validate. Its problems were:',
+          ...lastErrors.map((e) => `- ${e}`),
+          'Return the full object again, starting from the draft above (do not drop keys).',
+        ].join('\n'),
+      });
+    }
+    const filled = await deps.llm.invoke('render', FilledDataSchema, messages);
+    data = filled as Record<string, unknown>;
+    modelFilled = true;
+    const checked = await client.callTool<z.infer<typeof ValidateSchema>>('validate', { template_id: templateId, data });
+    if (checked.ok) return finish();
     lastErrors = checked.errors;
     emit({ type: 'warning', message: `${templateId}: fill attempt ${attempts} failed validation` });
   }
 
-  if (lastErrors.length > 0 && maxAttempts > 0) {
-    const checked = await client.callTool<z.infer<typeof ValidateSchema>>('validate', {
-      template_id: templateId,
-      data,
-    });
-    if (!checked.ok) {
-      return { warning: `${templateId}: data never validated (${lastErrors.slice(0, 3).join('; ')})` };
-    }
-  }
-
-  const rendered = await client.callTool<z.infer<typeof RenderSchema>>('render', {
-    template_id: templateId,
-    data,
-    filename: `${templateId}-${statement.accountType}-${result.id.slice(0, 8)}.pdf`,
-    watermark: true,
-    encrypt: false,
-  });
-  if (!rendered.ok || !rendered.path) {
-    return { warning: `${templateId}: render failed (${(rendered.errors ?? []).join('; ') || 'no detail'})` };
-  }
-  return {
-    artifact: {
-      template: templateId,
-      account: statement.accountType,
-      path: rendered.path,
-      pages: rendered.pages ?? 0,
-      bytes: rendered.bytes ?? 0,
-      sha256: rendered.sha256 ?? '',
-      attempts,
-      modelFilled,
-      ...(recommend ? { reasons: recommend.reasons, score: recommend.score } : {}),
-    },
-  };
+  return { warning: `${templateId}: data never validated (${lastErrors.slice(0, 3).join('; ')})` };
 }
 
 /**
@@ -311,7 +340,7 @@ export const renderStep =
             const limit = config.templateLimit ?? AUTO_TEMPLATE_LIMIT;
             for (const statement of result.statements) {
               if (!RENDERABLE_ACCOUNTS.has(statement.accountType)) continue;
-              const picked = await recommendFor(client, result, statement, deps.bankName, limit);
+              const picked = await recommendFor(client, result, statement, limit);
               for (const candidate of picked.candidates) {
                 targets.push({
                   templateId: candidate.template,
@@ -326,22 +355,23 @@ export const renderStep =
               });
             }
           }
-          for (const target of targets) {
-            try {
-              const { artifact, warning } = await renderOne(
-                deps,
-                emit,
-                client,
-                target.templateId,
-                result,
-                target.statement,
-                target.recommend,
-              );
-              if (artifact) artifacts.push(artifact);
-              if (warning) warnings.push(warning);
-            } catch (err) {
-              warnings.push(`${target.templateId}: ${err instanceof Error ? err.message : String(err)}`);
+          // 模板之间互不依赖：并行出片，两个同时在跑（MCP 客户端是同一连接，别把并发开太大）。
+          const slots: { artifact?: RenderArtifact; warning?: string }[] = new Array(targets.length);
+          let cursor = 0;
+          const worker = async (): Promise<void> => {
+            for (let i = cursor++; i < targets.length; i = cursor++) {
+              const target = targets[i]!;
+              try {
+                slots[i] = await renderOne(deps, emit, client, target.templateId, result, target.statement, target.recommend);
+              } catch (err) {
+                slots[i] = { warning: `${target.templateId}: ${err instanceof Error ? err.message : String(err)}` };
+              }
             }
+          };
+          await Promise.all(Array.from({ length: Math.min(RENDER_CONCURRENCY, targets.length) }, worker));
+          for (const slot of slots) {
+            if (slot?.artifact) artifacts.push(slot.artifact);
+            if (slot?.warning) warnings.push(slot.warning);
           }
         },
       );

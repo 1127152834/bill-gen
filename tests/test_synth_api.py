@@ -30,6 +30,15 @@ def get(origin, path):
         return response.status, response.headers, response.read()
 
 
+# 每个模板底稿自带的那家银行（不传 bank_name 时印的就是它）。
+TEMPLATE_BANK = {
+    "boa-personal": "Bank of America",
+    "wellsfargo": "Wells Fargo",
+    "chase-personal": "JPMorgan Chase",
+    "usbank-personal": "U.S. Bank",
+}
+
+
 def post(origin, path, body):
     request = Request(origin + path, json.dumps(body).encode(), {"Content-Type": "application/json"})
     with urlopen(request, timeout=120) as response:
@@ -99,7 +108,8 @@ def test_render_returns_job_pdf_and_pages(web, template, readable_text):
     assert job["pages"] >= 1
     assert job["ledger"]["rows"] == 4
     assert job["ledger"]["closing_cents"] == 150_000
-    assert job["ledger"]["bank"] == "Harborline Bank"
+    # 结果包里的 bankName 不再当行名用：留空表示由渲染模板决定印哪家。
+    assert job["ledger"]["bank"] == ""
     assert isinstance(job["data"], dict) and job["data"]["watermark"] is True
     pdf = get(web, job["links"]["pdf"])[2]
     assert pdf.startswith(b"%PDF-")
@@ -108,7 +118,9 @@ def test_render_returns_job_pdf_and_pages(web, template, readable_text):
     if readable_text:
         assert "MAYA OKAFOR" in text
         assert "1,500.00" in text
-        assert "Harborline Bank" in text
+        # 没有指定行名时印模板自带的那家，不再出现虚构行名。
+        assert "Harborline Bank" not in text
+        assert TEMPLATE_BANK[template] in text
     else:
         assert len(pdf) > 20_000
     png = get(web, job["links"]["pages"][0])[2]
@@ -171,16 +183,19 @@ def test_unknown_option_field_is_rejected(web):
 
 
 def test_brand_flag_switches_logo(web):
-    """默认换上行标；显式 brand=false 保留模板原稿 logo。"""
-    body = {"template": "chase-personal", "result": result()}
+    """指定行名时默认换上行标；显式 brand=false 保留模板原稿 logo。"""
+    # 不传 bank_name 就是「用模板自带的」，此时没有品牌重绘可换，所以这里显式点名。
+    body = {"template": "chase-personal", "result": result(), "bank_name": "Harborline Bank"}
     branded = get(web, post(web, "/api/v1/synth/render", body)[1]["links"]["pdf"])[2]
     plain = get(web, post(web, "/api/v1/synth/render",
                           {**body, "brand": False})[1]["links"]["pdf"])[2]
     assert branded != plain
-    with fitz.open(stream=branded, filetype="pdf") as doc:
-        assert sum(len(page.get_images()) for page in doc) == 3
-    with fitz.open(stream=plain, filetype="pdf") as doc:
-        assert sum(len(page.get_images()) for page in doc) == 1
+    def logos(pdf):
+        """只数 logo 级别的图：每页那层扫描颗粒是 306×396 的小图，不算。"""
+        with fitz.open(stream=pdf, filetype="pdf") as doc:
+            return sum(1 for page in doc for im in page.get_images() if im[2] > 400)
+
+    assert logos(branded) > logos(plain)   # 品牌重绘会在原稿图之外再加图
 
 
 def test_brand_flag_must_be_boolean(web):

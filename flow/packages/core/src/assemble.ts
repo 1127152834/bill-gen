@@ -136,7 +136,6 @@ export function assembleStatements(
   norm: NormalizedRequest,
   model: FinancialModel,
   facts: MerchantFact[],
-  bankName: string,
   rng: Rng,
 ): AssembleResult {
   const factById = new Map(facts.map((f) => [f.id, f]));
@@ -178,7 +177,8 @@ export function assembleStatements(
     const cycles = norm.cycles[account]!;
     const txns = out.txns.filter((t) => t.account === account).map((t) => built.get(t.id)!);
     const common = {
-      bankName,
+      // 行名交给渲染层：用模板自带的银行，flow 不再决定印哪家。
+      bankName: '',
       accountLast4: lastFour[account]!,
       periodStart: cycles[0]!.start,
       periodEnd: cycles.at(-1)!.end,

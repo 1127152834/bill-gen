@@ -25,3 +25,4 @@ export { GraphState, type GraphStateUpdate, type GraphStateValue } from './graph
 export { MAX_ROUNDS } from './graph/retry.js';
 export * from './graph/build.js';
 export * from './graph/run.js';
+export * from './graph/logfmt.js';

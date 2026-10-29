@@ -13,16 +13,18 @@ ENGINES = [
     ("capitalone", "c1_generate", "customer_name", "page_summary", 35),
     ("sofi", "sofi_generate", "holder_name", "page_statement", 35),
 ]
-# Captured from the original build() before this refactor (PyMuPDF 1.26.6).
+# 2026-10-29 重采：数据仍是原稿基线（`PARITY_DATA`），但水印改成画在正文之下
+# （原稿把 0.78 灰的 SAMPLE 盖在金额上，一眼假），字符流顺序与像素因此变化。
+# 原稿基线文本见各主题模块的 `PARITY_DATA`。
 DEFAULT_TEXT_SHA = {
-    "mercury": "7499a9fa2cd4b55b3019f1266d51a265e2e91723fbbfb2916e36e458bafbf250",
-    "capitalone": "382a6d0808f062495a2c08d18a801e86290302ab040f522c1e26a834e96a3b3f",
-    "sofi": "458dd16570c61e2a127c955adc0edbb46c867e7a4aaf9dda5085f48c46be7a2b",
+    "mercury": "7cf685b5991c7a1e59c43d29f9d6fc1dbd0b6146da206fea992ed6571668d7e9",
+    "capitalone": "af99dd0dee3dd1f70946ade4662ff046a890012b95776abd22c05aeea67be210",
+    "sofi": "abf3d09e6fbbb3d57f342fe27616efe3bb1a48b37a89fd08b1b29e76ad3281a3",
 }
 DEFAULT_PIXELS = {
-    "mercury": ["2c9c23cee19906fb663818ad034b4b9c", "962c0fc409f5a8cedcbaa6e5f0c6b536"],
-    "capitalone": ["346efbd781dcef344f69caee30380fb3", "88bbad201e746577ec8b67f41f1fb16d", "06470ba230ff6602742d915d9e74c699"],
-    "sofi": ["6a2e6cdad20fc36c134b21dd1713e173", "7b07b3c0b9eb3ae6f758eb31732b7b8b"],
+    "mercury": ['d9ed731aa26885935e57e5ef76e0f1c2', '13dd5aa78c45d280321384bb23bd2b7c'],
+    "capitalone": ['c818c6ac19354c44c5fec09a05d7e9a6', '17ccf0f6df67c77a5ba2c41bda49b144', 'debebd7608ffdf0f0963496d5ed5735a'],
+    "sofi": ['9ef16059093df908538c354aae068df0', 'bc0b8e17881a4a67bda9d1b4ec095e87'],
 }
 
 

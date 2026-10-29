@@ -20,6 +20,7 @@ from billgen.themes.usbank import imb_us as IMB
 
 from billgen.themes.usbank.shared import (
     parse_cmap,
+    patch_outlines,
     UsFont,
     esc,
     _build_layouts,
@@ -394,7 +395,8 @@ def add_watermark(doc, page):
                              old[:-2] + f" {ent}>>")
     cts = page.get_contents()
     if cts:
-        doc.update_stream(cts[0], doc.xref_stream(cts[0]) + ops)
+        # 前置：水印在内容之下，不压金额
+        doc.update_stream(cts[0], ops + b"\n" + doc.xref_stream(cts[0]))
     else:
         # 页内容全在 XObject（无页级 contents）——新建 Contents 流画水印
         nx = doc.get_new_xref()
@@ -1035,15 +1037,32 @@ def _patch_glyphs(doc):
             doc.update_stream(ff, out.getvalue())
 
 
+def _stamp_page_no(pg, k, total):
+    """披露页/尾页在原稿里没有页码 span，按首页样式（x=550、bl=126.9、9pt）补打。"""
+    doc = pg.doc
+    try:
+        kind, val = doc.xref_get_key(doc.load_page(0).xref, "Resources/Font/F6")
+        if kind == "xref":
+            doc.xref_set_key(pg.page.xref, "Resources/Font/F6", val)
+    except Exception:
+        pass
+    raw = make_units(pg.page.number, "F6", f"Page {k} of {total}",
+                     9.0, 550.0, 126.9)
+    if raw:
+        pg.append_text(raw)
+
+
 def _replace_fields(pages, d, n_stmt):
     """字段替换（同文跳过保回放字节）：账号/期间/客户/页码，含克隆续页。"""
     L = LAYOUTS["usbiz"]
+    total = len(pages)
     dashed = str(d.get("account_display", "")).strip()
     spaced = dashed.replace("-", " ")
     account_pattern = r"\d[ -]\d{3}[ -]\d{4}[ -]\d{4}"
     for pg in pages:
         pi = pg.page.number
         if pi == 1 or pi > n_stmt:
+            _stamp_page_no(pg, pi + 1, total)
             continue                          # 披露页(索引1)/尾空白页
         lay = 0                               # 账单页们同源布局（续页为 p1 克隆）
         lsp = L[lay]["spans"]
@@ -1103,12 +1122,16 @@ def _replace_fields(pages, d, n_stmt):
                                                - lead - len(core)))
             except Exception as e:
                 print(f"[IMB] 生成失败保留原样: {e}", file=sys.stderr)
-        # 页码（个户同款）：物理 p1=账单页1；披露页不编号；续页 pi≥2=账单页 pi
-        k = 1 if pi == 0 else pi
+        # 页码：物理页码 + 物理总页数
+        k = pi + 1
+        stamped = False
         for s in lsp:
             if re.fullmatch(r"Page \d of \d", s["text"].strip()):
-                pg.replace_span(s, f"Page {k} of {n_stmt}")
+                pg.replace_span(s, f"Page {k} of {total}")
+                stamped = True
                 break
+        if not stamped:
+            _stamp_page_no(pg, k, total)
 
 
 # ===== 元数据（缺省=原稿值，时间为实时；显式填写优先）=====
@@ -1197,6 +1220,7 @@ def build_pdf(d, out_path, watermark=True):
             committed.add(uf.tou)
     # 空壳字形补写（括号等未用字形——续页 (CONTINUED)/(continued) 必需）
     _patch_glyphs(doc)
+    patch_outlines(doc)      # 期间日期里的 J/S 等底稿未用字形
     write_metadata(doc, d.get("metadata"))
     if watermark:
         for p in doc:

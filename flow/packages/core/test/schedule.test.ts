@@ -108,7 +108,9 @@ describe('schedule', () => {
     const first = norm.cycles.credit![0]!;
     const firstCycle = out.txns.filter((t) => t.account === 'credit' && postedIn(t, first));
     expect(firstCycle.some((t) => t.type === 'PAYMENT')).toBe(false);
-    expect(out.balances.credit!.perCycle[0]!.statementBalanceCents).toBe(firstCycle.reduce((s, t) => s + t.amountCents, 0));
+    // Debits minus refunds: the noise layer may reverse part of a purchase.
+    const net = firstCycle.reduce((s, t) => s + (t.direction === 'debit' ? t.amountCents : -t.amountCents), 0);
+    expect(out.balances.credit!.perCycle[0]!.statementBalanceCents).toBe(net);
   });
 
   it('posts ATM withdrawals on the next bank business day with a same-day ATM fee', () => {

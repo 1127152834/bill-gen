@@ -16,17 +16,17 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 
 DIGESTS = {
-    "src/billgen/themes/boa/editor/data_personal.json": "46357343c7225112126f8dedc91ac5d0882ea2adebda36ee1220ebc042f083cc",
-    "src/billgen/themes/boa/editor/data_business.json": "e34048a98fa77b42728b63530e4c252fce737d32f32c62a0f5377c3b09311b96",
-    "src/billgen/themes/chase/editor_personal/data_personal.json": "4ad2fdbae98b332292b2471f2cfbdd182fe7165102da756cd9203b7a56eefbeb",
-    "src/billgen/themes/chase/editor_business/data_business.json": "ccd67121984977531e048c4b9a0cb616851bd4a7c61ae333f95bf197cfa77774",
-    "src/billgen/themes/chase/editor_personal/replay_personal.json": "4ad2fdbae98b332292b2471f2cfbdd182fe7165102da756cd9203b7a56eefbeb",
-    "src/billgen/themes/chase/editor_business/replay_business.json": "ccd67121984977531e048c4b9a0cb616851bd4a7c61ae333f95bf197cfa77774",
-    "src/billgen/themes/usbank/editor_us/data_us.json": "4579a6213cc7bbb77c244ebecda636dc55baf8796765cbb7501231d1be06920d",
-    "src/billgen/themes/usbank/editor_biz/data_biz.json": "a83002bb07500053120eca05c2e59faad4168b2179382ba3646fc44b030d0bda",
-    "src/billgen/themes/usbank/replay_us.json": "4579a6213cc7bbb77c244ebecda636dc55baf8796765cbb7501231d1be06920d",
-    "src/billgen/themes/usbank/replay_biz.json": "a83002bb07500053120eca05c2e59faad4168b2179382ba3646fc44b030d0bda",
-    "src/billgen/themes/wellsfargo/data_sample.json": "b698f155cb27b7818eee23d2e712ac8d589c368ae1892a59d3aa290cf4f91317",
+    "src/billgen/themes/boa/editor/data_personal.json": "d5d9e39867fea8a2dede4cfbdc54dc4e7bd2a7cbe432ab12c751140536684f18",
+    "src/billgen/themes/boa/editor/data_business.json": "de2b050c7c251ddeb7bfe859e4ead7d83daa921de3edafb95a5792e1ecb8f58f",
+    "src/billgen/themes/chase/editor_personal/data_personal.json": "cdc595b9c9237e1cda903063463e97c788789740d852a9f14fadbff04928a9f5",
+    "src/billgen/themes/chase/editor_business/data_business.json": "09bfca27fd0fdb55951633d1da8e020add42935a2d6ef3d45711b3c72e385210",
+    "src/billgen/themes/chase/editor_personal/replay_personal.json": "cdc595b9c9237e1cda903063463e97c788789740d852a9f14fadbff04928a9f5",
+    "src/billgen/themes/chase/editor_business/replay_business.json": "09bfca27fd0fdb55951633d1da8e020add42935a2d6ef3d45711b3c72e385210",
+    "src/billgen/themes/usbank/editor_us/data_us.json": "94c9d222727066192ca64e547f3a107f0aaa83639c83cab4e2e59bd6c76cc6e5",
+    "src/billgen/themes/usbank/editor_biz/data_biz.json": "dd34501b8510b64bc1fd833160f5f3d6ff75498d6ef36002b6ce0f312b360b81",
+    "src/billgen/themes/usbank/replay_us.json": "b6b166b76fe5d719e552b3cd539d9db3a1b59514a6768cc806b88db3dcf7aae9",
+    "src/billgen/themes/usbank/replay_biz.json": "dd34501b8510b64bc1fd833160f5f3d6ff75498d6ef36002b6ce0f312b360b81",
+    "src/billgen/themes/wellsfargo/data_sample.json": "51579aef378120202ae1eeceda11b597585e46928819966796f09c6395182a53",
 }
 
 

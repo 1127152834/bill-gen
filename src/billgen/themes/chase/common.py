@@ -157,8 +157,9 @@ def add_watermark(doc, page, text_w):
         if "/W " not in old:
             doc.xref_set_key(page.xref, "Resources/Font",
                              old[:-2] + f" /W {xref} 0 R>>")
+    # 水印画在内容之下（前置到内容流），否则 0.78 灰的大字会压住金额与表格
     cx2 = page.get_contents()[0]
-    doc.update_stream(cx2, doc.xref_stream(cx2) + ops.encode())
+    doc.update_stream(cx2, ops.encode() + b"\n" + doc.xref_stream(cx2))
 
 def write_meta(doc, tag, md, original_metadata):
     'Use explicit editor metadata or fictional sample metadata.'

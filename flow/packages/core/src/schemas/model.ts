@@ -119,7 +119,16 @@ export type DiscretionaryItem = z.infer<typeof DiscretionaryItemSchema>;
 export const AtmConfigSchema = z.object({
   perMonth: perMonthRange,
   amountChoicesCents: z.array(positiveCents).min(1),
+  /** Per-choice weights, same order as `amountChoicesCents`; omitted means uniform. */
+  amountWeights: z.array(z.number().min(0)).min(1).optional(),
   feeCents: z.number().int().min(0),
+  /** Spread for the fee actually charged; overrides `feeCents` when present. */
+  feeRange: z
+    .object({ min: z.number().int().min(0), max: z.number().int().min(0) })
+    .refine((r) => r.min <= r.max, minLeMax)
+    .optional(),
+  /** Share of withdrawals that carry no fee (in-network ATM, or the fee gets refunded). */
+  waivedProbability: z.number().min(0).max(1).optional(),
 });
 export type AtmConfig = z.infer<typeof AtmConfigSchema>;
 

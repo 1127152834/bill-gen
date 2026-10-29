@@ -61,7 +61,55 @@ WHITE    = (1, 1, 1)
 SZ6, SZ7, SZ8, SZ9, SZ12, SZ14, SZ44 = 6.0, 7.0125, 7.9875, 9.0, 12.0, 13.9875, 43.9875
 
 # ---------------------------------------------------------------- data
-DATA = {'customer_name': 'ALEX EXAMPLE',
+DEMO_DATA = {'customer_name': 'Maya Okafor',
+ 'address_lines': ['Maya Okafor', '2104 S 1st St', 'Austin TX 78704', ''],
+ 'tagline': 'Your account statement',
+ 'headline_month': 'October 2026',
+ 'period_range': 'Oct 01 - Oct 31, 2026',
+ 'summary_start_label': 'Oct 01',
+ 'summary_end_label': 'Oct 31',
+ 'account_name': 'Checking',
+ 'account_title': '360 Checking',
+ 'account_number': '410737211347',
+ 'apy': '0.00%',
+ 'days_in_cycle': '31',
+ 'opening_balance': 1000.0,
+ 'ytd_interest': 0.0,
+ 'transactions': [{'date': '10/02',
+                   'desc': 'ACME CORP PAYROLL PPD ID:4289126633',
+                   'amount': 250.0,
+                   'id': '9401882733',
+                   'txid': '9401882733',
+                   'memo': '',
+                   'type': 'Deposit'},
+                  {'date': '10/07',
+                   'desc': 'H-E-B #0611 AUSTIN TX',
+                   'amount': -35.5,
+                   'id': '9401882741',
+                   'txid': '9401882741',
+                   'memo': '',
+                   'type': 'Withdrawal'}],
+ 'closing_date': 'Oct 31',
+ 'interest_earned': 0.0,
+ 'overdraft_fees': 0.0,
+ 'finance_charges': 0.0,
+ 'fees_overdraft_period': 0.0,
+ 'fees_overdraft_ytd': 0.0,
+ 'fees_return_period': 0.0,
+ 'fees_return_ytd': 0.0,
+ 'footer_site': 'capitalone.com',
+ 'footer_phone': '1-800-227-4825',
+ 'footer_address': '2104 S 1st St, AUSTIN TX 78704',
+ 'note_text': 'Capital One account statement.',
+ 'error_heading': 'About this statement',
+ 'error_paragraphs': ['This statement is provided for your records.'],
+ 'error_items': ['Transactions posted after the statement date appear on your next statement.',
+                 'Questions about a charge? Call the number on the front of this statement.',
+                 'Capital One, N.A. Member FDIC.'],
+ 'final_paragraphs': ['©2026 Capital One. Capital One is a registered trademark.']}
+
+# 原稿基线：与 asset 里的样张一字不差，供 parity 回归比对（不要改）。
+PARITY_DATA = {'customer_name': 'ALEX EXAMPLE',
  'address_lines': ['ALEX EXAMPLE', '100 EXAMPLE STREET', 'DEMO CITY CA 90000', ''],
  'tagline': 'Sample account statement',
  'headline_month': 'October 2026',
@@ -107,6 +155,11 @@ DATA = {'customer_name': 'ALEX EXAMPLE',
                  'Transactions are sample data.',
                  'No banking services are provided.'],
  'final_paragraphs': ['Use your own authorized data when editing this template.']}
+
+#: 引擎默认数据 = 原稿基线（`build()` 不带 data 时用它，parity 回归依赖这一点）。
+DATA = PARITY_DATA
+
+
 
 WATERMARK = True
 WRAP_RIGHT = 554.4
@@ -221,6 +274,14 @@ def put(page, x, baseline, text, size, font=_REG, color=TEXT, ins_name=None, *, 
                 break
             j += 1
         seg = "".join(g[1] for g in glyphs[i:j])
+        if key == _CJK and ctx.font_cjk:
+            # 兜底字体按需注册：只在这一页真出现缺字时嵌入
+            pages = getattr(ctx, "cjk_pages", None)
+            if pages is None:
+                pages = ctx.cjk_pages = set()
+            if page.xref not in pages:
+                page.insert_font(fontname=_CJK, fontfile=ctx.font_cjk)
+                pages.add(page.xref)
         page.insert_text((x + gx0, baseline), seg, fontsize=size,
                          fontname=ins_name or key, color=color)
         i = j
@@ -253,8 +314,22 @@ def prepare(page, *, ctx=None):
     ctx = ctx if ctx is not None else _render_context()
     for k in (_REG, _BOLD):
         page.insert_font(fontname=k, fontfile=_FP[k])
-    if ctx.font_cjk:
-        page.insert_font(fontname=_CJK, fontfile=ctx.font_cjk)
+    # CJK 兜底字体只在真被某个字用到时才嵌入：真账单里没有中文字体，
+    # 常驻一份 Hiragino 是明显的机审特征（字体清单直接暴露生成环境）。
+
+def _wm_to_back(page):
+    """把刚写入的水印内容流挪到 /Contents 最前面（画在正文之下）。
+
+    PyMuPDF 的 TextWriter.write_text 总是追加一条新的内容流 → 水印会盖在金额和
+    表格上（实测首屏大数字被压住，一眼假）。这里重排 /Contents 数组顺序即可。
+    """
+    xrefs = page.get_contents()
+    if len(xrefs) < 2:
+        return
+    order = [xrefs[-1]] + xrefs[:-1]
+    page.parent.xref_set_key(page.xref, "Contents",
+                             "[" + " ".join(f"{x} 0 R" for x in order) + "]")
+
 
 def watermark(page, *, ctx=None):
     ctx = ctx if ctx is not None else _render_context()
@@ -268,6 +343,7 @@ def watermark(page, *, ctx=None):
     pt = fitz.Point((612 - w * 0.707) / 2, 792 * 0.62)
     tw.append(pt, txt, font=f, fontsize=size)
     tw.write_text(page, color=(0.93, 0.93, 0.95), morph=(pt, fitz.Matrix(45)))
+    _wm_to_back(page)
 
 def footer(page, page_num, total_pages, *, ctx=None):
     ctx = ctx if ctx is not None else _render_context()
@@ -289,7 +365,12 @@ def footer(page, page_num, total_pages, *, ctx=None):
                       filename=A("icon_f5.jpg"))
     put(page, 97.1625, 774.0, ctx.data["footer_site"], SZ8, ctx=ctx)
     put(page, 201.4125, 774.0, ctx.data["footer_phone"], SZ8, ctx=ctx)
-    put(page, 308.2125, 774.0, ctx.data["footer_address"], SZ8, ctx=ctx)
+    # 地址过长会顶到右侧 MEMBER FDIC 标记上（实测 `90000FDIC` 叠字）：按可用宽度缩字号
+    addr, addr_size = ctx.data["footer_address"], SZ8
+    avail = 467.1 - 6.0 - 308.2125
+    while addr_size > 6.0 and width(addr, addr_size, ctx=ctx) > avail:
+        addr_size -= 0.25
+    put(page, 308.2125, 774.0, addr, addr_size, ctx=ctx)
 
 def cont_header(page, *, ctx=None):
     """续页头部：右对齐块（0.0375 量化）。"""
@@ -431,7 +512,8 @@ def page_summary(doc, page_num, total_pages, *, ctx=None):
     rect(page, 57.6, L["bar_top"], 58.6125, L["bar_top"] + 28.8, BLUE)
     tag_end = put(page, 76.6125, L["tagline_bl"], ctx.data["tagline"], SZ12, _REG, BLUE, ctx=ctx)
     put(page, 76.6125, L["tagline_bl"], ctx.data["tagline"], SZ12, _REG, BLUE, ctx=ctx)
-    put(page, tag_end + 0.1035, L["tagline_bl"], "\u00ae", SZ12, _REG, BLUE, ctx=ctx)
+    # 原来在句末补 ®（继承自底稿的 “…statement®” 文案）；换成正式产品句后这个
+    # 注册商标号没有归属，真件不会在一句普通说明后面挂 ®。
 
     # 分隔竖线 + 标题
     rect(page, 366.6, L["divider"][0], 367.35, L["divider"][1], BLUE)

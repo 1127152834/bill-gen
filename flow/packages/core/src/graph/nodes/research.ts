@@ -5,8 +5,14 @@ import type { MerchantFact, ResearchQuery } from '../../schemas/index.js';
 import { createSemaphore, type Emit, type GraphDeps } from '../deps.js';
 import type { GraphStateUpdate } from '../state.js';
 
-/** Simultaneous `researchOne` calls per job. */
-export const RESEARCH_CONCURRENCY = 4;
+/**
+ * Simultaneous `researchOne` calls per job. 每条检索是「一次 Tavily + 一次抽取模型调用」，
+ * 主要耗时在等外部 IO，所以并发开大一点几乎线性加速；`RESEARCH_CONCURRENCY` 可覆盖。
+ */
+export const RESEARCH_CONCURRENCY = (() => {
+  const raw = Number.parseInt(process.env.RESEARCH_CONCURRENCY ?? '', 10);
+  return Number.isFinite(raw) && raw > 0 ? Math.min(raw, 16) : 8;
+})();
 /** A housing fallback runs only while more Tavily queries than this are left (the other tasks still need theirs). */
 const FALLBACK_TAVILY_RESERVE = 6;
 

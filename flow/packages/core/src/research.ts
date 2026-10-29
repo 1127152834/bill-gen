@@ -37,23 +37,75 @@ const SEARCH_TIMEOUT_MS = 60_000;
 
 // ---------------------------------------------------------------- Tavily client
 
-/** Tavily via `@langchain/tavily`, loaded lazily so importing core stays light. The key is never logged or put in errors. */
-export function createTavilyClient(apiKey: string): SearchClient {
+/** Tavily 说额度用完了（计划上限 / 速率限制），不是查询本身有问题。 */
+export class SearchQuotaError extends Error {
+  readonly code = 'TAVILY_QUOTA';
+  constructor(message: string) {
+    super(message);
+    this.name = 'SearchQuotaError';
+  }
+}
+
+const QUOTA_PATTERN = /quota|usage limit|rate limit|too many requests|exceeded.*(limit|plan)|429/i;
+const TAVILY_RETRIES = 2;
+const TAVILY_BACKOFF_MS = [1500, 4000] as const;
+
+/** 这一条错误值不值得再试一次：限流、5xx、网络抖动。 */
+function tavilyRetryable(err: unknown): boolean {
+  const text = err instanceof Error ? `${err.name} ${err.message}` : String(err);
+  const status = (err as { status?: unknown; statusCode?: unknown } | null)?.status ?? (err as { statusCode?: unknown } | null)?.statusCode;
+  if (typeof status === 'number') return status === 429 || status === 408 || status >= 500;
+  return /timeout|timed out|fetch failed|socket hang up|ECONNRESET|ETIMEDOUT|EAI_AGAIN|UND_ERR/i.test(text);
+}
+
+/**
+ * Tavily via `@langchain/tavily`, loaded lazily so importing core stays light. The key is never logged or put in errors.
+ *
+ * 限流（429）和网络抖动按指数退避重试两次——一次抖动不该让整个品类没数据；额度真用完时抛
+ * `SearchQuotaError`，由上层降级处理（用缓存 / 少一个品类），绝不终止任务。
+ */
+export function createTavilyClient(
+  apiKey: string,
+  opts: { retries?: number; sleep?: (ms: number) => Promise<void> } = {},
+): SearchClient {
   let tool: Promise<import('@langchain/tavily').TavilySearch> | undefined;
   const getTool = () =>
     (tool ??= import('@langchain/tavily').then(
       ({ TavilySearch }) => new TavilySearch({ tavilyApiKey: apiKey, maxResults: 5, searchDepth: 'advanced' }),
     ));
+  const sleep = opts.sleep ?? ((ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms)));
+  const retries = opts.retries ?? TAVILY_RETRIES;
 
   return {
     async search(query) {
-      let raw: unknown;
-      try {
-        raw = await (await getTool()).invoke({ query }, { signal: AbortSignal.timeout(SEARCH_TIMEOUT_MS) });
-      } catch (err) {
-        throw new Error(`Tavily search failed: ${redactKey(err instanceof Error ? err.message : String(err), apiKey)}`);
+      for (let attempt = 0; ; attempt++) {
+        let raw: unknown;
+        try {
+          raw = await (await getTool()).invoke({ query }, { signal: AbortSignal.timeout(SEARCH_TIMEOUT_MS) });
+        } catch (err) {
+          const message = redactKey(err instanceof Error ? err.message : String(err), apiKey);
+          if (QUOTA_PATTERN.test(message)) throw new SearchQuotaError(`Tavily quota: ${message}`);
+          const delay = TAVILY_BACKOFF_MS[attempt];
+          if (delay !== undefined && attempt < retries && tavilyRetryable(err)) {
+            await sleep(delay);
+            continue;
+          }
+          throw new Error(`Tavily search failed: ${message}`);
+        }
+        try {
+          return parseTavilyResponse(raw, apiKey);
+        } catch (err) {
+          // `{error}` 里的额度/限流信息同样按额度处理
+          if (err instanceof SearchQuotaError) throw err;
+          const message = err instanceof Error ? err.message : String(err);
+          const delay = TAVILY_BACKOFF_MS[attempt];
+          if (delay !== undefined && attempt < retries && tavilyRetryable(err)) {
+            await sleep(delay);
+            continue;
+          }
+          throw err;
+        }
       }
-      return parseTavilyResponse(raw, apiKey);
     },
   };
 }
@@ -63,7 +115,9 @@ function parseTavilyResponse(raw: unknown, apiKey: string): SearchHit[] {
   const data = (typeof raw === 'string' ? safeJson(raw) : raw) as { error?: unknown; results?: unknown } | null;
   if (typeof data?.error === 'string') {
     if (/no search results found/i.test(data.error)) return [];
-    throw new Error(`Tavily search failed: ${redactKey(data.error, apiKey)}`);
+    const message = redactKey(data.error, apiKey);
+    if (QUOTA_PATTERN.test(message)) throw new SearchQuotaError(`Tavily quota: ${message}`);
+    throw new Error(`Tavily search failed: ${message}`);
   }
   if (!Array.isArray(data?.results)) {
     throw new Error('Tavily search failed: unexpected response shape');
@@ -161,15 +215,40 @@ export async function researchOne(
   } catch (err) {
     if (!(err instanceof SearchFailedError)) throw err; // budget and model errors are not search failures
     const reason = err.message;
-    if (cached) return { facts: cached.facts, warnings: [`research ${q.category}: using stale cache (${reason})`] };
-    return { facts: [], warnings: [`category ${q.category} dropped: search failed`] };
+    const quota = /quota/i.test(reason);
+    if (cached) {
+      return {
+        facts: cached.facts,
+        warnings: [
+          quota
+            ? `research ${q.category}: 检索额度已用完，改用缓存`
+            : `research ${q.category}: using stale cache (${reason})`,
+        ],
+      };
+    }
+    return {
+      facts: [],
+      warnings: [quota ? `category ${q.category} dropped: 检索额度已用完（任务继续）` : `category ${q.category} dropped: search failed`],
+    };
   }
 
   if (facts.length === 0) {
+    // 没结果时先看是不是额度用完了：预算耗尽属于「降级」，措辞要让人知道是没钱搜，不是没搜到。
+    const quota = deps.budget.tavilyLeft === 0;
     if (cached) {
-      return { facts: cached.facts, warnings: [`research ${q.category}: using stale cache (no fresh sources)`] };
+      return {
+        facts: cached.facts,
+        warnings: [
+          quota
+            ? `research ${q.category}: 检索额度已用完，改用缓存`
+            : `research ${q.category}: using stale cache (no fresh sources)`,
+        ],
+      };
     }
-    return { facts: [], warnings: [`category ${q.category} dropped: no sources`] };
+    return {
+      facts: [],
+      warnings: [quota ? `category ${q.category} dropped: 检索额度已用完（任务继续）` : `category ${q.category} dropped: no sources`],
+    };
   }
   deps.cache.set(key, facts, deps.now);
   return { facts, warnings: [] };
@@ -180,7 +259,8 @@ class SearchFailedError extends Error {}
 
 /** One charged search + extraction. Only a failed search is wrapped as SearchFailedError. */
 async function attempt(q: ResearchQuery, query: string, loc: LocationInfo, deps: ResearchDeps): Promise<MerchantFact[]> {
-  deps.budget.chargeTavily();
+  // 额度是软上限：没额度了就当这次检索没结果，不抛错、不拖垮整个任务。
+  if (!deps.budget.tryChargeTavily()) return [];
   let hits: SearchHit[];
   try {
     hits = await deps.search.search(query);

@@ -5,12 +5,13 @@
 """
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 
 from .adapters import BindingError, binding_for
 from .ledger import LedgerDocument
 
-__all__ = ["Issue", "SynthLintError", "issues", "verify"]
+__all__ = ["Issue", "SynthLintError", "issues", "placeholder_hits", "verify"]
 
 
 @dataclass(frozen=True)
@@ -38,8 +39,64 @@ class SynthLintError(ValueError):
         super().__init__(f"{template_id} 账本自检未通过（{len(found)} 项）：{listed}")
 
 
+# 占位词：真账单上永远不会出现，出现就说明这份数据是「没填完的示例」。
+_PLACEHOLDER_WORDS = (
+    "sample",
+    "example",
+    "demo",
+    "dummy",
+    "test data",
+    "lorem ipsum",
+    "john doe",
+    "jane doe",
+    "your name",
+    "somebody",
+    "nobody",
+    "placeholder",
+)
+# 这些词单独出现不算错（"Test" 可能是商户名的一部分），所以只在整词/整字段命中时判。
+_PLACEHOLDER_RE = re.compile(
+    r"\b(?:" + "|".join(re.escape(w) for w in _PLACEHOLDER_WORDS) + r")\b",
+    re.IGNORECASE,
+)
+# 全 0 的账号/路由号（`000000000001`、`000000000`）同样是没填。
+_ALL_ZERO_RE = re.compile(r"0{9,}")
+_ACCOUNT_KEYS = ("account", "routing", "iban", "check", "reference", "id")
+
+
+def _walk_strings(value, path: str = ""):
+    """把数据树里的 (路径, 字符串) 摊平，用来扫占位词。"""
+    if isinstance(value, dict):
+        for key, item in value.items():
+            yield from _walk_strings(item, f"{path}.{key}" if path else str(key))
+    elif isinstance(value, (list, tuple)):
+        for index, item in enumerate(value):
+            yield from _walk_strings(item, f"{path}[{index}]")
+    elif isinstance(value, str):
+        yield path, value
+
+
+def placeholder_hits(data: dict) -> list[str]:
+    """扫出这份数据里的占位痕迹（路径 + 命中词），给 `issues()` 和外部调用方共用。"""
+    hits: list[str] = []
+    for path, text in _walk_strings(data):
+        if not text.strip():
+            continue
+        match = _PLACEHOLDER_RE.search(text)
+        if match:
+            hits.append(f"{path}={text.strip()[:40]!r}（{match.group(0)}）")
+            continue
+        lowered = path.lower()
+        if any(word in lowered for word in _ACCOUNT_KEYS) and _ALL_ZERO_RE.search(text):
+            hits.append(f"{path}={text.strip()[:40]!r}（全 0 号码）")
+    return hits
+
+
 def issues(ledger: LedgerDocument, data: dict, template_id: str) -> list[Issue]:
     found: list[Issue] = []
+
+    for hit in placeholder_hits(data):
+        found.append(Issue("placeholder_text", f"{template_id} 里还有占位内容：{hit}"))
 
     expected = ledger.opening_cents + ledger.credits_cents - ledger.debits_cents
     if expected != ledger.closing_cents:

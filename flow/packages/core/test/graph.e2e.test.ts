@@ -1,3 +1,4 @@
+import { RESEARCH_CONCURRENCY } from '../src/graph/nodes/research.js';
 import { writeFileSync } from 'node:fs';
 import { MemorySaver } from '@langchain/langgraph';
 import { describe, expect, it } from 'vitest';
@@ -48,23 +49,24 @@ const high = (suggestedTarget: AuditFinding['suggestedTarget'], problem: string)
 });
 
 describe('runGeneration with fixture dependencies', () => {
-  it('Austin freelancer, 3 months, both accounts: valid result, R1-R13 pass, events from normalize to finalize', async () => {
+  it('Austin freelancer, 3 months, both accounts: valid result, R1-R14 pass, events from normalize to finalize', async () => {
     const { result, events, deps } = await run();
 
     expect(GenerationResultSchema.safeParse(result).success).toBe(true);
     expect(result.status).toBe('completed');
-    expect(result.audit.rules).toHaveLength(13);
+    expect(result.audit.rules).toHaveLength(14);
     expect(result.audit.rules.filter((r) => !r.passed).map((r) => r.ruleId)).toEqual([]);
     expect(result.statements.map((s) => s.accountType)).toEqual(['checking', 'credit']);
     expect(result.statements.every((s) => s.months.length === 3)).toBe(true);
     expect(result.id).toBe('job-1');
     expect(result.seed).toBe('austin-1');
 
-    expect(events[0]).toEqual({ type: 'node_start', node: 'normalize' });
-    expect(events.at(-1)).toEqual({ type: 'node_end', node: 'finalize' });
+    expect(events[0]).toMatchObject({ type: 'node_start', node: 'normalize' });
+    expect(events.at(-1)).toMatchObject({ type: 'node_end', node: 'finalize' });
     for (const node of GRAPH_NODES) {
-      expect(events, node).toContainEqual({ type: 'node_start', node });
-      expect(events, node).toContainEqual({ type: 'node_end', node });
+      expect(events, node).toContainEqual(expect.objectContaining({ type: 'node_start', node }));
+      // node_end 现在带真实耗时（ms），只断言类型与节点名
+      expect(events, node).toContainEqual(expect.objectContaining({ type: 'node_end', node }));
     }
     const research = events.filter((e) => e.type === 'research');
     expect(research).toHaveLength(13);
@@ -161,12 +163,12 @@ describe('runGeneration rulings', () => {
     await expect(runGeneration(request, createFixtureDeps(), { threadId: 't' })).rejects.toThrow(/profile is required/);
   });
 
-  it('runs at most 4 research queries at the same time', async () => {
+  it('research 并发不超过 RESEARCH_CONCURRENCY（默认 8）', async () => {
     const deps = createFixtureDeps({ searchDelayMs: 15 });
     await run(deps);
     expect(deps.search.queries).toHaveLength(13);
     expect(deps.search.maxInFlight).toBeGreaterThan(1);
-    expect(deps.search.maxInFlight).toBeLessThanOrEqual(4);
+    expect(deps.search.maxInFlight).toBeLessThanOrEqual(8);
   });
 
   it('drops a category whose extraction fails, with a warning, and still completes', async () => {
@@ -281,7 +283,7 @@ describe('runGeneration keeps a valid earlier result when a later round fails (s
     expect(result.status).toBe('completed_with_warnings');
     expect(result.audit.findings).toEqual([]);
     expect(result.warnings).toContain('audit failed (LLM_OUTPUT_INVALID); statements were not reviewed');
-    expect(events.at(-1)).toEqual({ type: 'node_end', node: 'finalize' });
+    expect(events.at(-1)).toMatchObject({ type: 'node_end', node: 'finalize' });
   });
 
   it('a later round that breaks a rule does not replace the best rule-clean round', async () => {

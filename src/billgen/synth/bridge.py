@@ -95,10 +95,36 @@ def normalize_id(pdf: bytes) -> bytes:
     return pdf[: match.start()] + b"/ID[<" + head + b"><" + tail + b">]" + pdf[match.end() :]
 
 
+_BANK_FIELDS = ("name", "legal", "domain", "phone", "po_box", "po_box_alt", "city_state_zip",
+                "phone_service", "phone_es", "phone_intl", "phone_metro")
+
+
+def _adopt_template_bank(ledger: LedgerDocument, defaults: dict[str, Any]) -> LedgerDocument:
+    """行名留空 = 用模板自带的那家银行（模板自己知道该印什么，避免版式与行名错配）。"""
+    if ledger.bank.name:
+        return ledger
+    bank = {k: str(v) for k, v in (defaults.get("bank") or {}).items() if k in _BANK_FIELDS}
+    name = bank.get("name", "").strip()
+    if not name:
+        return ledger
+    from .ledger import BankIdentity, refresh_references, routing_for
+
+    banked = BankIdentity(**{key: bank.get(key, "") for key in _BANK_FIELDS})
+    account = ledger.account
+    routing = routing_for(name, ledger.seed)
+    adopted = replace(ledger, bank=banked, account=replace(account, routing=routing))
+    if routing != account.routing:
+        # 账本装配时银行名还空着，ACH trace 用的是临时路由号；这里按真行路由号重挂一遍。
+        adopted = refresh_references(adopted)
+    return adopted
+
+
 def build_data(template_id: str, ledger: LedgerDocument, *, verify_rows: bool = True) -> dict[str, Any]:
     binding = binding_for(template_id)
     renderer = registry.get_renderer(template_id)
-    data = binding.build(ledger, renderer.default_data())
+    defaults = renderer.default_data()
+    ledger = _adopt_template_bank(ledger, defaults)
+    data = binding.build(ledger, defaults)
     if verify_rows:
         verify(ledger, data, template_id)
     return data
@@ -117,6 +143,8 @@ def render(
     entropy: bool = False,
 ) -> RenderResult:
     renderer = registry.get_renderer(template_id)
+    # 行名留空时先换成模板自带的那家，后续的品牌重绘才知道该画谁。
+    ledger = _adopt_template_bank(ledger, renderer.default_data())
     data = build_data(template_id, ledger, verify_rows=verify_rows)
     result = renderer.render(data, options or renderer.spec.default_options)
     if brand:
@@ -142,6 +170,9 @@ def apply_brand(pdf: bytes, template_id: str, ledger: LedgerDocument) -> bytes:
     """把版式里烙死的真实行标换成账本自己的行标（物理删除原图，不是盖白块）。"""
     import fitz
 
+    # 没指定行名 = 用模板自带的那家，底稿原样保留，一个字都不换。
+    if not ledger.bank.name.strip():
+        return pdf
     if template_id not in branding.PLACEMENTS:
         return pdf
     with fitz.open(stream=pdf, filetype="pdf") as doc:

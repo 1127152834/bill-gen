@@ -1,6 +1,7 @@
 import { GenerationResultSchema, type BudgetLimits, type GraphDeps } from '@bh/core';
 import { FIXTURE_TODAY, createFixtureDeps, fixtureRequest } from '@bh/core/testing';
 import { createApp } from '../src/app.js';
+import { loadEnv } from '../src/env.js';
 import { openDb, type Db } from '../src/db.js';
 import { createEventBus, type EventBus } from '../src/events.js';
 import { createJobRunner, type JobRunner } from '../src/jobs.js';
@@ -44,6 +45,7 @@ export function setup(opts: HarnessOptions = {}): Harness {
   });
   const app = createApp({
     db,
+    env: loadEnv({ LLM_FAKE: '1', API_KEY }),
     runner,
     bus,
     makeDeps,

@@ -158,11 +158,21 @@ describe('researchOne: budget', () => {
     expect(t.budget.usage().tavilyQueries).toBe(2);
   });
 
-  it('propagates BudgetExceededError instead of falling back, even with stale cache', async () => {
+  it('额度用完时用过期缓存并给警告，不抛错', async () => {
     const t = setup({ search: [hits], budget: new Budget({ tavilyQueries: 0 }) });
     t.cache.set(KEY, [storedFact()], NOW - 31 * DAY);
-    await expect(researchOne(query, austin, t.deps)).rejects.toBeInstanceOf(BudgetExceededError);
-    expect(t.queries).toEqual([]); // charged before searching
+    const out = await researchOne(query, austin, t.deps);
+    expect(out.facts).toHaveLength(1);
+    expect(out.warnings.join(' ')).toMatch(/检索额度已用完/);
+    expect(t.queries).toEqual([]); // 没额度就不发请求
+  });
+
+  it('额度用完且没有缓存时丢掉这个品类，但任务继续', async () => {
+    const t = setup({ search: [hits], budget: new Budget({ tavilyQueries: 0 }) });
+    const out = await researchOne(query, austin, t.deps);
+    expect(out.facts).toEqual([]);
+    expect(out.warnings.join(' ')).toMatch(/检索额度已用完/);
+    expect(t.queries).toEqual([]);
   });
 
   it('propagates a BudgetExceededError thrown from the search itself', async () => {
@@ -362,9 +372,12 @@ describe('researchOne: state-scope retry', () => {
     expect(t.queries[1]).toBe('cheap grocery stores Texas');
   });
 
-  it('keeps the budget error from the retry attempt', async () => {
+  it('第二次检索没额度时不再发请求，用一个警告收尾', async () => {
     const t = setup({ search: [hits], llm: [[]], budget: new Budget({ tavilyQueries: 1 }) });
-    await expect(researchOne(query, austin, t.deps)).rejects.toBeInstanceOf(BudgetExceededError);
+    const out = await researchOne(query, austin, t.deps);
+    expect(out.facts).toEqual([]);
+    expect(t.queries).toHaveLength(1); // 只跑了第一次
+    expect(out.warnings.join(' ')).toMatch(/dropped/);
   });
 });
 

@@ -119,6 +119,44 @@ def _fix_stamp(doc, seed: str) -> bool:
     return True
 
 
+def _add_grain(pdf: bytes, seed: str) -> bytes:
+    """叠一层极淡的扫描颗粒（每页不同），把「纯矢量白底」的机器感打掉。
+
+    密度按经验调过：35‰ 的中灰点 + 21‰ 的浅灰点，用 2pt 一颗的 Pixmap 拉伸铺满
+    整页，肉眼是复印纸的麻点，不影响文字识别，也不改任何内容流几何。
+    """
+    try:
+        import fitz
+        import random
+    except ModuleNotFoundError:  # pragma: no cover
+        return pdf
+    try:
+        doc = fitz.open(stream=pdf, filetype="pdf")
+    except Exception:  # pragma: no cover
+        return pdf
+    try:
+        for i, page in enumerate(doc):
+            w = max(1, int(page.rect.width / 2))
+            h = max(1, int(page.rect.height / 2))
+            rng = random.Random(f"grain:{seed}:{i}")
+            buf = bytearray()
+            for _ in range(w * h):
+                r = rng.random()
+                if r < 0.035:
+                    buf += bytes((205, 10))
+                elif r < 0.056:
+                    buf += bytes((235, 6))
+                else:
+                    buf += bytes((255, 0))
+            pix = fitz.Pixmap(fitz.csGRAY, w, h, bytes(buf), True)
+            page.insert_image(page.rect, pixmap=pix, overlay=True)
+        return doc.tobytes(garbage=3, deflate=True, no_new_id=True)
+    except Exception:  # pragma: no cover
+        return pdf
+    finally:
+        doc.close()
+
+
 def finalize(
     pdf: bytes,
     *,
@@ -127,6 +165,7 @@ def finalize(
     xmp: bool = False,
     entropy: bool = False,
     fix_stamp: bool = True,
+    grain: bool = True,
 ) -> bytes:
     """重写对象结构、随机化字体前缀，可选补 XMP 与打散字节。"""
     try:
@@ -139,6 +178,13 @@ def finalize(
         return pdf
     if doc.is_encrypted:  # 加密件（amex 默认）重写会掉加密，宁可不动
         doc.close()
+        return pdf
+    doc.close()
+    if grain:
+        pdf = _add_grain(pdf, seed or "grain")
+    try:
+        doc = pikepdf.open(io.BytesIO(pdf))
+    except Exception:  # pragma: no cover
         return pdf
     try:
         for key in _DROP_CATALOG_KEYS:

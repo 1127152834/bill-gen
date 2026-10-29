@@ -159,7 +159,8 @@ result = render("boa-personal", ledger)                          # result.pdf / 
 - 同一份账本重复渲染字节一致（trailer `/ID` 归一化），`fingerprint(pdf)` 给版式指纹；
 - 渲染前跑账本自检：期初 + Σ贷 − Σ借 = 期末、不丢行、账户类型匹配，任何一条不通过就报
   `SynthLintError`，不产出半对的 PDF；
-- 样例标记统一保留：可见 `SAMPLE` 水印 + PDF 元数据 `SAMPLE — NOT A REAL BANK STATEMENT`。
+- 样例标记只留在可见层：每页 `SAMPLE` 水印；PDF 元数据按模板族写成该行真实的出件标题
+  （如 `Chase Online Statement`、`U.S. Bank Online Statement`），与 producer/creator 供应商指纹配套。
 
 同一能力也走 HTTP 与工作台：
 

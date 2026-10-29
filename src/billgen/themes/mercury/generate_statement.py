@@ -80,7 +80,41 @@ TOPBAR     = (0.5529, 0.6431, 0.9608)
 BLACK      = (0, 0, 0)
 
 # ---------------------------------------------------------------- data
-DATA = {'period_label': 'October 2026',
+DEMO_DATA = {'period_label': 'October 2026',
+ 'period_start': 'Oct 01, 2026',
+ 'period_end': 'Oct 31, 2026',
+ 'period_days': '31',
+ 'timezone': 'All dates in UTC',
+ 'company': 'Okafor Design Studio LLC',
+ 'address': ['2104 S 1st St', 'Austin TX 78704'],
+ 'ein': 'EIN: 87-4190265',
+ 'account_type': 'Checking',
+ 'account_number': '410737211347',
+ 'routing_number': '121140399',
+ 'beginning_balance': 1000.0,
+ 'footer_line1': 'Mercury account statement',
+ 'footer_line2': 'Banking services provided by Column National Association, Member FDIC.',
+ 'transactions': [{'date': 'Oct 2',
+                   'desc': 'ACME CORP PAYROLL PPD ID:4289126633',
+                   'amount': 250.0,
+                   'id': '9401882733',
+                   'txid': '9401882733',
+                   'memo': '',
+                   'type': 'ACH In',
+                   'dir': 'in',
+                   'icon': 'achIn'},
+                  {'date': 'Oct 7',
+                   'desc': 'H-E-B #0611 AUSTIN TX',
+                   'amount': -35.5,
+                   'id': '9401882741',
+                   'txid': '9401882741',
+                   'memo': '',
+                   'type': 'Debit',
+                   'dir': 'out',
+                   'icon': 'achOut'}]}
+
+# 原稿基线：与 asset 里的样张一字不差，供 parity 回归比对（不要改）。
+PARITY_DATA = {'period_label': 'October 2026',
  'period_start': 'Oct 01, 2026',
  'period_end': 'Oct 31, 2026',
  'period_days': '31',
@@ -112,6 +146,11 @@ DATA = {'period_label': 'October 2026',
                    'type': 'Debit',
                    'dir': 'out',
                    'icon': 'achOut'}]}
+
+#: 引擎默认数据 = 原稿基线（`build()` 不带 data 时用它，parity 回归依赖这一点）。
+DATA = PARITY_DATA
+
+
 
 WATERMARK = True
 
@@ -417,6 +456,20 @@ def footer(page, baselines, *, ctx=None):
     for line, bl in zip(lines, baselines):
         put_center_ls(page, 306, bl, line, 8, _480, FOOTER_COL, FOOTER_LS, ctx=ctx)
 
+def _wm_to_back(page):
+    """把刚写入的水印内容流挪到 /Contents 最前面（画在正文之下）。
+
+    PyMuPDF 的 TextWriter.write_text 总是追加一条新的内容流 → 水印会盖在金额和
+    表格上（实测首屏大数字被压住，一眼假）。这里重排 /Contents 数组顺序即可。
+    """
+    xrefs = page.get_contents()
+    if len(xrefs) < 2:
+        return
+    order = [xrefs[-1]] + xrefs[:-1]
+    page.parent.xref_set_key(page.xref, "Contents",
+                             "[" + " ".join(f"{x} 0 R" for x in order) + "]")
+
+
 def watermark(page, *, ctx=None):
     ctx = ctx if ctx is not None else _render_context()
     if not ctx.watermark:
@@ -429,6 +482,7 @@ def watermark(page, *, ctx=None):
     pt = fitz.Point((612 - w * 0.707) / 2, 792 * 0.62)
     tw.append(pt, txt, font=f, fontsize=size)
     tw.write_text(page, color=(0.93, 0.93, 0.95), morph=(pt, fitz.Matrix(45)))
+    _wm_to_back(page)
 
 def collect_texts(data=None):
     """收集数据中所有会被渲染的文本。"""

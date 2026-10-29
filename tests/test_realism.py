@@ -81,14 +81,22 @@ def test_card_and_atm_stay_on_the_weekend():
 
 
 def test_pos_descriptors_get_acquirer_prefix_once():
-    book = ledger_with([row("2026-07-06", "POS", 4_299, "H-E-B #2604 AUSTIN TX")])
+    """前缀跟着商户类别走，且一行只加一次。
+
+    老实现随机抽前缀，会拼出 `AMZN Mktp US*TRADER JOES`、`PAYPAL *UBER *TRIP`
+    这种真账单不会出现的组合（实测件里就有）。"""
+    book = ledger_with([
+        row("2026-07-06", "POS", 4_299, "STARBUCKS STORE 08841 AUSTIN TX"),
+        row("2026-07-07", "POS", 3_150, "UBER TRIP 8H2K3L AUSTIN TX"),
+    ])
     out, stats = realism.apply_all(book)
     assert stats["descriptors"] == 1
-    text = out.rows[0].description
-    assert text.startswith(("SQ *", "TST* ", "PAYPAL *", "AMZN Mktp US*", "SP ")), text
+    coffee, rideshare = out.rows[0].description, out.rows[1].description
+    assert coffee.startswith(("SQ *", "TST* ")), coffee
+    assert rideshare == "UBER TRIP 8H2K3L AUSTIN TX", "对不上类别的一律不动"
     again, stats2 = realism.apply_all(out)
     assert stats2["descriptors"] == 0, "已经带前缀的行不能二次加前缀"
-    assert again.rows[0].description == text
+    assert [r.description for r in again.rows] == [coffee, rideshare]
 
 
 def test_rebalance_keeps_the_ledger_closed():

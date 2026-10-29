@@ -3,6 +3,7 @@ import { Budget, createOpenAiStructuredLlm, createTavilyClient, loadSkills, type
 import { createFixtureDeps } from '@bh/core/testing';
 import { createSqliteCache, type Db } from './db.js';
 import type { Env } from './env.js';
+import { resolveLlm } from './settings.js';
 
 /** Repo-root `skills/` (this file lives in `apps/server/src`). */
 const SKILLS_DIR = fileURLToPath(new URL('../../../skills/', import.meta.url));
@@ -18,26 +19,27 @@ export type MakeDeps = (limits?: Partial<BudgetLimits>) => GraphDeps;
  * `LLM_FAKE=1` gives the offline fixture dependencies (canned Austin freelancer answers).
  */
 export function makeDeps(env: Env, db: Db): MakeDeps {
-  if (env.llmFake || !env.llm || !env.tavilyApiKey) {
-    // Fixtures have no `render` answers: render the deterministic ledger draft through MCP instead.
-    return (limits) => ({
-      ...createFixtureDeps(limits ? { budget: limits } : {}),
-      bankName: env.bankName,
-      ...(env.billgen && { billgen: { ...env.billgen, modelFill: false } }),
-    });
-  }
-  const { llm: llmEnv, tavilyApiKey } = env;
+  // 这两样跟配置无关、构造也贵，建一次复用；模型客户端则每次现建。
   const skills = loadSkills(SKILLS_DIR);
   const cache = createSqliteCache(db);
+
   return (limits) => {
+    // 每开一个 job 都重新读一次：页面上刚改完的模型配置立刻生效。
+    const eff = resolveLlm(db, env);
+    if (!eff.ready || !eff.llm || !eff.tavilyApiKey) {
+      // Fixtures have no `render` answers: render the deterministic ledger draft through MCP instead.
+      return {
+        ...createFixtureDeps(limits ? { budget: limits } : {}),
+        ...(env.billgen && { billgen: { ...env.billgen, modelFill: false } }),
+      };
+    }
     const budget = new Budget(limits);
     return {
-      llm: createOpenAiStructuredLlm(llmEnv, budget),
-      search: createTavilyClient(tavilyApiKey),
+      llm: createOpenAiStructuredLlm(eff.llm, budget),
+      search: createTavilyClient(eff.tavilyApiKey),
       cache,
       skills,
       budget,
-      bankName: env.bankName,
       today: todayUtc(),
       now: Date.now,
       ...(env.billgen && { billgen: env.billgen }),

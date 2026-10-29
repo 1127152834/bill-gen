@@ -103,6 +103,7 @@ export function normalizeModel(model: FinancialModel, norm: NormalizedRequest, f
   return out;
 }
 
+
 /** Average occurrences per month (money estimates). */
 const monthlyCount = (rule: RecurringItem['dayRule'], norm: NormalizedRequest): number =>
   rule.kind === 'dayOfMonth' ? 1 : rule.kind === 'biweekly' ? BIWEEKLY_PER_MONTH : norm.taxDates.length > 0 ? 1 : 0;

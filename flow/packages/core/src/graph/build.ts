@@ -15,6 +15,7 @@ import { assembleStatements } from '../assemble.js';
 import { BudgetExceededError } from '../budget.js';
 import { createRng } from '../rng.js';
 import type { AuditFinding, Statement } from '../schemas/index.js';
+import { lifeModelSkills } from '../skills.js';
 import type { Emit, GraphDeps, GraphNodeName, ProgressEvent, RetryTarget } from './deps.js';
 import { auditNode } from './nodes/audit.js';
 import { descriptorsNode } from './nodes/descriptors.js';
@@ -77,10 +78,19 @@ function llmSteps(deps: GraphDeps, emit: Emit) {
    * Any other failure, or a LifeModelError with no rounds left, falls back to an earlier result if there is one.
    */
   const lifeModel: Step = async (s) => {
+    emit({ type: 'step', node: 'lifeModel', message: `第 ${s.rounds + 1} 轮：请求收支模型` });
     const feedback = s.retryTarget === 'lifeModel' && s.feedback.length > 0 ? s.feedback : undefined;
     try {
+      const profile = profileOf(s);
       const model = await lifeModelNode(
-        { norm: need(s.norm, 'norm'), profile: profileOf(s), facts: uniqueFacts(s.facts), ...(feedback && { feedback }) },
+        {
+          norm: need(s.norm, 'norm'),
+          profile,
+          facts: uniqueFacts(s.facts),
+          // 个人档不带「行业成本结构」（约 14KB），见 lifeModelSkills 的说明
+          skillsText: deps.skills.get(lifeModelSkills('industry' in profile)),
+          ...(feedback && { feedback }),
+        },
         deps,
       );
       return { model, templates: [], retryTarget: null, feedback: [] };
@@ -98,6 +108,7 @@ function llmSteps(deps: GraphDeps, emit: Emit) {
    * forked per round (`assemble-r<rounds>`).
    */
   const descriptors: Step = async (s) => {
+    emit({ type: 'step', node: 'descriptors', message: `第 ${s.rounds + 1} 轮：生成交易描述` });
     const norm = need(s.norm, 'norm');
     const model = need(s.model, 'model');
     const out = need(s.scheduleOut, 'scheduleOut');
@@ -124,7 +135,7 @@ function llmSteps(deps: GraphDeps, emit: Emit) {
     for (const t of fresh) byKey.set(t.merchantKey, t);
     const templates = [...byKey.values()];
     const rng = createRng(norm.request.seed).fork(`assemble-r${s.rounds}`);
-    const { statements, meta } = assembleStatements(out, templates, norm, model, facts, deps.bankName, rng);
+    const { statements, meta } = assembleStatements(out, templates, norm, model, facts, rng);
     return { templates, statements, meta, retryTarget: null, feedback: [] };
   };
 
@@ -166,23 +177,36 @@ function llmSteps(deps: GraphDeps, emit: Emit) {
  */
 export function buildGraph(deps: GraphDeps, checkpointer?: BaseCheckpointSaver, onEvent?: (e: ProgressEvent) => void) {
   const emit: Emit = (e) => onEvent?.(e);
+  /** 每个节点都报开始/结束（带真实耗时），节点内部的关键步骤用 `step` 事件补充。 */
   const tracked =
     (node: GraphNodeName, step: Step): Step =>
     async (s, config) => {
+      const startedAt = Date.now();
       emit({ type: 'node_start', node });
-      const update = await step(s, config);
-      emit({ type: 'node_end', node });
-      return update;
+      try {
+        const update = await step(s, config);
+        emit({ type: 'node_end', node, ms: Date.now() - startedAt });
+        return update;
+      } catch (err) {
+        // 失败也要有结束行，否则日志会在中途断掉、看不出是哪个节点炸的
+        emit({ type: 'node_end', node, ms: Date.now() - startedAt, detail: '失败' });
+        throw err;
+      }
     };
 
   const research = researchStep(deps, emit);
   let researchStarted = 0;
   let researchDone = 0;
+  const researchStartedAt = { at: 0 };
   const trackedResearch = async (task: ResearchTask & { total: number }): Promise<GraphStateUpdate> => {
-    if (researchStarted++ === 0) emit({ type: 'node_start', node: 'research' });
+    if (researchStarted++ === 0) {
+      researchStartedAt.at = Date.now();
+      emit({ type: 'node_start', node: 'research', detail: `${task.total} 条查询` });
+    }
+    emit({ type: 'step', node: 'research', message: `开始检索 ${task.query.query}（${task.query.category}）` });
     const update = await research(task);
     if (++researchDone === task.total) {
-      emit({ type: 'node_end', node: 'research' });
+      emit({ type: 'node_end', node: 'research', ms: Date.now() - researchStartedAt.at, detail: `${task.total} 条查询` });
       researchStarted = researchDone = 0;
     }
     return update;

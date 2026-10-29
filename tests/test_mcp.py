@@ -82,7 +82,7 @@ def test_validate_flags_placeholder_bank_identity(srv):
     """占位行名（Sample Bank / Harborline Bank）现在算缺陷，真行名才是期望。"""
     data = call(srv, "template_contract", {"template_id": "boa-personal"})["data"]
     data["bank"] = {"name": "Harborline Bank", "legal": "Harborline Bank, N.A.",
-                    "domain": "harborline-bank.example"}
+                    "domain": "harborline-bank.com"}
     result = call(srv, "validate", {"template_id": "boa-personal", "data": data})
     assert not result["ok"]
     assert any("虚构占位行名" in problem for problem in result["errors"])
@@ -119,10 +119,10 @@ def test_draft_from_ledger_returns_template_data(srv):
                         "openingBalanceCents": 100000, "closingBalanceCents": 150000}],
             "transactions": [
                 {"id": "t1", "transactionDate": "2027-01-04", "postedDate": "2027-01-04",
-                 "description": "SAMPLE SALARY", "type": "ACH", "direction": "credit",
+                 "description": "ACME CORP PAYROLL PPD", "type": "ACH", "direction": "credit",
                  "amountCents": 250000},
                 {"id": "t2", "transactionDate": "2027-01-06", "postedDate": "2027-01-06",
-                 "description": "SAMPLE RENT", "type": "ACH", "direction": "debit",
+                 "description": "CAMDEN PROPERTY MGMT RENT", "type": "ACH", "direction": "debit",
                  "amountCents": 200000},
             ],
         }],

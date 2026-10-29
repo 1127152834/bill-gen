@@ -38,8 +38,8 @@ _COMMON_NOTES: dict[str, str] = {
     "bank": "银行身份。name / legal / domain 必须自洽，且不能指向真实银行",
     "bank.name": "账单上出现的行名，如 \"Bank of America\"",
     "bank.legal": "法律主体名，通常是 \"<行名>, N.A.\"",
-    "bank.domain": "官网域名，用 example 域名，如 \"harborline-bank.example\"",
-    "customer_lines": "持卡人三行地址：姓名 / 街道 / 城市 州 邮编",
+    "bank.domain": "官网域名，与行名同源的真实形态域名，如 \"harborline-bank.com\"（别用 .example / 占位域名）",
+    "customer_lines": "持卡人三行地址：姓名 / 街道与门牌 / 城市 州 邮编（写具体值，别写占位）",
     "account_number": "完整账号（可 8–17 位数字）；后四位要与账户一致",
     "account_display": "账单上显示的账号字符串，可用掩码",
     "period": "结算期。label 是给人看的整段，begin/start/end 是各模板要的格式，彼此不能矛盾",
@@ -47,11 +47,11 @@ _COMMON_NOTES: dict[str, str] = {
     "period.begin": _DATE_LONG,
     "period.start": "起始日期，按模板要求（可能只要 \"Jan 1, 2027\"）",
     "period.end": "结束日期，同 start",
-    "product": "产品名，如 \"Everyday Checking\"；不要用真实银行的产品名",
-    "metadata": "PDF 文档属性。title 必须是 SAMPLE 声明，producer/creator 用生成器名",
-    "metadata.title": "必须保持 \"SAMPLE — NOT A REAL BANK STATEMENT\"",
-    "metadata.producer": "\"BillGen Sample Editor\"",
-    "metadata.creator": "\"BillGen Sample Editor\"",
+    "product": "产品名，如 \"Everyday Checking\"；不要用真实银行的产品名，也不要写 Sample/Example",
+    "metadata": "PDF 文档属性。title 用该行真实出件标题，producer/creator 用真实单据供应商名",
+    "metadata.title": "该行真实出件标题，如 \"Chase Online Statement\"",
+    "metadata.producer": "真实单据供应商，如 \"OpenText Output Transformation Engine 16.6.0\"",
+    "metadata.creator": "同上，与模板族一致",
 }
 
 # 每类明细行的说明
@@ -134,12 +134,18 @@ _TEMPLATE_NOTES: dict[str, dict[str, str]] = {
 
 # 硬规则：任何模板都必须满足
 _COMMON_RULES: tuple[str, ...] = (
+    "身份字段必须具体：真实感的人名（Maya Okafor）、街道号 + 街名 + 城市 + 州缩写 + 5 位邮编；"
+    "禁止 SAMPLE / EXAMPLE / DEMO / TEST / DUMMY / 占位名字（John Doe）/ 123 Main St / 00000 之类。",
+    "账号用 10–17 位数字，路由号必须能过 ABA 校验位；不要整串 0。",
+    "商户名只能来自 facts 或账本里已有的行，不要新编一个商户或价格。",
+    "交易描述按真实收单方格式：ACH 用 DES:<名> ID:<号> INDN:<持卡人> CO ID:<5位> PPD|WEB；"
+    "卡消费用 <商户> <城市> <州> Card <尾号>；Zelle 用 Zelle payment to <全名> Conf# <参考号>。",
     "金额是十进制字符串：不写 $、不写千分位（模板自己的格式化字段除外，如 summary）。",
     "期初 + Σ存入 − Σ扣款 = 期末，必须严格闭合；改任何一行都要重算。",
     "余额链连续：本行余额 = 上行余额 + 本行金额。",
     "日期必须落在 period 里，且按时间升序排列。",
     "行名、法律主体、域名、行址、客服电话必须是虚构值，不得指向真实银行。",
-    "metadata.title 保持 \"SAMPLE — NOT A REAL BANK STATEMENT\"，watermark 保持 true。",
+    "metadata.title 用模板族真实出件标题（勿写 SAMPLE），watermark 保持 true。",
     "描述长度受版式限制，超长会被裁剪；先按 limits.desc_chars 截断。",
     "auto=true 的模板不要手填 summary/totals/daily，让引擎算。",
 )

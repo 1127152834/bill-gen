@@ -130,6 +130,27 @@ def holder_upper(ledger: LedgerDocument) -> str:
     return ledger.holder.name.upper()
 
 
+_ZELLE_PREFIX = re.compile(r"(?i)^(?:zelle)\b[\s:*-]*")
+_ZELLE_VERB = re.compile(r"(?i)^(?:payment|transfer|pmt)\b[\s:*-]*")
+_ZELLE_DIR = re.compile(r"(?i)^(?:to|from)\b[\s:*-]*")
+_ZELLE_CONF = re.compile(r"(?i)\s*(?:conf\.?\s*#?|confirmation\s*#?)\s*[A-Z0-9]+$")
+
+
+def zelle_party(row: LedgerRow, fallback: str) -> str:
+    """Zelle 行的对手方名字。
+
+    上游描述常是 ``Zelle payment to Jordan R`` / ``Zelle Payment``，直接往模板句式
+    ``Zelle payment to {who}`` 里塞会拼成 ``Zelle payment to PAYMENT TO JORDAN R``
+    （实测件里就是这个叠字）。这里把 zelle / payment / to / from / Conf# 全部剥掉。
+    """
+    text = row.description.strip()
+    for pat in (_ZELLE_PREFIX, _ZELLE_VERB, _ZELLE_DIR):
+        text = pat.sub("", text).strip()
+    text = _ZELLE_CONF.sub("", text).strip()
+    text = re.sub(r"\s{2,}", " ", text).strip(" -:,")
+    return text or fallback
+
+
 def clip(text: str, limit: int) -> str:
     """描述符按列宽截断（上游描述本来就可能超宽）。"""
     text = " ".join(str(text).split())

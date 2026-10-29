@@ -94,7 +94,7 @@ export function build(
   const templates = loadTemplates(fixture);
   const norm = makeNormAt({ fixture, seed, accounts, months, ...ranges });
   const out = schedule(model, norm, createRng(seed));
-  const { statements, meta } = assembleStatements(out, templates, norm, model, facts, BANK, createRng(`${seed}/assemble`));
+  const { statements, meta } = assembleStatements(out, templates, norm, model, facts, createRng(`${seed}/assemble`));
   return { norm, model, facts, templates, statements, meta, ctx: { norm, model, facts, meta } };
 }
 

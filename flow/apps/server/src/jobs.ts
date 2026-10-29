@@ -3,9 +3,11 @@ import type { BaseCheckpointSaver } from '@langchain/langgraph';
 import { SqliteSaver } from '@langchain/langgraph-checkpoint-sqlite';
 import {
   GenerationRequestSchema,
+  createConsoleLogger,
   createRng,
   randomPersona,
   runGeneration,
+  tee,
   type GenerationRequest,
   type GraphDeps,
 } from '@bh/core';
@@ -36,6 +38,10 @@ export interface JobRunner {
 }
 
 export type JobRunnerOptions = {
+  /** 生成进度写一行到 stdout（默认开）；SSE 事件照旧发给浏览器。 */
+  logProgress?: boolean;
+  /** 连每次检索明细一起打（默认关）。 */
+  logResearch?: boolean;
   db: Db;
   /** Fresh dependencies for every job: each job has its own `Budget` and model client. */
   makeDeps: () => GraphDeps;
@@ -124,12 +130,12 @@ export function createJobRunner(opts: JobRunnerOptions): JobRunner {
     try {
       deps = opts.makeDeps();
       const request = await completeRequest(id, deps);
-      const result = await runGeneration(request, deps, {
-        threadId: id,
-        checkpointer,
-        resume,
-        onEvent: (e) => bus.emit(id, e),
-      });
+      const toBus = (e: Parameters<typeof bus.emit>[1]) => bus.emit(id, e);
+      const onEvent =
+        opts.logProgress === false
+          ? toBus
+          : tee(toBus, createConsoleLogger({ quietResearch: opts.logResearch !== true }));
+      const result = await runGeneration(request, deps, { threadId: id, checkpointer, resume, onEvent });
       finishGeneration(db, id, { status: result.status, result });
       bus.finish(id, result.status);
     } catch (err) {

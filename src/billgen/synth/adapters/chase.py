@@ -1,16 +1,19 @@
 """大通银行（Chase）：个人版走统一流水，商业版走五个分区表。"""
 from __future__ import annotations
 
+import re
 from typing import Any
 
 from .. import refs
 from ..ledger import LedgerDocument, LedgerRow
 from ..money import cents_to_currency, cents_to_grouped, cents_to_plain, fmt_month_day, fmt_slash
-from ._common import bank_block, clip, deep, metadata, split_rows
+from ._common import bank_block, clip, deep, metadata, split_rows, zelle_party
 
 __all__ = ["build_business", "build_personal"]
 
 DESC_LIMIT = 38
+#: 该主题的字体是从原稿抽出的子集，没有 ``#`` 字形（编码器会退化成 notdef，渲染成一个小点）。「WALGREENS #1593」这类门店号在出字前把 ``#`` 去掉，得到「WALGREENS 1593」，与真账单同义。
+_UNSUPPORTED = re.compile(r"\s*[#*]")
 # 描述列的第二子列（真账单里 `Card Purchase` 与 `10/13 Arcteryx…` 分占两栏）
 SUB_PAD = "          "
 PERSONAL_TYPES = {
@@ -49,17 +52,31 @@ def _base(ledger: LedgerDocument, defaults: dict[str, Any]) -> dict[str, Any]:
             "bank": bank_block(ledger),
             "period": _period(ledger),
             "metadata": metadata(ledger),
-            "micr": {
-                "routing": ledger.account.routing,
-                "dre": (d.get("micr") or {}).get("dre", "SAMPLE"),
-                "cycle": (d.get("micr") or {}).get("cycle", "00"),
-                "extra": (d.get("micr") or {}).get("extra", "SAMPLE"),
-            },
+            "micr": _micr(ledger),
             # 条码里应装「本账户自己的号」，不能留底稿原值（那是别人的账号）
             "barcode_num": barcode_number(ledger),
         }
     )
     return d
+
+
+def _micr(ledger: LedgerDocument) -> dict[str, str]:
+    """MICR 行四段：路由号 / 账号分段 / 周期段 / on-us 段。
+
+    底稿那行原来是 ``00462377``、``DRE 703 219 28826 NNNNNNNNNNN``、``  1 000000000 09``、
+    ``0000      AT 00`` 这种形态 —— 前两段是别人的号，必须逐段换成本账户的；
+    ``extra`` 留空表示沿用底稿的 on-us 段（``0000      AT 00`` 是补白，不含任何账号）。
+    以前这里缺省写死字符串 ``SAMPLE``，MICR 行的可见文本就印成了
+    ``021202337SAMPLE`` —— 真账单的磁码行只有数字。
+    """
+    num = ledger.account.number
+    cycle = int(ledger.extras.get("cycle_index", 0)) + 1
+    return {
+        "routing": ledger.account.routing,
+        "dre": f"{num[:4]} {num[4:8]} {num[8:]}",
+        "cycle": f"  {cycle} {num[:9]} {ledger.period.end.month:02d}",
+        "extra": "",
+    }
 
 
 def barcode_number(ledger: LedgerDocument) -> str:
@@ -95,10 +112,10 @@ def _personal_desc(ledger: LedgerDocument, row: LedgerRow) -> str:
     ``Payment Sent           10/09Pandaremit US 917-9248298 De Card 4499``。
     """
     key = _key(ledger, row)
-    text = clip(row.description, DESC_LIMIT)
+    text = clip(_UNSUPPORTED.sub(" ", row.description), DESC_LIMIT)
     stamp = f"{row.date:%m/%d}"
     if row.type == "ZELLE":
-        who = text.replace("ZELLE ", "").strip() or "TRANSFER"
+        who = zelle_party(row, "TRANSFER")
         return clip(f"Zelle Payment {who} {digits_zelle(ledger, key)}", DESC_LIMIT + 24)
     if row.type == "POS":
         return _fit("Card Purchase", f"{stamp} {text}", f"Card {ledger.account.last4}")
@@ -165,7 +182,7 @@ def build_personal(ledger: LedgerDocument, defaults: dict[str, Any]) -> dict[str
 def _business_desc(ledger: LedgerDocument, row: LedgerRow, limit: int = DESC_LIMIT) -> str:
     """商业版描述：大额转账把 Fedwire 的 IMAD / Trn 直接印在描述里。"""
     key = _key(ledger, row)
-    text = clip(row.description, limit)
+    text = clip(_UNSUPPORTED.sub(" ", row.description), limit)
     if row.direction == "debit" and row.amount_cents >= 100_000:
         imad = refs.fedwire_imad(f"{row.date:%m%d}", key)
         trn = refs.fedwire_trn(key)

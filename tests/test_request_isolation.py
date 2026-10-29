@@ -54,9 +54,10 @@ def test_distinct_requests_do_not_exchange_customer_data():
     renderer = registry.get_renderer("mercury")
     original = renderer.default_data()
     # 选择默认数据里确实显示的客户名字段，显式替换后验证文本归属。
-    key = "account_name" if "account_name" in original else "customer_name"
-    if key not in original:
-        key = next(k for k, v in original.items() if isinstance(v, str) and "EXAMPLE" in v)
+    key = next((k for k in ("customer_name", "company", "holder_name", "account_name")
+                if isinstance(original.get(k), str)), None)
+    if key is None:
+        key = next(k for k, v in original.items() if isinstance(v, str) and v.strip())
     requests = []
     for name, watermark in [("ALPHA REQUEST", True), ("BRAVO REQUEST", False)] * 2:
         data = copy.deepcopy(original)
