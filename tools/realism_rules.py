@@ -246,6 +246,46 @@ def date_order_problems(template: str, data: dict) -> list[dict[str, str]]:
     return problems
 
 
+# PDF 里绝不能残留的生成器指纹：真出件不会出现这些字样，出现一次就一眼假。
+# 注意别把参考件自带的 producer 也算进来（C1 的底稿 producer 本来就是 openhtmltopdf）。
+FINGERPRINTS = [
+    ("generator", "生成器指纹", re.compile(r"billgen|PyMuPDF|pymupdf|MuPDF|mupdf|pdf-poster|pdfpost", re.IGNORECASE)),
+]
+
+# 每家出件该带的 producer（与真实账单一致；改版式时顺手核对）
+EXPECTED_PRODUCER = {
+    "chase-personal": "OpenText",
+    "chase-business": "OpenText",
+    "usbank-personal": "AFP2PDF",
+    "usbank-business": "AFP2PDF",
+    "capitalone": "openhtmltopdf",
+    "mercury": "react-pdf",
+    "sofi": "LibreOffice",
+    "wellsfargo": "iText",
+    "amex": "Smart Communications",
+    "boa-personal": "TargetStream",
+    "boa-business": "TargetStream",
+}
+
+
+def pdf_fingerprint_problems(template: str, pdf: bytes) -> list[dict[str, str]]:
+    """扫原始字节 + 文档信息：生成器指纹残留、producer 与真实账单不符。"""
+    problems: list[dict[str, str]] = []
+    raw = pdf.decode("latin-1", errors="ignore")
+    for key, label, pattern in FINGERPRINTS:
+        hit = pattern.search(raw)
+        if hit:
+            problems.append({"template": template, "rule": key, "label": label, "hit": hit.group(0)[:40]})
+    with fitz.open(stream=pdf, filetype="pdf") as doc:
+        producer = (doc.metadata or {}).get("producer") or ""
+    want = EXPECTED_PRODUCER.get(template)
+    if want and want.lower() not in producer.lower():
+        problems.append(
+            {"template": template, "rule": "producer", "label": "producer 与真实账单不符", "hit": f"{producer or '（空）'} ≠ {want}"}
+        )
+    return problems
+
+
 def statement_text(template: str, ledger, *, watermark: bool = False) -> str:
     """渲染并取正文文本。
 
@@ -256,8 +296,10 @@ def statement_text(template: str, ledger, *, watermark: bool = False) -> str:
 
 
 def check_template(template: str, ledger) -> list[dict[str, str]]:
-    text = statement_text(template, ledger)
-    problems: list[dict[str, str]] = []
+    pdf = render(template, ledger).pdf
+    with fitz.open(stream=pdf, filetype="pdf") as doc:
+        text = "\n".join(page.get_text() for page in doc)
+    problems: list[dict[str, str]] = pdf_fingerprint_problems(template, pdf)
     for key, label, pattern in COMMON_RULES:
         hit = pattern.search(text)
         if hit:

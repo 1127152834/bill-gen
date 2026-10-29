@@ -46,3 +46,25 @@ def test_date_order_rule_catches_unsorted_rows() -> None:
     good = {"withdrawals": [{"date": "Aug 29"}, {"date": "Sep 4"}, {"date": "Sep 6"}]}
     assert not date_order_problems("usbank-personal", good)
     assert not date_order_problems("x", {"rows": [{"date": "Dec 30"}, {"date": "Jan 2"}]}), "跨年回绕被误判"
+
+
+def test_pdf_fingerprint_rule_catches_injected_producer():
+    """生成器指纹与 producer 必须能被抓到：这是「一眼假」里最容易漏的一层（元数据不印在纸面上）。"""
+    import importlib.util
+
+    import fitz
+
+    spec = importlib.util.spec_from_file_location("realism_rules", ROOT / "tools" / "realism_rules.py")
+    rr = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(rr)
+
+    doc = fitz.open()
+    doc.new_page().insert_text((72, 72), "x")
+    doc.set_metadata({"producer": "billgen 0.9 / PyMuPDF 1.24"})
+    problems = rr.pdf_fingerprint_problems("mercury", doc.tobytes())
+    assert {p["rule"] for p in problems} == {"generator", "producer"}
+
+    clean = fitz.open()
+    clean.new_page().insert_text((72, 72), "x")
+    clean.set_metadata({"producer": "react-pdf"})
+    assert rr.pdf_fingerprint_problems("mercury", clean.tobytes()) == []
