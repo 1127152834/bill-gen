@@ -57,7 +57,9 @@ def build_amex(ledger: LedgerDocument, defaults: dict[str, Any]) -> dict[str, An
             "customer_name": ledger.holder.name.upper(),
             "address_lines": _addr(ledger),
             "account_ending": ledger.account.last4,
-            "account_name": ledger.account.product,
+            # Account Summary 那一行是「产品名...卡尾4」（参考件 `360 Checking...5521`）；
+            # 直接用账本里的产品名会印成 `Everyday Checking`，与 360 版式的产品线对不上。
+            "account_name": f"{str(d.get('account_title') or '360 Checking').strip()}...{ledger.account.last4}",
             "bank": bank_block(ledger),
             # 出件日 = 期末 + 2 天：真账单是结单后 1–3 个工作日出件，
             # 和期末同一天等于「当天结单当天寄」。
@@ -141,14 +143,20 @@ def build_capitalone(ledger: LedgerDocument, defaults: dict[str, Any]) -> dict[s
             # 这一版式第 1 页的头块是「姓名 + 地址」整块画的（模板默认数据第一行就是姓名），
             # 只给地址会印出一张没有户名的账单（实测）。
             "address_lines": customer_lines(ledger),
-            "footer_address": ", ".join(_addr(ledger)).upper().strip(", "),  # 页脚只放地址，不带户名
+            # 页脚左下第三格印的是**Capital One 360 的账单寄送地址**（参考件：
+            # `P.O. Box 85123, Richmond, VA 23285`），不是持卡人住址；早先照持卡人地址
+            # 填，等于把「我们家地址」印在银行账单页脚上。电话同理走 360 专线。
+            "footer_address": "P.O. Box 85123, Richmond, VA 23285",
+            "footer_phone": "1-888-464-0727",
             "headline_month": fmt_month_year(ledger.period.end),
             "period_range": f"{ledger.period.start.strftime('%b %d')} - "
             f"{ledger.period.end.strftime('%b %d, %Y')}",
             "summary_start_label": ledger.period.start.strftime("%b %d"),
             "summary_end_label": ledger.period.end.strftime("%b %d"),
             "closing_date": ledger.period.end.strftime("%m/%d/%Y"),
-            "account_name": ledger.account.product,
+            # Account Summary 那一行是「产品名...卡尾4」（参考件 `360 Checking...5521`）；
+            # 直接用账本里的产品名会印成 `Everyday Checking`，与 360 版式的产品线对不上。
+            "account_name": f"{str(d.get('account_title') or '360 Checking').strip()}...{ledger.account.last4}",
             "account_number": ledger.account.display,
             "days_in_cycle": str(ledger.period.days),
             "opening_balance": cents_to_float(ledger.opening_cents),

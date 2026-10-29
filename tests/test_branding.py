@@ -409,6 +409,7 @@ def test_chase_body_domain_is_redrawn_as_one_run():
         result = render(template_id, book)
         with fitz.open(stream=result.pdf, filetype="pdf") as doc:
             text = " ".join(page.get_text() for page in doc)
-        assert "at chase.com or call us at the number listed on this statement." in text
+        # 底稿印的是带路径的 `chase.com/disclosures`，剪掉路径就是另一句话了
+        assert "at chase.com/disclosures or call us at the number listed on this statement." in text
         assert "harb orline" not in text
         assert "Fee on this account (if applicable), or if you have any questions" in text

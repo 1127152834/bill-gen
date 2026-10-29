@@ -373,8 +373,8 @@ def build_subs(d):
     if b.get("domain"):
         # 带路径的串必须再先一步：只换域名时路径会留着，替换后比原 span 长得多，
         # 会压到同一行后文的 " or call us at the number…"（实测）
-        subs.append(("chase.com/business/disclosures", b["domain"]))
-        subs.append(("chase.com/disclosures", b["domain"]))
+        subs.append(("chase.com/business/disclosures", f"{b['domain']}/business/disclosures"))
+        subs.append(("chase.com/disclosures", f"{b['domain']}/disclosures"))
         subs.append(("Chase.com", b["domain"]))
         subs.append(("chase.com", b["domain"]))
     if b.get("name") and b["name"] not in DEFAULT_NAMES:

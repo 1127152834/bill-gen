@@ -21,7 +21,7 @@
 | 字体（共有） | F10, F11, F12, F14, F2, F3, F4, F5, F6, F8, F9, Helvetica, Helvetica-Bold, Symbo | 参考共 15 种 | OK |
 | 字体（仅出片） | 无 | — | INFO |
 | 最低图效 DPI | 600.0 | 600.0 | OK |
-| 第 1 页墨量 % | 11.4 | 12.4 | OK |
+| 第 1 页墨量 % | 11.5 | 12.4 | OK |
 | 区块标题 CHECKING SUMMARY | 有 | 有 | OK |
 | 区块标题 DEPOSITS AND ADDITIONS | 有 | 有 | OK |
 | 参考件身份/占位泄漏 | 无 | — | OK |

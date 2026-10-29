@@ -78,7 +78,7 @@
 | 字体（共有） | MyFontBold, MyFontRegular | 参考共 3 种 | OK |
 | 字体（仅出片） | MyFontMedium | — | INFO |
 | 最低图效 DPI | 72.0 | 72.0 | OK |
-| 第 1 页墨量 % | 34.4 | 34.5 | OK |
+| 第 1 页墨量 % | 34.5 | 34.5 | OK |
 | 区块标题 TOTAL ENDING BALANCE | 有 | 有 | OK |
 | 区块标题 Account Summary | 有 | 有 | OK |
 | 区块标题 Cashflow Summary | 有 | 有 | OK |

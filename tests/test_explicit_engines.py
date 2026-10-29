@@ -18,14 +18,16 @@ ENGINES = [
 # 原稿基线文本见各主题模块的 `PARITY_DATA`。
 # 水印层级改回「最上层、极浅灰」后（与参考件一致，见 docs/notes/e2e-round1.md），
 # 字符流顺序与像素都变了，三套基线按新渲染重采。
+# 2026-10-30 再采 capitalone：标语改成参考件的 "Thanks for saving with Capital One 360®"、
+# 页脚换成 360 专线与 P.O. Box、Account Summary 首行改 "360 Checking...<last4>"。
 DEFAULT_TEXT_SHA = {
     "mercury": "03624891786d6e2bd4dfbac2b305bdff1458b1db0304ab3d1b702bda7a6d4f2f",
-    "capitalone": "e83890f95d5cbcbb28464165bf8b187f33947f650a33cb32ae863c8a5a16c4bc",
+    "capitalone": "fc82757de8c6629b02c90348a1f533c820bc7bdd7f82a3f5a5b0777ae625afc0",
     "sofi": "4260995e2f8761189763277b12b3f1114e09cd2467070b4279aa688d57a70f32",
 }
 DEFAULT_PIXELS = {
     "mercury": ['f5ba07c7d5a6a5efedfefb58b4180c4c', '4ae7e9f5265b75ff1020257b3a002c6c'],
-    "capitalone": ['03f2b8f34b718b3ca39554c2739336d8', '9149c670de197cb569d518c610e89f17', 'e407454df966612f38d9d9fd1925a588'],
+    "capitalone": ['039826011de069ddf80cf0e19916ede6', 'bf95905cb2ce2cf46a18b025ae935a1a', '909ddfd7d990ccfece5abf686902bc1c'],
     "sofi": ['beddba3594841db54db4b629da43a055', 'af167418cb9d2a86127a55cbc24bb796'],
 }
 

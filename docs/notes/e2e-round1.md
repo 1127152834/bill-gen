@@ -157,3 +157,36 @@ U.S. Bank 的「金额列 `$` 独立成列」「负数尾随减号 `1,650.00-`�
 - 实测当前 11 套全绿；注入 `producer=billgen 0.9 / PyMuPDF 1.24` 的实验件会被同时报
   `generator` 与 `producer` 两条（`tests/test_realism_rules.py::test_pdf_fingerprint_rule_catches_injected_producer`）。
 - 提交 `dc445ea`。回滚：`git revert dc445ea`。
+
+## 第七轮（参考件逐行文本比对：标语、页脚、网址路径、Account Summary）
+
+不再只看页面尺寸/页数/墨量这些粗指标，改成**逐行文本比对**：把参考件的每个文字行
+（纯数字行剔除）拿到我们的出片里找，缺的位置逐条看。这一轮抓出四处真问题：
+
+1. **Capital One 标语是我们自己编的**。参考件写着 `Thanks for saving with Capital One 360®`，
+   我们印 `Your account statement` —— 一句泛泛的说明，且商标号还被当成「多余字符」删过。
+   改成参考件的原句（`®` 用 `\u00ae` 写，别让编辑器吃掉）。
+2. **Capital One 页脚印的是持卡人住址**。参考件第三格是**银行的账单寄送地址**
+   `P.O. Box 85123, Richmond, VA 23285`，电话是 360 专线 `1-888-464-0727`（不是 1-800-227-4825）。
+   早先照持卡人地址填，等于把「我家地址」印在银行页脚上。
+3. **Capital One Account Summary 第一行**该是 `360 Checking...<尾4>`（参考件 `360 Checking...5521`），
+   我们直接印账本里的产品名 → `Everyday Checking`，跟 360 版式的产品线对不上。
+4. **Chase 正文把网址路径剪了**。参考件 `at chase.com/disclosures or call us…`、
+   企业版 `Business Accounts at chase.com/business/disclosures or visit a Chase branch.`；
+   我们只替换域名，印成 `at chase.com or call us…`。真账单不会把自家披露页路径省掉。
+
+新增两条闸门（`tools/realism_rules.py`）：
+- `url_path_problems(template, text)`：参考件里所有「带路径的网址」必须在出片里原样出现；
+  单测注入 `web site: chase.com` 必须报 `chase.com/disclosures`。
+- 加上第六轮的 `pdf_fingerprint_problems`，`check_template()` 现在同时看字节、元数据、文本。
+
+基线影响与重采：
+- `tests/test_branding.py` 的断言补 `/disclosures`；
+- `tools/gen_bank_forms_assets.py` 重新导出 11 套 assets（C1 默认数据变了）；
+- `tools/render_regression.py refresh` 重采 16 例（chase 个人/企业文本变化）；
+- `tests/test_explicit_engines.py` 重采 capitalone 的 `DEFAULT_TEXT_SHA` 与三页像素。
+
+验证：`pytest` 562 passed / 16 skipped / 33 subtests；`realism_rules.py` 11 套全绿；
+`e2e_compare` 个人 7 套差异 0 项 + 2 套版式漂移 0 段，企业 3 套全 0。
+
+回滚：`git revert <本轮提交>`（C1 标语/页脚/Account Summary + Chase 路径 + 两条闸门在同一提交里）。

@@ -68,3 +68,17 @@ def test_pdf_fingerprint_rule_catches_injected_producer():
     clean.new_page().insert_text((72, 72), "x")
     clean.set_metadata({"producer": "react-pdf"})
     assert rr.pdf_fingerprint_problems("mercury", clean.tobytes()) == []
+
+
+def test_url_path_rule_catches_stripped_path():
+    """参考件里 `chase.com/disclosures` 被剪成 `chase.com` 时必须报出来。"""
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("realism_rules", ROOT / "tools" / "realism_rules.py")
+    rr = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(rr)
+
+    assert [p["hit"] for p in rr.url_path_problems("chase-personal", "web site: chase.com")] == [
+        "chase.com/disclosures"
+    ]
+    assert rr.url_path_problems("chase-personal", "at chase.com/disclosures or call us") == []

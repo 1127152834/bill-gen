@@ -268,6 +268,40 @@ EXPECTED_PRODUCER = {
 }
 
 
+#: 有真参考件的版式：参考件里带路径的网址，我们出片必须一字不差地留着。
+#: 银行把「查披露页 / 查账单说明」的路径印在正文里，剪掉只留域名是常见的手滑，
+#: 但它一眼能看出来（真账单不会把自家路径省了）。
+REFERENCE_PDF = {
+    "chase-personal": "src/billgen/themes/chase/assets/chase_static_personal.pdf",
+    "chase-business": "src/billgen/themes/chase/assets/chase_static_business.pdf",
+    "usbank-personal": "src/billgen/themes/usbank/assets/us_static_personal.pdf",
+    "usbank-business": "src/billgen/themes/usbank/assets/usbiz_static.pdf",
+    "capitalone": "src/billgen/themes/capitalone/C1-Personal-Statement-SAMPLE.pdf",
+    "mercury": "src/billgen/themes/mercury/Demo-Bank-Statement-SAMPLE.pdf",
+    "sofi": "src/billgen/themes/sofi/SoFi-Statement-SAMPLE.pdf",
+}
+
+_URL_WITH_PATH = re.compile(r"([a-z0-9-]+(?:\.[a-z0-9-]+)*\.(?:com|net|org)/[A-Za-z0-9/_.-]+)")
+
+
+def url_path_problems(template: str, text: str) -> list[dict[str, str]]:
+    """参考件里带路径的网址，出片里必须一个不少（只换域名、丢掉 /path 是最常见的手滑）。"""
+    rel = REFERENCE_PDF.get(template)
+    if not rel:
+        return []
+    try:
+        with fitz.open(str(ROOT / rel)) as ref:
+            ref_text = " ".join(page.get_text() for page in ref)
+    except Exception:  # noqa: BLE001 - 参考件读不到时不阻断规则
+        return []
+    want = {u.rstrip(".") for u in _URL_WITH_PATH.findall(ref_text)}
+    have = {u.rstrip(".") for u in _URL_WITH_PATH.findall(text)}
+    return [
+        {"template": template, "rule": "url-path", "label": "参考件里的网址路径被剪掉了", "hit": u}
+        for u in sorted(want - have)
+    ]
+
+
 def pdf_fingerprint_problems(template: str, pdf: bytes) -> list[dict[str, str]]:
     """扫原始字节 + 文档信息：生成器指纹残留、producer 与真实账单不符。"""
     problems: list[dict[str, str]] = []
@@ -300,6 +334,7 @@ def check_template(template: str, ledger) -> list[dict[str, str]]:
     with fitz.open(stream=pdf, filetype="pdf") as doc:
         text = "\n".join(page.get_text() for page in doc)
     problems: list[dict[str, str]] = pdf_fingerprint_problems(template, pdf)
+    problems.extend(url_path_problems(template, text))
     for key, label, pattern in COMMON_RULES:
         hit = pattern.search(text)
         if hit:
