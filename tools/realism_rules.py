@@ -358,6 +358,141 @@ def page_number_problems(template: str, pdf: bytes) -> list[dict[str, str]]:
     return problems
 
 
+_MONEY_TOKEN = _re_page.compile(r"^[-+]?\$?[\d,]+\.\d\d[-+]?$")
+# 金额常被拆成几格：`$` 单独一格、负号单独一格、`-  5,154.53` 中间还带空格。
+_AMOUNT_FRAGMENT = _re_page.compile(r"^[-+$]?[\d,]*\.?\d*[-+]?$")
+
+
+def _money_of(*parts: str) -> int | None:
+    joined = "".join(part.replace(" ", "") for part in parts)
+    return _money_cents(joined) if _MONEY_TOKEN.match(joined) else None
+_DATE_LABEL = _re_page.compile(r"^\d{1,2}/\d{1,2}|^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\b", _re_page.I)
+_BEGIN_LABEL = _re_page.compile(r"beginning balance", _re_page.I)
+_END_LABEL = _re_page.compile(r"(ending|closing|current) balance", _re_page.I)
+
+
+def _money_cents(token: str) -> int | None:
+    """`$1,234.56` / `-1,234.56` / `1,234.56-`（U.S. Bank 尾随减号）→ 分。"""
+    text = token.replace("$", "").replace(",", "").replace(" ", "")
+    negative = text.startswith("-") or text.endswith("-")
+    text = text.strip("-")
+    if not text:
+        return None
+    try:
+        value = int(round(float(text) * 100))
+    except ValueError:
+        return None
+    return -value if negative else value
+
+
+def _text_rows(pdf: bytes, tol: float = 2.0, gap: float = 18.0) -> list[tuple[float, float, str, int | None]]:
+    """把文字按基线聚成行，再把「标签 → 它右边那一笔金额」配成 `(物理页, 基线, 标签, 金额)`。
+
+    三件事非做不可，否则规则会「假通过」：
+    * 金额和标签通常不是同一个 span（右对齐单独绘制），按基线 ±tol 抓同行；
+    * 金额常被拆成几格（U.S. Bank 的 `$` 与 `11,249.73`、Wells Fargo 的 `-` 与 `5,154.53`），
+      要把紧随其后的金额碎片拼成一个数；
+    * 摘要区可能是**双列**（Amex 左边 `Statement Summary`、右边 `Interest Summary` 共用同一条
+      基线），所以「取本行最后一个金额」会拿到右列的数——只取标签之后、下一个标签之前的金额。
+    """
+    rows: list[tuple[float, float, str, int | None]] = []
+    with fitz.open(stream=pdf, filetype="pdf") as doc:
+        for page in doc:
+            spans: list[tuple[float, float, float, str]] = []      # x0, x1, 基线, 文本
+            for block in page.get_text("dict")["blocks"]:
+                for line in block.get("lines", []):
+                    for span in line["spans"]:
+                        text = span["text"].strip()
+                        if text:
+                            spans.append((span["bbox"][0], span["bbox"][2], span["origin"][1], text))
+            spans.sort(key=lambda item: (round(item[2], 1), item[0]))
+
+            def segments(baseline: float, items: list[tuple[float, float, str]]) -> None:
+                items.sort()
+                chunks: list[list[tuple[float, float, str]]] = []
+                prev_x1 = None
+                for item in items:
+                    if chunks and item[0] - (prev_x1 or 0) <= gap:
+                        chunks[-1].append(item)
+                    else:
+                        chunks.append([item])
+                    prev_x1 = item[1]
+
+                def is_money(chunk: list[tuple[float, float, str]]) -> bool:
+                    # 金额碎片里可能夹空格（Wells Fargo 印 `-  5,154.53`），先抹掉再判。
+                    return all(_AMOUNT_FRAGMENT.match(text.replace(" ", "")) for _, _, text in chunk)
+
+                index = 0
+                while index < len(chunks):
+                    chunk = chunks[index]
+                    if is_money(chunk):
+                        index += 1
+                        continue
+                    label = " ".join(text for _, _, text in chunk).strip()
+                    amount = None
+                    look = index + 1
+                    gathered: list[str] = []
+                    prev_x1 = chunk[-1][1]
+                    while look < len(chunks) and is_money(chunks[look]):
+                        parts = [text for _, _, text in chunks[look]]
+                        adjacent = chunks[look][0][0] - prev_x1 <= 12.0
+                        candidate = gathered + parts if adjacent else parts
+                        value = _money_of(*candidate)
+                        if value is not None:
+                            amount = value
+                            look += 1
+                            break
+                        if adjacent:
+                            gathered = candidate
+                        else:
+                            gathered = parts
+                        prev_x1 = chunks[look][-1][1]
+                        look += 1
+                    rows.append((page.number + 1, baseline, label, amount))
+                    index = look if amount is not None else index + 1
+
+            group: list[tuple[float, float, float, str]] = []
+            base = None
+            for span in spans:
+                if base is None or abs(span[2] - base) <= tol:
+                    group.append(span)
+                    base = span[2] if base is None else base
+                    continue
+                segments(base, [(x0, x1, text) for x0, x1, _, text in group])
+                group = [span]
+                base = span[2]
+            if group:
+                segments(base or 0.0, [(x0, x1, text) for x0, x1, _, text in group])
+    return rows
+
+
+def summary_arithmetic_problems(template: str, pdf: bytes) -> list[dict[str, str]]:
+    """摘要区必须自己算得平：`期初 + 各分项（带符号）= 期末`。
+
+    只取第一对 `Beginning Balance … Ending Balance`，且跳过以日期开头的行——
+    Chase / Amex 的流水区也会出现 `Beginning Balance`，把流水金额算进来必然算不平。
+    """
+    rows = [r for r in _text_rows(pdf) if r[3] is not None and r[2] and not _DATE_LABEL.match(r[2])]
+    begin = next((i for i, r in enumerate(rows) if _BEGIN_LABEL.search(r[2])), None)
+    if begin is None:
+        return []
+    end = next((i for i, r in enumerate(rows) if i > begin and _END_LABEL.search(r[2])), None)
+    if end is None or end - begin < 2:
+        return []
+    opening = rows[begin][3]
+    closing = rows[end][3]
+    middle = sum(r[3] for r in rows[begin + 1 : end])
+    if opening + middle == closing:
+        return []
+    return [{
+        "template": template,
+        "rule": "summary-arithmetic",
+        "label": "摘要区加减法不平（期初 + 分项 ≠ 期末）",
+        "hit": f"期初 {opening} + 分项 {middle} = {opening + middle}，期末印的是 {closing}"
+               f"（差 {closing - opening - middle} 分）",
+    }]
+
+
 def statement_text(template: str, ledger, *, watermark: bool = False) -> str:
     """渲染并取正文文本。
 
@@ -373,6 +508,7 @@ def check_template(template: str, ledger) -> list[dict[str, str]]:
         text = "\n".join(page.get_text() for page in doc)
     problems: list[dict[str, str]] = pdf_fingerprint_problems(template, pdf)
     problems.extend(page_number_problems(template, pdf))
+    problems.extend(summary_arithmetic_problems(template, pdf))
     problems.extend(url_path_problems(template, text))
     for key, label, pattern in COMMON_RULES:
         hit = pattern.search(text)

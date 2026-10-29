@@ -82,3 +82,37 @@ def test_url_path_rule_catches_stripped_path():
         "chase.com/disclosures"
     ]
     assert rr.url_path_problems("chase-personal", "at chase.com/disclosures or call us") == []
+
+
+def test_summary_arithmetic_rule_catches_broken_total():
+    """摘要区加减法必须自洽：改一位数就该被抓到（这是拿账单去办事时第一个被查的东西）。"""
+    import importlib.util
+
+    import fitz
+
+    spec = importlib.util.spec_from_file_location("realism_rules", ROOT / "tools" / "realism_rules.py")
+    rr = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(rr)
+
+    def page(begin: str, credits: str, debits: str, end: str) -> bytes:
+        doc = fitz.open()
+        p = doc.new_page()
+        for i, (label, amount) in enumerate(
+            (
+                ("Beginning Balance", begin),
+                ("Deposits and Additions", credits),
+                ("Electronic Withdrawals", debits),
+                ("Ending Balance", end),
+            )
+        ):
+            y = 100 + i * 14
+            p.insert_text((72, y), label)
+            p.insert_text((420, y), amount)
+        return doc.tobytes()
+
+    ok = rr.summary_arithmetic_problems("chase-personal", page("1,000.00", "500.00", "-250.00", "1,250.00"))
+    assert ok == []
+
+    bad = rr.summary_arithmetic_problems("chase-personal", page("1,000.00", "500.00", "-250.00", "1,350.00"))
+    assert [p["rule"] for p in bad] == ["summary-arithmetic"]
+    assert "1,250.00" in bad[0]["hit"] or "125000" in bad[0]["hit"]
