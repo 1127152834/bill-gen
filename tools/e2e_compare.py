@@ -57,8 +57,10 @@ SECTION_LABELS = {
     "boa-business": ["Account summary", "Deposits and other additions"],
     "chase-personal": ["CHECKING SUMMARY", "CUSTOMER SERVICE INFORMATION", "TRANSACTION DETAIL"],
     "chase-business": ["CHECKING SUMMARY", "DEPOSITS AND ADDITIONS"],
-    "usbank-personal": ["Uni-Statement", "SAFE DEBIT ACCOUNT", "Deposits / Credits", "Other Withdrawals"],
-    "usbank-business": ["Business Statement", "BUSINESS ESSENTIALS CHECKING"],
+    # `Account Summary` 这行小标题以前被擦掉就没再补（2026-10-30 补回），
+    # 列进必检清单，免得再漏
+    "usbank-personal": ["Uni-Statement", "SAFE DEBIT ACCOUNT", "Account Summary", "Deposits / Credits", "Other Withdrawals"],
+    "usbank-business": ["Business Statement", "BUSINESS ESSENTIALS CHECKING", "Account Summary"],
     "capitalone": ["TOTAL ENDING BALANCE", "Account Summary", "Cashflow Summary"],
     "mercury": ["Account details", "Account activity", "All Transactions"],
     "sofi": ["Primary Account Holder", "Transaction Details", "Contact Information"],

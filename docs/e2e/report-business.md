@@ -45,6 +45,7 @@
 | 第 1 页墨量 % | 17.8 | 18.3 | OK |
 | 区块标题 Business Statement | 有 | 有 | OK |
 | 区块标题 BUSINESS ESSENTIALS CHECKING | 有 | 有 | OK |
+| 区块标题 Account Summary | 有 | 有 | OK |
 | 参考件身份/占位泄漏 | 无 | — | OK |
 | 日期格式 | Mon D, Mon DD, YYYY, Month D, YYYY | MM/DD, Mon D, Mon DD, YYYY, Month D, YYYY | OK |
 

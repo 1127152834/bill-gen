@@ -666,7 +666,10 @@ def _plan_lines(plans, d, sum_lines):
 
 def _emit_summary(pages, d, sum_lines):
     _erase(pages[0], *BANDS["summary_rows"][1:])
-    blob = b""
+    # `Account Summary` 这行小标题在参考件里是有的（Arial-BoldMT 10pt，基线 450.25，
+    # x 20.15），我们擦掉摘要区之后一直没补回来 —— 页面上就少一行标题，
+    # 公户版是画的（bl 441.2），个人版以前漏了。
+    blob = make_units(0, BOLD_FONT, "Account Summary", 10.0, 20.1, SUMMARY_TITLE_BL)
     for y, lbl, val, dollar, x in sum_lines:
         lbl = lbl.format(start=d["period"]["start"].split(",")[0],
                          end=d["period"]["end"])

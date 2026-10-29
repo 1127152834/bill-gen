@@ -51,9 +51,10 @@
 | 字体（共有） | Arial-BoldItalicMT, Arial-BoldMT, Arial-ItalicMT, ArialMT, C0000365_T1001140_0,  | 参考共 9 种 | OK |
 | 字体（仅出片） | Helvetica-Bold | — | INFO |
 | 最低图效 DPI | 240.4 | 240.4 | OK |
-| 第 1 页墨量 % | 15.3 | 13.3 | OK |
+| 第 1 页墨量 % | 15.4 | 13.3 | OK |
 | 区块标题 Uni-Statement | 有 | 有 | OK |
 | 区块标题 SAFE DEBIT ACCOUNT | 有 | 有 | OK |
+| 区块标题 Account Summary | 有 | 有 | OK |
 | 区块标题 Deposits / Credits | 有 | 有 | OK |
 | 区块标题 Other Withdrawals | 有 | 有 | OK |
 | 参考件身份/占位泄漏 | 无 | — | OK |

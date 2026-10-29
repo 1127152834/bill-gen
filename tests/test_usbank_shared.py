@@ -26,10 +26,12 @@ THEME = Path(__file__).resolve().parents[1] / "src/billgen/themes/usbank"
 # 期间换成 `Jan 05, 2027` 后渲染缺字（肉眼 `an 05`）。shared.patch_outlines 从系统
 # Arial 补轮廓后像素变了、文本层不变 —— 文本摘要未动，仅四个 us 像素摘要更新。
 GOLDENS = {
-    "us-default": (3, "de98766582c5dae3d05289cf39659a2d2b4dbda7f43aaaf766ea8de323bda621", "766a0ab278ae6c3bc5aceef8dd8893d981897d0eeda74b4fd7f0c51df6e6984e"),
-    "us-empty": (3, "4c9991a2b3df22b70c2ef3e87ece684415ea036abcee885ad4ff3ce7c8ebe8ae", "77ebb6527f535008bb8de020a2d48fb116fd7e9e08f4d101b1e0dc5480fc2748"),
-    "us-multipage": (8, "467ac9b5a5a60ea3bde1ac3863d8ccf937474073576c4fb08b4424384cee3322", "e09000fdd3914f65dc74bf9efd9c2c63bf67f28bd4e4eb4d09011370828e247c"),
-    "us-replay": (3, "3ee229942947bd30e59146409dfb5c89b8955a9efcaa8fd1a7fda8a20b406374", "153a3e2933df17c36537bcda4a9f9b539e32b149711e3bc3066986a044e47d1a"),
+    # 2026-10-30 重采：补回参考件里的 `Account Summary` 小标题（Arial-BoldMT 10pt、
+    # bl 450.25），四份 us 基线文本与像素都变了。
+    "us-default": (3, "b8fd2bda226dd5d4ee8bb3f7b7007bfcafef6637a986033a479916b6a8c51f55", "ee5c86ebeccc728b5183616f72cf69a2976ac4ae85eaf73ed02720cf9c3d0782"),
+    "us-empty": (3, "3484d006942d099c62beb5df8ecdb9f7da545898ca8f9a1f426920dff65c756a", "62554989f9e809f5153f797cfe51307bcc069fadf6f5fb53d1ef3c2d22b35225"),
+    "us-multipage": (8, "0f5cee80adef870808e4a21a6df6c450f9fe067e40208c682aaa6c7200672140", "f254098956b7057a81039bf8ea72ebc07c53f95d66f4572c43e770bab3e3f3f3"),
+    "us-replay": (3, "832982dc1e48f00cc28969bb6963ef4023f283d88e3eb67b17081e04e9a32e75", "924e485e3820d90c526d0c88202a64105cce9e376a70f09fbb0b6d5c381091fb"),
     "usbiz-default": (2, "40059874355e9db9aa01ba3a741952e0bbf0e2f1082ae6d54662552051eb49e0", "8ac74649d8debe521a2e936567b750392af2b7fd2b4383d3be5ed41c0a32b552"),
     "usbiz-empty": (2, "8eb58044b396509a23400df9dc90cd97bec30767dc8bbe6c3f2e52984bed65f2", "116078d9c603beb3abe19ecda2e8047acd64459e9bdfd61d2a17fa2d9798abad"),
     "usbiz-multipage": (8, "30ec590b44e57ab3bcf761be5b26e9af554ddb06b23cd0ac9377e3d50c2cea12", "76091b5e9021b702eb2efa1ae65e01a45b491562a7bd5d519da4de47f310d033"),

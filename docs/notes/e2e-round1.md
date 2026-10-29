@@ -190,3 +190,21 @@ U.S. Bank 的「金额列 `$` 独立成列」「负数尾随减号 `1,650.00-`�
 `e2e_compare` 个人 7 套差异 0 项 + 2 套版式漂移 0 段，企业 3 套全 0。
 
 回滚：`git revert <本轮提交>`（C1 标语/页脚/Account Summary + Chase 路径 + 两条闸门在同一提交里）。
+
+## 第八轮（U.S. Bank 少了 `Account Summary` 小标题）
+
+把参考件里「没有数字的纯标签行」全捞出来跟我们出片对，抓到一条结构性缺失：
+
+- 参考件 `us_static_personal.pdf` 第 1 页在 `SAFE DEBIT ACCOUNT` 下方有一行小标题
+  `Account Summary`（Arial-BoldMT 10pt，基线 **450.25**，x **20.15**），我们擦掉摘要区之后
+  **一直没画回来**，页面上就少一行——公户版是画的（`generate_biz.py` 的 `SUMMARY_TITLE_BL = 441.2`），
+  个人版只有常量 `SUMMARY_TITLE_BL = 450.2`，没被任何代码引用。
+- 修法：`src/billgen/themes/usbank/generate_us.py::_emit_summary()` 里先发这一行
+  `make_units(0, BOLD_FONT, "Account Summary", 10.0, 20.1, SUMMARY_TITLE_BL)`，再发行。
+- 顺手把这个标签加进 `tools/e2e_compare.py::SECTION_LABELS`（个人 + 企业），列进必检清单。
+- 基线重采：`tests/test_usbank_shared.py` 的 `us-*` 四条（文本 + 像素）、
+  `tools/render_regression.py refresh` 8 例。
+- 复验：`pytest` 562 passed / 16 skipped / 33 subtests；`realism_rules.py` 全绿；
+  `e2e_compare` 个人 usbank-personal 差异 0 项、企业 3 套全 0。
+
+回滚：`git revert <本轮提交>`。
