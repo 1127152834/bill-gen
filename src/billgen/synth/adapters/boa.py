@@ -91,8 +91,11 @@ def build(ledger: LedgerDocument, defaults: dict[str, Any]) -> dict[str, Any]:
     parts = split_rows(ledger)
 
     deposits = [_row(ledger, r) for r in parts["deposits"]]
-    withdrawals = [_row(ledger, r) for r in parts["checks"] + parts["atm"] + parts["electronic"] + parts["other"]]
-    withdrawals.sort(key=lambda r: r["date"])
+    # 按日期对象排序，不是按 "Aug 29" 这种字符串：字符串排序里 May 排在 Jun 后面（实测坑）
+    withdrawal_rows = sorted(
+        parts["checks"] + parts["atm"] + parts["electronic"] + parts["other"], key=lambda r: r.date
+    )
+    withdrawals = [_row(ledger, r) for r in withdrawal_rows]
     fees = [_row(ledger, r) for r in parts["fees"]]
 
     deposits_cents = sum(r.amount_cents for r in parts["deposits"])

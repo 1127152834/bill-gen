@@ -109,3 +109,15 @@ WF 号码消失的根因链（值得记一笔）：
 - `compare_layout()` 跳过孤立单字符 span（`-`/`•`）——它们和金额负号撞车，之前让 wellsfargo 恒报 1 段漂移。
 
 回滚：`git revert fa66f48 0e2936b`；单点 `git checkout <prev> -- src/billgen/synth/bridge.py src/billgen/synth/adapters/_common.py src/billgen/synth/adapters/wellsfargo.py`。
+
+## 第四轮（C1 户名 / 页脚地址 / 流水日期顺序）
+
+| 版式 | 问题 | 修法 |
+| --- | --- | --- |
+| capitalone | 第 1 页头块只有地址，**户名整行没有**（参考件是「Jordan Smith / 118 Maple Street / Portland, OR」整块） | `adapters/simple.py::build_capitalone` 的 `address_lines` 改用 `customer_lines(ledger)`（姓名+地址） |
+| capitalone | 页脚地址一直印模板默认样例地址 | 新增 `footer_address`，取持卡人地址造串（页脚不带户名） |
+| usbank | 「Other Withdrawals」日期倒序：`Sep 6` → `Aug 29` → `Sep 4` | `adapters/usbank.py` 把 `checks+atm+electronic+other+fees` 拼完后按 `r.date` 排序（原来按分区拼接） |
+| boa | 同类隐患：排的是格式化字符串 `"Aug 29"`，跨月 `May` 会排到 `Jun` 之后 | `adapters/boa.py` 改成按 `LedgerRow.date` 对象排序 |
+
+U.S. Bank 的「金额列 `$` 独立成列」「负数尾随减号 `1,650.00-`」经核对是 `themes/usbank/shared.py::_fmt_amt` 有意为之（该行真件的写法就是尾随 `-`），不动。
+回滚：`git checkout <prev> -- src/billgen/synth/adapters/simple.py src/billgen/synth/adapters/usbank.py src/billgen/synth/adapters/boa.py`。

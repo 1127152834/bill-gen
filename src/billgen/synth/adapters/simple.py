@@ -26,7 +26,7 @@ from ..money import (
     fmt_month_year,
     fmt_slash_year,
 )
-from ._common import address_lines, bank_block, clip, deep, statement_memo
+from ._common import address_lines, bank_block, clip, customer_lines, deep, statement_memo
 
 __all__ = ["build_amex", "build_capitalone", "build_mercury", "build_sofi"]
 
@@ -138,7 +138,10 @@ def build_capitalone(ledger: LedgerDocument, defaults: dict[str, Any]) -> dict[s
         {
             "bank": bank_block(ledger),
             "customer_name": ledger.holder.name.upper(),
-            "address_lines": _addr(ledger),
+            # 这一版式第 1 页的头块是「姓名 + 地址」整块画的（模板默认数据第一行就是姓名），
+            # 只给地址会印出一张没有户名的账单（实测）。
+            "address_lines": customer_lines(ledger),
+            "footer_address": ", ".join(_addr(ledger)).upper().strip(", "),  # 页脚只放地址，不带户名
             "headline_month": fmt_month_year(ledger.period.end),
             "period_range": f"{ledger.period.start.strftime('%b %d')} - "
             f"{ledger.period.end.strftime('%b %d, %Y')}",

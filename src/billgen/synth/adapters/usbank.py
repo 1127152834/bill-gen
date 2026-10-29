@@ -118,10 +118,15 @@ def _build(ledger: LedgerDocument, defaults: dict[str, Any], template: str) -> d
             "bank": bank_block(ledger),
             # 智能邮件条码（IMB）的 20 位跟踪号：按账号与账期派生，不能留底稿原值
             "imb_serial": imb_serial(ledger),
-            "deposits": [_row(ledger, r) for r in parts["deposits"]],
+            # 真账单的「Other Withdrawals」按日期排（ATM/ACH/费用混在一起），
+            # 按分区拼会印出 Sep 6 → Aug 29 → Sep 4 这种倒序（实测）。
+            "deposits": [_row(ledger, r) for r in sorted(parts["deposits"], key=lambda r: r.date)],
             "withdrawals": [
                 _row(ledger, r)
-                for r in parts["checks"] + parts["atm"] + parts["electronic"] + parts["other"] + parts["fees"]
+                for r in sorted(
+                    parts["checks"] + parts["atm"] + parts["electronic"] + parts["other"] + parts["fees"],
+                    key=lambda r: r.date,
+                )
             ],
             "summary": {
                 "begin": cents_to_grouped(ledger.opening_cents),
