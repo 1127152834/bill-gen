@@ -160,7 +160,13 @@ def amex_desc(ledger: LedgerDocument, row: LedgerRow, text: str) -> str:
     Amex 支票账户的账单就是这么印的。
     """
     if _is_card(row):
-        return f"DEBIT CARD PURCHASE {text} {merchant_location(ledger, text)}".strip()
+        # 上游描述里常已带 ``WALGREENS #5310 AUSTIN TX``，再补一次城市就成了
+        # ``… AUSTIN TX AUSTIN TX``（实测）。只在末尾没有城市时才补。
+        place = merchant_location(ledger, text)
+        tail = text.upper().strip()
+        if place and not tail.endswith(place):
+            tail = f"{tail} {place}"
+        return f"DEBIT CARD PURCHASE {tail}".strip()
     if row.type == "ACH":
         # 本模板样张里的 ACH 行就是 `ACH CREDIT …` / `ACH DEBIT …`
         mark = "ACH CREDIT" if row.direction == "credit" else "ACH DEBIT"

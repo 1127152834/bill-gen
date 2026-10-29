@@ -5,6 +5,7 @@
 """
 from __future__ import annotations
 
+from datetime import timedelta
 from typing import Any
 
 from .. import refs
@@ -58,7 +59,9 @@ def build_amex(ledger: LedgerDocument, defaults: dict[str, Any]) -> dict[str, An
             "account_ending": ledger.account.last4,
             "account_name": ledger.account.product,
             "bank": bank_block(ledger),
-            "statement_date": ledger.period.end.strftime("%m/%d/%Y"),
+            # 出件日 = 期末 + 2 天：真账单是结单后 1–3 个工作日出件，
+            # 和期末同一天等于「当天结单当天寄」。
+            "statement_date": (ledger.period.end + timedelta(days=2)).strftime("%m/%d/%Y"),
             "period_start": ledger.period.start.strftime("%m/%d/%Y"),
             "period_end": ledger.period.end.strftime("%m/%d/%Y"),
             "days_in_period": ledger.period.days,

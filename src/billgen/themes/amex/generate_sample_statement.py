@@ -59,7 +59,7 @@ K_BOLD, K_REG, K_ITAL = 1.0978, 1.0778, 1.0820  # 基线系数（自原版 span 
 
 BLUE = (0, 0.4353, 0.8118)      # #006FCF
 BLACK = (0, 0, 0)
-WM_GRAY = (0.60, 0.60, 0.60)
+WM_GRAY = (0.93, 0.93, 0.95)
 
 # =====================================================================
 # 数据集（CLI 与编辑器预设用）
@@ -239,7 +239,7 @@ def watermark(page):
     page.insert_text(
         (306 - w / 2 - 6.17, 396 + 0.3683 * size), "SAMPLE",
         fontname="AEB", fontfile=FONT_BOLD, fontsize=size,
-        color=WM_GRAY, fill_opacity=0.45,
+        color=WM_GRAY, fill_opacity=0.55,
         morph=(fitz.Point(306, 396), mat),
     )
 
