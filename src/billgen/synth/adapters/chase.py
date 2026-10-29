@@ -116,13 +116,20 @@ def _personal_desc(ledger: LedgerDocument, row: LedgerRow) -> str:
     stamp = f"{row.date:%m/%d}"
     if row.type == "ZELLE":
         who = zelle_party(row, "TRANSFER")
-        return clip(f"Zelle Payment {who} {digits_zelle(ledger, key)}", DESC_LIMIT + 24)
+        # 真账单：``Zelle Payment to JOHN SMITH 31179996497``
+        return clip(f"Zelle Payment to {who} {digits_zelle(ledger, key)}", DESC_LIMIT + 24)
     if row.type == "POS":
         return _fit("Card Purchase", f"{stamp} {text}", f"Card {ledger.account.last4}")
     if row.type == "ATM":
         return _fit("ATM Withdrawal", f"{stamp} {text}", refs.card_auth(key))
     if row.type == "CHECK":
-        return _fit("Check Paid", f"{stamp} {text}", row.check_no or "")
+        # 上游描述可能就是 ``CHECK 1110``：别再叠成 ``Check Paid 12/18 CHECK 1110``
+        body = text
+        if body.upper().startswith("CHECK"):
+            body = body[5:].strip()
+            if row.check_no and body.startswith(row.check_no):
+                body = body[len(row.check_no) :].strip()
+        return _fit("Check Paid", f"{stamp} {body}".strip(), row.check_no or "")
     if row.type == "FEE":
         return _fit("Fee", f"{stamp} {text}", "")
     if row.type == "ACH":
@@ -180,10 +187,17 @@ def build_personal(ledger: LedgerDocument, defaults: dict[str, Any]) -> dict[str
 
 
 def _business_desc(ledger: LedgerDocument, row: LedgerRow, limit: int = DESC_LIMIT) -> str:
-    """商业版描述：大额转账把 Fedwire 的 IMAD / Trn 直接印在描述里。"""
+    """商业版描述：行文与个人版同一套（`Card Purchase … Card 8334`、`ACH Debit …`），
+    大额扣款再把 Fedwire 的 IMAD / Trn 直接印在描述里。
+
+    依据：企业版底稿里就是 ``ATM Check Deposit 01/31 13201 14th Ave Flushing NY Card 8334``，
+    类型前缀与卡尾号一个不少；之前这里只印原始商户名，和真件对不上。
+    """
     key = _key(ledger, row)
-    text = clip(_UNSUPPORTED.sub(" ", row.description), limit)
-    if row.direction == "debit" and row.amount_cents >= 100_000:
+    text = _personal_desc(ledger, row)
+    # IMAD/Trn 只属于 Fedwire（电汇），普通 ACH 扣款不会带——之前把 1000 美元以上的 ACH
+    # 全当电汇印，等于在真件里加了不存在的东西。
+    if row.type == "TRANSFER" and row.direction == "debit":
         imad = refs.fedwire_imad(f"{row.date:%m%d}", key)
         trn = refs.fedwire_trn(key)
         return clip(f"{text} Imad: {imad} Trn: {trn}", limit + 52)

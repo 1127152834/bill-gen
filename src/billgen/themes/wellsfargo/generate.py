@@ -11,7 +11,7 @@
   的 bank 字段做字符串替换，便于演示与测试。
 - 交易流水超过 10 条自动分页：续表页复刻原表头样式，每页最多 55 条；
   月费区块在溢出时整体后移到独立页；信息/披露/工作表页顺延，页码自动计算。
-- --watermark 在每页叠加居中大号 45° SAMPLE 水印。
+- --watermark 在每页叠加居中大号 45° 水印。
 """
 import json, os, sys, re
 from datetime import datetime

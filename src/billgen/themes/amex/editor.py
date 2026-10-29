@@ -320,7 +320,7 @@ HTML = r"""<!DOCTYPE html>
     <div class="card">
       <h2>预设</h2>
       <div class="btnrow">
-        <button class="btn" onclick="loadPreset('demo')">载入 demo 占位数据</button>
+        <button class="btn" onclick="loadPreset('demo')">载入示例数据</button>
         <button class="btn" onclick="loadPreset('original')">载入 original 数据（复刻核对用）</button>
         <button class="btn" onclick="loadPreset('jun')">载入 jun 数据（跨页排版核对用）</button>
       </div>
@@ -422,7 +422,7 @@ HTML = r"""<!DOCTYPE html>
           <label for="enc" style="margin:0">输出加密（同原稿 Standard V2 R3 128-bit RC4）</label>
         </div>
         <div style="grid-column:1/-1"><label>保存文件名</label>
-          <input type="text" id="fname" value="AE_sample_statement.pdf"></div>
+          <input type="text" id="fname" value="american_express_statement.pdf"></div>
       </div>
       <div class="btnrow">
         <button class="btn primary" onclick="savePdf()">保存 PDF 到模板目录</button>
@@ -683,7 +683,7 @@ function random10(){
   for(let i=0;i<10;i++){
     randCounter++;
     tx.push({ date: `04/${String(2+(randCounter%28)).padStart(2,'0')}/2026`,
-      desc: `Random Test Transaction ${randCounter} Demo Merchant Ref ${1000+randCounter}`,
+      desc: `Random Test Transaction ${randCounter} Payment Ref ${1000+randCounter}`,
       id: `ID ${String(700000000000000+randCounter)}`,
       amount: +(Math.random()*300-80).toFixed(2), interest:false });
   }
@@ -848,7 +848,7 @@ class Handler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header("Content-Type", "application/pdf")
             self.send_header("Content-Disposition",
-                             'attachment; filename="AE_sample_statement.pdf"')
+                             'attachment; filename="american_express_statement.pdf"')
             self.send_header("Content-Length", str(len(pdf)))
             self.end_headers()
             self.wfile.write(pdf)
@@ -929,7 +929,7 @@ class Handler(BaseHTTPRequestHandler):
                 return
             fname = os.path.basename(str(body.get("filename") or "").strip())
             if not fname or fname.startswith("."):
-                fname = "AE_sample_statement.pdf"
+                fname = "american_express_statement.pdf"
             if not fname.lower().endswith(".pdf"):
                 fname += ".pdf"
             os.makedirs(SAVE_DIR, exist_ok=True)

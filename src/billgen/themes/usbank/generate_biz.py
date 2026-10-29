@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""US Bank 个户对账单模板生成器（SAMPLE 用途）
+"""US Bank 企业账户对账单模板生成器
 架构（大通同款）：字节级静态克隆 + 内容流单元定点重写；同数据回放零操作=1:1。
 - 字体=Type0(Identity-H)+全量字体程序：char→GID 走程序 cmap（fontTools），
   ToUnicode/W 随用随补——可编辑字符集=Arial 家族全字母数字。

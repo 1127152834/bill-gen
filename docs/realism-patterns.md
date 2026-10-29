@@ -75,6 +75,22 @@
 | SoFi | `商户 CITY ST` + TYPE `Card Purchase` | TYPE `Direct Payment`（借记）/ `Deposit`（贷记） | TYPE `Check` | TYPE `Transfer` | TYPE `Withdrawal`，内部转账 `To Savings - 1943` |
 | Mercury | 只印商户名（`AWS EMEA`） | TYPE `ACH In/Out`，≥$5,000 贷记记 `Wire In` | TYPE `Check` | TYPE `Zelle` | `ATM WITHDRAWAL CITY ST` |
 
+### 4.4 卡尾号：只有部分银行印在流水行里
+
+| 银行 | 行内表现 | 依据 |
+| --- | --- | --- |
+| Chase | `Card Purchase 12/11 商户 Card 1347`、`De Card 4499` | 底稿 `chase/assets/chase_static_personal.pdf` 原文 |
+| Bank of America | `TST* 商户 12/11 Card 1347` | BoA 主题示例数据（来自真实账单格式） |
+| Wells Fargo | 行内**不印**，卡号在页眉账户区 | WF 版式为「存/取分列」，无卡号列 |
+| Capital One | 不印；账户尾号在页眉 `360 Checking...5521` | `C1-Personal-Statement-SAMPLE.pdf` |
+| SoFi | 不印；页眉 `Checking Account - 4287`，**内部转账才印目标账户** `To Savings - 1943` | `SoFi-Statement-SAMPLE.pdf` |
+| Mercury | 不印；Type 列写 `Card` | `Demo-Bank-Statement-SAMPLE.pdf` |
+| Amex | 不印；第二行给 `ID …` | Amex 样张 |
+| U.S. Bank | 不印；类型进 Type 列，号进 Ref 列 | 底稿已清洗，按现版式保留 |
+
+**结论**：卡尾号不是「全都一样」的东西 —— 有的行印（Chase/BoA），有的靠页眉账户尾号区分（C1/SoFi/WF/Mercury），
+所以在 `line_styles` 里它是**按银行开关**的，不是全局参数。
+
 ### 4.3 城市州
 
 - 线上/全国品牌印**注册地**：`NETFLIX.COM LOS GATOS CA`、`APPLE.COM/BILL CUPERTINO CA`、`STEAM GAMES BELLEVUE WA`。

@@ -104,7 +104,7 @@ class Handler(BaseHTTPRequestHandler):
                     pdf = fh.read()
             self._send(200, pdf, "application/pdf",
                            {"Content-Disposition":
-                            'attachment; filename="usbank_biz_SAMPLE.pdf"'})
+                            'attachment; filename="usbank_business_statement.pdf"'})
         elif self.path.startswith("/export/data.json"):
             with open(DATA_FILE, "rb") as fh:
                 self._send(200, fh.read(), "application/json",

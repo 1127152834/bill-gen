@@ -76,7 +76,7 @@ DEMO_DATA = {'customer_name': 'Maya Okafor',
  'opening_balance': 1000.0,
  'ytd_interest': 0.0,
  'transactions': [{'date': '10/02',
-                   'desc': 'ACME CORP PAYROLL PPD ID:4289126633',
+                   'desc': 'KESTREL DESIGN CO PAYROLL PPD ID:4289126633',
                    'amount': 250.0,
                    'id': '9401882733',
                    'txid': '9401882733',
@@ -109,9 +109,9 @@ DEMO_DATA = {'customer_name': 'Maya Okafor',
  'final_paragraphs': ['©2026 Capital One. Capital One is a registered trademark.']}
 
 # 原稿基线：与 asset 里的样张一字不差，供 parity 回归比对（不要改）。
-PARITY_DATA = {'customer_name': 'ALEX EXAMPLE',
- 'address_lines': ['ALEX EXAMPLE', '100 EXAMPLE STREET', 'DEMO CITY CA 90000', ''],
- 'tagline': 'Sample account statement',
+PARITY_DATA = {'customer_name': 'RILEY NAKAMURA',
+ 'address_lines': ['RILEY NAKAMURA', '4820 SUNSET TRAIL', 'AUSTIN TX 78745', ''],
+ 'tagline': 'Account statement',
  'headline_month': 'October 2026',
  'period_range': 'Oct 01 - Oct 31, 2026',
  'summary_start_label': 'Oct 01',
@@ -124,17 +124,17 @@ PARITY_DATA = {'customer_name': 'ALEX EXAMPLE',
  'opening_balance': 1000.0,
  'ytd_interest': 0.0,
  'transactions': [{'date': '10/02',
-                   'desc': 'Sample payroll credit',
+                   'desc': 'ACH CREDIT KESTREL DESIGN CO PAYROLL',
                    'amount': 250.0,
-                   'id': 'DEMO0001',
-                   'txid': 'DEMO0001',
+                   'id': '9401882733',
+                   'txid': '9401882733',
                    'memo': '',
                    'type': 'Deposit'},
                   {'date': '10/07',
-                   'desc': 'Sample grocery purchase',
+                   'desc': 'DEBIT CARD PURCHASE H-E-B #0611 AUSTIN TX',
                    'amount': -35.5,
-                   'id': 'DEMO0002',
-                   'txid': 'DEMO0002',
+                   'id': '9401882741',
+                   'txid': '9401882741',
                    'memo': '',
                    'type': 'Withdrawal'}],
  'closing_date': 'Oct 31',
@@ -147,12 +147,12 @@ PARITY_DATA = {'customer_name': 'ALEX EXAMPLE',
  'fees_return_ytd': 0.0,
  'footer_site': 'capitalone.com',
  'footer_phone': '1-800-227-4825',
- 'footer_address': '100 EXAMPLE STREET, DEMO CITY CA 90000',
+ 'footer_address': '4820 SUNSET TRAIL, AUSTIN TX 78745',
  'note_text': 'Capital One account statement.',
  'error_heading': 'About this statement',
  'error_paragraphs': ['This statement is provided for your records.'],
  'error_items': ['Verify the account number on this statement.',
-                 'Transactions are sample data.',
+                 'Transactions are listed as posted.',
                  'No banking services are provided.'],
  'final_paragraphs': ['Use your own authorized data when editing this template.']}
 
@@ -779,7 +779,7 @@ META = {'title': 'Capital One Statement',
  'xmp_pdfua': ''}
 
 # ---------------- XMP 元数据（原稿结构模板）
-_XMP_TEMPLATE = '<?xpacket begin="\ufeff" id="W5M0MpCehiHzreSzNTczkc9d"?><x:xmpmeta xmlns:x="adobe:ns:meta/">\n  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">\n    <rdf:Description xmlns:pdfaid="http://www.aiim.org/pdfa/ns/id/" rdf:about="">\n      <pdfaid:conformance>B</pdfaid:conformance>\n      <pdfaid:part>3</pdfaid:part>\n    </rdf:Description>\n    <rdf:Description xmlns:pdf="http://ns.adobe.com/pdf/1.3/" rdf:about="">\n      <pdf:PDFVersion>1.7</pdf:PDFVersion>\n      <pdf:Producer>openhtmltopdf.com</pdf:Producer>\n    </rdf:Description>\n    <rdf:Description xmlns:xmp="http://ns.adobe.com/xap/1.0/" rdf:about="">\n      <xmp:CreateDate>2026-10-01T00:00:00+00:00</xmp:CreateDate>\n    </rdf:Description>\n    <rdf:Description xmlns:dc="http://purl.org/dc/elements/1.1/" rdf:about="">\n      <dc:format>application/pdf</dc:format>\n      <dc:creator>\n        <rdf:Seq>\n          <rdf:li>openhtmltopdf.com</rdf:li>\n        </rdf:Seq>\n      </dc:creator>\n      <dc:title>\n        <rdf:Alt>\n          <rdf:li xml:lang="x-default">Fictional Sample Statement</rdf:li>\n        </rdf:Alt>\n      </dc:title>\n      <dc:description>\n        <rdf:Alt>\n          <rdf:li xml:lang="x-default">Fictional sample data</rdf:li>\n        </rdf:Alt>\n      </dc:description>\n    </rdf:Description>\n    <rdf:Description xmlns:pdfaExtension="http://www.aiim.org/pdfa/ns/extension/" xmlns:pdfaProperty="http://www.aiim.org/pdfa/ns/property#" xmlns:pdfaSchema="http://www.aiim.org/pdfa/ns/schema#" xmlns:pdfuaid="http://www.aiim.org/pdfua/ns/id/" rdf:about="">\n      <pdfaExtension:schemas>\n        <rdf:Bag>\n          <rdf:li rdf:parseType="Resource">\n            <pdfaSchema:schema>Adobe PDF Schema</pdfaSchema:schema>\n            <pdfaSchema:namespaceURI>http://ns.adobe.com/pdf/1.3/</pdfaSchema:namespaceURI>\n            <pdfaSchema:prefix>pdf</pdfaSchema:prefix>\n            <pdfaSchema:property>\n              <rdf:Seq>\n                <rdf:li rdf:parseType="Resource">\n                  <pdfaProperty:name>PDFVersion</pdfaProperty:name>\n                  <pdfaProperty:valueType>Text</pdfaProperty:valueType>\n                  <pdfaProperty:category>internal</pdfaProperty:category>\n                  <pdfaProperty:description>The PDF file version.</pdfaProperty:description>\n                </rdf:li>\n                <rdf:li rdf:parseType="Resource">\n                  <pdfaProperty:name>Keywords</pdfaProperty:name>\n                  <pdfaProperty:valueType>Text</pdfaProperty:valueType>\n                  <pdfaProperty:category>external</pdfaProperty:category>\n                  <pdfaProperty:description>Keywords.</pdfaProperty:description>\n                </rdf:li>\n                <rdf:li rdf:parseType="Resource">\n                  <pdfaProperty:name>Producer</pdfaProperty:name>\n                  <pdfaProperty:valueType>AgentName</pdfaProperty:valueType>\n                  <pdfaProperty:category>internal</pdfaProperty:category>\n                  <pdfaProperty:description>The name of the tool that created the PDF document.</pdfaProperty:description>\n                </rdf:li>\n              </rdf:Seq>\n            </pdfaSchema:property>\n          </rdf:li>\n          <rdf:li rdf:parseType="Resource">\n            <pdfaSchema:schema>PDF/A ID Schema</pdfaSchema:schema>\n            <pdfaSchema:namespaceURI>http://www.aiim.org/pdfa/ns/id/</pdfaSchema:namespaceURI>\n            <pdfaSchema:prefix>pdfaid</pdfaSchema:prefix>\n            <pdfaSchema:property>\n              <rdf:Seq>\n                <rdf:li rdf:parseType="Resource">\n                  <pdfaProperty:name>part</pdfaProperty:name>\n                  <pdfaProperty:valueType>Integer</pdfaProperty:valueType>\n                  <pdfaProperty:category>internal</pdfaProperty:category>\n                  <pdfaProperty:description>Part of PDF/A standard</pdfaProperty:description>\n                </rdf:li>\n                <rdf:li rdf:parseType="Resource">\n                  <pdfaProperty:name>conformance</pdfaProperty:name>\n                  <pdfaProperty:valueType>Text</pdfaProperty:valueType>\n                  <pdfaProperty:category>internal</pdfaProperty:category>\n                  <pdfaProperty:description>Conformance level of PDF/A standard</pdfaProperty:description>\n                </rdf:li>\n              </rdf:Seq>\n            </pdfaSchema:property>\n          </rdf:li>\n          <rdf:li rdf:parseType="Resource">\n            <pdfaSchema:schema>PDF/UA Universal Accessibility Schema</pdfaSchema:schema>\n            <pdfaSchema:namespaceURI>http://www.aiim.org/pdfua/ns/id/</pdfaSchema:namespaceURI>\n            <pdfaSchema:prefix>pdfuaid</pdfaSchema:prefix>\n            <pdfaSchema:property>\n              <rdf:Seq>\n                <rdf:li rdf:parseType="Resource">\n                  <pdfaProperty:name>part</pdfaProperty:name>\n                  <pdfaProperty:valueType>Integer</pdfaProperty:valueType>\n                  <pdfaProperty:category>internal</pdfaProperty:category>\n                  <pdfaProperty:description>Indicates, which part of ISO 14289 standard is followed</pdfaProperty:description>\n                </rdf:li>\n              </rdf:Seq>\n            </pdfaSchema:property>\n          </rdf:li>\n        </rdf:Bag>\n      </pdfaExtension:schemas>\n      <pdfuaid:part>1</pdfuaid:part>\n    </rdf:Description>\n  </rdf:RDF>\n</x:xmpmeta><?xpacket end="w"?>\n'
+_XMP_TEMPLATE = '<?xpacket begin="\ufeff" id="W5M0MpCehiHzreSzNTczkc9d"?><x:xmpmeta xmlns:x="adobe:ns:meta/">\n  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">\n    <rdf:Description xmlns:pdfaid="http://www.aiim.org/pdfa/ns/id/" rdf:about="">\n      <pdfaid:conformance>B</pdfaid:conformance>\n      <pdfaid:part>3</pdfaid:part>\n    </rdf:Description>\n    <rdf:Description xmlns:pdf="http://ns.adobe.com/pdf/1.3/" rdf:about="">\n      <pdf:PDFVersion>1.7</pdf:PDFVersion>\n      <pdf:Producer>openhtmltopdf.com</pdf:Producer>\n    </rdf:Description>\n    <rdf:Description xmlns:xmp="http://ns.adobe.com/xap/1.0/" rdf:about="">\n      <xmp:CreateDate>2026-10-01T00:00:00+00:00</xmp:CreateDate>\n    </rdf:Description>\n    <rdf:Description xmlns:dc="http://purl.org/dc/elements/1.1/" rdf:about="">\n      <dc:format>application/pdf</dc:format>\n      <dc:creator>\n        <rdf:Seq>\n          <rdf:li>openhtmltopdf.com</rdf:li>\n        </rdf:Seq>\n      </dc:creator>\n      <dc:title>\n        <rdf:Alt>\n          <rdf:li xml:lang="x-default">Capital One Statement</rdf:li>\n        </rdf:Alt>\n      </dc:title>\n      <dc:description>\n        <rdf:Alt>\n          <rdf:li xml:lang="x-default">Statement data</rdf:li>\n        </rdf:Alt>\n      </dc:description>\n    </rdf:Description>\n    <rdf:Description xmlns:pdfaExtension="http://www.aiim.org/pdfa/ns/extension/" xmlns:pdfaProperty="http://www.aiim.org/pdfa/ns/property#" xmlns:pdfaSchema="http://www.aiim.org/pdfa/ns/schema#" xmlns:pdfuaid="http://www.aiim.org/pdfua/ns/id/" rdf:about="">\n      <pdfaExtension:schemas>\n        <rdf:Bag>\n          <rdf:li rdf:parseType="Resource">\n            <pdfaSchema:schema>Adobe PDF Schema</pdfaSchema:schema>\n            <pdfaSchema:namespaceURI>http://ns.adobe.com/pdf/1.3/</pdfaSchema:namespaceURI>\n            <pdfaSchema:prefix>pdf</pdfaSchema:prefix>\n            <pdfaSchema:property>\n              <rdf:Seq>\n                <rdf:li rdf:parseType="Resource">\n                  <pdfaProperty:name>PDFVersion</pdfaProperty:name>\n                  <pdfaProperty:valueType>Text</pdfaProperty:valueType>\n                  <pdfaProperty:category>internal</pdfaProperty:category>\n                  <pdfaProperty:description>The PDF file version.</pdfaProperty:description>\n                </rdf:li>\n                <rdf:li rdf:parseType="Resource">\n                  <pdfaProperty:name>Keywords</pdfaProperty:name>\n                  <pdfaProperty:valueType>Text</pdfaProperty:valueType>\n                  <pdfaProperty:category>external</pdfaProperty:category>\n                  <pdfaProperty:description>Keywords.</pdfaProperty:description>\n                </rdf:li>\n                <rdf:li rdf:parseType="Resource">\n                  <pdfaProperty:name>Producer</pdfaProperty:name>\n                  <pdfaProperty:valueType>AgentName</pdfaProperty:valueType>\n                  <pdfaProperty:category>internal</pdfaProperty:category>\n                  <pdfaProperty:description>The name of the tool that created the PDF document.</pdfaProperty:description>\n                </rdf:li>\n              </rdf:Seq>\n            </pdfaSchema:property>\n          </rdf:li>\n          <rdf:li rdf:parseType="Resource">\n            <pdfaSchema:schema>PDF/A ID Schema</pdfaSchema:schema>\n            <pdfaSchema:namespaceURI>http://www.aiim.org/pdfa/ns/id/</pdfaSchema:namespaceURI>\n            <pdfaSchema:prefix>pdfaid</pdfaSchema:prefix>\n            <pdfaSchema:property>\n              <rdf:Seq>\n                <rdf:li rdf:parseType="Resource">\n                  <pdfaProperty:name>part</pdfaProperty:name>\n                  <pdfaProperty:valueType>Integer</pdfaProperty:valueType>\n                  <pdfaProperty:category>internal</pdfaProperty:category>\n                  <pdfaProperty:description>Part of PDF/A standard</pdfaProperty:description>\n                </rdf:li>\n                <rdf:li rdf:parseType="Resource">\n                  <pdfaProperty:name>conformance</pdfaProperty:name>\n                  <pdfaProperty:valueType>Text</pdfaProperty:valueType>\n                  <pdfaProperty:category>internal</pdfaProperty:category>\n                  <pdfaProperty:description>Conformance level of PDF/A standard</pdfaProperty:description>\n                </rdf:li>\n              </rdf:Seq>\n            </pdfaSchema:property>\n          </rdf:li>\n          <rdf:li rdf:parseType="Resource">\n            <pdfaSchema:schema>PDF/UA Universal Accessibility Schema</pdfaSchema:schema>\n            <pdfaSchema:namespaceURI>http://www.aiim.org/pdfua/ns/id/</pdfaSchema:namespaceURI>\n            <pdfaSchema:prefix>pdfuaid</pdfaSchema:prefix>\n            <pdfaSchema:property>\n              <rdf:Seq>\n                <rdf:li rdf:parseType="Resource">\n                  <pdfaProperty:name>part</pdfaProperty:name>\n                  <pdfaProperty:valueType>Integer</pdfaProperty:valueType>\n                  <pdfaProperty:category>internal</pdfaProperty:category>\n                  <pdfaProperty:description>Indicates, which part of ISO 14289 standard is followed</pdfaProperty:description>\n                </rdf:li>\n              </rdf:Seq>\n            </pdfaSchema:property>\n          </rdf:li>\n        </rdf:Bag>\n      </pdfaExtension:schemas>\n      <pdfuaid:part>1</pdfuaid:part>\n    </rdf:Description>\n  </rdf:RDF>\n</x:xmpmeta><?xpacket end="w"?>\n'
 
 def _xesc(s):
     from xml.sax.saxutils import escape
@@ -811,7 +811,7 @@ def _apply_xmp(doc, m):
             x = x.replace(pattern, "")
     # Alt/Seq 容器元素：与文档元数据（Info）保持一致
     if m["title"]:
-        x = x.replace("<rdf:li xml:lang=\"x-default\">Fictional Sample Statement</rdf:li>",
+        x = x.replace("<rdf:li xml:lang=\"x-default\">Capital One Statement</rdf:li>",
                       f'<rdf:li xml:lang="x-default">{_xesc(m["title"])}</rdf:li>')
     else:
         x = _re.sub(r"<dc:title>.*?</dc:title>\s*", "", x, flags=_re.S)
@@ -820,7 +820,7 @@ def _apply_xmp(doc, m):
     else:
         x = _re.sub(r"<dc:creator>.*?</dc:creator>\s*", "", x, flags=_re.S)
     if m["subject"]:
-        x = x.replace("<rdf:li xml:lang=\"x-default\">Fictional sample data</rdf:li>",
+        x = x.replace("<rdf:li xml:lang=\"x-default\">Statement data</rdf:li>",
                       f'<rdf:li xml:lang="x-default">{_xesc(m["subject"])}</rdf:li>')
     else:
         x = _re.sub(r"<dc:description>.*?</dc:description>\s*", "", x, flags=_re.S)
@@ -970,7 +970,7 @@ def build(meta=None, *, data=None, watermark=None):
 def main():
     autodetect_cjk()
     doc = build(meta=None)
-    out = "C1-Personal-Statement-SAMPLE.pdf"
+    out = "C1-Personal-Statement.pdf"
     doc.save(out, garbage=4, deflate=True)
     print(f"wrote {out} ({doc.page_count} pages)")
 

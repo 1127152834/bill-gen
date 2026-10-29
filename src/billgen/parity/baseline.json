@@ -8,9 +8,9 @@
       612.0,
       792.0
     ],
-    "bytes": 290654,
-    "text_sha256_16": "a5ed7bde1ed55278",
-    "text_chars": 7180,
+    "bytes": 290683,
+    "text_sha256_16": "b4f43521febcd521",
+    "text_chars": 7196,
     "fonts": [
       "ConnectionsBold_CZEX0AA0",
       "ConnectionsIta_CZEX0AC0",
@@ -19,7 +19,7 @@
       "HigherStandards_CZEX0660",
       "ITC_Franklin_Gothic_Book_CZEX0080"
     ],
-    "secs_render": 0.45
+    "secs_render": 0.46
   },
   "boa-business": {
     "id": "boa-business",
@@ -30,9 +30,9 @@
       612.0,
       792.0
     ],
-    "bytes": 1012961,
-    "text_sha256_16": "4b54a3f47f367d6b",
-    "text_chars": 6857,
+    "bytes": 1012976,
+    "text_sha256_16": "aeb227a489434761",
+    "text_chars": 6865,
     "fonts": [
       "ConnectionsBold_CZEX0AA0",
       "ConnectionsIta_CZEX0AC0",
@@ -52,9 +52,9 @@
       612.0,
       792.0
     ],
-    "bytes": 87107,
-    "text_sha256_16": "d3b317f6b2847742",
-    "text_chars": 10693,
+    "bytes": 87112,
+    "text_sha256_16": "924bf34d3beb8b25",
+    "text_chars": 10701,
     "fonts": [
       "Helvetica",
       "Helvetica-Bold",
@@ -95,16 +95,16 @@
       612.0,
       792.0
     ],
-    "bytes": 231996,
-    "text_sha256_16": "f33f8cd7545f0dbe",
-    "text_chars": 858,
+    "bytes": 232169,
+    "text_sha256_16": "a4da0afc55f8530d",
+    "text_chars": 866,
     "fonts": [
       "1695149660304911865-0-Arcadia-Text-480",
       "ArcadiaText-480",
       "ArcadiaTextVariable-Variable",
       "Helvetica"
     ],
-    "secs_render": 0.35
+    "secs_render": 0.36
   },
   "capitalone": {
     "id": "capitalone",
@@ -115,15 +115,15 @@
       612.0,
       792.0
     ],
-    "bytes": 416952,
-    "text_sha256_16": "7c5f01769476941e",
-    "text_chars": 1699,
+    "bytes": 417302,
+    "text_sha256_16": "676ba98f2f16cfa5",
+    "text_chars": 1707,
     "fonts": [
       "MyFontBold",
       "MyFontMedium",
       "MyFontRegular"
     ],
-    "secs_render": 0.27
+    "secs_render": 0.37
   },
   "sofi": {
     "id": "sofi",
@@ -134,9 +134,9 @@
       612.0,
       792.0
     ],
-    "bytes": 513737,
-    "text_sha256_16": "7b093a4a2d68aab2",
-    "text_chars": 6273,
+    "bytes": 513893,
+    "text_sha256_16": "5ede6476d8378f4c",
+    "text_chars": 6281,
     "fonts": [
       "Montserrat-Thin",
       "TTNormsBold",
@@ -153,9 +153,9 @@
       612.0,
       792.0
     ],
-    "bytes": 171911,
-    "text_sha256_16": "a7ba90b33f504084",
-    "text_chars": 3931,
+    "bytes": 171984,
+    "text_sha256_16": "ebf64b508ea8a210",
+    "text_chars": 3939,
     "fonts": [
       "F10",
       "F11",
@@ -204,7 +204,7 @@
       "Symbol",
       "Times-Roman"
     ],
-    "secs_render": 0.06
+    "secs_render": 0.07
   },
   "usbank-personal": {
     "id": "usbank-personal",
@@ -215,9 +215,9 @@
       612.0,
       792.0
     ],
-    "bytes": 181932,
-    "text_sha256_16": "836a6f35a176362c",
-    "text_chars": 9510,
+    "bytes": 181941,
+    "text_sha256_16": "f27377b782c7d41f",
+    "text_chars": 9518,
     "fonts": [
       "Arial-BoldItalicMT",
       "Arial-BoldMT",
@@ -241,9 +241,9 @@
       612.0,
       792.0
     ],
-    "bytes": 207961,
-    "text_sha256_16": "515d54be938c4552",
-    "text_chars": 9550,
+    "bytes": 207970,
+    "text_sha256_16": "7550096e1f4c3d1b",
+    "text_chars": 9558,
     "fonts": [
       "Arial-BoldItalicMT",
       "Arial-BoldMT",

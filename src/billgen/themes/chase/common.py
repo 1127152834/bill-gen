@@ -162,7 +162,7 @@ def add_watermark(doc, page, text_w):
     doc.update_stream(cx2, ops.encode() + b"\n" + doc.xref_stream(cx2))
 
 def write_meta(doc, tag, md, original_metadata):
-    'Use explicit editor metadata or fictional sample metadata.'
+    'Use explicit editor metadata.'
     om = original_metadata[tag]
     md = md or {}
     # 缺省（用户未填）：Producer 固定 23.4.26 版串；创建/修改时间=生成时实时时间

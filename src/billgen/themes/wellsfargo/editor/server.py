@@ -119,7 +119,7 @@ class Handler(BaseHTTPRequestHandler):
         elif self.path == "/export/statement.pdf":
             with open(PREVIEW, "rb") as fh:
                 self._send(200, fh.read(), "application/pdf",
-                           {"Content-Disposition": "attachment; filename=statement_sample.pdf"})
+                           {"Content-Disposition": "attachment; filename=wells_fargo_statement.pdf"})
         elif self.path == "/api/reset":
             shutil.copy(SAMPLE_DATA_FILE, DATA_FILE)
             regenerate(init_data(), STATE.watermark, STATE.mark, STATE.fonts)

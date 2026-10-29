@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """BOA 对账单模板生成器 — 个人版（Adv Plus Banking）+ 商业版（Business Advantage）
 1:1 复刻自原稿：Connections 字体（重建）、矢量细线、logo/横幅/图标、版式坐标。
-银行名等文本按 data.bank 替换；SAMPLE 水印默认开启。支票影像页不复刻（已按要求删除）。
+银行名等文本按 data.bank 替换；水印默认开启。支票影像页不复刻（已按要求删除）。
 """
 import json
 import math
@@ -220,7 +220,7 @@ _PERSONAL_COPY = {
 def build_subs(d):
     b = d.get("bank", {})
     name, legal, domain = b.get("name", ""), b.get("legal", ""), b.get("domain", "")
-    abbr = "".join(name.upper().split())[:12] or "SAMPLEBANK"
+    abbr = "".join(name.upper().split())[:12] or "BANK"
     subs = {}
     if legal:
         subs["Bank of America, N.A."] = legal

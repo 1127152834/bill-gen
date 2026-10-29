@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-Demo Bank statement template — 1:1 layout replica of the Mercury-style statement,
-rebuilt with fictional data for design/demo purposes only.
+Mercury statement template — 1:1 layout replica of the Mercury-style statement.
 
 Fidelity engine:
 - Fonts rebuilt from the source PDF's embedded subsets (identical outlines/advances).
@@ -95,7 +94,7 @@ DEMO_DATA = {'period_label': 'October 2026',
  'footer_line1': 'Banking services provided by Column N.A., Member FDIC',
  'footer_line2': 'Mercury | help@mercury.com | 2261 Market Street, Suite 86807, San Francisco, CA 94114',
  'transactions': [{'date': 'Oct 2',
-                   'desc': 'ACME CORP PAYROLL PPD ID:4289126633',
+                   'desc': 'KESTREL DESIGN CO PAYROLL PPD ID:4289126633',
                    'amount': 250.0,
                    'id': '9401882733',
                    'txid': '9401882733',
@@ -119,8 +118,8 @@ PARITY_DATA = {'period_label': 'October 2026',
  'period_end': 'Oct 31, 2026',
  'period_days': '31',
  'timezone': 'All dates in UTC',
- 'company': 'EXAMPLE COMPANY LLC',
- 'address': ['100 EXAMPLE STREET', 'DEMO CITY CA 90000'],
+ 'company': 'KESTREL DESIGN LLC',
+ 'address': ['4820 SUNSET TRAIL', 'AUSTIN TX 78745'],
  'ein': 'EIN ••3170',
  'account_type': 'Checking',
  'account_number': '000000000001',
@@ -129,19 +128,19 @@ PARITY_DATA = {'period_label': 'October 2026',
  'footer_line1': 'Banking services provided by Column N.A., Member FDIC',
  'footer_line2': 'Mercury | help@mercury.com | 2261 Market Street, Suite 86807, San Francisco, CA 94114',
  'transactions': [{'date': 'Oct 2',
-                   'desc': 'Sample payroll credit',
+                   'desc': 'ACH CREDIT KESTREL DESIGN CO PAYROLL',
                    'amount': 250.0,
-                   'id': 'DEMO0001',
-                   'txid': 'DEMO0001',
+                   'id': '9401882733',
+                   'txid': '9401882733',
                    'memo': '',
                    'type': 'ACH In',
                    'dir': 'in',
                    'icon': 'achIn'},
                   {'date': 'Oct 7',
-                   'desc': 'Sample grocery purchase',
+                   'desc': 'DEBIT CARD PURCHASE H-E-B #0611 AUSTIN TX',
                    'amount': -35.5,
-                   'id': 'DEMO0002',
-                   'txid': 'DEMO0002',
+                   'id': '9401882741',
+                   'txid': '9401882741',
                    'memo': '',
                    'type': 'Debit',
                    'dir': 'out',
@@ -738,7 +737,7 @@ def build(meta=None, *, data=None, watermark=None):
 
 def main():
     doc = build(meta=None)
-    out = "Demo-Bank-Statement-SAMPLE.pdf"
+    out = "Mercury-Statement.pdf"
     doc.save(out, garbage=4, deflate=True)
     print(f"wrote {out} ({doc.page_count} pages)")
 

@@ -103,7 +103,7 @@ DEMO_DATA = {'holder_name': 'Maya Okafor',
                    'memo': '',
                    'type': 'Withdrawal'},
                   {'date': '10/02/2026',
-                   'desc': 'ACME CORP PAYROLL PPD ID:4289126633',
+                   'desc': 'KESTREL DESIGN CO PAYROLL PPD ID:4289126633',
                    'amount': 250.0,
                    'id': '9401882733',
                    'txid': '9401882733',
@@ -117,9 +117,9 @@ DEMO_DATA = {'holder_name': 'Maya Okafor',
                 'Rate Sheet and is paid on the last day of the Statement Period.')}
 
 # 原稿基线：与 asset 里的样张一字不差，供 parity 回归比对（不要改）。
-PARITY_DATA = {'holder_name': 'ALEX EXAMPLE',
+PARITY_DATA = {'holder_name': 'RILEY NAKAMURA',
  'member_since': 'Member since Mar 15, 2025',
- 'address_lines': ['100 EXAMPLE STREET', 'DEMO CITY CA 90000', '', ''],
+ 'address_lines': ['4820 SUNSET TRAIL', 'AUSTIN TX 78745', '', ''],
  'account_number': '000000000001',
  'statement_period': '10/01/2026 - 10/31/2026',
  'account_type': 'Checking',
@@ -133,17 +133,17 @@ PARITY_DATA = {'holder_name': 'ALEX EXAMPLE',
  'ytd_interest': 0.0,
  'balance_note': 'Current balances include the amount of interest paid.',
  'transactions': [{'date': '10/07/2026',
-                   'desc': 'Sample grocery purchase',
+                   'desc': 'DEBIT CARD PURCHASE H-E-B #0611 AUSTIN TX',
                    'amount': -35.5,
-                   'id': 'DEMO0002',
-                   'txid': 'DEMO0002',
+                   'id': '9401882741',
+                   'txid': '9401882741',
                    'memo': '',
                    'type': 'Withdrawal'},
                   {'date': '10/02/2026',
-                   'desc': 'Sample payroll credit',
+                   'desc': 'ACH CREDIT KESTREL DESIGN CO PAYROLL',
                    'amount': 250.0,
-                   'id': 'DEMO0001',
-                   'txid': 'DEMO0001',
+                   'id': '9401882733',
+                   'txid': '9401882733',
                    'memo': '',
                    'type': 'Deposit'}],
  'contact_website': 'www.sofi.com',
@@ -625,7 +625,7 @@ def _brand_texts(ctx):
     if not name:
         return None
     legal = str(bank.get("legal") or "").strip() or name
-    domain = str(bank.get("domain") or "").strip() or name.lower().replace(" ", "-") + ".example"
+    domain = str(bank.get("domain") or "").strip() or name.lower().replace(" ", "-") + ".com"
     return name, legal, domain
 
 
@@ -876,7 +876,7 @@ def build(meta=None, *, data=None, watermark=None):
 
 def main():
     doc = build(meta=None)
-    out = "SoFi-Statement-SAMPLE.pdf"
+    out = "SoFi-Statement.pdf"
     doc.save(out, garbage=4, deflate=True)
     print(f"wrote {out} ({doc.page_count} pages)")
 

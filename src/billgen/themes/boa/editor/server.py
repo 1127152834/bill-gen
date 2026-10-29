@@ -132,7 +132,7 @@ class Handler(BaseHTTPRequestHandler):
             tpl = "business" if "tpl=business" in self.path else "personal"
             with open(PREVIEW[tpl], "rb") as fh:
                 self._send(200, fh.read(), "application/pdf",
-                           {"Content-Disposition": 'attachment; filename="BOA_statement_SAMPLE.pdf"'})
+                           {"Content-Disposition": 'attachment; filename="BOA_statement.pdf"'})
         elif self.path == "/export/data.json":
             self._send(200, json.dumps({"personal": load_data("personal"),
                                         "business": load_data("business")},
