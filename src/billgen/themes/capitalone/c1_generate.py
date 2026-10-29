@@ -100,13 +100,21 @@ DEMO_DATA = {'customer_name': 'Maya Okafor',
  'footer_site': 'capitalone.com',
  'footer_phone': '1-888-464-0727',
  'footer_address': 'P.O. Box 85123, Richmond, VA 23285',
- 'note_text': 'Capital One account statement.',
- 'error_heading': 'About this statement',
- 'error_paragraphs': ['This statement is provided for your records.'],
- 'error_items': ['Transactions posted after the statement date appear on your next statement.',
-                 'Questions about a charge? Call the number on the front of this statement.',
-                 'Capital One, N.A. Member FDIC.'],
- 'final_paragraphs': ['©2026 Capital One. Capital One is a registered trademark.']}
+ 'note_text': 'The last four digits of your external accounts may not match your actual account numbers. This is because some banks may  issue a virtual or tokenized number for security. To learn more about tokenized account numbers, contact your external bank.',
+ 'error_heading': 'If anything in your statement looks incorrect, please let us know immediately.',
+ 'error_paragraphs': [
+                 # 参考件这里是一整段（"In case… 23285. Or, log in…" 连续排三行），
+                 # 拆成两段会因为段间距多出 7.3pt，后面所有基线整体下移
+                 'In case of error or questions about your electronic transfers, we can be reached by telephone at 1-888-464-0727, or mail at P.O. Box 85123, Richmond, VA 23285. Or, log in to your account at capitalone.com and click  on the transaction. If you think your statement or receipt is wrong or if you need more information about a transfer listed on your statement or receipt, you must let us know within 60 days after we sent you the FIRST statement on which the error appeared.',
+                 ],
+ 'error_items': [
+                 'Tell us your name and account number.',
+                 'Describe the error or the transfer you are unsure about, and provide an explanation of why you believe it is an error or why you need more information.',
+                 'Tell us the dollar amount of the suspected error.',
+                 ],
+ 'final_paragraphs': [
+                 'We will investigate your complaint and will correct any error promptly. If we take more than 10 business days to do this, we will credit your account for the amount you think is in error, so that you will have the use of the money during the time it takes us to complete our investigation.',
+                 ]}
 
 # 原稿基线：与 asset 里的样张一字不差，供 parity 回归比对（不要改）。
 PARITY_DATA = {'customer_name': 'RILEY NAKAMURA',
@@ -148,13 +156,21 @@ PARITY_DATA = {'customer_name': 'RILEY NAKAMURA',
  'footer_site': 'capitalone.com',
  'footer_phone': '1-888-464-0727',
  'footer_address': 'P.O. Box 85123, Richmond, VA 23285',
- 'note_text': 'Capital One account statement.',
- 'error_heading': 'About this statement',
- 'error_paragraphs': ['This statement is provided for your records.'],
- 'error_items': ['Verify the account number on this statement.',
-                 'Transactions are listed as posted.',
-                 'No banking services are provided.'],
- 'final_paragraphs': ['Use your own authorized data when editing this template.']}
+ 'note_text': 'The last four digits of your external accounts may not match your actual account numbers. This is because some banks may  issue a virtual or tokenized number for security. To learn more about tokenized account numbers, contact your external bank.',
+ 'error_heading': 'If anything in your statement looks incorrect, please let us know immediately.',
+ 'error_paragraphs': [
+                 # 参考件这里是一整段（"In case… 23285. Or, log in…" 连续排三行），
+                 # 拆成两段会因为段间距多出 7.3pt，后面所有基线整体下移
+                 'In case of error or questions about your electronic transfers, we can be reached by telephone at 1-888-464-0727, or mail at P.O. Box 85123, Richmond, VA 23285. Or, log in to your account at capitalone.com and click  on the transaction. If you think your statement or receipt is wrong or if you need more information about a transfer listed on your statement or receipt, you must let us know within 60 days after we sent you the FIRST statement on which the error appeared.',
+                 ],
+ 'error_items': [
+                 'Tell us your name and account number.',
+                 'Describe the error or the transfer you are unsure about, and provide an explanation of why you believe it is an error or why you need more information.',
+                 'Tell us the dollar amount of the suspected error.',
+                 ],
+ 'final_paragraphs': [
+                 'We will investigate your complaint and will correct any error promptly. If we take more than 10 business days to do this, we will credit your account for the amount you think is in error, so that you will have the use of the money during the time it takes us to complete our investigation.',
+                 ]}
 
 #: 引擎默认数据 = 原稿基线（`build()` 不带 data 时用它，parity 回归依赖这一点）。
 DATA = PARITY_DATA

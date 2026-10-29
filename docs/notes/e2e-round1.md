@@ -208,3 +208,40 @@ U.S. Bank 的「金额列 `$` 独立成列」「负数尾随减号 `1,650.00-`�
   `e2e_compare` 个人 usbank-personal 差异 0 项、企业 3 套全 0。
 
 回滚：`git revert <本轮提交>`。
+
+## 第九轮（C1 条款页：我们自己编的免责声明换成参考件原文）
+
+`C1-Personal-Statement-SAMPLE.pdf` 第 3 页是真条款，我们那页一直印的是自己编的
+`Note: Capital One account statement.` / `About this statement` / `This statement is provided for
+your records.` / `(1) Verify the account number on this statement.` —— 这种"泛泛的合规话"
+是最好认的破绽，因为真账单不会这么写。
+
+换掉的五块数据（`src/billgen/themes/capitalone/c1_generate.py` 的 `DEMO_DATA` / `PARITY_DATA`）：
+- `note_text`：`The last four digits of your external accounts may not match your actual account
+  numbers. This is because some banks may  issue a virtual or tokenized number for security. To learn
+  more about tokenized account numbers, contact your external bank.`
+- `error_heading`：`If anything in your statement looks incorrect, please let us know immediately.`
+  （12pt MyFontBold，色 `#255f82`）
+- `error_paragraphs`：从 `In case of error or questions… 23285.` 一路到 `…the first statement on which
+  the error appeared.` —— **必须合成一段**，参考件排成连续三行；拆成两段会多 7.3pt 段间距，
+  后面每条基线整体下移。
+- `error_items`：`(1) Tell us your name and account number.` / `(2) Describe the error or the transfer
+  you are unsure about, …` / `(3) Tell us the dollar amount of the suspected error.`
+- `final_paragraphs`：`We will investigate your complaint and will correct any error promptly. If we
+  take more than 10 business days to do this, we will credit your account for the amount you think is in
+  error, …`
+
+出片基线 115.50 / 122.51 / 141.90 / 155.92 / 162.93 / 169.95 / 184.27 / 198.59 / 205.60 / 219.92 /
+234.13 / 241.14 与参考件逐条一致（x 57.60，编号项 87.60）。
+
+顺带修了闸门的**误报**：`src/billgen/synth/lint.py` 的 `_PLACEHOLDER_WORDS` 里有 `your name`，
+把真条款 `Tell us your name and account number.` 判成占位内容。现在 `your name` 单拎出来，
+只有整串就是 `Your Name` / `your name:` 这种标签形态才算没填。
+
+基线：重导 `flow/skills/bank-forms/assets/capitalone.json`；`tests/test_explicit_engines.py` 的
+capitalone `DEFAULT_TEXT_SHA=d07cdc35…e0c0b0`、第三页像素 `e94c861c64e8ae4697b5504e7cf73e48`。
+
+验证：`pytest` 562 passed / 16 skipped / 33 subtests；`realism_rules.py` 全绿；`e2e_compare`
+个人 7 套差异 0 项、企业 3 套全 0。
+
+回滚：`git revert <本轮提交>`。

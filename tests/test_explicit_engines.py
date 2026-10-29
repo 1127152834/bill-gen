@@ -22,12 +22,13 @@ ENGINES = [
 # 页脚换成 360 专线与 P.O. Box、Account Summary 首行改 "360 Checking...<last4>"。
 DEFAULT_TEXT_SHA = {
     "mercury": "03624891786d6e2bd4dfbac2b305bdff1458b1db0304ab3d1b702bda7a6d4f2f",
-    "capitalone": "fc82757de8c6629b02c90348a1f533c820bc7bdd7f82a3f5a5b0777ae625afc0",
+    "capitalone": "d07cdc3528341c4c08497836b8896fa221bbb021d0fa2f229784c11579e0c0b0",
     "sofi": "4260995e2f8761189763277b12b3f1114e09cd2467070b4279aa688d57a70f32",
 }
 DEFAULT_PIXELS = {
     "mercury": ['f5ba07c7d5a6a5efedfefb58b4180c4c', '4ae7e9f5265b75ff1020257b3a002c6c'],
-    "capitalone": ['039826011de069ddf80cf0e19916ede6', 'bf95905cb2ce2cf46a18b025ae935a1a', '909ddfd7d990ccfece5abf686902bc1c'],
+    # 2026-10-30 第 3 页条款换成参考件原文，第三页像素随之改变
+    "capitalone": ['039826011de069ddf80cf0e19916ede6', 'bf95905cb2ce2cf46a18b025ae935a1a', 'e94c861c64e8ae4697b5504e7cf73e48'],
     "sofi": ['beddba3594841db54db4b629da43a055', 'af167418cb9d2a86127a55cbc24bb796'],
 }
 

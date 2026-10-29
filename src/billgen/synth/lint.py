@@ -49,11 +49,13 @@ _PLACEHOLDER_WORDS = (
     "lorem ipsum",
     "john doe",
     "jane doe",
-    "your name",
     "somebody",
     "nobody",
     "placeholder",
 )
+# `your name` 单独处理：真银行条款里就有 "Tell us your name and account number."，
+# 只有当整串本身就是一句占位标签（`Your Name` / `your name:`）时才算没填。
+_PLACEHOLDER_LABEL_RE = re.compile(r"^your\s+name\s*[:?]?$", re.IGNORECASE)
 # 这些词单独出现不算错（"Test" 可能是商户名的一部分），所以只在整词/整字段命中时判。
 _PLACEHOLDER_RE = re.compile(
     r"\b(?:" + "|".join(re.escape(w) for w in _PLACEHOLDER_WORDS) + r")\b",
@@ -82,7 +84,9 @@ def placeholder_hits(data: dict) -> list[str]:
     for path, text in _walk_strings(data):
         if not text.strip():
             continue
-        match = _PLACEHOLDER_RE.search(text)
+        match = _PLACEHOLDER_RE.search(text) or (
+            _PLACEHOLDER_LABEL_RE.match(text.strip()) if text.strip() else None
+        )
         if match:
             hits.append(f"{path}={text.strip()[:40]!r}（{match.group(0)}）")
             continue
