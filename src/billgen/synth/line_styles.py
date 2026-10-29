@@ -56,6 +56,45 @@ def _city_state(ledger: LedgerDocument) -> str:
     return ledger.holder.city_state.upper()
 
 
+#: 线上/全国性品牌在账单上印的是自己的注册地，不是持卡人所在城市
+#: （`NETFLIX.COM LOS GATOS CA`、`APPLE.COM/BILL CUPERTINO CA`）。
+_ONLINE_BRANDS: Final[tuple[tuple[tuple[str, ...], str], ...]] = (
+    (("NETFLIX",), "LOS GATOS CA"),
+    (("AMAZON", "AMZN"), "SEATTLE WA"),
+    (("APPLE.COM", "APPLE "), "CUPERTINO CA"),
+    (("GOOGLE",), "MOUNTAIN VIEW CA"),
+    (("PAYPAL",), "SAN JOSE CA"),
+    (("EBAY",), "SAN JOSE CA"),
+    (("UBER",), "SAN FRANCISCO CA"),
+    (("LYFT",), "SAN FRANCISCO CA"),
+    (("DOORDASH", "DD *"), "SAN FRANCISCO CA"),
+    (("INSTACART",), "SAN FRANCISCO CA"),
+    (("AIRBNB",), "SAN FRANCISCO CA"),
+    (("SPOTIFY",), "NEW YORK NY"),
+    (("ETSY",), "BROOKLYN NY"),
+    (("STEAM", "VALVE"), "BELLEVUE WA"),
+    (("PLAYSTATION", "SONY"), "SAN MATEO CA"),
+    (("MICROSOFT",), "REDMOND WA"),
+    (("ADOBE",), "SAN JOSE CA"),
+    (("COMCAST", "XFINITY"), "PHILADELPHIA PA"),
+    (("VERIZON",), "BASKING RIDGE NJ"),
+    (("T-MOBILE",), "BELLEVUE WA"),
+    (("AT&T",), "DALLAS TX"),
+    (("GEICO",), "CHEVY CHASE MD"),
+    (("STATE FARM",), "BLOOMINGTON IL"),
+    (("PROGRESSIVE",), "MAYFIELD VILLAGE OH"),
+)
+
+
+def merchant_location(ledger: LedgerDocument, text: str) -> str:
+    """卡行末尾的城市州：线上品牌用注册地，实体商户用持卡人所在城市。"""
+    up = (text or "").upper()
+    for keys, place in _ONLINE_BRANDS:
+        if any(key in up for key in keys):
+            return place
+    return _city_state(ledger)
+
+
 def merchant_category(text: str, row: LedgerRow | None = None) -> str:
     """按商户名判品类；判不出来再按交易类型落到 Cash/Fees/Transfers。"""
     up = (text or "").upper()
@@ -81,7 +120,7 @@ def _mmdd(row: LedgerRow) -> str:
 def capitalone_desc(ledger: LedgerDocument, row: LedgerRow, text: str) -> str:
     """Capital One：卡行 = 商户 + 城市 + 州；ACH 保留 NACHA 原文。"""
     if _is_card(row):
-        return f"{text} {_city_state(ledger)}".strip()
+        return f"{text} {merchant_location(ledger, text)}".strip()
     return text
 
 
@@ -93,7 +132,7 @@ def capitalone_category(ledger: LedgerDocument, row: LedgerRow, text: str) -> st
 def wellsfargo_desc(ledger: LedgerDocument, row: LedgerRow, text: str) -> str:
     """Wells Fargo：卡行 ``Card Purchase 12/11 商户 城市 州``；ATM/支票各自带前缀。"""
     if _is_card(row):
-        return f"Card Purchase {_mmdd(row)} {text} {_city_state(ledger)}".strip()
+        return f"Card Purchase {_mmdd(row)} {text} {merchant_location(ledger, text)}".strip()
     if row.type == "ATM":
         return f"ATM Withdrawal {_mmdd(row)} {text}".strip()
     if row.type == "CHECK":
@@ -119,7 +158,7 @@ def amex_desc(ledger: LedgerDocument, row: LedgerRow, text: str) -> str:
     Amex 支票账户的账单就是这么印的。
     """
     if _is_card(row):
-        return f"DEBIT CARD PURCHASE {text} {_city_state(ledger)}".strip()
+        return f"DEBIT CARD PURCHASE {text} {merchant_location(ledger, text)}".strip()
     if row.type == "ACH":
         # 本模板样张里的 ACH 行就是 `ACH CREDIT …` / `ACH DEBIT …`
         mark = "ACH CREDIT" if row.direction == "credit" else "ACH DEBIT"
@@ -130,7 +169,7 @@ def amex_desc(ledger: LedgerDocument, row: LedgerRow, text: str) -> str:
 def sofi_desc(ledger: LedgerDocument, row: LedgerRow, text: str) -> str:
     """SoFi：卡行带城市州；转账类用 ``To Savings - 1943`` 这种内部转账口吻。"""
     if _is_card(row):
-        return f"{text} {_city_state(ledger)}".strip()
+        return f"{text} {merchant_location(ledger, text)}".strip()
     if row.type == "TRANSFER" and row.direction == "debit":
         return f"To Savings - {ledger.account.last4}"
     return text

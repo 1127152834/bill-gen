@@ -42,8 +42,15 @@ def _descriptor(ledger: LedgerDocument, row: LedgerRow) -> str:
     holder = ledger.holder.name.upper()
     orig = "WEB" if row.direction == "debit" else "PPD"
     if row.type == "ACH":
+        # NACHA 的 DES 字段是短码：22 字符以内，且不切断单词（真账单不会出现 "PAYROLL DIRE"）
+        des = text[:22]
+        if len(text) > 22 and " " in des:
+            des = des.rsplit(" ", 1)[0]
+        des = des.strip() or text[:22].strip()
+        holder_field = holder[:22].rstrip()
+        # 真账单的 CO ID 是 ``XXXXX12345``：5 个掩码位 + 5 位公司号
         co = digits(f"coid:{key}", 5)
-        return f"DES:{text} ID:{row.reference} INDN:{holder} CO ID:{co} {orig}"
+        return f"DES:{des} ID:{row.reference} INDN:{holder_field} CO ID:XXXXX{co} {orig}"
     if row.type == "ZELLE":
         who = zelle_party(row, holder)
         return f"Zelle payment to {who} Conf# {refs.zelle_conf(key)}"

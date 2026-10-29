@@ -37,9 +37,33 @@ def load_data(tpl):
         return json.load(fh)
 
 
+_MONEY_KEYS = {"amount", "balance", "begin_balance"}
+_MONEY_SUM_KEYS = {"begin", "deposits", "withdrawals", "checks", "fees", "ending"}
+
+
+def plain_money(node):
+    """把 `$1,284.73` 这类展示格式还原成 `1284.73`。
+
+    编辑器前端会把金额格式化成带 $ 与千分位的文本再提交回来；如果原样落盘，示例数据就
+    再也不能作为 `synth render` 的默认入参（MCP 校验只收纯数字）。
+    """
+    if isinstance(node, dict):
+        for key, value in list(node.items()):
+            if isinstance(value, str) and (key in _MONEY_KEYS or key in _MONEY_SUM_KEYS):
+                cleaned = value.replace("$", "").replace(",", "").strip()
+                if cleaned and cleaned.replace(".", "", 1).replace("-", "", 1).isdigit():
+                    node[key] = cleaned
+            else:
+                plain_money(value)
+    elif isinstance(node, list):
+        for item in node:
+            plain_money(item)
+    return node
+
+
 def regenerate(tpl, data, watermark):
     with LOCK:
-        data = deepcopy(data)
+        data = plain_money(deepcopy(data))
         state = STATES[tpl]
         data["watermark"] = watermark
         generate.build_pdf(data, PREVIEW[tpl], watermark=watermark)

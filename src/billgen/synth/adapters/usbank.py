@@ -78,6 +78,9 @@ def _row(ledger: LedgerDocument, item: LedgerRow) -> dict[str, Any]:
             f"REF={item.reference}Y00",
             f"{entry} {digits(f'coid:{key}', 10)}",
         ]
+    elif item.type == "CHECK":
+        # 真账单的支票行在 Ref 列直接印支票号（不是 trace）
+        row["ref"] = item.check_no or item.reference
     elif item.type in {"FEE", "INTEREST"}:
         row["ref"] = item.reference
     return row

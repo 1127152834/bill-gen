@@ -26,9 +26,9 @@ THEME = Path(__file__).resolve().parents[1] / "src/billgen/themes/usbank"
 # 期间换成 `Jan 05, 2027` 后渲染缺字（肉眼 `an 05`）。shared.patch_outlines 从系统
 # Arial 补轮廓后像素变了、文本层不变 —— 文本摘要未动，仅四个 us 像素摘要更新。
 GOLDENS = {
-    "us-default": (3, "bbf186a0a85db104440686941ad4d10c12adfe502a06b23bc0e197f108119f8d", "1bb83dc3a801841437bb84e64a8eedb7eab70000e1ef17eca4d0c90d7c45d0dc"),
-    "us-empty": (3, "482a853c21c5ca115f8406b65db27af951e2959692504661f541ef5ceb788f8e", "fa6c8f53956cf1355b2e23872d04967c7e73da6797c7d9622c64ecc773b7e09e"),
-    "us-multipage": (8, "d1c29afd4d191ed7648a012a629077230978aa83f1fbe6fb6c2a15495eb99439", "4440074fb5e769feb53a8f5991007ee3e73e5625ef3ed48a881771961293a4c8"),
+    "us-default": (3, "444a8010b08f7b8b96fc10ef5d3f4599d408721738849a2ce848b3dbc02014f3", "fd64efdd7e7df7e20134a46eb47c5182f843e889bebd0b61363a1f4724b5795e"),
+    "us-empty": (3, "4c9991a2b3df22b70c2ef3e87ece684415ea036abcee885ad4ff3ce7c8ebe8ae", "77ebb6527f535008bb8de020a2d48fb116fd7e9e08f4d101b1e0dc5480fc2748"),
+    "us-multipage": (8, "467ac9b5a5a60ea3bde1ac3863d8ccf937474073576c4fb08b4424384cee3322", "e09000fdd3914f65dc74bf9efd9c2c63bf67f28bd4e4eb4d09011370828e247c"),
     "us-replay": (3, "72a036fbfd4533a81924c5a5140a73dbc60ad2cedd7af6d06603bf9485b5e792", "7cb785aeb8c727de3198a00929159d0d322ef9b611b9d41b1ab04a268a19aad4"),
     "usbiz-default": (2, "e309100a37d13b339d51385d82097609c382b2c93fc7c27e53a045166e01ef9a", "d3e83d0497ccfdf65764b9532a57e8a414d310712f436460bfa33b73367ced2b"),
     "usbiz-empty": (2, "8eb58044b396509a23400df9dc90cd97bec30767dc8bbe6c3f2e52984bed65f2", "116078d9c603beb3abe19ecda2e8047acd64459e9bdfd61d2a17fa2d9798abad"),

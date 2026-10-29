@@ -8,9 +8,9 @@
       612.0,
       792.0
     ],
-    "bytes": 286272,
-    "text_sha256_16": "5ea4fff3ac7d9f77",
-    "text_chars": 6866,
+    "bytes": 290654,
+    "text_sha256_16": "a5ed7bde1ed55278",
+    "text_chars": 7180,
     "fonts": [
       "ConnectionsBold_CZEX0AA0",
       "ConnectionsIta_CZEX0AC0",
@@ -19,7 +19,7 @@
       "HigherStandards_CZEX0660",
       "ITC_Franklin_Gothic_Book_CZEX0080"
     ],
-    "secs_render": 0.63
+    "secs_render": 0.45
   },
   "boa-business": {
     "id": "boa-business",
@@ -41,7 +41,7 @@
       "HigherStandards_CZEX0660",
       "ITC_Franklin_Gothic_Book_CZEX0080"
     ],
-    "secs_render": 0.7
+    "secs_render": 0.48
   },
   "wellsfargo": {
     "id": "wellsfargo",
@@ -66,7 +66,7 @@
       "SymbolMT,Bold",
       "ZapfDingbatsITCbyBT-Regular"
     ],
-    "secs_render": 0.4
+    "secs_render": 0.27
   },
   "amex": {
     "id": "amex",
@@ -84,7 +84,7 @@
       "BentonSans-Bold",
       "BentonSans-Regular"
     ],
-    "secs_render": 0.11
+    "secs_render": 0.07
   },
   "mercury": {
     "id": "mercury",
@@ -95,8 +95,8 @@
       612.0,
       792.0
     ],
-    "bytes": 232473,
-    "text_sha256_16": "ca934126f69f8b2e",
+    "bytes": 231996,
+    "text_sha256_16": "f33f8cd7545f0dbe",
     "text_chars": 858,
     "fonts": [
       "1695149660304911865-0-Arcadia-Text-480",
@@ -104,7 +104,7 @@
       "ArcadiaTextVariable-Variable",
       "Helvetica"
     ],
-    "secs_render": 0.51
+    "secs_render": 0.35
   },
   "capitalone": {
     "id": "capitalone",
@@ -115,15 +115,15 @@
       612.0,
       792.0
     ],
-    "bytes": 416961,
-    "text_sha256_16": "744b18b1ce1abe95",
-    "text_chars": 1702,
+    "bytes": 416952,
+    "text_sha256_16": "7c5f01769476941e",
+    "text_chars": 1699,
     "fonts": [
       "MyFontBold",
       "MyFontMedium",
       "MyFontRegular"
     ],
-    "secs_render": 0.39
+    "secs_render": 0.27
   },
   "sofi": {
     "id": "sofi",
@@ -142,7 +142,7 @@
       "TTNormsBold",
       "TTNormsRegular"
     ],
-    "secs_render": 0.38
+    "secs_render": 0.26
   },
   "chase-personal": {
     "id": "chase-personal",
@@ -173,7 +173,7 @@
       "Symbol",
       "Times-Roman"
     ],
-    "secs_render": 0.09
+    "secs_render": 0.06
   },
   "chase-business": {
     "id": "chase-business",
@@ -204,7 +204,7 @@
       "Symbol",
       "Times-Roman"
     ],
-    "secs_render": 0.09
+    "secs_render": 0.06
   },
   "usbank-personal": {
     "id": "usbank-personal",
@@ -215,8 +215,8 @@
       612.0,
       792.0
     ],
-    "bytes": 181942,
-    "text_sha256_16": "cc741aeb601b6091",
+    "bytes": 181932,
+    "text_sha256_16": "836a6f35a176362c",
     "text_chars": 9510,
     "fonts": [
       "Arial-BoldItalicMT",
@@ -230,7 +230,7 @@
       "IDAutomation2D",
       "USPSIMBCompact"
     ],
-    "secs_render": 0.18
+    "secs_render": 0.13
   },
   "usbank-business": {
     "id": "usbank-business",
@@ -241,7 +241,7 @@
       612.0,
       792.0
     ],
-    "bytes": 207965,
+    "bytes": 207961,
     "text_sha256_16": "515d54be938c4552",
     "text_chars": 9550,
     "fonts": [
@@ -256,7 +256,7 @@
       "IDAutomation2D",
       "USPSIMBCompact"
     ],
-    "secs_render": 0.18
+    "secs_render": 0.13
   },
   "alliant": {
     "id": "alliant",

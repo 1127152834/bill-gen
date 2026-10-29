@@ -22,7 +22,7 @@ DIGESTS = {
     "src/billgen/themes/chase/editor_business/data_business.json": "09bfca27fd0fdb55951633d1da8e020add42935a2d6ef3d45711b3c72e385210",
     "src/billgen/themes/chase/editor_personal/replay_personal.json": "cdc595b9c9237e1cda903063463e97c788789740d852a9f14fadbff04928a9f5",
     "src/billgen/themes/chase/editor_business/replay_business.json": "09bfca27fd0fdb55951633d1da8e020add42935a2d6ef3d45711b3c72e385210",
-    "src/billgen/themes/usbank/editor_us/data_us.json": "6e1958dcbfd9556f545b5f511205e57dc9d3d77b06e03ef1cfc32d1621390f13",
+    "src/billgen/themes/usbank/editor_us/data_us.json": "af942b0e606135a8fbd40df19dceacca115c6fadb61b8b86b66f4ee00daf4c4d",
     "src/billgen/themes/usbank/editor_biz/data_biz.json": "dd34501b8510b64bc1fd833160f5f3d6ff75498d6ef36002b6ce0f312b360b81",
     "src/billgen/themes/usbank/replay_us.json": "b6b166b76fe5d719e552b3cd539d9db3a1b59514a6768cc806b88db3dcf7aae9",
     "src/billgen/themes/usbank/replay_biz.json": "dd34501b8510b64bc1fd833160f5f3d6ff75498d6ef36002b6ce0f312b360b81",

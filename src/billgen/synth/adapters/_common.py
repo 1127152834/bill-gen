@@ -162,10 +162,11 @@ def zelle_party(row: LedgerRow, fallback: str) -> str:
 def clip(text: str, limit: int) -> str:
     """描述符按列宽截断（上游描述本来就可能超宽）。
 
-    上游已经截过一遍（带 ``…``）时先把它去掉，否则会叠成 ``… …`` 两个省略号。
+    真账单的截断是**硬切**，不会印省略号：`AMAZON MKTPLACE PMTS AMZN.COM/BILL WA` 超宽
+    就停在字符边界上。所以这里既不加 ``…``，也要把上游残留的 ``…`` 先去掉。
     """
     text = " ".join(str(text).split()).replace("…", " ").strip()
-    return text if len(text) <= limit else text[: limit - 1].rstrip() + "…"
+    return text if len(text) <= limit else text[:limit].rstrip()
 
 
 def split_rows(ledger: LedgerDocument) -> dict[str, list[LedgerRow]]:

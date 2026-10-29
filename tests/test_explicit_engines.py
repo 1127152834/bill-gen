@@ -17,13 +17,13 @@ ENGINES = [
 # （原稿把 0.78 灰的 SAMPLE 盖在金额上，一眼假），字符流顺序与像素因此变化。
 # 原稿基线文本见各主题模块的 `PARITY_DATA`。
 DEFAULT_TEXT_SHA = {
-    "mercury": "7c18da96a36a33057d569d912657ecbf6593149facc7b5771ec2cf0960bb921d",
-    "capitalone": "af99dd0dee3dd1f70946ade4662ff046a890012b95776abd22c05aeea67be210",
+    "mercury": "c5a491bdaf89c837f684292a8e499389513b8ebab4d3fac5aa90749be029b053",
+    "capitalone": "bb9220433b6f6f8e5c3a7c662f15daf01344172a8df1b6c6637c97d03868a28d",
     "sofi": "a3c1a21308e5e084bc9d6a311b89eaae64d4ce67480aeb67e84fc2754c7c4547",
 }
 DEFAULT_PIXELS = {
-    "mercury": ['c9a6f500b1ff9c869eab067011f1a9ba', '1fd7a3caa4c27890d9d15d75ad38355d'],
-    "capitalone": ['c818c6ac19354c44c5fec09a05d7e9a6', '17ccf0f6df67c77a5ba2c41bda49b144', 'debebd7608ffdf0f0963496d5ed5735a'],
+    "mercury": ['cbb2da189272fae73f152868dbad122c', '1fd7a3caa4c27890d9d15d75ad38355d'],
+    "capitalone": ['c818c6ac19354c44c5fec09a05d7e9a6', '0c91d0838c7289d4965e39ed54868c86', 'debebd7608ffdf0f0963496d5ed5735a'],
     "sofi": ['9f73361c6e72dc8f6fe59ea6c53fb527', 'ec92a65a02617d9b5498cfba5956db7a'],
 }
 

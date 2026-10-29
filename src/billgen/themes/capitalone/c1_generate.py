@@ -308,7 +308,8 @@ def money(v):
     return f"${abs(v):,.2f}"
 
 def signed(v):
-    return ("+ " if v >= 0 else "- ") + money(v)
+    # 真账单的金额不带正号、也不在符号与数字之间留空格：`-$86.42` / `$3,125.80`
+    return ("-" if v < 0 else "") + money(v)
 
 def prepare(page, *, ctx=None):
     ctx = ctx if ctx is not None else _render_context()
