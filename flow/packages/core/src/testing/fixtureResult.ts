@@ -2686,6 +2686,18 @@ const RESULT: GenerationResult = {
         "passed": true,
         "violations": [],
         "target": "lifeModel"
+      },
+      {
+        "ruleId": "R12_no_placeholder_names",
+        "passed": true,
+        "violations": [],
+        "target": "lifeModel"
+      },
+      {
+        "ruleId": "R13_occupation_category_fit",
+        "passed": true,
+        "violations": [],
+        "target": "lifeModel"
       }
     ],
     "findings": [
@@ -2704,8 +2716,8 @@ const RESULT: GenerationResult = {
     "tokens": 0,
     "tavilyQueries": 13
   },
-  "renders": [],
   "warnings": [],
+  "renders": [],
   "status": "completed"
 };
 

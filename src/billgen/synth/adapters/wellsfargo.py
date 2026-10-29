@@ -56,7 +56,7 @@ def build(ledger: LedgerDocument, defaults: dict[str, Any]) -> dict[str, Any]:
             },
             "account": {
                 "product": ledger.account.product,
-                "number": ledger.account.number,
+                "number": ledger.account.display,
                 "rtn": ledger.account.routing,
                 "primary_label": "Primary account",
             },

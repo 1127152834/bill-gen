@@ -174,7 +174,7 @@ def write_meta(doc, tag, md, original_metadata):
         "subject": om.get("subject", "") or "",
         "keywords": om.get("keywords", "") or "",
         "producer": md.get("producer")
-        or 'BillGen Sample Editor',
+        or 'OpenText Output Transformation Engine 16.6.0',
         "creationDate": creation,
         "modDate": md.get("mod") or creation,
     })

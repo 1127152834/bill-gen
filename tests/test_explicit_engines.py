@@ -15,14 +15,14 @@ ENGINES = [
 ]
 # Captured from the original build() before this refactor (PyMuPDF 1.26.6).
 DEFAULT_TEXT_SHA = {
-    "mercury": "366f02a31feb3616ba8387b063bbf16f204b42454daa98f4f42fa1f8657ae2c9",
-    "capitalone": "6be6d1c552aee84c28e2297066583ba749b53de7cdc05d051209f304b2842efb",
-    "sofi": "8e160da92f2f290487ca6344193176ffa2d14fbb64cd06b93959a3ea2980ef3e",
+    "mercury": "7499a9fa2cd4b55b3019f1266d51a265e2e91723fbbfb2916e36e458bafbf250",
+    "capitalone": "382a6d0808f062495a2c08d18a801e86290302ab040f522c1e26a834e96a3b3f",
+    "sofi": "458dd16570c61e2a127c955adc0edbb46c867e7a4aaf9dda5085f48c46be7a2b",
 }
 DEFAULT_PIXELS = {
-    "mercury": ["2014ad5ac680bc5e2fb6d67bc6bc21af", "c0ece6bb7cbea6cf039cd3239f7cb01c"],
-    "capitalone": ["459bc633e3be3f8dcb935a251235ac99", "e8a0748332f3fe6112eb29a5e3dbe57f", "c88d4cf19e096cf05bda147d0dd5cdd4"],
-    "sofi": ["664eb85a3861ee645d6ed6b0424300ac", "6e83042049ba9a52da3833e0b2ffc7a7"],
+    "mercury": ["2c9c23cee19906fb663818ad034b4b9c", "962c0fc409f5a8cedcbaa6e5f0c6b536"],
+    "capitalone": ["346efbd781dcef344f69caee30380fb3", "88bbad201e746577ec8b67f41f1fb16d", "06470ba230ff6602742d915d9e74c699"],
+    "sofi": ["6a2e6cdad20fc36c134b21dd1713e173", "7b07b3c0b9eb3ae6f758eb31732b7b8b"],
 }
 
 

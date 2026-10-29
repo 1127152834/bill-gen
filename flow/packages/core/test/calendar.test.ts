@@ -60,13 +60,22 @@ describe('estimatedTaxDates', () => {
 });
 
 describe('cycles', () => {
-  it('checkingCycles are natural months, oldest first, without dueDate', () => {
+  it('checkingCycles fall back to natural months when no anchorDay is given', () => {
     const c = checkingCycles('2026-02', 6);
     expect(c.map((x) => x.start)).toEqual([
       '2025-09-01', '2025-10-01', '2025-11-01', '2025-12-01', '2026-01-01', '2026-02-01',
     ]);
     expect(c.map((x) => x.index)).toEqual([0, 1, 2, 3, 4, 5]);
     expect(c[5]?.end).toBe('2026-02-28');
+    expect(c.every((x) => x.dueDate === undefined)).toBe(true);
+  });
+  it('checkingCycles roll on the anchor day (opening day) and stay contiguous', () => {
+    const c = checkingCycles('2026-02', 3, 17);
+    expect(c.map((x) => [x.start, x.end])).toEqual([
+      ['2025-11-18', '2025-12-17'],
+      ['2025-12-18', '2026-01-17'],
+      ['2026-01-18', '2026-02-17'],
+    ]);
     expect(c.every((x) => x.dueDate === undefined)).toBe(true);
   });
   it('creditCycles are contiguous and carry dueDate on a business day', () => {

@@ -1112,7 +1112,7 @@ def _replace_fields(pages, d, n_stmt):
 
 
 # ===== 元数据（缺省=原稿值，时间为实时；显式填写优先）=====
-META_DEFAULTS = {'title': 'SAMPLE — NOT A REAL BANK STATEMENT', 'creator': 'BillGen Sample Editor', 'producer': 'BillGen Sample Editor', 'subject': 'Fictional sample statement', 'x_producer': 'BillGen Sample Editor', 'x_creator': 'BillGen Sample Editor', 'x_title': 'SAMPLE — NOT A REAL BANK STATEMENT', 'x_desc': 'Fictional sample statement', 'xmptk': 'BillGen Sample Editor'}
+META_DEFAULTS = {'title': 'U.S. Bank Online Statement', 'creator': 'Ricoh Americas Corporation, AFP2PDF v3.2.1', 'producer': 'Ricoh Americas Corporation, AFP2PDF v3.2.1', 'subject': '', 'x_producer': 'Ricoh Americas Corporation, AFP2PDF v3.2.1', 'x_creator': 'Ricoh Americas Corporation, AFP2PDF v3.2.1', 'x_title': 'U.S. Bank Online Statement', 'x_desc': '', 'xmptk': 'Ricoh Americas Corporation, AFP2PDF v3.2.1'}
 
 
 def write_metadata(doc, md):

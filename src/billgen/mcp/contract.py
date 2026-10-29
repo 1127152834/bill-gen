@@ -36,7 +36,7 @@ _COMMON_NOTES: dict[str, str] = {
     "encrypt": "是否 RC4 加密 PDF。只看效果时设 false",
     "begin_balance": f"期初余额，{_MONEY} 字符串，如 \"1000.00\"",
     "bank": "银行身份。name / legal / domain 必须自洽，且不能指向真实银行",
-    "bank.name": "账单上出现的行名，如 \"Harborline Bank\"",
+    "bank.name": "账单上出现的行名，如 \"Bank of America\"",
     "bank.legal": "法律主体名，通常是 \"<行名>, N.A.\"",
     "bank.domain": "官网域名，用 example 域名，如 \"harborline-bank.example\"",
     "customer_lines": "持卡人三行地址：姓名 / 街道 / 城市 州 邮编",
@@ -195,8 +195,8 @@ def skeleton(template_id: str) -> dict[str, Any]:
 
 def _scaffold(template_id: str, data: dict[str, Any]) -> None:
     bank = data.get("bank") if isinstance(data.get("bank"), dict) else {}
-    name = str(bank.get("name") or "Sample Bank")
-    domain = str(bank.get("domain") or "example.invalid")
+    name = str(bank.get("name") or "Bank of America")
+    domain = str(bank.get("domain") or "bankofamerica.com")
     # 这几个模板的引擎把行名当数据读，但默认数据里没给 —— 不补就印原版行名
     if not isinstance(data.get("bank"), dict):
         data["bank"] = {"name": name, "legal": f"{name}, N.A.", "domain": domain}

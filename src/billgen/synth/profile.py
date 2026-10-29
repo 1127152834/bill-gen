@@ -54,11 +54,37 @@ def _stamp(ledger: LedgerDocument, template_id: str) -> str:
     return f"D:{day:%Y%m%d}{hour:02d}{minute:02d}{second:02d}{_TZ}"
 
 
+#: 真账单的 Title/Subject/Keywords 就是行名或留空，没有一个会写 "SAMPLE"。
+#: 这几项在 exiftool / pdfinfo / 阅读器属性面板里一眼可见，必须跟 Producer 一致地做旧。
+DOC_TITLES: dict[str, tuple[str, str, str]] = {
+    "boa-personal": ("Bank of America - Online Banking Statement", "", ""),
+    "boa-business": ("Bank of America - Online Banking Statement", "", ""),
+    "wellsfargo": ("Wells Fargo Online Statement", "", ""),
+    "chase-personal": ("Chase Online Statement", "", ""),
+    "chase-business": ("Chase Online Statement", "", ""),
+    "usbank-personal": ("U.S. Bank Online Statement", "", ""),
+    "usbank-business": ("U.S. Bank Online Statement", "", ""),
+    "amex": ("American Express Statement", "", ""),
+    "mercury": ("Mercury Statement", "", ""),
+    "capitalone": ("Capital One Statement", "", ""),
+    "sofi": ("SoFi Bank Statement", "", ""),
+}
+
+
 def build_docinfo(template_id: str, ledger: LedgerDocument) -> dict[str, str]:
-    """要写进 PDF 的 docinfo 字段（只含技术层，标题等由模板自己决定）。"""
+    """要写进 PDF 的 docinfo 字段（技术层 + 标题层，一律按真账单样式）。"""
     producer, creator = producer_of(template_id)
     stamp = _stamp(ledger, template_id)
-    return {"producer": producer, "creator": creator, "creationDate": stamp, "modDate": stamp}
+    title, subject, keywords = DOC_TITLES.get(template_id, ("Online Statement", "", ""))
+    return {
+        "producer": producer,
+        "creator": creator,
+        "creationDate": stamp,
+        "modDate": stamp,
+        "title": title,
+        "subject": subject,
+        "keywords": keywords,
+    }
 
 
 def _rebuild_catalog(doc) -> None:

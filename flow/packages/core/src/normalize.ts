@@ -17,6 +17,8 @@ export type NormalizedRequest = {
   request: GenerationRequest & { seed: string; endMonth: string };
   location: LocationInfo;
   closingDay?: number;
+  /** 支票账户的结单日（开户日），1–28；决定每月账单的起止。 */
+  anchorDay?: number;
   cycles: { checking?: Cycle[]; credit?: Cycle[] };
   /** Earliest cycle start across all requested accounts. */
   periodStart: string;
@@ -39,7 +41,10 @@ export function normalizeRequest(req: GenerationRequest, today: string): Normali
     : undefined;
 
   const cycles: NormalizedRequest['cycles'] = {};
-  if (req.accounts.checking) cycles.checking = checkingCycles(endMonth, req.months);
+  // 结单日跟着「开户日」走：同一账户每月同一天结单，不是自然月。
+  // 只有显式给了 checkingAnchorDay 才滚 —— 自然月是历史默认，改不动。
+  const anchorDay = req.accounts.checking ? req.checkingAnchorDay : undefined;
+  if (req.accounts.checking) cycles.checking = checkingCycles(endMonth, req.months, anchorDay);
   if (req.accounts.credit) cycles.credit = creditCycles(endMonth, req.months, closingDay!);
 
   const all = [...(cycles.checking ?? []), ...(cycles.credit ?? [])];
@@ -60,7 +65,17 @@ export function normalizeRequest(req: GenerationRequest, today: string): Normali
     ? lookupLocation(address.city, address.state)
     : metroToLocation(pickWeightedMetro(createRng(seed).fork('location')));
 
-  return { request, location, ...(closingDay !== undefined && { closingDay }), cycles, periodStart, periodEnd, holidays, taxDates };
+  return {
+    request,
+    location,
+    ...(closingDay !== undefined && { closingDay }),
+    ...(anchorDay !== undefined && { anchorDay }),
+    cycles,
+    periodStart,
+    periodEnd,
+    holidays,
+    taxDates,
+  };
 }
 
 /** Base required monthly count: checking 2 (+1 when a credit account also exists); credit 1. */

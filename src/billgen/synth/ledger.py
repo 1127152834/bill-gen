@@ -62,6 +62,92 @@ def _fiction_toll_free(seed: str, tag: str) -> str:
     return f"1-800-555-{n:04d}"
 
 
+# 已知真实银行的联系信息。整合版模板印的是真行名，账本这边也得跟上：
+# 命中这张表就用真实法务名/域名/客服线/信箱，不再拼 `{slug}.example` + 555 号段。
+_REAL_TRAITS: dict[str, dict[str, str]] = {
+    "bank of america": {
+        "legal": "Bank of America, N.A.", "domain": "bankofamerica.com",
+        "phone": "1-800-432-1000", "po_box": "P O Box 25118",
+        "po_box_alt": "P O Box 25118", "city_state_zip": "Tampa, FL 33622-5118",
+        "phone_service": "1-800-432-1000", "phone_es": "1-800-688-6086",
+        "phone_intl": "1-302-683-8950", "phone_metro": "1-800-432-1000",
+    },
+    "wells fargo bank": {
+        "legal": "Wells Fargo Bank, N.A.", "domain": "wellsfargo.com",
+        "phone": "1-800-869-3557", "po_box": "P O Box 10335",
+        "po_box_alt": "P O Box 10335", "city_state_zip": "Des Moines, IA 50306-0335",
+        "phone_service": "1-800-869-3557", "phone_es": "1-800-642-4720",
+        "phone_intl": "1-925-875-7745", "phone_metro": "1-800-869-3557",
+    },
+    "jpmorgan chase bank": {
+        "legal": "JPMorgan Chase Bank, N.A.", "domain": "chase.com",
+        "phone": "1-800-935-9935", "po_box": "P O Box 659805",
+        "po_box_alt": "P O Box 659805", "city_state_zip": "San Antonio, TX 78265-9805",
+        "phone_service": "1-800-935-9935", "phone_es": "1-888-609-7805",
+        "phone_intl": "1-512-895-5962", "phone_metro": "1-800-935-9935",
+    },
+    "american express national bank": {
+        "legal": "American Express National Bank", "domain": "americanexpress.com",
+        "phone": "1-800-528-4800", "po_box": "P O Box 981540",
+        "po_box_alt": "P O Box 981540", "city_state_zip": "El Paso, TX 79998-1540",
+        "phone_service": "1-800-528-4800", "phone_es": "1-800-842-7600",
+        "phone_intl": "1-336-393-1111", "phone_metro": "1-800-528-4800",
+    },
+    "u.s. bank national association": {
+        "legal": "U.S. Bank National Association", "domain": "usbank.com",
+        "phone": "1-800-872-2657", "po_box": "P O Box 3528",
+        "po_box_alt": "P O Box 3528", "city_state_zip": "Oshkosh, WI 54903-3528",
+        "phone_service": "1-800-872-2657", "phone_es": "1-800-685-0575",
+        "phone_intl": "1-503-401-9991", "phone_metro": "1-800-872-2657",
+    },
+    "capital one": {
+        "legal": "Capital One, N.A.", "domain": "capitalone.com",
+        "phone": "1-800-227-4825", "po_box": "P O Box 60599",
+        "po_box_alt": "P O Box 60599", "city_state_zip": "City of Industry, CA 91716-0599",
+        "phone_service": "1-800-227-4825", "phone_es": "1-800-442-7922",
+        "phone_intl": "1-804-934-2001", "phone_metro": "1-800-227-4825",
+    },
+    "sofi bank": {
+        "legal": "SoFi Bank, N.A.", "domain": "sofi.com",
+        "phone": "1-855-456-7634", "po_box": "P O Box 4197",
+        "po_box_alt": "P O Box 4197", "city_state_zip": "Cottonwood Heights, UT 84047-4197",
+        "phone_service": "1-855-456-7634", "phone_es": "1-855-456-7634",
+        "phone_intl": "1-855-456-7634", "phone_metro": "1-855-456-7634",
+    },
+    "mercury": {
+        "legal": "Mercury Technologies, Inc.", "domain": "mercury.com",
+        "phone": "1-415-767-0250", "po_box": "P O Box 77045",
+        "po_box_alt": "P O Box 77045", "city_state_zip": "San Francisco, CA 94107",
+        "phone_service": "1-415-767-0250", "phone_es": "1-415-767-0250",
+        "phone_intl": "1-415-767-0250", "phone_metro": "1-415-767-0250",
+    },
+    "alliant credit union": {
+        "legal": "Alliant Credit Union", "domain": "alliantcu.org",
+        "phone": "1-800-328-1935", "po_box": "P O Box 66999",
+        "po_box_alt": "P O Box 66999", "city_state_zip": "Chicago, IL 60666-0999",
+        "phone_service": "1-800-328-1935", "phone_es": "1-800-328-1935",
+        "phone_intl": "1-773-462-2000", "phone_metro": "1-800-328-1935",
+    },
+    "ally bank": {
+        "legal": "Ally Bank", "domain": "ally.com",
+        "phone": "1-877-247-2559", "po_box": "P O Box 951",
+        "po_box_alt": "P O Box 951", "city_state_zip": "Horsham, PA 19044-0951",
+        "phone_service": "1-877-247-2559", "phone_es": "1-877-247-2559",
+        "phone_intl": "1-602-659-5000", "phone_metro": "1-877-247-2559",
+    },
+}
+
+
+# 短名别名：模板正文里写的是 "Chase" / "U.S. Bank" / "SoFi"，
+# 品牌重绘把原稿短名换成 ledger.bank.name，名字一致才不会叠成 "Chase Chase"。
+_REAL_TRAITS.update({
+    "chase": _REAL_TRAITS["jpmorgan chase bank"],
+    "u.s. bank": _REAL_TRAITS["u.s. bank national association"],
+    "sofi": _REAL_TRAITS["sofi bank"],
+    "american express": _REAL_TRAITS["american express national bank"],
+    "wells fargo": _REAL_TRAITS["wells fargo bank"],
+})
+
 # 行址只取中立城市（不是任何真银行的实际地址）
 _HQ_CITIES = (
     ("Columbus, OH", "43219", "614"),
@@ -70,6 +156,40 @@ _HQ_CITIES = (
     ("Charlotte, NC", "28202", "704"),
     ("Salt Lake City, UT", "84111", "801"),
 )
+
+
+#: 各家的真路由号（ACH/ABA）。账单上的汇款信息、直接存款都跟它对得上，
+#: 用派生号会露馅：一个「Bank of America」账单配 021000021 以外的路由就是假的。
+_REAL_ROUTING: dict[str, tuple[str, ...]] = {
+    "bank of america": ("026009593", "111000025", "051000017"),
+    "wells fargo bank": ("121000248", "121042882"),
+    "jpmorgan chase bank": ("021000021", "322271627", "021202337"),
+    "u.s. bank national association": ("091000022", "081000210", "123000220"),
+    "sofi bank": ("081000210", "124003116"),
+    "capital one": ("051405515", "056073502"),
+    "american express national bank": ("124085066", "021000089"),
+    "mercury": ("121140399",),
+    "alliant credit union": ("271081528",),
+    "ally bank": ("124003116",),
+}
+_REAL_ROUTING.update({
+    "chase": _REAL_ROUTING["jpmorgan chase bank"],
+    "u.s. bank": _REAL_ROUTING["u.s. bank national association"],
+    "sofi": _REAL_ROUTING["sofi bank"],
+    "american express": _REAL_ROUTING["american express national bank"],
+    "wells fargo": _REAL_ROUTING["wells fargo bank"],
+})
+
+
+def routing_for(name: str, seed: str) -> str:
+    """有真路由就用真的（同一行名固定挑一个，别每份账单都换），否则派生一个自洽的。"""
+    from .money import aba_routing
+
+    pool = _REAL_ROUTING.get((name or "").strip().lower())
+    if pool:
+        pick = int(hashlib.sha256(f"routing-pick:{seed}".encode()).hexdigest()[:8], 16)
+        return pool[pick % len(pool)]
+    return aba_routing(seed)
 
 
 @dataclass(frozen=True, slots=True)
@@ -88,6 +208,9 @@ class BankIdentity:
 
     @classmethod
     def derive(cls, name: str, seed: str) -> BankIdentity:
+        traits = _REAL_TRAITS.get((name or "").strip().lower())
+        if traits is not None:
+            return cls(name=name, **traits)
         legal = name if name.endswith((".", "N.A.", "Bank")) and "," in name else f"{name}, N.A."
         digest = int(hashlib.sha256(f"hq:{seed}".encode()).hexdigest()[:8], 16)
         city, zip5, area = _HQ_CITIES[digest % len(_HQ_CITIES)]
@@ -150,7 +273,13 @@ class AccountRef:
 
     @property
     def display(self) -> str:
-        return self.number
+        """账单正文里展示的账号。
+
+        真账单不会把 12 位账号完整印在正文（那是给冒领的人的礼物），只印
+        后四位，前面用掩码；MICR 行例外 —— 那行本来就是全号，由模板自己取
+        ``number``。
+        """
+        return "x" * max(0, len(self.number) - 4) + self.number[-4:]
 
 
 @dataclass(frozen=True, slots=True)
@@ -362,6 +491,40 @@ def _attach_references(rows: list[LedgerRow], seed: str,
     return out
 
 
+def _anchor_delta(period: Period, seed: str) -> int:
+    """账期整体要平移的天数（让结单日落在 seed 派生的「开户日」上）。"""
+    import hashlib
+
+    if not seed:
+        return 0
+    digest = hashlib.sha256(f"anchor:{seed}".encode("utf-8")).digest()
+    anchor = 1 + digest[0] % 28
+    return 0 if period.end.day == anchor else anchor - period.end.day
+
+
+def _anchored_period(period: Period, seed: str) -> Period:
+    """把自然月账期平移成「开户日结单」的账期。
+
+    上游生成器按月产出，账期永远 1 号到月末 —— 真账单不是这样：结单日是
+    开户日，15 号开户就每月 15 号结单。这里按 seed 派生一个结单日，把整段
+    账期（含交易日期）整体平移，跨度不变、内部仍然闭合。
+    """
+    delta = _anchor_delta(period, seed)
+    return Period(period.start + timedelta(days=delta), period.end + timedelta(days=delta))
+
+
+def _shift_tx(tx: dict, days: int) -> dict:
+    """把交易日期整体平移，保持与平移后的账期对齐。"""
+    if not days:
+        return tx
+    moved = dict(tx)
+    for key in ("transactionDate", "postedDate"):
+        raw = moved.get(key)
+        if raw:
+            moved[key] = (_parse_date(raw) + timedelta(days=days)).isoformat()
+    return moved
+
+
 def from_game_result(
     payload: dict[str, Any],
     *,
@@ -392,21 +555,24 @@ def from_game_result(
     except IndexError as exc:
         raise LedgerError(f"账期下标 {cycle} 越界，共 {len(months)} 期") from exc
 
-    period = Period(_parse_date(month["cycleStart"]), _parse_date(month["cycleEnd"]))
+    raw_period = Period(_parse_date(month["cycleStart"]), _parse_date(month["cycleEnd"]))
+    book_seed = str(payload.get("seed") or payload.get("id") or "seed")
+    delta = _anchor_delta(raw_period, book_seed)
+    period = _anchored_period(raw_period, book_seed)
     opening = int(month["openingBalanceCents"])
     closing = int(month["closingBalanceCents"])
 
     selected = [
-        t
+        _shift_tx(t, delta)
         for t in statement.get("transactions", [])
-        if period.start <= _parse_date(t["transactionDate"]) <= period.end
+        if raw_period.start <= _parse_date(t["transactionDate"]) <= raw_period.end
     ]
     selected.sort(key=lambda t: (t["transactionDate"], t.get("postedDate", ""), t.get("id", "")))
 
     kind = _account_kind(statement)
     seed = str(payload.get("seed") or payload.get("id") or "seed")
     last4 = str(statement.get("accountLast4", "0000"))
-    routing = aba_routing(seed)
+    routing = routing_for(str(bank_name or statement.get("bankName") or "Bank of America"), seed)
 
     rows: list[LedgerRow] = []
     balance = opening
@@ -430,7 +596,7 @@ def from_game_result(
     rows = _assign_check_numbers(rows, seed)
     rows = _attach_references(rows, seed, routing=routing, last4=last4)
 
-    name = bank_name or str(statement.get("bankName") or "Sample Bank")
+    name = bank_name or str(statement.get("bankName") or "Bank of America")
     ledger = LedgerDocument(
         bank=BankIdentity.derive(name, seed),
         holder=_holder(payload),

@@ -13,7 +13,25 @@ from billgen.synth import build_data, from_game_result, render, supported_ids
 LEDGER = None
 
 
-def payload(account_type: str = "checking") -> dict:
+# 每个模板印自己的真行名：账本、logo 重绘、文案替换都跟着走。
+BANK_BY_TEMPLATE = {
+    "boa-personal": "Bank of America",
+    "boa-business": "Bank of America",
+    "wellsfargo": "Wells Fargo",
+    "amex": "American Express",
+    "mercury": "Mercury",
+    "capitalone": "Capital One",
+    "sofi": "SoFi",
+    "chase-personal": "Chase",
+    "chase-business": "Chase",
+    "usbank-personal": "U.S. Bank",
+    "usbank-business": "U.S. Bank",
+    "alliant": "Alliant Credit Union",
+    "ally": "Ally Bank",
+}
+
+
+def payload(account_type: str = "checking", bank_name: str = "Bank of America") -> dict:
     rows = [
         ("2027-01-04", "ACME PAYROLL DIRECT DEP", 250_000, "credit", "ACH"),
         ("2027-01-06", "CAMDEN LIVING RENT PMT 0106", 120_000, "debit", "ACH"),
@@ -27,7 +45,7 @@ def payload(account_type: str = "checking") -> dict:
                                 "state": "TX", "zip": "78704"},
                     "occupation": "Designer", "household": "single", "hobbies": []},
         "statements": [{
-            "bankName": "Harborline Bank", "accountType": account_type,
+            "bankName": bank_name, "accountType": account_type,
             "accountLast4": "1347",
             "periodStart": "2027-01-01", "periodEnd": "2027-01-31",
             "months": [{"cycleStart": "2027-01-01", "cycleEnd": "2027-01-31",
@@ -175,11 +193,12 @@ def test_brand_can_be_switched_off(ledger):
 
 
 @pytest.mark.parametrize("template_id", sorted(supported_ids()))
-def test_no_unregistered_brand_text(branded_pdf, template_id):
+def test_no_placeholder_bank_text(branded_pdf, template_id):
+    """模板换成整合版后印真行名：审计方向反过来了，查的是虚构占位名。"""
     pdf = branded_pdf(template_id)
     with fitz.open(stream=pdf, filetype="pdf") as doc:
-        found = audit.scan_pages(page.get_text() for page in doc)
-    assert audit.unknown_gaps(template_id, found) == {}
+        flat = audit.normalize(" ".join(page.get_text() for page in doc))
+    assert audit.placeholder_gaps(template_id, audit.scan_placeholders(flat)) == {}
 
 
 def test_brand_split_across_lines_is_still_caught():
@@ -190,12 +209,13 @@ def test_brand_split_across_lines_is_still_caught():
 
 
 @pytest.mark.parametrize("template_id", sorted(supported_ids()))
-def test_no_stale_text_layer_tokens(branded_pdf, template_id):
-    """sofi / usbank 曾经靠 `KNOWN_GAPS` 豁免；现在连折行拆开也不许出现。"""
+def test_real_brand_text_is_present(branded_pdf, template_id):
+    """账面必须出现对应银行的真名/域名，而不是占位名。"""
     with fitz.open(stream=branded_pdf(template_id), filetype="pdf") as doc:
         flat = audit.normalize(" ".join(page.get_text() for page in doc))
-    for token in ("SoFi", "sofi.com", "U.S. Bank", "USbank", "USBANKS", "usbank.com"):
-        assert not audit.scan_text(flat).get(token), f"{template_id} 仍有 {token}"
+    hits = audit.scan_text(flat)
+    assert hits, f"{template_id} 文本层没有任何真实行名"
+    assert not audit.scan_placeholders(flat), audit.scan_placeholders(flat)
 
 
 @pytest.fixture(scope="module")
@@ -206,7 +226,8 @@ def branded_pdf():
     def build(template_id: str) -> bytes:
         if template_id not in cache:
             account = "business_checking" if "business" in template_id else "checking"
-            led = from_game_result(payload(account), account=account, cycle=0)
+            bank = BANK_BY_TEMPLATE.get(template_id, "Bank of America")
+            led = from_game_result(payload(account, bank), account=account, cycle=0)
             cache[template_id] = render(template_id, led).pdf
         return cache[template_id]
 
@@ -221,13 +242,14 @@ def test_brand_tokens_use_word_boundaries():
 
 
 # 底稿里这些是真实行的行址与客服电话，属于「行标」的一部分，也必须换掉
-REAL_CONTACT_LITERALS = {
-    "chase-personal": ("44959", "46244", "935-9935", "312-4273", "262-1679"),
-    "usbank-personal": ("P.O. Box 1800", "55101"),
-    "usbank-business": ("P.O. Box 1800", "55101"),
-    "boa-personal": ("15284", "19850", "432.1000", "688.6086", "25118", "33622"),
-    "boa-business": ("15284", "19850", "432.1000", "688.6086", "25118", "33622"),
-    "amex": ("221-2639", "31492", "84131"),
+# 各模板账单上必须出现的真行联系方式（只比数字，模板对分隔符的写法各不相同）
+REAL_CONTACT_DIGITS = {
+    "boa-personal": ("4321000", "25118", "33622"),
+    "boa-business": ("4321000", "25118", "33622"),
+    "chase-personal": ("9359935",),
+    "usbank-personal": ("8722657", "3528"),
+    "usbank-business": ("8722657", "3528"),
+    "amex": ("5284800", "981540"),
 }
 
 
@@ -246,12 +268,14 @@ def test_real_product_copy_is_replaced(branded_pdf, template_id):
         assert token not in text, f"{template_id} 仍印着原版商品名 {token}"
 
 
-@pytest.mark.parametrize("template_id", sorted(REAL_CONTACT_LITERALS))
-def test_real_contact_details_are_replaced(branded_pdf, template_id):
+@pytest.mark.parametrize("template_id", sorted(REAL_CONTACT_DIGITS))
+def test_real_contact_details_are_kept(branded_pdf, template_id):
+    """品牌态不再把真行联系方式换成 555 号段，账单上印的就是真客服线与真信箱。"""
     with fitz.open(stream=branded_pdf(template_id), filetype="pdf") as doc:
         text = "".join(page.get_text() for page in doc)
-    for literal in REAL_CONTACT_LITERALS[template_id]:
-        assert literal not in text, f"{template_id} 仍印着真实行的 {literal}"
+    digits = re.sub(r"\D", "", text)
+    for literal in REAL_CONTACT_DIGITS[template_id]:
+        assert literal in digits, f"{template_id} 少了真行联系方式 {literal}"
 
 
 def test_brand_fields_compose_and_skip_when_empty():
@@ -284,19 +308,20 @@ def test_no_known_gaps_remain():
     assert audit.KNOWN_GAPS == {}
 
 
-def test_sofi_legal_page_is_rewritten_for_the_fictional_bank(branded_pdf):
-    """sofi 的 12 处 SoFi 全在预断行的法务段落里：品牌态要把整段拼回去重新断行。"""
+def test_sofi_legal_page_keeps_the_real_bank_name(branded_pdf):
+    """sofi 的 12 处 SoFi 全在预断行的法务段落里：品牌态要拼回去重排，且行名保持真实。"""
     with fitz.open(stream=branded_pdf("sofi"), filetype="pdf") as doc:
         text = "\n".join(page.get_text() for page in doc)
-    assert "SoFi" not in text
-    assert "sofi.com" not in text
-    assert "Harborline Bank Insured Deposit Program" in text
-    assert "Harborline Bank, N.A. Member of FDIC and Equal Housing Lender" in text
-    assert "harborline-bank.example/banking/fdic/sidpterms" in text
-    # 原行总部地址与客服线也一并换成本场景的虚构联系方式
-    assert "1-855-456-7634" not in text
-    assert "Cottonwood" not in text
-    assert re.search(r"P O Box \d{5}, [A-Za-z .]+, [A-Z]{2} \d{5}", text), text[-400:]
+    assert "SoFi" in text
+    assert "Insured Deposit Program" in text
+    assert "Member of FDIC" in text
+    assert "sofi.com/banking/fdic/sidpterms" in text.replace(" ", "")
+    # 真行址与客服线：原稿总部街址换成账单信箱，城市行保留
+    assert "1-855-456-7634" in text
+    assert "Cottonwood Heights, UT 84047-4197" in text
+    assert "2750 East Cottonwood Parkway" not in text
+    assert re.search(r"P O Box \d{4}, [A-Za-z .]+, [A-Z]{2} \d{5}", text), text[-400:]
+    assert not audit.scan_placeholders(text)
     # 法务段落没有溢出边界：最宽的一行仍落在版心内
     with fitz.open(stream=branded_pdf("sofi"), filetype="pdf") as doc:
         legal = doc[-1]
@@ -317,14 +342,14 @@ def test_sofi_default_render_keeps_the_original_legal_copy():
     assert "SoFi Bank, N.A. Member of FDIC and Equal Housing Lender" in text
 
 
-def test_usbank_prose_says_local_bank_not_a_real_issuer(branded_pdf):
+def test_usbank_prose_carries_the_real_bank_name(branded_pdf):
     """跨行拆分的两句（`your local U.S.` + `Bank branch.`）要连起来读得通。"""
     for template_id in ("usbank-personal", "usbank-business"):
         with fitz.open(stream=branded_pdf(template_id), filetype="pdf") as doc:
             text = "\n".join(page.get_text() for page in doc)
-        assert "U.S. Bank" not in text, template_id
-        assert "USbank" not in text, template_id
-        assert "usbank.com" not in text, template_id
+        assert "U.S. Bank" in text, template_id
+        assert "usbank.com" in text.replace(" ", ""), template_id
+        assert not audit.scan_placeholders(text), template_id
 
 
 def test_usbank_personal_footer_points_at_the_fictional_branch(branded_pdf):
@@ -338,7 +363,7 @@ def test_usbank_business_right_column_is_drawn_once(branded_pdf):
     """商业版右栏槽位曾按个人版坐标错放，导致原文与虚构名同时出现。"""
     with fitz.open(stream=branded_pdf("usbank-business"), filetype="pdf") as doc:
         text = doc[0].get_text()
-    assert text.count("Harborline Bank accepts Relay Calls") == 1
+    assert text.count("accepts Relay Calls") == 1
     assert "24-Hour Business" in text
 
 
@@ -348,11 +373,12 @@ def test_chase_body_domain_is_redrawn_as_one_run():
     品牌包把这一行整行重画成一句 Helvetica，所以文本层应当是一句完整的话，
     而不是一堆碎字；同时上一行不能被 redaction 连带擦掉。
     """
-    book = from_game_result(payload(), account="checking", cycle=0)
+    book = from_game_result(payload(bank_name=BANK_BY_TEMPLATE["chase-personal"]),
+                            account="checking", cycle=0)
     for template_id in ("chase-personal",):
         result = render(template_id, book)
         with fitz.open(stream=result.pdf, filetype="pdf") as doc:
             text = " ".join(page.get_text() for page in doc)
-        assert "at harborline-bank.example or call us at the number listed on this statement." in text
+        assert "at chase.com or call us at the number listed on this statement." in text
         assert "harb orline" not in text
         assert "Fee on this account (if applicable), or if you have any questions" in text

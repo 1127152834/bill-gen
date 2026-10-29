@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -17,6 +18,8 @@ from ..spec import RenderOptions
 __all__ = ["compare", "compare_file", "probe", "record"]
 
 PARITY_KEYS = ("pages", "size", "text_sha256_16", "text_chars", "fonts")
+
+_SUBSET = re.compile(r"^[A-Z]{6}\+")
 
 # 旧仓 probe 用的 id → 新注册表 id（P0 基线是旧目录下记录的）
 LEGACY_IDS: dict[str, str] = {
@@ -42,7 +45,8 @@ def probe(spec_id: str, opts: RenderOptions | None = None) -> dict[str, Any]:
     doc = fitz.open(stream=result.pdf, filetype="pdf")
     try:
         text = "\n".join(page.get_text() for page in doc)
-        fonts = sorted({font[3] for page in doc for font in page.get_fonts()})
+        # 字体子集前缀每次出件都随机（真样本也是这样），判据里只留名字本体。
+        fonts = sorted({_SUBSET.sub("", font[3]) for page in doc for font in page.get_fonts()})
         return {
             "id": spec_id,
             "name": spec.display_name,

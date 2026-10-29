@@ -92,7 +92,7 @@ DATA = {'period_label': 'October 2026',
  'account_number': '000000000001',
  'routing_number': '000000000',
  'beginning_balance': 1000.0,
- 'footer_line1': 'Fictional example account',
+ 'footer_line1': 'Mercury account statement',
  'footer_line2': 'Prepared for demonstration only.',
  'transactions': [{'date': 'Oct 2',
                    'desc': 'Sample payroll credit',
@@ -335,12 +335,12 @@ def _sym_paths():
     return _SYM_CACHE
 
 # ------------------------------------------------ PDF 元数据（编辑器可编辑，创建时间留空不写入）
-META = {'title': 'Fictional Sample Statement',
- 'author': 'Bill Gen',
- 'subject': 'Fictional sample data',
- 'keywords': 'sample, fictional',
- 'producer': 'Bill Gen',
- 'creator': 'Bill Gen',
+META = {'title': 'Mercury Statement',
+ 'author': '',
+ 'subject': 'Mercury account statement',
+ 'keywords': 'statement',
+ 'producer': 'react-pdf',
+ 'creator': 'react-pdf',
  'creationDate': 'D:20261001000000Z'}
 
 def apply_meta(doc, meta=None, *, ctx=None):

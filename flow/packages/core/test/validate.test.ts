@@ -50,6 +50,8 @@ describe('runRules', () => {
       ['R9_evidence_present', 'lifeModel'],
       ['R10_no_payroll_income_personal', 'lifeModel'],
       ['R11_credit_within_limit', 'lifeModel'],
+      ['R12_no_placeholder_names', 'lifeModel'],
+      ['R13_occupation_category_fit', 'lifeModel'],
     ]);
   });
 
@@ -323,12 +325,28 @@ describe('R11_credit_within_limit', () => {
 
 describe('R10_no_payroll_income_personal', () => {
   it('fails when personal income is described as payroll', () => {
-    for (const wording of ['ACME CORP PAYROLL', 'DIRECT DEP ACME', 'ACME SALARY']) {
+    // 用真公司风格的写法，把 R10 和 R12（占位名）分开测
+    for (const wording of ['KESTREL DESIGN CO PAYROLL', 'DIRECT DEP KESTREL DESIGN', 'KESTREL DESIGN SALARY']) {
       const b = build('freelancer', 'alpha');
       const t = pick(rowsOf(b, 'checking-any'), b, (m) => m.source === 'income');
       const r = expectOnlyFails(run(b, edit(b, t.id, (x) => ({ ...x, description: wording }))), 'R10_no_payroll_income_personal');
       expect(r.violations[0]!.transactionIds).toEqual([t.id]);
     }
+  });
+
+  it('R12 rejects placeholder company names in income and memos', () => {
+    const b = build('freelancer', 'alpha');
+    const t = pick(rowsOf(b, 'checking-any'), b, (m) => m.source === 'income');
+    const r = expectOnlyFails(
+      run(b, edit(b, t.id, (x) => ({ ...x, description: 'ACME CORP PAYMENT', memo: 'Deposit from Acme' }))),
+      'R12_no_placeholder_names',
+    );
+    expect(r.violations[0]!.transactionIds).toEqual([t.id]);
+  });
+
+  it('R13 stays quiet when the statement has no card spending to judge', () => {
+    const b = build('freelancer', 'alpha', 'checking');
+    expect(failing(run(b))).not.toContain('R13_occupation_category_fit');
   });
 
   it('does not apply to a business persona or to debits', () => {

@@ -6,4 +6,9 @@ _ASSET_PATH = Path(__file__).resolve().parent / "assets" / "declared_fonts.json"
 ASSETS = json.loads(_ASSET_PATH.read_text(encoding="utf-8"))
 DECLARED_FONTS = ASSETS["fonts"]
 ENCODING_OBJ = ASSETS["encoding"]
-META_DEFAULTS = {"producer": "BillGen Sample Editor"}
+META_DEFAULTS = {
+    "producer": "iText® Core 9.5.0 (AGPL version) ©2000-2025 iText Group NV",
+    "title": "Wells Fargo Online Statement",
+    "subject": "",
+    "keywords": "",
+}

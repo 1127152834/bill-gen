@@ -127,10 +127,10 @@ def _validate(template_id: str, data: Any) -> dict[str, Any]:
 
     if pdf is not None:
         with fitz.open(stream=pdf, filetype="pdf") as doc:
-            hits = audit.scan_pages(page.get_text() for page in doc)
-        unknown = audit.unknown_gaps(template_id, hits)
-        if unknown:
-            errors.append(f"文本层仍有真实银行标识：{unknown}")
+            flat = audit.normalize(" ".join(page.get_text() for page in doc))
+        placeholders = audit.placeholder_gaps(template_id, audit.scan_placeholders(flat))
+        if placeholders:
+            errors.append(f"文本层仍有虚构占位行名：{placeholders}")
 
     return {"ok": not errors, "errors": errors, "warnings": warnings,
             "pages": pages, "bytes": len(pdf) if pdf else 0}
@@ -222,15 +222,15 @@ def build(*, out_dir: str | None = None):  # noqa: ANN201 - 返回 FastMCP，避
         target = out / Path(name).name
         target.write_bytes(result.pdf)
         with fitz.open(stream=result.pdf, filetype="pdf") as doc:
-            hits = audit.scan_pages(page.get_text() for page in doc)
-        unknown = audit.unknown_gaps(template_id, hits)
+            flat = audit.normalize(" ".join(page.get_text() for page in doc))
+        placeholders = audit.placeholder_gaps(template_id, audit.scan_placeholders(flat))
         return {
             "ok": True,
             "path": str(target),
             "pages": result.pages,
             "bytes": len(result.pdf),
             "sha256": _digest(result.pdf),
-            "brand_leftovers": unknown,
+            "brand_leftovers": placeholders,
         }
 
     @server.tool(description="把指定页渲染成 PNG 供肉眼检查；返回文件路径")

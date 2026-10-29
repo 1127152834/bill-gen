@@ -110,7 +110,7 @@ def build_mercury(ledger: LedgerDocument, defaults: dict[str, Any]) -> dict[str,
             "company": ledger.holder.name.upper(),
             "address": _addr(ledger),
             "account_type": "Checking",
-            "account_number": ledger.account.number,
+            "account_number": ledger.account.display,
             "routing_number": ledger.account.routing,
             "beginning_balance": cents_to_float(ledger.opening_cents),
             "period_label": fmt_month_year(ledger.period.end),
@@ -137,7 +137,7 @@ def build_capitalone(ledger: LedgerDocument, defaults: dict[str, Any]) -> dict[s
             "summary_end_label": ledger.period.end.strftime("%b %d"),
             "closing_date": ledger.period.end.strftime("%m/%d/%Y"),
             "account_name": ledger.account.product,
-            "account_number": ledger.account.number,
+            "account_number": ledger.account.display,
             "days_in_cycle": str(ledger.period.days),
             "opening_balance": cents_to_float(ledger.opening_cents),
             "transactions": [
@@ -168,7 +168,7 @@ def build_sofi(ledger: LedgerDocument, defaults: dict[str, Any]) -> dict[str, An
             "contact_phone": ledger.bank.phone_service,
             # 第三个槽位是空行占位（原稿三行地址），补空串避免越界
             "contact_address": [ledger.bank.po_box, ledger.bank.city_state_zip, ""],
-            "account_number": ledger.account.number,
+            "account_number": ledger.account.display,
             "account_last4": ledger.account.last4,
             "account_type": ledger.account.product,
             "statement_period": f"{ledger.period.start.strftime('%m/%d/%Y')} - "

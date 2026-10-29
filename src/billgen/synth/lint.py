@@ -77,6 +77,10 @@ def issues(ledger: LedgerDocument, data: dict, template_id: str) -> list[Issue]:
         found.append(
             Issue("rows_dropped", f"适配器只承载 {carried} 行，账本有 {len(ledger.rows)} 行")
         )
+
+    # 账单上印的「合计」必须和逐行相加对得上。模板各自维护 total 字段，
+    # 一旦某家把行过滤了而没重算，读者一眼就能发现（真账单从不结不上）。
+    found.extend(_sum_mismatches(ledger, data, template_id))
     if not binding.accepts(ledger.account.kind):
         found.append(
             Issue(
@@ -84,6 +88,54 @@ def issues(ledger: LedgerDocument, data: dict, template_id: str) -> list[Issue]:
                 f"{template_id} 只接受 {sorted(binding.accounts)}，账本是 {ledger.account.kind}",
             )
         )
+    return found
+
+
+
+def _cents(text) -> int | None:
+    """把 "$1,234.56" / "-12.34" / "" 解析成分，解析不了返回 None。"""
+    raw = str(text or "").strip().replace("$", "").replace(",", "").replace("(", "-").replace(")", "")
+    if not raw or raw in {"-", "."}:
+        return None
+    try:
+        return int(round(float(raw) * 100))
+    except ValueError:
+        return None
+
+
+def _sum_mismatches(ledger: LedgerDocument, data: dict, template_id: str) -> list[Issue]:
+    """逐行合计 vs 账单上的小计行。只比能明确配对的字段。"""
+    found: list[Issue] = []
+    totals = data.get("totals")
+    if isinstance(totals, dict):
+        for key, rows_key, direction in (
+            ("deposits", "deposits", "credit"),
+            ("withdrawals", "withdrawals", "debit"),
+            ("additions", "deposits", "credit"),
+            ("subtractions", "withdrawals", "debit"),
+        ):
+            if key not in totals or rows_key not in data:
+                continue
+            rows = [r for r in data.get(rows_key) or [] if isinstance(r, dict)]
+            if not rows:
+                continue
+            amount = _cents(totals[key])
+            if amount is None:
+                continue
+            summed = 0
+            for row in rows:
+                value = _cents(row.get("amount") or row.get("value"))
+                if value is not None:
+                    summed += abs(value)
+            if abs(summed - abs(amount)) > 1:
+                found.append(
+                    Issue(
+                        "sum_mismatch",
+                        f"{template_id} 的 {key} 小计 {totals[key]} 与逐行合计 "
+                        f"{summed / 100:.2f} 对不上",
+                    )
+                )
+            break
     return found
 
 

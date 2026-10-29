@@ -114,14 +114,15 @@ describe('normalizeRequest', () => {
     expect(out.periodEnd).toBe(all.map((c) => c.end).sort().at(-1));
     // credit's first cycle starts in the prior month, before checking's first day
     expect(out.periodStart < out.cycles.checking![0]!.start).toBe(true);
-    // checking ends on the last calendar day, after any closingDay <= 28
+    // 未给 checkingAnchorDay 时仍是自然月末
     expect(out.periodEnd).toBe('2026-09-30');
   });
 
-  it('periodStart/periodEnd of a checking-only request are the calendar bounds', () => {
-    const out = normalizeRequest(req({ endMonth: '2026-02', months: 6 }), TODAY);
-    expect(out.periodStart).toBe('2025-09-01');
-    expect(out.periodEnd).toBe('2026-02-28');
+  it('periodStart/periodEnd of a checking-only request follow the anchor day', () => {
+    const out = normalizeRequest(req({ endMonth: '2026-02', months: 6, checkingAnchorDay: 17 }), TODAY);
+    expect(out.anchorDay).toBe(17);
+    expect(out.periodStart).toBe(out.cycles.checking![0]!.start);
+    expect(out.periodEnd).toBe('2026-02-17');
   });
 
   it('taxDates cover prior-year Jan 15 and in-window quarterly dates', () => {

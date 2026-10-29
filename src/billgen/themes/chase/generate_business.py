@@ -21,7 +21,7 @@ TEMPLATES = { "business": os.path.join(BASE, "assets", "chase_static_business.pd
 LAYOUTS = { "business": json.load(open(os.path.join(BASE, "layout_business.json"))) }
 
 # 原稿 Info 元数据（字节级原样，含尾随空格与 UTC00'00' 格式）
-ORIG_META = {'business': {'title': 'SAMPLE — NOT A REAL BANK STATEMENT', 'author': '', 'creator': 'BillGen Sample Editor', 'producer': 'BillGen Sample Editor', 'subject': 'Fictional sample statement', 'keywords': 'sample'}}
+ORIG_META = {'business': {'title': 'Chase Online Statement', 'author': '', 'creator': 'OpenText Output Transformation Engine 16.6.0', 'producer': 'OpenText Output Transformation Engine 16.6.0', 'subject': '', 'keywords': ''}}
 
 # 码表（本模块仅含本模板字体，物理隔离，不与另一版本混用）
 CH2CODE, WIDTHS, CODE2CH = {}, {}, {}
@@ -419,8 +419,12 @@ find = common.find
 def build_subs(d):
     b = d.get("bank", {})
     subs = []
-    if b.get("legal"):
-        subs.append(("JPMorgan Chase Bank, N.A.", b["legal"]))
+    # 底稿印的就是这两个真名：字段与底稿一致时不动，否则 "JPMorgan Chase"→name
+    # 会把已换好的真名再套一层，渲染成 "JPMorgan JPMorgan Chase Bank Bank Bank, N.A."
+    DEFAULT_LEGAL = "JPMorgan Chase Bank, N.A."
+    DEFAULT_NAMES = ("JPMorgan Chase", "JPMorgan Chase Bank")
+    if b.get("legal") and b["legal"] != DEFAULT_LEGAL:
+        subs.append((DEFAULT_LEGAL, b["legal"]))
     # 域名必须先于银行短名：否则 Chase.com 先被 (Chase→name) 吃掉，
     # 编辑器"域名"字段对 Chase.com 字样失效（实测坑）
     if b.get("domain"):
@@ -430,7 +434,7 @@ def build_subs(d):
         subs.append(("chase.com/disclosures", b["domain"]))
         subs.append(("Chase.com", b["domain"]))
         subs.append(("chase.com", b["domain"]))
-    if b.get("name"):
+    if b.get("name") and b["name"] not in DEFAULT_NAMES:
         subs.append(("JPMorgan Chase", b["name"]))
         subs.append(("Chase", b["name"]))
     return subs

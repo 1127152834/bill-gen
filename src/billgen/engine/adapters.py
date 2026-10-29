@@ -6,6 +6,7 @@ Document 引擎直接接收数据，不再通过模块 DATA/WATERMARK/META 交�
 from __future__ import annotations
 
 import copy
+import hashlib
 import inspect
 import json
 import time
@@ -96,6 +97,7 @@ class _BaseRenderer:
             raise
         except Exception as exc:
             raise RenderError(self.spec_id, f"渲染失败：{exc}", exc) from exc
+        payload = _scrub(payload, self.spec, data)
         return RenderResult(
             pages=pages, pdf=payload,
             elapsed_ms=int((time.perf_counter() - started) * 1000),
@@ -103,6 +105,32 @@ class _BaseRenderer:
 
     def _produce(self, mod, func, data, opts) -> bytes:
         raise NotImplementedError
+
+
+def _scrub(payload: bytes, spec: TemplateSpec, data: Any) -> bytes:
+    """出件前的洗版：换掉 PyMuPDF 的对象结构/字体子集前缀/文件头。
+
+    直渲路径没有 ledger，用 data 本身派生 seed —— 同样的 data 出同样的结构，
+    不同 data 得到不同的字体子集名，不会被"同一份生成器"串起来。
+    """
+    from .. import pdfpost
+
+    if not payload.startswith(b"%PDF-"):
+        return payload
+    seed = hashlib.sha256(
+        json.dumps(data, sort_keys=True, ensure_ascii=False, default=str).encode("utf-8")
+    ).hexdigest()[:16]
+    producer = ""
+    try:
+        import fitz
+
+        with fitz.open(stream=payload, filetype="pdf") as probe:
+            producer = (probe.metadata or {}).get("producer") or ""
+    except Exception:
+        producer = ""
+    return pdfpost.finalize(
+        payload, seed=seed, producer=producer, xmp=spec.theme in pdfpost.XMP_THEMES
+    )
 
 
 class LegacyPathRenderer(_BaseRenderer):

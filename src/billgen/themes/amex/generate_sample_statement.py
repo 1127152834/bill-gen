@@ -488,10 +488,10 @@ def pdf_date_to_xmp(v):
 
 # ---------------------------------------------------------------- 元数据默认值
 # 与原稿（JUN/APR 实测）Info 字典一致；修改时间(modDate)一律不写。
-META_DEFAULTS = {'title': 'Fictional Sample Statement',
- 'author': 'Bill Gen',
- 'subject': 'Fictional sample data',
- 'producer': 'Bill Gen'}
+META_DEFAULTS = {'title': 'American Express Statement',
+ 'author': 'American Express',
+ 'subject': '',
+ 'producer': 'Smart Communications - SC32'}
 
 XMP_KEYS = ("dc:title", "dc:creator", "dc:description", "dc:language",
             "dc:date", "pdf:Producer", "xmp:CreateDate", "xmp:MetadataDate")

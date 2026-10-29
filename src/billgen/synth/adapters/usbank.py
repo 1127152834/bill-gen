@@ -95,7 +95,7 @@ def _build(ledger: LedgerDocument, defaults: dict[str, Any], template: str) -> d
             "watermark": ledger.watermark,
             "begin_balance": cents_to_plain(ledger.opening_cents),
             "customer_lines": customer_lines(ledger),
-            "account_display": ledger.account.number,
+            "account_display": ledger.account.display,
             "period": {
                 "label": f"{ledger.period.start.strftime('%B %d, %Y')} through "
                 f"{ledger.period.end.strftime('%B %d, %Y')}",

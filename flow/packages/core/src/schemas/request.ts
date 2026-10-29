@@ -71,6 +71,11 @@ export const GenerationRequestSchema = z
       credit: CountRangeSchema.optional(),
     }),
     months: z.union([z.literal(1), z.literal(3), z.literal(6)]),
+    /**
+     * 支票账户结单日（开户日）。给了就按它滚账期，不给仍是自然月 ——
+     * 老数据/老 fixture 依赖自然月，不能悄悄改。
+     */
+    checkingAnchorDay: z.number().int().min(1).max(28).optional(),
     endMonth: MonthStringSchema.optional(),
     seed: z.string().optional(),
   })

@@ -119,7 +119,7 @@ def promo_code(name: str, domain: str) -> str:
 
 
 def brand_for(name: str, legal: str = "", domain: str = "", **fields: str) -> Brand:
-    return Brand(name=name.strip() or "Sample Bank",
+    return Brand(name=name.strip() or "Bank of America",
                  legal=legal.strip(), domain=domain.strip(), accent=_accent(name),
                  promo_code=promo_code(name, domain),
                  **{key: str(value) for key, value in fields.items()})
@@ -166,7 +166,7 @@ def contact_fields(name: str, domain: str) -> dict[str, str]:
 def brand_from_data(data: dict[str, object]) -> Brand:
     """从模板数据里的 ``bank`` 块造一枚行标（MCP / 编辑器直接用数据渲染时用）。"""
     bank = data.get("bank") if isinstance(data.get("bank"), dict) else {}
-    name = str(bank.get("name") or data.get("company") or "Sample Bank")
+    name = str(bank.get("name") or data.get("company") or "Bank of America")
     legal = str(bank.get("legal") or bank.get("legal_na") or "")
     domain = str(bank.get("domain") or "")
     return brand_for(name, legal, domain, **contact_fields(name, domain))

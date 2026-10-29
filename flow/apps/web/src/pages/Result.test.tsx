@@ -165,17 +165,19 @@ describe('Result: statement preview', () => {
 })
 
 describe('Result: audit side panel', () => {
-  it('lists R1-R11 with Chinese names and pass marks', () => {
+  it('lists R1-R13 with Chinese names and pass marks', () => {
     renderResult(makeView())
     const panel = screen.getByRole('complementary', { name: '审计报告' })
     const rules = within(panel).getAllByRole('listitem').filter((li) => /^R\d+/.test(li.textContent ?? ''))
-    expect(rules).toHaveLength(11)
+    expect(rules).toHaveLength(13)
     expect(rules[0]).toHaveTextContent('R1')
     expect(rules[0]).toHaveTextContent('✓')
     expect(rules[1]).toHaveTextContent('余额连续')
     expect(rules[9]).toHaveTextContent('R10')
     expect(rules[10]).toHaveTextContent('R11')
     expect(rules[10]).toHaveTextContent('信用卡余额未超额度')
+    expect(rules[11]).toHaveTextContent('占位式公司名')
+    expect(rules[12]).toHaveTextContent('消费类目符合职业')
   })
 
   it('marks failed rules with ✗ and shows findings high to low with severity badges', () => {

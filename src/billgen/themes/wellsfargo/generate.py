@@ -60,7 +60,7 @@ def line(page, x0, y0, x1, y1, width, color=BLACK):
 # ---------------------------------------------------------------- 数据与替换
 def build_subs(d):
     bank = d["bank"]
-    legal_short = bank["legal_na"].removesuffix(", N.A.")  # "Wells Fargo Bank" / "Sample Bank"
+    legal_short = bank["legal_na"].removesuffix(", N.A.")  # "Wells Fargo Bank" / 编辑器里填的行名
     return [
         ("Wells Fargo Bank, N.A.", bank["legal_na"]),
         ("Wells Fargo Bank",       legal_short),

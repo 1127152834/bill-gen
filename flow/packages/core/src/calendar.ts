@@ -1,4 +1,4 @@
-import { addDays, addMonths, monthEnd, monthStart, weekday } from './date.js';
+import { addDays, addMonths, monthEnd, weekday } from './date.js';
 
 const pad2 = (n: number): string => String(n).padStart(2, '0');
 
@@ -75,11 +75,28 @@ export function estimatedTaxDates(taxYear: number): string[] {
 
 export type Cycle = { index: number; start: string; end: string; dueDate?: string };
 
-/** `months` natural-month cycles ending at `endMonth`, oldest first. No dueDate. */
-export function checkingCycles(endMonth: string, months: number): Cycle[] {
+/**
+ * `months` checking cycles ending at `endMonth`, oldest first. No dueDate.
+ *
+ * 真支票账户的账单周期不是自然月：开户日决定「结单日」，之后每月同一天结单。
+ * 传 `anchorDay`（1–28）就按它滚；不传则退回自然月（老行为，历史数据用）。
+ */
+export function checkingCycles(
+  endMonth: string,
+  months: number,
+  anchorDay?: number,
+): Cycle[] {
+  if (anchorDay !== undefined && (!Number.isInteger(anchorDay) || anchorDay < 1 || anchorDay > 28)) {
+    throw new Error(`anchorDay must be an integer in 1-28, got ${anchorDay}`);
+  }
+  const closeOf = (ym: string) => (anchorDay === undefined ? monthEnd(ym) : `${ym}-${pad2(anchorDay)}`);
   return Array.from({ length: months }, (_, index) => {
     const ym = addMonths(endMonth, index - (months - 1));
-    return { index, start: monthStart(ym), end: monthEnd(ym) };
+    return {
+      index,
+      start: addDays(closeOf(addMonths(ym, -1)), 1),
+      end: closeOf(ym),
+    };
   });
 }
 

@@ -16,19 +16,19 @@
     "end": "Jan 31, 2027"
   },
   "metadata": {
-    "title": "SAMPLE — NOT A REAL BANK STATEMENT",
+    "title": "U.S. Bank Online Statement",
     "author": "",
-    "producer": "BillGen Sample Editor",
-    "creator": "BillGen Sample Editor",
-    "subject": "Fictional sample statement",
-    "keywords": "sample",
+    "producer": "Ricoh Americas Corporation, AFP2PDF v3.2.1",
+    "creator": "Ricoh Americas Corporation, AFP2PDF v3.2.1",
+    "subject": "",
+    "keywords": "",
     "creation": "D:20270131000000Z",
     "mod": "D:20270131000000Z",
-    "x_producer": "BillGen Sample Editor",
-    "x_creator": "BillGen Sample Editor",
-    "x_title": "SAMPLE — NOT A REAL BANK STATEMENT",
-    "x_desc": "Fictional sample statement",
-    "xmptk": "BillGen Sample Editor"
+    "x_producer": "Ricoh Americas Corporation, AFP2PDF v3.2.1",
+    "x_creator": "Ricoh Americas Corporation, AFP2PDF v3.2.1",
+    "x_title": "U.S. Bank Online Statement",
+    "x_desc": "",
+    "xmptk": "Ricoh Americas Corporation, AFP2PDF v3.2.1"
   },
   "imb_serial": "000000000",
   "deposits": [

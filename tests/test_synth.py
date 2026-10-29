@@ -137,9 +137,16 @@ def test_date_formats():
 
 # ---------------------------------------------------------------- 账本
 
+def ledger_period_anchor(ledger):
+    """账期平移后结单日落在哪个「开户日」上（供断言反推）。"""
+    return (ledger.period.end.day - 1) % 28
+
+
 def test_ledger_builds_closed_chain(ledger):
     assert ledger.account.kind == "checking"
-    assert ledger.period.start.isoformat() == "2027-01-01"
+    # 账期跟着「开户日」滚：不再是自然月 1 号到月末
+    assert ledger.period.end.day == (1 + ledger_period_anchor(ledger))
+    assert (ledger.period.end - ledger.period.start).days == 30
     assert len(ledger.rows) == 6
     expected = ledger.opening_cents + ledger.credits_cents - ledger.debits_cents
     assert expected == ledger.closing_cents
@@ -190,11 +197,13 @@ def test_business_adapter_carries_every_row(template_id, business_ledger):
 
 
 def test_adapter_marks_sample_provenance(ledger):
+    """适配器不再写 SAMPLE/BillGen 这类自曝字段：标题与 producer 都按真账单做旧。"""
     data = build_data("boa-personal", ledger)
     assert data["watermark"] is True
-    assert data["metadata"]["title"].startswith("SAMPLE")
-    assert data["metadata"]["producer"] == "BillGen Sample Editor"
-    assert data["bank"]["name"] == "Harborline Bank"
+    title = data["metadata"]["title"]
+    assert "SAMPLE" not in title.upper() and "FICTIONAL" not in title.upper()
+    assert data["metadata"]["producer"] and "BillGen" not in data["metadata"]["producer"]
+    assert data["bank"]["name"] == ledger.bank.name
 
 
 def test_adapter_truncates_long_descriptions_without_dropping_rows(ledger):

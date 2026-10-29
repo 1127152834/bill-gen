@@ -50,7 +50,7 @@ class HunterSettings:
     model: str = "gpt-6.1-sol"
     structured_mode: StructuredMode = "json_schema"
     tavily_api_key: str = ""
-    bank_name: str = "Harborline Bank"
+    bank_name: str = "Bank of America"
     templates: str = "auto"
     auto_limit: int = 2
     ai_fill: bool = True
@@ -116,7 +116,7 @@ def from_env(environ: dict[str, str] | None = None) -> HunterSettings:
         model=env.get("LLM_MODEL") or "gpt-6.1-sol",
         structured_mode=_structured(env.get("LLM_STRUCTURED_MODE")),
         tavily_api_key=env.get("TAVILY_API_KEY", ""),
-        bank_name=env.get("BANK_DISPLAY_NAME") or "Harborline Bank",
+        bank_name=env.get("BANK_DISPLAY_NAME") or "Bank of America",
         templates=env.get("BILLGEN_TEMPLATES") or "auto",
         auto_limit=_env_int(env.get("BILLGEN_AUTO_LIMIT"), 2, low=1, high=11),
         ai_fill=_env_flag(env.get("BILLGEN_AI_FILL"), True),

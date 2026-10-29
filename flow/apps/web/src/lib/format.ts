@@ -84,6 +84,8 @@ export const RULE_LABEL: Record<string, string> = {
   R9_evidence_present: '有调研依据',
   R10_no_payroll_income_personal: '个人账户无工资式收入',
   R11_credit_within_limit: '信用卡余额未超额度',
+  R12_no_placeholder_names: '没有占位式公司名',
+  R13_occupation_category_fit: '消费类目符合职业',
 }
 
 export const STATUS_LABEL: Record<GenerationStatus, string> = {

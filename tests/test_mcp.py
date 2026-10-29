@@ -59,12 +59,12 @@ def test_list_templates_covers_every_renderable_template(srv):
 
 @pytest.mark.parametrize("template_id", RENDERABLE)
 def test_contract_defaults_render_after_bank_swap(srv, template_id):
-    """把行名换成虚构银行后，契约给的骨架必须能直接出片。"""
+    """把行名换成对应银行后，契约给的骨架必须能直接出片。"""
     data = call(srv, "template_contract", {"template_id": template_id})["data"]
     bank = data.get("bank")
     if isinstance(bank, dict):
-        bank.update({"name": "Harborline Bank", "legal": "Harborline Bank, N.A.",
-                     "domain": "harborline-bank.example"})
+        bank.update({"name": "Bank of America", "legal": "Bank of America, N.A.",
+                     "domain": "bankofamerica.com"})
     result = call(srv, "validate", {"template_id": template_id, "data": data})
     assert result["ok"], result["errors"]
     assert result["pages"] >= 1
@@ -78,19 +78,20 @@ def test_validate_rejects_formatted_money(srv):
     assert any("begin_balance" in problem for problem in result["errors"])
 
 
-def test_validate_flags_real_bank_identity(srv):
+def test_validate_flags_placeholder_bank_identity(srv):
+    """占位行名（Sample Bank / Harborline Bank）现在算缺陷，真行名才是期望。"""
     data = call(srv, "template_contract", {"template_id": "boa-personal"})["data"]
-    data["bank"] = {"name": "Bank of America", "legal": "Bank of America, N.A.",
-                    "domain": "bankofamerica.com"}
+    data["bank"] = {"name": "Harborline Bank", "legal": "Harborline Bank, N.A.",
+                    "domain": "harborline-bank.example"}
     result = call(srv, "validate", {"template_id": "boa-personal", "data": data})
     assert not result["ok"]
-    assert any("真实银行标识" in problem for problem in result["errors"])
+    assert any("虚构占位行名" in problem for problem in result["errors"])
 
 
 def test_render_writes_pdf_and_reports_fingerprint(srv, tmp_path):
     data = call(srv, "template_contract", {"template_id": "chase-personal"})["data"]
-    data["bank"] = {"name": "Harborline Bank", "legal": "Harborline Bank, N.A.",
-                    "domain": "harborline-bank.example"}
+    data["bank"] = {"name": "JPMorgan Chase Bank", "legal": "JPMorgan Chase Bank, N.A.",
+                    "domain": "chase.com"}
     out = call(srv, "render", {"template_id": "chase-personal", "data": data,
                                "filename": "mcp-test"})
     assert out["ok"], out
@@ -112,7 +113,7 @@ def test_preview_makes_png(srv):
 def test_draft_from_ledger_returns_template_data(srv):
     result = {
         "statements": [{
-            "bankName": "Harborline Bank", "accountType": "checking", "accountLast4": "0042",
+            "bankName": "Bank of America", "accountType": "checking", "accountLast4": "0042",
             "periodStart": "2027-01-01", "periodEnd": "2027-01-31",
             "months": [{"cycleStart": "2027-01-01", "cycleEnd": "2027-01-31",
                         "openingBalanceCents": 100000, "closingBalanceCents": 150000}],

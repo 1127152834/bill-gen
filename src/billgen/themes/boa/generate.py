@@ -7,6 +7,7 @@
 import json
 import math
 import os
+import re
 from decimal import Decimal
 
 import fitz
@@ -615,12 +616,34 @@ def cmyk_postpass(doc):
                 doc.update_stream(xref, txt_.encode("latin-1"))
 
 # ---------------------------------------------------------------- 组装
+#: 底稿里那行印刷控制串（`PULL: B CYCLE: 3 SPEC: E ...`）。真印件里 CYCLE 是
+#: 本期的第几期、SPEC 随批次轮换；照抄底稿恒定的 "3"/"E" 等于每份都一样。
+_CTRL_RE = re.compile(r"(CYCLE:\s*)(\d+)")
+_SPEC_RE = re.compile(r"(SPEC:\s*)([A-Z])")
+
+
+def _cycle_ctrls(L, tag, d):
+    """按账单月份派生控制串里的周期号与 SPEC 字母。"""
+    text = json.dumps(L)
+    if "CYCLE:" not in text:
+        return L
+    period = str(d.get("period") or d.get("statement_period") or "")
+    year = int(period[:4]) if period[:4].isdigit() else 2026
+    month = int(period[5:7]) if period[5:7].isdigit() else 1
+    cycle_no = (month + 11) % 60 or 1
+    spec = "ABCDEF"[(year + month) % 6]
+    L = json.loads(_SPEC_RE.sub(lambda m: m.group(1) + spec,
+                                _CTRL_RE.sub(lambda m: m.group(1) + str(cycle_no), text)))
+    return L
+
+
 def build_pdf(d, out_path, watermark=True):
     d = json.loads(json.dumps(d))
     d["watermark"] = watermark
     apply_auto_calc(d)
     tag = d["template"]
     L = json.load(open(os.path.join(BASE, f"layout_{tag}.json")))
+    L = _cycle_ctrls(L, tag, d)
     subs = build_subs(d)
     biz = tag == "business"
 

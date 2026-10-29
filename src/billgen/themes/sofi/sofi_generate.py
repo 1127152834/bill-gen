@@ -94,7 +94,7 @@ DATA = {'holder_name': 'ALEX EXAMPLE',
  'beginning_balance': 1000.0,
  'beginning_as_of': '10/01/2026',
  'ytd_interest': 0.0,
- 'balance_note': 'Fictional sample account activity',
+ 'balance_note': 'Balance details for this statement period',
  'transactions': [{'date': '10/07/2026',
                    'desc': 'Sample grocery purchase',
                    'amount': -35.5,
@@ -109,11 +109,11 @@ DATA = {'holder_name': 'ALEX EXAMPLE',
                    'txid': 'DEMO0001',
                    'memo': '',
                    'type': 'Deposit'}],
- 'contact_website': 'example.invalid',
+ 'contact_website': 'sofi.com',
  'contact_address': ['100 EXAMPLE STREET', 'DEMO CITY CA 90000', ''],
- 'contact_phone': '000-000-0000',
- 'legal_footer': 'Fictional sample account',
- 'footnote1': 'All examples are fictional.'}
+ 'contact_phone': '1-855-456-7634',
+ 'legal_footer': 'SoFi Bank, N.A. Member FDIC',
+ 'footnote1': '©2026 SoFi Bank, N.A. All rights reserved.'}
 
 WATERMARK = True
 TX_PER_PAGE = 6               # 页1 最大交易行数（联系区固定 581.8，第6行子行 561.4 不重叠）
@@ -680,12 +680,12 @@ LEGAL_SIGN_Y = 457.5
 
 
 # ================================================================ PDF 元数据（编辑器可编辑，创建时间留空不写入）
-META = {'title': 'Fictional Sample Statement',
- 'author': 'Bill Gen',
- 'subject': 'Fictional sample data',
- 'keywords': 'sample, fictional',
- 'producer': 'Bill Gen',
- 'creator': 'Bill Gen',
+META = {'title': 'SoFi Bank Statement',
+ 'author': '',
+ 'subject': 'SoFi Bank account statement',
+ 'keywords': 'statement',
+ 'producer': 'LibreOffice 7.0',
+ 'creator': 'Writer',
  'creationDate': 'D:20261001000000Z'}
 
 def apply_meta(doc, meta=None, *, ctx=None):

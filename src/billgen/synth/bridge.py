@@ -14,7 +14,7 @@ import re
 from dataclasses import replace
 from typing import Any
 
-from .. import branding, registry
+from .. import branding, pdfpost, registry
 from ..spec import RenderOptions, RenderResult
 from . import profile
 from .adapters import binding_for
@@ -78,6 +78,11 @@ def normalize_id(pdf: bytes) -> bytes:
 
     不能沿用原文件里的第一个 ID —— 它是每轮渲染随机生成的（品牌替换后
     走 `tobytes()` 尤其明显），必须由文件内容自己算。
+
+    真 PDF 的两个 ID 是「创建时 ID」与「当前 ID」：首值来自出件时的时间+路径，
+    次值在增量更新后才与首值不同，绝大多数账单样本两者**不相等**。
+    两个值写同一个 hash 是 PyMuPDF 的特征指纹（pdfid 一眼看到 /ID[<X><X>]），
+    所以次值用另一撮盐派生，长度与首值一致。
     """
     import hashlib
 
@@ -85,8 +90,9 @@ def normalize_id(pdf: bytes) -> bytes:
     if match is None:
         return pdf
     body = pdf[: match.start()] + pdf[match.end() :]
-    stable = hashlib.sha256(body).hexdigest()[:32].upper().encode()
-    return pdf[: match.start()] + b"/ID[<" + stable + b"><" + stable + b">]" + pdf[match.end() :]
+    head = hashlib.sha256(body).hexdigest()[:32].upper().encode()
+    tail = hashlib.sha256(body + b"\x00file-id").hexdigest()[:32].upper().encode()
+    return pdf[: match.start()] + b"/ID[<" + head + b"><" + tail + b">]" + pdf[match.end() :]
 
 
 def build_data(template_id: str, ledger: LedgerDocument, *, verify_rows: bool = True) -> dict[str, Any]:
@@ -107,6 +113,8 @@ def render(
     stable_bytes: bool = True,
     brand: bool = True,
     docinfo: bool = True,
+    scrub: bool = True,
+    entropy: bool = False,
 ) -> RenderResult:
     renderer = registry.get_renderer(template_id)
     data = build_data(template_id, ledger, verify_rows=verify_rows)
@@ -115,6 +123,16 @@ def render(
         result = replace(result, pdf=apply_brand(result.pdf, template_id, ledger))
     if docinfo:
         result = replace(result, pdf=apply_docinfo(result.pdf, template_id, ledger))
+    if scrub:
+        # 洗版：XRef 流 + 对象流、随机字体子集前缀、补 XMP。
+        # 真出件每次字节都不同，所以默认带 entropy（同一份数据两次渲染不一样）。
+        result = replace(result, pdf=pdfpost.finalize(
+            result.pdf,
+            seed=f"{ledger.seed}:{template_id}",
+            producer=profile.producer_of(template_id)[0],
+            xmp=renderer.spec.theme in pdfpost.XMP_THEMES,
+            entropy=entropy,
+        ))
     if not stable_bytes:
         return result
     return replace(result, pdf=normalize_id(result.pdf))

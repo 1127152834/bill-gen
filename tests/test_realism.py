@@ -120,7 +120,10 @@ def test_rendered_pdf_carries_the_docinfo_profile():
         assert meta["producer"] == PRODUCERS["chase-personal"][0]
         assert meta["creator"] == ""
         assert meta["creationDate"] == meta["modDate"]
-        assert "SAMPLE" in (meta["title"] or ""), "样例标记要保留"
+        # 标题层也按真账单做旧：exiftool 一眼能看到，不能留 SAMPLE/Fictional
+        title = meta["title"] or ""
+        assert title and not any(w in title.upper() for w in ("SAMPLE", "FICTIONAL"))
+        assert "SAMPLE" not in (meta["subject"] or "").upper()
 
 
 def test_chase_barcode_encodes_our_own_account():

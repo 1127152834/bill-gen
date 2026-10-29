@@ -93,3 +93,50 @@ def unknown_gaps(template_id: str, found: dict[str, int]) -> dict[str, int]:
     """扣掉 `KNOWN_GAPS` 之后仍然残留的部分。"""
     allowed = {token.lower() for token in KNOWN_GAPS.get(template_id, ())}
     return {token: count for token, count in found.items() if token.lower() not in allowed}
+
+
+# --------------------------------------------------------------------------
+# 反向审计：占位行名（Sample Bank / Harborline Bank / example.invalid …）
+#
+# 模板换成整合版之后，账面上要印真行名，所以「残留」的定义反了过来：
+# 真品牌是期望值，虚构占位名才是要清掉的东西。上面那套 BRAND_TOKENS 还给
+# tools/brand_audit.py 做「谁还在印真名」的统计用，两把尺子并存。
+# --------------------------------------------------------------------------
+PLACEHOLDER_TOKENS: tuple[str, ...] = (
+    "Sample Bank",
+    "samplebank",
+    "Harborline Bank",
+    "harborline-bank",
+    "BillGen Demo Institution",
+    "Bill Gen",
+    "example.invalid",
+    "Fictional Sample Statement",
+    "Fictional sample",
+)
+
+_PLACEHOLDER_PATTERNS = tuple(
+    (
+        token,
+        re.compile(rf"(?<![A-Za-z0-9]){re.escape(token)}(?![A-Za-z0-9])", re.IGNORECASE),
+    )
+    for token in PLACEHOLDER_TOKENS
+)
+
+
+def scan_placeholders(text: str) -> dict[str, int]:
+    """统计文本里的虚构占位行名。"""
+    found: dict[str, int] = {}
+    for token, pattern in _PLACEHOLDER_PATTERNS:
+        count = len(pattern.findall(text))
+        if count:
+            found[token] = found.get(token, 0) + count
+    return found
+
+
+def placeholder_gaps(template_id: str, found: dict[str, int]) -> dict[str, int]:
+    """扣掉 `PLACEHOLDER_GAPS` 之后仍然残留的占位名。"""
+    allowed = {token.lower() for token in PLACEHOLDER_GAPS.get(template_id, ())}
+    return {token: count for token, count in found.items() if token.lower() not in allowed}
+
+
+PLACEHOLDER_GAPS: dict[str, tuple[str, ...]] = {}

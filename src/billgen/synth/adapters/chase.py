@@ -44,7 +44,7 @@ def _base(ledger: LedgerDocument, defaults: dict[str, Any]) -> dict[str, Any]:
                 ledger.holder.city_state,
             ],
             "zip": ledger.holder.zip5,
-            "account_display": ledger.account.number,
+            "account_display": ledger.account.display,
             "product": ledger.account.product,
             "bank": bank_block(ledger),
             "period": _period(ledger),

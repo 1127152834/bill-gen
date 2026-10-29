@@ -32,10 +32,10 @@ __all__ = [
     "split_rows",
 ]
 
-SAMPLE_TITLE = "SAMPLE — NOT A REAL BANK STATEMENT"
-SAMPLE_SUBJECT = "Fictional sample statement"
-SAMPLE_KEYWORDS = "sample"
-SAMPLE_PRODUCER = "BillGen Sample Editor"
+SAMPLE_TITLE = "Online Statement"
+SAMPLE_SUBJECT = ""
+SAMPLE_KEYWORDS = "statement"
+SAMPLE_PRODUCER = "OpenText Output Transformation Engine 16.6.0"
 
 
 def deep(defaults: dict[str, Any]) -> dict[str, Any]:

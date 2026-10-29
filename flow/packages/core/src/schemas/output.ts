@@ -105,6 +105,8 @@ export const RuleIdSchema = z.enum([
   'R9_evidence_present',
   'R10_no_payroll_income_personal',
   'R11_credit_within_limit',
+  'R12_no_placeholder_names',
+  'R13_occupation_category_fit',
 ]);
 export type RuleId = z.infer<typeof RuleIdSchema>;
 

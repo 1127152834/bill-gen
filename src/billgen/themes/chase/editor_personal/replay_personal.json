@@ -11,9 +11,9 @@
   ],
   "account_display": "000000000001",
   "bank": {
-    "name": "BillGen Demo Institution",
-    "legal": "BillGen Demo Institution, N.A.",
-    "domain": "example.invalid"
+    "name": "JPMorgan Chase Bank",
+    "legal": "JPMorgan Chase Bank, N.A.",
+    "domain": "chase.com"
   },
   "period": {
     "label": "January 01, 2027 through January 31, 2027",
@@ -21,12 +21,12 @@
     "end": "Jan 31, 2027"
   },
   "metadata": {
-    "title": "SAMPLE — NOT A REAL BANK STATEMENT",
+    "title": "Chase Online Statement",
     "author": "",
-    "producer": "BillGen Sample Editor",
-    "creator": "BillGen Sample Editor",
-    "subject": "Fictional sample statement",
-    "keywords": "sample",
+    "producer": "OpenText Output Transformation Engine 16.6.0",
+    "creator": "OpenText Output Transformation Engine 16.6.0",
+    "subject": "",
+    "keywords": "",
     "creation": "D:20270131000000Z",
     "mod": "D:20270131000000Z"
   },

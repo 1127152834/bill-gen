@@ -7,6 +7,7 @@ import type { TxnMeta } from './assemble.js';
 import { nextBankBusinessDay } from './calendar.js';
 import { addDays, addMonths, daysBetween } from './date.js';
 import type { NormalizedRequest } from './normalize.js';
+import { expectedCategories, looksLikePlaceholder } from './realism.js';
 import { ROLLING_TYPES } from './schedule/place.js';
 import { NATIONAL_STATE, type FinancialModel, type MerchantFact, type RecurringItem, type RuleId, type RuleResult, type Statement, type Transaction } from './schemas/index.js';
 
@@ -268,6 +269,46 @@ const r11CreditLimit: Check = (statements) =>
       }));
   });
 
+/** R12: 名字里不能出现 ACME/EXAMPLE/SAMPLE 这类占位词。 */
+const r12NoPlaceholders: Check = (statements) => {
+  const offenders = flat(statements).filter(
+    (t) => looksLikePlaceholder(t.description) || looksLikePlaceholder(t.merchant?.name) || looksLikePlaceholder(t.memo),
+  );
+  return offenders.map((t) => ({
+    transactionIds: [t.id],
+    message: `${t.id}: "${t.description}" reads like a placeholder name`,
+  }));
+};
+
+/** R13: 职业决定了账单里该出现哪几类消费（barista 从不买咖啡才假）。 */
+const r13OccupationFit: Check = (statements, { norm, meta, facts }) => {
+  const occupation = (norm.request.profile as { occupation?: string } | undefined)?.occupation;
+  if (norm.request.subjectType !== 'personal') return [];
+  // 只有支票账户时，日常消费根本不出现在账单上（那都在卡里），无从判断。
+  if (!statements.some(isCredit)) return [];
+  const wanted = expectedCategories(occupation);
+  if (wanted.length === 0) return [];
+  const byId = new Map(facts.map((f) => [f.id, f]));
+  const seen = new Set<string>();
+  for (const t of flat(statements)) {
+    if (t.direction !== 'debit') continue;
+    const factId = meta[t.id]?.factId;
+    const category = (factId ? byId.get(factId)?.category : undefined) ?? t.merchant?.category;
+    if (category) seen.add(category.toLowerCase());
+  }
+  // 不必每个类目都出现：3 类里命中 2 类就算这个人的生活方式对得上。
+  // 一类都沾不上（或只沾一类）才是「画像和账单对不上」。
+  const missing = wanted.filter((c) => !seen.has(c));
+  const hit = wanted.length - missing.length;
+  if (hit >= Math.max(1, wanted.length - 1)) return [];
+  return [
+    {
+      transactionIds: [],
+      message: `occupation "${occupation}" implies ${wanted.join(' / ')} spending, but the statements never show ${missing.join(' / ')}`,
+    },
+  ];
+};
+
 const RULES: readonly { id: RuleId; target: RuleResult['target']; check: Check }[] = [
   { id: 'R1_count_in_range', target: 'schedule', check: r1Count },
   { id: 'R2_balance_continuity', target: 'schedule', check: r2Balance },
@@ -280,6 +321,8 @@ const RULES: readonly { id: RuleId; target: RuleResult['target']; check: Check }
   { id: 'R9_evidence_present', target: 'lifeModel', check: r9Evidence },
   { id: 'R10_no_payroll_income_personal', target: 'lifeModel', check: r10NoPayroll },
   { id: 'R11_credit_within_limit', target: 'lifeModel', check: r11CreditLimit },
+  { id: 'R12_no_placeholder_names', target: 'lifeModel', check: r12NoPlaceholders },
+  { id: 'R13_occupation_category_fit', target: 'lifeModel', check: r13OccupationFit },
 ];
 
 /** Runs R1-R11 in order; a rule with no violations passes. */

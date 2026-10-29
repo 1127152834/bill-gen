@@ -48,12 +48,12 @@ const high = (suggestedTarget: AuditFinding['suggestedTarget'], problem: string)
 });
 
 describe('runGeneration with fixture dependencies', () => {
-  it('Austin freelancer, 3 months, both accounts: valid result, R1-R11 pass, events from normalize to finalize', async () => {
+  it('Austin freelancer, 3 months, both accounts: valid result, R1-R13 pass, events from normalize to finalize', async () => {
     const { result, events, deps } = await run();
 
     expect(GenerationResultSchema.safeParse(result).success).toBe(true);
     expect(result.status).toBe('completed');
-    expect(result.audit.rules).toHaveLength(11);
+    expect(result.audit.rules).toHaveLength(13);
     expect(result.audit.rules.filter((r) => !r.passed).map((r) => r.ruleId)).toEqual([]);
     expect(result.statements.map((s) => s.accountType)).toEqual(['checking', 'credit']);
     expect(result.statements.every((s) => s.months.length === 3)).toBe(true);

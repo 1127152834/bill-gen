@@ -21,6 +21,7 @@
 from __future__ import annotations
 
 import hashlib
+import re
 from dataclasses import replace
 from datetime import date, timedelta
 
@@ -121,6 +122,38 @@ def descriptors(ledger: LedgerDocument) -> tuple[list[LedgerRow], int]:
     return out, changed
 
 
+#: 收单方城市码（真账单里 ATM/POS 行末尾的 3 字母，来自收单行所在地）。
+_CITY_CODES = ("AUS", "CHI", "NYC", "SFO", "SEA", "DEN", "ATL", "DFW", "PHX", "BOS",
+               "MIA", "PDX", "MSP", "STL", "CLT", "SLC", "LAS", "SAN", "DET", "TPA")
+
+#: ATM 行的尾巴：真样本是 `TERMINAL 0721 AUS` 这种「终端号 + 城市码」，
+#: 不是一串无源字母（旧实现会拼出 `725LUIMG` 这种一眼假的串）。
+_ATM_TAIL = re.compile(r"\s+(?:TERMINAL\s+)?[A-Z0-9]{5,}$")
+
+
+def _atm_tail(ledger: LedgerDocument, row: LedgerRow) -> str:
+    digest = _stem(ledger, row, "atm")
+    terminal = 1000 + digest % 9000
+    city = _CITY_CODES[(digest // 9000) % len(_CITY_CODES)]
+    return f"TERMINAL {terminal} {city}"
+
+
+def atm_tails(ledger: LedgerDocument) -> tuple[list[LedgerRow], int]:
+    """把 ATM 行的乱码尾巴换成「终端号 + 城市码」。"""
+    out: list[LedgerRow] = []
+    changed = 0
+    for row in ledger.rows:
+        if row.type != "ATM" or not row.description.strip():
+            out.append(row)
+            continue
+        head = _ATM_TAIL.sub("", row.description.strip()).rstrip()
+        new = f"{head} {_atm_tail(ledger, row)}"
+        if new != row.description:
+            changed += 1
+        out.append(replace(row, description=new))
+    return out, changed
+
+
 def postings(ledger: LedgerDocument) -> tuple[list[LedgerRow], int]:
     """把非工作日入账的 ACH/费用/利息/支票提前到上一个工作日。"""
     out: list[LedgerRow] = []
@@ -156,12 +189,15 @@ def apply_all(ledger: LedgerDocument) -> tuple[LedgerDocument, dict[str, int]]:
     cents_changed = 0
     rows, desc_changed = descriptors(ledger)
     ledger = replace(ledger, rows=tuple(rows))
+    rows, atm_changed = atm_tails(ledger)
+    ledger = replace(ledger, rows=tuple(rows))
     rows, moved = postings(ledger)
     rows = _rebalance(ledger, rows)
     extras = dict(ledger.extras)
     extras.update(
         cents_nudged=cents_changed,
         descriptors_prefixed=desc_changed,
+        atm_tails=atm_changed,
         postings_shifted=moved,
     )
     # 期末余额以流水重算为准：结果包里报错的 closing 不带进 PDF
@@ -169,5 +205,6 @@ def apply_all(ledger: LedgerDocument) -> tuple[LedgerDocument, dict[str, int]]:
     return replace(ledger, rows=tuple(rows), closing_cents=closing, extras=extras), {
         "cents": cents_changed,
         "descriptors": desc_changed,
+        "atm": atm_changed,
         "postings": moved,
     }

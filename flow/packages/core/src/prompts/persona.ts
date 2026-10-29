@@ -56,7 +56,7 @@ const PERSONAL_RULES = `- The person is self-employed (1099 / gig / sole proprie
 - Make the fields agree: age fits the trade and career stage, household (maritalStatus, children) fits the age, hobbies (2-5) fit age, household, budget and city.`;
 
 const BUSINESS_RULES = `- A small independent US business. Make the fields agree: entityType fits the size (a Sole Prop has 0-2 employees), employeeCount is typical for the industry and city, founded (YYYY-MM, before 2026) is older for an established, larger business; description is one plain sentence about what it sells and to whom.
-- "legalName" is fictional and ends with the entity suffix when one applies (e.g. "Copper Kettle Cafe LLC"); never the name of a real chain or known company.`;
+- "legalName" is fictional and ends with the entity suffix when one applies (e.g. "Copper Kettle Cafe LLC"); never the name of a real chain or known company, and never a placeholder word (ACME, EXAMPLE, SAMPLE, FICTIONAL, TEST, DEMO, "Your Company", XYZ, FOO).`;
 
 /** Messages for the persona node (random profile completion). */
 export function buildPersonaMessages(input: PersonaPromptInput): LlmMessage[] {
