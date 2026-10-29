@@ -16,13 +16,13 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 
 DIGESTS = {
-    "src/billgen/themes/boa/editor/data_personal.json": "d5d9e39867fea8a2dede4cfbdc54dc4e7bd2a7cbe432ab12c751140536684f18",
-    "src/billgen/themes/boa/editor/data_business.json": "de2b050c7c251ddeb7bfe859e4ead7d83daa921de3edafb95a5792e1ecb8f58f",
+    "src/billgen/themes/boa/editor/data_personal.json": "2ff000a99e253c822db2ec036ced1b47a17bb9524c8d27ac4b6e579c3be9c6df",
+    "src/billgen/themes/boa/editor/data_business.json": "d7dd3073c48802cd1e2d79f4e02f47e0d6d24e793889463c0c86f90b179f6f09",
     "src/billgen/themes/chase/editor_personal/data_personal.json": "cdc595b9c9237e1cda903063463e97c788789740d852a9f14fadbff04928a9f5",
     "src/billgen/themes/chase/editor_business/data_business.json": "09bfca27fd0fdb55951633d1da8e020add42935a2d6ef3d45711b3c72e385210",
     "src/billgen/themes/chase/editor_personal/replay_personal.json": "cdc595b9c9237e1cda903063463e97c788789740d852a9f14fadbff04928a9f5",
     "src/billgen/themes/chase/editor_business/replay_business.json": "09bfca27fd0fdb55951633d1da8e020add42935a2d6ef3d45711b3c72e385210",
-    "src/billgen/themes/usbank/editor_us/data_us.json": "94c9d222727066192ca64e547f3a107f0aaa83639c83cab4e2e59bd6c76cc6e5",
+    "src/billgen/themes/usbank/editor_us/data_us.json": "6e1958dcbfd9556f545b5f511205e57dc9d3d77b06e03ef1cfc32d1621390f13",
     "src/billgen/themes/usbank/editor_biz/data_biz.json": "dd34501b8510b64bc1fd833160f5f3d6ff75498d6ef36002b6ce0f312b360b81",
     "src/billgen/themes/usbank/replay_us.json": "b6b166b76fe5d719e552b3cd539d9db3a1b59514a6768cc806b88db3dcf7aae9",
     "src/billgen/themes/usbank/replay_biz.json": "dd34501b8510b64bc1fd833160f5f3d6ff75498d6ef36002b6ce0f312b360b81",

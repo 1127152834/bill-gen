@@ -32,6 +32,14 @@ TYPE_LABEL = {
 }
 
 
+def _usb_account(number: str) -> str:
+    """真样本的账号格式是 ``1 964 9173 9161``（1-3-4-4），不是掩码。"""
+    digits = "".join(ch for ch in number if ch.isdigit())
+    if len(digits) == 12:
+        return f"{digits[0]} {digits[1:4]} {digits[4:8]} {digits[8:]}"
+    return number
+
+
 def _key(ledger: LedgerDocument, item: LedgerRow) -> str:
     return f"{ledger.seed}:{item.date.isoformat()}:{item.amount_cents}:{item.description}"
 
@@ -95,7 +103,7 @@ def _build(ledger: LedgerDocument, defaults: dict[str, Any], template: str) -> d
             "watermark": ledger.watermark,
             "begin_balance": cents_to_plain(ledger.opening_cents),
             "customer_lines": customer_lines(ledger),
-            "account_display": ledger.account.display,
+            "account_display": _usb_account(ledger.account.number),
             "period": {
                 "label": f"{ledger.period.start.strftime('%B %d, %Y')} through "
                 f"{ledger.period.end.strftime('%B %d, %Y')}",

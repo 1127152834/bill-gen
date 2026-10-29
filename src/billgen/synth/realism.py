@@ -20,6 +20,8 @@
 """
 from __future__ import annotations
 
+from typing import Final
+
 import hashlib
 import re
 from dataclasses import replace
@@ -124,9 +126,23 @@ _PREFIX_RULES: tuple[tuple[tuple[str, ...], tuple[str, ...]], ...] = (
 )
 
 
+_KNOWN_PREFIXES: Final[tuple[str, ...]] = (
+    "SQ *", "TST*", "TST* ", "PAYPAL *", "SP ", "GOOGLE *", "APPLE.COM/BILL", "AMZN MKTP US*",
+    "AMAZON PRIME*", "AMAZON.COM*", "UBER *", "LYFT *", "DD *", "CASH APP*", "AMZN Mktp US*",
+)
+
+
 def _prefix_for(ledger: LedgerDocument, row: LedgerRow, text: str) -> str:
-    """商户名命中类别就取该类的收单方前缀；对不上类别一律不加。"""
+    """商户名命中类别就取该类的收单方前缀；对不上类别、或本身已带前缀都不加。
+
+    真账单不会出现 ``AMZN Mktp US*AMAZON MKTPLACE PMTS`` 这种叠前缀的写法。
+    """
     up = text.upper()
+    if any(text.startswith(prefix) or up.startswith(prefix.upper()) for prefix in _KNOWN_PREFIXES):
+        return ""
+    # Amazon 自己发的描述符已经是 `AMAZON MKTPLACE PMTS`，前面再挂 `AMZN Mktp US*` 就是叠前缀
+    if up.startswith("AMAZON") or "MARKETPLACE" in up or "MKTP" in up:
+        return ""
     for keys, prefixes in _PREFIX_RULES:
         if any(k in up for k in keys):
             if not prefixes:

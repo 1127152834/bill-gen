@@ -436,8 +436,10 @@ def tx_row(page, top, t, running, *, ctx=None):
     for i, ln in enumerate(lines):
         put(page, 102.3, top + 12.375 + i * 7.9875, ln, SZ8, ctx=ctx)
     put(page, 59.1, bl_c, t["date"], SZ8, ctx=ctx)
+    # CATEGORY 列印的是商户品类（真账单是 Groceries / Dining / Bills & Utilities…），
+    # 不是金额方向；数据层没给品类时才退回 Credit/Debit。
     put_right(page, CAT_RIGHT, bl_c,
-              "Credit" if t["amount"] >= 0 else "Debit", SZ8, ctx=ctx)
+              t.get("category") or ("Credit" if t["amount"] >= 0 else "Debit"), SZ8, ctx=ctx)
     put_right(page, AMT_RIGHT, bl_c + 0.1125, signed(t["amount"]), SZ8, _BOLD,
               GREEN if t["amount"] >= 0 else TEXT, ctx=ctx)
     put_right(page, BAL_RIGHT, bl_c, money(running), SZ8, ctx=ctx)

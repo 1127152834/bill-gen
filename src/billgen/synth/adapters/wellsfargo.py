@@ -4,6 +4,7 @@ from __future__ import annotations
 from typing import Any
 
 from ..ledger import LedgerDocument
+from ..line_styles import wellsfargo_desc
 from ..money import cents_to_grouped, cents_to_plain, fmt_month_day, fmt_two_digit
 from ._common import address_lines, bank_contact, clip, deep, metadata
 
@@ -16,9 +17,7 @@ def _desc(ledger: LedgerDocument, row) -> str:
     """描述列：支票行把票号写进描述（真账单有独立 Check Number 列，
     这里的版式把票号并入描述，长度仍在列宽内）。"""
     text = clip(row.description, DESC_LIMIT)
-    if row.type == "CHECK" and row.check_no:
-        return clip(f"{text} CHECK {row.check_no}", DESC_LIMIT + 12)
-    return text
+    return clip(wellsfargo_desc(ledger, row, text), DESC_LIMIT + 26)
 
 
 def build(ledger: LedgerDocument, defaults: dict[str, Any]) -> dict[str, Any]:

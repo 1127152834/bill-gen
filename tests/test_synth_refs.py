@@ -83,9 +83,35 @@ def test_sofi_uses_batch_sequence_transaction_id() -> None:
 
 
 def test_capitalone_fills_category_column() -> None:
+    """CATEGORY 列填商户品类（真账单如此），不能填 Credit/Debit（那是金额方向）。"""
     ledger = _ledger()
     data = binding_for("capitalone").build(ledger, {})
-    assert {tx["category"] for tx in data["transactions"]} <= {"Credit", "Debit"}
+    categories = {tx["category"] for tx in data["transactions"]}
+    assert categories <= {"Groceries", "Dining", "Gas/Automotive", "Transportation", "Merchandise",
+                           "Health Care", "Bills & Utilities", "Entertainment", "Travel",
+                           "Insurance", "Cash", "Fees", "Interest", "Transfers", "Income", "Other"}
+    assert categories & {"Groceries", "Income", "Bills & Utilities"}
+
+
+def test_same_ledger_reads_differently_per_bank() -> None:
+    """同一笔卡消费在 Chase / Wells Fargo / Capital One 上必须是三种行文。"""
+    ledger = _ledger()
+    chase = [r["desc"] for r in binding_for("chase-personal").build(ledger, {})["transactions"]]
+    wf = [r["desc"] for r in binding_for("wellsfargo").build(ledger, {})["transactions"]]
+    c1 = [r["desc"] for r in binding_for("capitalone").build(ledger, {})["transactions"]]
+    assert any(d.startswith("Card Purchase ") and " Card " in d for d in chase)
+    assert any(d.startswith("Card Purchase ") and " TX" in d for d in wf)
+    assert any(" TX" in d and not d.startswith("Card Purchase") for d in c1), c1
+
+
+def test_sofi_type_column_is_specific() -> None:
+    """SoFi 的类型列是 Direct Payment / Card Purchase / Interest Earned，不是笼统的 Withdrawal。"""
+    ledger = _ledger()
+    data = binding_for("sofi").build(ledger, {})
+    types = {tx["type"] for tx in data["transactions"]}
+    assert types <= {"Deposit", "Withdrawal", "Direct Payment", "Card Purchase",
+                     "Interest Earned", "Transfer", "Check", "Fee"}
+    assert "Card Purchase" in types
 
 
 def test_usbank_puts_trace_in_continuation_lines() -> None:

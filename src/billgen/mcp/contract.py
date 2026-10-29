@@ -138,8 +138,14 @@ _COMMON_RULES: tuple[str, ...] = (
     "禁止 SAMPLE / EXAMPLE / DEMO / TEST / DUMMY / 占位名字（John Doe）/ 123 Main St / 00000 之类。",
     "账号用 10–17 位数字，路由号必须能过 ABA 校验位；不要整串 0。",
     "商户名只能来自 facts 或账本里已有的行，不要新编一个商户或价格。",
-    "交易描述按真实收单方格式：ACH 用 DES:<名> ID:<号> INDN:<持卡人> CO ID:<5位> PPD|WEB；"
-    "卡消费用 <商户> <城市> <州> Card <尾号>；Zelle 用 Zelle payment to <全名> Conf# <参考号>。",
+    "流水行文照模板所属银行，不要用一套通用格式：Chase 前缀式（Card Purchase/ACH Debit + 日期 + 商户 + Card 尾号）；"
+    "BoA 直接印 NACHA 字段（DES:<名> ID:<号> INDN:<持卡人> CO ID:<5位> PPD|WEB）；"
+    "U.S. Bank 有 Ref Number 列，ACH 走两行续行（REF=<15 位 trace> / PAYROLL <公司号>）；"
+    "Wells Fargo 用 Card Purchase <MM/DD> <商户> <城市> <州>；Amex 用 DEBIT CARD PURCHASE <商户> <城市> <州>；"
+    "Capital One 的 CATEGORY 列填品类词（Groceries/Dining/Gas/Automotive/Bills & Utilities/Income），不许填 Credit/Debit；"
+    "SoFi 的 TYPE 列用 Deposit/Direct Payment/Card Purchase/Interest Earned，描述下带 Transaction ID；"
+    "Mercury 的 TYPE 列用 ACH In/ACH Out/Card/Wire In/Fee，描述只写商户名。",
+    "版式里存在的列必须填满：CATEGORY、Ref Number、Type 这类列留空就是穿帮。",
     "金额是十进制字符串：不写 $、不写千分位（模板自己的格式化字段除外，如 summary）。",
     "期初 + Σ存入 − Σ扣款 = 期末，必须严格闭合；改任何一行都要重算。",
     "余额链连续：本行余额 = 上行余额 + 本行金额。",

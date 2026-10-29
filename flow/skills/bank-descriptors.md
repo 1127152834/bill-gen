@@ -252,3 +252,27 @@ days only; weekend sales land Monday or Tuesday. Toast and Square batches read l
 - https://www.bankrate.com/banking/checking/checking-account-survey/
 - https://www.bankrate.com/press-releases/atm-fees-hit-record-high-for-third-consecutive-year/
 - https://www.nerdwallet.com/blog/credit-cards/how-credit-card-interest-calculated
+
+## 15. Per-bank line anatomy (the same ledger must not read the same everywhere)
+
+One ledger feeds 11 layouts. A Chase line and a Capital One line describe the same swipe
+differently — copying one house style across banks is the fastest way to look generated.
+
+| Template | Row shape (what the customer actually sees) |
+|---|---|
+| `chase-personal` / `chase-business` | Two-part description column: `Card Purchase` + `12/11 WHOLE FOODS MKT 105 Card 1347`; `ACH Debit` + `12/10 CAMDEN PROPERTY MGMT RENT`; `Zelle Payment` + party + 11-digit id; `Check Paid` + `12/18 CHECK 1110`. Type word first, then the date, then the merchant, card last4 last. |
+| `boa-personal` / `boa-business` | ACH rows print the raw NACHA fields: `DES:ACME CORP PAYROLL ID:… INDN:MAYA OKAFOR CO ID:08683 PPD`. Card rows: `TST* WHOLE FOODS MKT 105 12/11 Card 1347`. Checks: `CHECK 1110 12/18`. |
+| `usbank-personal` / `usbank-business` | Grouped tables (Deposits/Credits, Other Withdrawals) with a **Ref Number** column. ACH is two continuation lines: `REF=<15-digit trace>Y00` then `PAYROLL 086830302`. Zelle: `On 12/16/26 PMT|ID=USB…`. ATM: `ATM TERMINAL 7014 AUS`. |
+| `wellsfargo` | Single five-column table: date, description, deposits, withdrawals, balance. Card rows carry the prefix and city/state: `Card Purchase 12/11 WHOLE FOODS MKT 105 AUSTIN TX`; ATM `ATM Withdrawal 01/09 …`; checks `Check 1042`. |
+| `amex` | Date, description, credits, debits, balance, with a second line `ID 1234567`. Card rows: `DEBIT CARD PURCHASE H-E-B #0611 AUSTIN TX` (no date and no card number inside the text). |
+| `capitalone` | Five columns **including CATEGORY**: `DATE / DESCRIPTION / CATEGORY / AMOUNT / BALANCE`. Category is a merchant class word — `Groceries`, `Dining`, `Gas/Automotive`, `Bills & Utilities`, `Merchandise`, `Health Care`, `Entertainment`, `Travel`, `Cash`, `Fees`, `Income`, `Transfers`. Never `Credit`/`Debit` (that is the amount direction, not a category). Description = merchant + city + state. |
+| `sofi` | `DATE / TYPE / DESCRIPTION / AMOUNT / BALANCE`, plus `Transaction ID: 137-38317001` under the description. TYPE is specific: `Deposit`, `Direct Payment` (ACH debit), `Card Purchase`, `Withdrawal` (ATM/cash), `Interest Earned`, `Transfer`. Internal moves read `To Savings - 1943`. |
+| `mercury` | `Date (UTC) / Description / Type / Amount / End of Day Balance`. Type ∈ `ACH In`, `ACH Out`, `Card`, `Wire In`, `Wire Out`, `Fee`, `Interest`, `Zelle`. Description is the merchant alone (`AWS EMEA`, `UBER TRIP`, `STRIPE PAYOUT`) — no city, no card number. |
+
+Rules that follow from the table:
+
+- Fill the columns the layout actually has. An empty CATEGORY column, a TYPE column reading
+  `Withdrawal` on an ACH bill, or a `Ref Number` column left blank are all tells.
+- Keep the vocabulary of the bank: Chase buckets withdrawals as `ATM & Debit Card Withdrawals`
+  and `Electronic Withdrawals`; U.S. Bank groups by table; Capital One sorts by category.
+- The bank name must not leak into the row text. Nobody writes `Chase Card Purchase`.

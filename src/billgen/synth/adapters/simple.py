@@ -9,6 +9,15 @@ from typing import Any
 
 from .. import refs
 from ..ledger import LedgerDocument, LedgerRow
+from ..line_styles import (
+    amex_desc,
+    capitalone_category,
+    capitalone_desc,
+    mercury_desc,
+    mercury_type,
+    sofi_desc,
+    sofi_type,
+)
 from ..money import (
     cents_to_float,
     fmt_month_day,
@@ -57,7 +66,7 @@ def build_amex(ledger: LedgerDocument, defaults: dict[str, Any]) -> dict[str, An
             "transactions": [
                 {
                     "date": r.date.strftime("%m/%d/%Y"),
-                    "desc": clip(r.description, DESC_LIMIT),
+                    "desc": clip(amex_desc(ledger, r, r.description), DESC_LIMIT + 12),
                     "amount": _signed(r),
                     "id": f"ID {r.reference}" if r.reference.isdigit() else "ID " + refs.amex_reference(_key(ledger, r)),
                     "memo": statement_memo(r),
@@ -89,14 +98,11 @@ def build_mercury(ledger: LedgerDocument, defaults: dict[str, Any]) -> dict[str,
     d = deep(defaults)
     transactions = []
     for r in ledger.rows:
-        if r.direction == "credit":
-            label, direction, icon = MERCURY_TYPE.get(r.type, ("ACH In", "in", "achIn"))
-        else:
-            label, direction, icon = MERCURY_TYPE.get(r.type, ("ACH Out", "out", "achOut"))
+        label, direction, icon = mercury_type(r)
         transactions.append(
             {
                 "date": fmt_month_day(r.date),
-                "desc": clip(r.description, DESC_LIMIT),
+                "desc": clip(mercury_desc(ledger, r, r.description), DESC_LIMIT),
                 "amount": _signed(r),
                 "id": refs.internal_id(_key(ledger, r)),
                 "memo": statement_memo(r),
@@ -143,11 +149,11 @@ def build_capitalone(ledger: LedgerDocument, defaults: dict[str, Any]) -> dict[s
             "transactions": [
                 {
                     "date": r.date.strftime("%m/%d"),
-                    "desc": clip(r.description, DESC_LIMIT),
+                    "desc": clip(capitalone_desc(ledger, r, r.description), DESC_LIMIT + 8),
                     "amount": _signed(r),
                     "id": refs.internal_id(_key(ledger, r)),
                     "memo": statement_memo(r),
-                    "category": "Credit" if r.direction == "credit" else "Debit",
+                    "category": capitalone_category(ledger, r, r.description),
                     "type": "Deposit" if r.direction == "credit" else "Withdrawal",
                 }
                 for r in ledger.rows
@@ -180,12 +186,12 @@ def build_sofi(ledger: LedgerDocument, defaults: dict[str, Any]) -> dict[str, An
             "transactions": [
                 {
                     "date": fmt_slash_year(r.date),
-                    "desc": clip(r.description, DESC_LIMIT),
+                    "desc": clip(sofi_desc(ledger, r, r.description), DESC_LIMIT + 8),
                     "amount": _signed(r),
                     "id": refs.internal_id(_key(ledger, r)),
                     "txid": refs.sofi_txid(_key(ledger, r)),
                     "memo": statement_memo(r),
-                    "type": "Deposit" if r.direction == "credit" else "Withdrawal",
+                    "type": sofi_type(r),
                 }
                 for r in ledger.rows
             ],

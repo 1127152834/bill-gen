@@ -8,9 +8,9 @@
       612.0,
       792.0
     ],
-    "bytes": 365583,
-    "text_sha256_16": "95c26cce731943da",
-    "text_chars": 6865,
+    "bytes": 286272,
+    "text_sha256_16": "5ea4fff3ac7d9f77",
+    "text_chars": 6866,
     "fonts": [
       "ConnectionsBold_CZEX0AA0",
       "ConnectionsIta_CZEX0AC0",
@@ -19,7 +19,7 @@
       "HigherStandards_CZEX0660",
       "ITC_Franklin_Gothic_Book_CZEX0080"
     ],
-    "secs_render": 0.77
+    "secs_render": 0.63
   },
   "boa-business": {
     "id": "boa-business",
@@ -30,9 +30,9 @@
       612.0,
       792.0
     ],
-    "bytes": 1110857,
-    "text_sha256_16": "93db3ba92eca872c",
-    "text_chars": 6849,
+    "bytes": 1012961,
+    "text_sha256_16": "4b54a3f47f367d6b",
+    "text_chars": 6857,
     "fonts": [
       "ConnectionsBold_CZEX0AA0",
       "ConnectionsIta_CZEX0AC0",
@@ -41,7 +41,7 @@
       "HigherStandards_CZEX0660",
       "ITC_Franklin_Gothic_Book_CZEX0080"
     ],
-    "secs_render": 0.85
+    "secs_render": 0.7
   },
   "wellsfargo": {
     "id": "wellsfargo",
@@ -52,7 +52,7 @@
       612.0,
       792.0
     ],
-    "bytes": 205589,
+    "bytes": 87107,
     "text_sha256_16": "d3b317f6b2847742",
     "text_chars": 10693,
     "fonts": [
@@ -66,7 +66,7 @@
       "SymbolMT,Bold",
       "ZapfDingbatsITCbyBT-Regular"
     ],
-    "secs_render": 0.6
+    "secs_render": 0.4
   },
   "amex": {
     "id": "amex",
@@ -95,16 +95,16 @@
       612.0,
       792.0
     ],
-    "bytes": 257555,
-    "text_sha256_16": "c047a35cf5053f75",
-    "text_chars": 777,
+    "bytes": 232473,
+    "text_sha256_16": "ca934126f69f8b2e",
+    "text_chars": 858,
     "fonts": [
       "1695149660304911865-0-Arcadia-Text-480",
       "ArcadiaText-480",
       "ArcadiaTextVariable-Variable",
       "Helvetica"
     ],
-    "secs_render": 0.47
+    "secs_render": 0.51
   },
   "capitalone": {
     "id": "capitalone",
@@ -115,7 +115,7 @@
       612.0,
       792.0
     ],
-    "bytes": 477090,
+    "bytes": 416961,
     "text_sha256_16": "744b18b1ce1abe95",
     "text_chars": 1702,
     "fonts": [
@@ -123,7 +123,7 @@
       "MyFontMedium",
       "MyFontRegular"
     ],
-    "secs_render": 0.51
+    "secs_render": 0.39
   },
   "sofi": {
     "id": "sofi",
@@ -134,15 +134,15 @@
       612.0,
       792.0
     ],
-    "bytes": 551626,
-    "text_sha256_16": "96193a4aaf9bbc46",
-    "text_chars": 5983,
+    "bytes": 513737,
+    "text_sha256_16": "7b093a4a2d68aab2",
+    "text_chars": 6273,
     "fonts": [
       "Montserrat-Thin",
       "TTNormsBold",
       "TTNormsRegular"
     ],
-    "secs_render": 0.44
+    "secs_render": 0.38
   },
   "chase-personal": {
     "id": "chase-personal",
@@ -153,7 +153,7 @@
       612.0,
       792.0
     ],
-    "bytes": 212883,
+    "bytes": 171911,
     "text_sha256_16": "a7ba90b33f504084",
     "text_chars": 3931,
     "fonts": [
@@ -173,7 +173,7 @@
       "Symbol",
       "Times-Roman"
     ],
-    "secs_render": 0.19
+    "secs_render": 0.09
   },
   "chase-business": {
     "id": "chase-business",
@@ -184,7 +184,7 @@
       612.0,
       792.0
     ],
-    "bytes": 211573,
+    "bytes": 170398,
     "text_sha256_16": "27867671833f2db1",
     "text_chars": 4097,
     "fonts": [
@@ -204,7 +204,7 @@
       "Symbol",
       "Times-Roman"
     ],
-    "secs_render": 0.25
+    "secs_render": 0.09
   },
   "usbank-personal": {
     "id": "usbank-personal",
@@ -215,9 +215,9 @@
       612.0,
       792.0
     ],
-    "bytes": 241492,
-    "text_sha256_16": "e8ce25c682770522",
-    "text_chars": 9504,
+    "bytes": 181942,
+    "text_sha256_16": "cc741aeb601b6091",
+    "text_chars": 9510,
     "fonts": [
       "Arial-BoldItalicMT",
       "Arial-BoldMT",
@@ -230,7 +230,7 @@
       "IDAutomation2D",
       "USPSIMBCompact"
     ],
-    "secs_render": 0.3
+    "secs_render": 0.18
   },
   "usbank-business": {
     "id": "usbank-business",
@@ -241,7 +241,7 @@
       612.0,
       792.0
     ],
-    "bytes": 248101,
+    "bytes": 207965,
     "text_sha256_16": "515d54be938c4552",
     "text_chars": 9550,
     "fonts": [
@@ -256,7 +256,7 @@
       "IDAutomation2D",
       "USPSIMBCompact"
     ],
-    "secs_render": 0.26
+    "secs_render": 0.18
   },
   "alliant": {
     "id": "alliant",

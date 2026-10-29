@@ -103,7 +103,7 @@ def build(ledger: LedgerDocument, defaults: dict[str, Any]) -> dict[str, Any]:
             "owner_names": [holder_upper(ledger)],
             "owner_line": holder_upper(ledger),
             "strip_name": holder_upper(ledger),
-            "account_number": ledger.account.display,
+            "account_number": ledger.account.grouped,
             "product": ledger.account.product,
             "period": {
                 "label": ledger.period.label_long,

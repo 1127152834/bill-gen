@@ -213,7 +213,10 @@ def test_adapter_truncates_long_descriptions_without_dropping_rows(ledger):
     data = build_data("wellsfargo", stretched)
     descriptions = [item["desc"] for item in data["transactions"]]
     assert len(descriptions) == len(stretched.rows)
-    assert all(len(text) <= 34 for text in descriptions)
+    # Wells Fargo 的描述列从 x=142.5 到 411.75（约 259pt / 8pt 字号 ≈ 58 字符），
+    # 真账单的 `Card Purchase 12/11 WHOLE FOODS MKT #105 AUSTIN TX` 就是 50 上下，
+    # 所以上限按列宽算，而不是原来随手定的 34。
+    assert all(len(text) <= 56 for text in descriptions)
 
 
 def test_lint_flags_dropped_rows(ledger):
