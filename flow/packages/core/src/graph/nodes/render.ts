@@ -343,16 +343,16 @@ export const renderStep =
     const pinned = config.templates.filter((id) => id !== AUTO_TEMPLATES);
     const targets: { templateId: string; statement: Statement; recommend?: { reasons: string[]; score: number } }[] = [];
     const skipped = new Set<string>();
+    const skipWarnings: string[] = [];
     for (const statement of result.statements) {
       if (!RENDERABLE_ACCOUNTS.has(statement.accountType)) {
         // 不说一声就少出一份账单，会被当成 bug；这里明确记下来（credit 信用卡账单
         // 服务端没有对应版式，只有存款账户版式）。
         if (!skipped.has(statement.accountType)) {
           skipped.add(statement.accountType);
-          emit({
-            type: 'warning',
-            message: `${statement.accountType}: 服务端没有该账户类型的版式，跳过出片（只有存款账户版式）`,
-          });
+          const message = `${statement.accountType}: 服务端没有该账户类型的版式，跳过出片（只有存款账户版式）`;
+          skipWarnings.push(message);
+          emit({ type: 'warning', message });
         }
         continue;
       }
@@ -360,10 +360,13 @@ export const renderStep =
         targets.push({ templateId, statement });
       }
     }
-    if (targets.length === 0 && !wantsAuto) return {};
+    if (targets.length === 0 && !wantsAuto) {
+      // 一页都出不了也要把「为什么」带回去，否则调用方只看到 renders 为空。
+      return skipWarnings.length ? { result: { ...result, warnings: [...result.warnings, ...skipWarnings] } } : {};
+    }
 
     const artifacts: RenderArtifact[] = [];
-    const warnings: string[] = [];
+    const warnings: string[] = [...skipWarnings];
     try {
       await sharedMcpPool.with(
         { command: config.command, args: config.args, env: { BILLGEN_MCP_OUT: config.outDir } },

@@ -297,3 +297,12 @@ business checking 的 Uni-Statement、Everyday Checking 之类），所以这里
 `pytest` 562 passed。
 
 回滚：`git revert <本轮提交>`。
+
+补记：第一版的告警只 `emit` 到进度流，**没进 `result.warnings`** —— 线上真跑一次
+`warnings: []`，等于对调用方还是静默。现在 `skipWarnings` 同时拼进 `result.warnings`，
+并且在「一个目标都没有」的早退分支里也会带回结果：
+```
+warnings ["credit: 服务端没有该账户类型的版式，跳过出片（只有存款账户版式）"]
+renders  [('chase-personal','checking',2), ('usbank-personal','checking',4)]
+```
+（容器已重建，线上验证通过。）
