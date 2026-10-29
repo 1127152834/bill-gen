@@ -24,6 +24,7 @@ const FIXTURE_NOW = Date.UTC(2026, 9, 29, 12);
 const readFixture = <T>(name: string): T => JSON.parse(readFileSync(new URL(name, FIXTURE_DIR), 'utf8')) as T;
 
 export const fixturePersona = (): PersonalProfile => readFixture<PersonalProfile>('persona.json');
+const businessFixture = readFixture<Record<string, unknown>>('persona-business.json');
 
 /** The request the fixtures answer: Austin, 3 months to 2026-09, checking 8-13 and credit 20-35 rows a month. */
 export function fixtureRequest(overrides: Partial<GenerationRequest> = {}): GenerationRequest {
@@ -59,7 +60,12 @@ export type FixtureDeps = GraphDeps & { llm: FixtureLlm; search: FixtureSearch }
 /** Fresh copies of the default answers (one per node), for tests that tweak one. */
 export function fixtureAnswers(): Required<FixtureAnswers> {
   return {
-    persona: [readFixture('persona.json')],
+    // 企业请求与个人请求共用 `persona` 节点：按调用里给的 schema 挑对应 fixture，
+    // 否则 `LLM_FAKE=1` 下 `subjectType: business` 会在 persona 解析处整单失败（实测线上）。
+    persona: [
+      ({ schema }: { schema: { safeParse: (v: unknown) => { success: boolean } } }) =>
+        schema.safeParse(businessFixture).success ? businessFixture : readFixture('persona.json'),
+    ],
     planResearch: [readFixture('plan.json')],
     lifeModel: [readFixture('lifeModel.json')],
     descriptors: [readFixture('descriptors.json')],
@@ -75,20 +81,24 @@ const categoryOf = (messages: LlmMessage[]): string =>
 function fixtureLlm(answers: Required<FixtureAnswers>, extract: Record<string, unknown>, budget: Budget): FixtureLlm {
   const cursor = new Map<LlmNode, number>();
   const calls: FixtureLlm['calls'] = [];
-  const answerFor = (node: LlmNode, messages: LlmMessage[]): unknown => {
+  const answerFor = (node: LlmNode, schema: z.ZodType<unknown>, messages: LlmMessage[]): unknown => {
     if (node === 'extractFacts') return extract[categoryOf(messages)] ?? [];
     const queue = answers[node];
     if (queue.length === 0) throw new Error(`fixture llm: no answer for node "${node}"`);
     const i = cursor.get(node) ?? 0;
     cursor.set(node, i + 1);
-    return queue[Math.min(i, queue.length - 1)];
+    const entry = queue[Math.min(i, queue.length - 1)];
+    // 函数条目：按调用上下文挑答案（企业/个人 persona 共用同一节点）。
+    return typeof entry === 'function'
+      ? (entry as (ctx: { schema: z.ZodType<unknown>; messages: LlmMessage[] }) => unknown)({ schema, messages })
+      : entry;
   };
   return {
     calls,
     async invoke<T>(node: LlmNode, schema: z.ZodType<T>, messages: LlmMessage[]): Promise<T> {
       budget.chargeLlm();
       calls.push({ node, messages });
-      const answer = answerFor(node, messages);
+      const answer = answerFor(node, schema as z.ZodType<unknown>, messages);
       if (answer instanceof Error) throw answer;
       return schema.parse(structuredClone(answer));
     },
