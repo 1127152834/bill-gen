@@ -184,8 +184,11 @@ def build(*, out_dir: str | None = None):  # noqa: ANN201 - 返回 FastMCP，避
     def recommend_templates(result: dict[str, Any], account: str = "", cycle: int = -1,
                             bank_name: str = "", limit: int = 3) -> dict[str, Any]:
         try:
+            # 这里是「按版式适配度打分」，本身不属于任何一家版式：传空模板，
+            # 让账本走默认的日历月锚定逻辑（早先误写成 `template=template_id`，
+            # 本函数根本没有这个参数，工具一调就 NameError）。
             ledger = synth.from_game_result(result, account=account or None, cycle=cycle,
-                                            template=template_id, bank_name=bank_name or None)
+                                            template="", bank_name=bank_name or None)
         except (KeyError, ValueError, synth.SynthLintError) as err:
             return {"ok": False, "errors": [str(err)], "candidates": []}
         ranked = synth.recommend(ledger, limit=max(1, min(int(limit), len(synth.BINDINGS))))

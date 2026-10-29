@@ -131,3 +131,57 @@ def test_draft_from_ledger_returns_template_data(srv):
     assert out["ok"], out
     assert out["data"]["begin_balance"] == "1000.00"
     assert out["ledger"]["rows"] == 2
+
+
+def test_recommend_templates_runs_and_ranks(srv):
+    """推荐工具曾经把不存在的 `template_id` 传进 from_game_result，一调就 NameError。
+
+    这条测试只保证「工具能跑、返回打分」——版式适配度的具体分数由引擎自带测试覆盖。
+    """
+    payload = {
+        "id": "recommend-probe",
+        "seed": "recommend-probe",
+        "createdAt": "2027-02-01T00:00:00.000Z",
+        "subject": {
+            "name": "Maya Okafor",
+            "age": 34,
+            "address": {"street": "2104 S 1st St", "city": "Austin", "state": "TX", "zip": "78704"},
+            "occupation": "Designer",
+            "household": "single",
+            "hobbies": [],
+        },
+        "statements": [
+            {
+                "bankName": "JPMorgan Chase Bank, N.A.",
+                "accountType": "checking",
+                "accountLast4": "1347",
+                "periodStart": "2027-01-01",
+                "periodEnd": "2027-01-31",
+                "months": [
+                    {
+                        "cycleStart": "2027-01-01",
+                        "cycleEnd": "2027-01-31",
+                        "openingBalanceCents": 480000,
+                        "closingBalanceCents": 512345,
+                        "totalCreditsCents": 320000,
+                        "totalDebitsCents": 287655,
+                        "transactionCount": 8,
+                    }
+                ],
+                "transactions": [
+                    {
+                        "transactionDate": "2027-01-06",
+                        "description": "ACME CORP PAYROLL DIRECT DEP",
+                        "amountCents": 320000,
+                        "direction": "credit",
+                        "category": "payroll",
+                    }
+                ],
+            }
+        ],
+        "audit": {"rules": [], "findings": []},
+    }
+    out = call(srv, "recommend_templates", {"result": payload, "limit": 3})
+    assert out["ok"] is True, out
+    assert out["candidates"], out
+    assert out["rows"] >= 1
