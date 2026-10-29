@@ -81,7 +81,7 @@ LOGO_RECT = (470.85, 49.85, 574.40, 77.45)
 
 # ---------------------------------------------------------------- data
 DEMO_DATA = {'holder_name': 'Maya Okafor',
- 'member_since': 'May 2024',
+ 'member_since': 'Member since Mar 15, 2025',
  'address_lines': ['2104 S 1st St', 'Austin TX 78704', '', ''],
  'account_number': '410737211347',
  'statement_period': '10/01/2026 - 10/31/2026',
@@ -94,7 +94,7 @@ DEMO_DATA = {'holder_name': 'Maya Okafor',
  'beginning_balance': 1000.0,
  'beginning_as_of': '10/01/2026',
  'ytd_interest': 0.0,
- 'balance_note': 'Balance details for this statement period',
+ 'balance_note': 'Current balances include the amount of interest paid.',
  'transactions': [{'date': '10/07/2026',
                    'desc': 'H-E-B #0611 AUSTIN TX',
                    'amount': -35.5,
@@ -109,15 +109,16 @@ DEMO_DATA = {'holder_name': 'Maya Okafor',
                    'txid': '9401882733',
                    'memo': '',
                    'type': 'Deposit'}],
- 'contact_website': 'sofi.com',
- 'contact_address': ['2104 S 1st St', 'Austin TX 78704', ''],
- 'contact_phone': '1-855-456-7634',
- 'legal_footer': 'SoFi Bank, N.A. Member FDIC',
- 'footnote1': '©2026 SoFi Bank, N.A. All rights reserved.'}
+ 'contact_website': 'www.sofi.com',
+ 'contact_address': ['SoFi Bank, N.A.', '2750 East Cottonwood Parkway #300', 'Cottonwood Heights, Utah 84121'],
+ 'contact_phone': '(855) 456-SOFI (7634)',
+ 'legal_footer': 'SoFi Checking and Savings accounts are offered through SoFi Bank, N.A., Member FDIC',
+ 'footnote1': ('Interest accrues daily at the rates as described in the SoFi Bank '
+                'Rate Sheet and is paid on the last day of the Statement Period.')}
 
 # 原稿基线：与 asset 里的样张一字不差，供 parity 回归比对（不要改）。
 PARITY_DATA = {'holder_name': 'ALEX EXAMPLE',
- 'member_since': 'October 2026',
+ 'member_since': 'Member since Mar 15, 2025',
  'address_lines': ['100 EXAMPLE STREET', 'DEMO CITY CA 90000', '', ''],
  'account_number': '000000000001',
  'statement_period': '10/01/2026 - 10/31/2026',
@@ -130,7 +131,7 @@ PARITY_DATA = {'holder_name': 'ALEX EXAMPLE',
  'beginning_balance': 1000.0,
  'beginning_as_of': '10/01/2026',
  'ytd_interest': 0.0,
- 'balance_note': 'Balance details for this statement period',
+ 'balance_note': 'Current balances include the amount of interest paid.',
  'transactions': [{'date': '10/07/2026',
                    'desc': 'Sample grocery purchase',
                    'amount': -35.5,
@@ -145,11 +146,12 @@ PARITY_DATA = {'holder_name': 'ALEX EXAMPLE',
                    'txid': 'DEMO0001',
                    'memo': '',
                    'type': 'Deposit'}],
- 'contact_website': 'sofi.com',
- 'contact_address': ['100 EXAMPLE STREET', 'DEMO CITY CA 90000', ''],
- 'contact_phone': '1-855-456-7634',
- 'legal_footer': 'SoFi Bank, N.A. Member FDIC',
- 'footnote1': '©2026 SoFi Bank, N.A. All rights reserved.'}
+ 'contact_website': 'www.sofi.com',
+ 'contact_address': ['SoFi Bank, N.A.', '2750 East Cottonwood Parkway #300', 'Cottonwood Heights, Utah 84121'],
+ 'contact_phone': '(855) 456-SOFI (7634)',
+ 'legal_footer': 'SoFi Checking and Savings accounts are offered through SoFi Bank, N.A., Member FDIC',
+ 'footnote1': ('Interest accrues daily at the rates as described in the SoFi Bank '
+                'Rate Sheet and is paid on the last day of the Statement Period.')}
 
 #: 引擎默认数据 = 原稿基线（`build()` 不带 data 时用它，parity 回归依赖这一点）。
 DATA = PARITY_DATA
@@ -542,9 +544,10 @@ def page_statement(doc, page_num, total_pages, txs=None, balances=None, *, ctx=N
     hline(page, sep_y)
     put(page, 18.1, contact_y, "Contact Information", SZ11, "thin", ins_name="thinD")
 
-    _contact_icon(page, "web", fitz.Rect(15.75, icon_y, 45.05, icon_y + 29.3))
+    # 真样本：Website 配手机图标、Contact Us 配耳麦（"web" 画的是耳麦，"phone" 画的是手机）
+    _contact_icon(page, "phone", fitz.Rect(15.75, icon_y, 45.05, icon_y + 29.3))
     _contact_icon(page, "mail", fitz.Rect(212.2, icon_y + 0.45, 239.95, icon_y + 27.75))
-    _contact_icon(page, "phone", fitz.Rect(405.45, icon_y + 0.30, 434.5, icon_y + 29.35))
+    _contact_icon(page, "web", fitz.Rect(405.45, icon_y + 0.30, 434.5, icon_y + 29.35))
 
     put(page, 20.9, label_y, "Website", SZ8, "thin")
     put(page, 20.9, value_y, ctx.data["contact_website"], SZ8, "thin", color=GRAY_909,

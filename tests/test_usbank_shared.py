@@ -4,7 +4,7 @@ Goldens hash page text and RGB pixels at 72 dpi (PyMuPDF 1.26.6), not PDF
 bytes: metadata timestamps and encryption are deliberately non-deterministic.
 Original implementation copies and generated PDFs stay outside the package.
 
-基线于 2026-10-29 重录：示例数据（editor_*/data_*.json、replay_*.json）曾被运行期写脏，
+基线于 2026-10-30 重录（页码补打 + 扫描颗粒层）——重录原因：每页都印 Page k of n，并在 pdfpost 叠极淡扫描颗粒；2026-10-29 重录：示例数据（editor_*/data_*.json、replay_*.json）曾被运行期写脏，
 恢复成 SAMPLE 样本后文本层与页数与原基线一致，像素摘要因采样环境重录。
 """
 import copy
@@ -26,14 +26,14 @@ THEME = Path(__file__).resolve().parents[1] / "src/billgen/themes/usbank"
 # 期间换成 `Jan 05, 2027` 后渲染缺字（肉眼 `an 05`）。shared.patch_outlines 从系统
 # Arial 补轮廓后像素变了、文本层不变 —— 文本摘要未动，仅四个 us 像素摘要更新。
 GOLDENS = {
-    "us-default": (3, "803e4f0331f9bbf399bee0a9bd9bf168e9a766922adef9c2843a4c03f3ac4270", "d201ea6377e4468a9b1f265c43c37b27a266090da6180222ebb391f903c0d34d"),
-    "us-empty": (3, "4d31768a47b4616b97e9ca6036d67b65936781fc8115800cab02e03cb8ddd3f1", "bcca81183fc6492d57bdd763d13d090f3c823baa92319ac251e454e31a23db7a"),
-    "us-multipage": (8, "0ef8235324c82430ef2424997bd2eb7fc8809e0a5d361ef1fafe6c8192567b7b", "51a43513318e964b15e86a34a883a7df5446fa32fb2d00556e1d1c0de93410a8"),
-    "us-replay": (3, "a1e7f5608039fb937a525a885b551db30c1577e942aac88abca3b8ceb6b9e374", "e4b6f0df3742b723dfdfafe7619f78d4a2ee79f44a9bc1be7572cd89179f142c"),
-    "usbiz-default": (2, "ababae066ac23cf695ac32d45327b5aea7ba0285027ecfa46bfbfc33c9cd4600", "2ff36308edfafa425880d219f210153494b2b82f816b5168de0953a4b7e9b42d"),
-    "usbiz-empty": (2, "b9955a234a9d1f6af73026c2a46665cfeaf1cb4b8305cdcf424b0eb96468d5c3", "09570e4e88d27ab5da2322a52f84827597b6779a57fb86821e57d60afdf00ba9"),
-    "usbiz-multipage": (8, "c2b7145065ef3eabe27d0ac022b7d94514b9314d5fd9fe013cf3d28202cd7c2f", "3e0030d3e9c8d9e22911f4d826951f8af089eb74560917c852cf59b5a3073b8b"),
-    "usbiz-replay": (2, "5ad30010695540a649be5d7f9863605d19e153c7f3689744cd4242bb58c6daa4", "4908f3b891da246dfc33edd72d759cccd1bc37d380795ab5a1a1c2ce6cb2408c"),
+    "us-default": (3, "20e743007be8c0e4900f9c4141166cbfb7f1b7b3b8f9ed47530718499eba6268", "8127749ded08edb2e3db68825d6169b7266b10a5199085caba218b0f278b6cd7"),
+    "us-empty": (3, "9f0ca0d5d36d520cf471a5e719ec257114e3e2f005153c31fa171da3326b6e42", "7792700b05839580053e2b511f712e6ad67f53f3ee2d6bc0a38392eb0dac1022"),
+    "us-multipage": (8, "3957fce1c802138efcea622464b071661576be887bb27c9262b256259fa2021b", "0b01ef520d834efe0c72fd7f50ca9f75b6f80b31ef0d22574b65b2438744d517"),
+    "us-replay": (3, "72a036fbfd4533a81924c5a5140a73dbc60ad2cedd7af6d06603bf9485b5e792", "7cb785aeb8c727de3198a00929159d0d322ef9b611b9d41b1ab04a268a19aad4"),
+    "usbiz-default": (2, "e309100a37d13b339d51385d82097609c382b2c93fc7c27e53a045166e01ef9a", "d3e83d0497ccfdf65764b9532a57e8a414d310712f436460bfa33b73367ced2b"),
+    "usbiz-empty": (2, "8eb58044b396509a23400df9dc90cd97bec30767dc8bbe6c3f2e52984bed65f2", "116078d9c603beb3abe19ecda2e8047acd64459e9bdfd61d2a17fa2d9798abad"),
+    "usbiz-multipage": (8, "30ec590b44e57ab3bcf761be5b26e9af554ddb06b23cd0ac9377e3d50c2cea12", "76091b5e9021b702eb2efa1ae65e01a45b491562a7bd5d519da4de47f310d033"),
+    "usbiz-replay": (2, "16b7a30c6cb76757feb17f4e29a307ef4df42aace8378683246b862fe4297952", "af8775c9aea6d3fb4fbd0fe7bb5731d60ad98b103ee278cfb49e95156517a95c"),
 }
 
 

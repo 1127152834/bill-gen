@@ -210,6 +210,10 @@ _PERSONAL_COPY = {
         "- Pay bills and move money with Zelle\u00ae in Online Banking",
     "* SmartAsset.com 2025":
         "* Mobile and online alerts require an active account.",
+    "certain information is collected from your mobile device for business purposes. This credit":
+        "certain information is collected from your mobile device for account servicing. This bank",
+    "card program is issued and administered by Bank of America, N.A. Banking products":
+        "program is issued and administered by Bank of America, N.A. Banking products",
 }
 
 

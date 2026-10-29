@@ -28,6 +28,7 @@ __all__ = [
     "LedgerRow",
     "Period",
     "from_game_result",
+    "real_traits",
     "refresh_references",
 ]
 
@@ -225,6 +226,24 @@ def routing_for(name: str, seed: str) -> str:
 _ROUTING_NORM.update({_bank_key(k): v for k, v in _REAL_ROUTING.items()})
 
 
+def real_traits(name: str) -> dict[str, str] | None:
+    """按行名查真行联系方式表；`JPMorgan Chase Bank, N.A.` 也能命中 `jpmorgan chase bank`。
+
+    模板里写的是短名（Chase）、法定名带后缀（… Bank, N.A.）、甚至大小写不一，
+    所以从右往左逐词剥到命中为止，别让「真行却配 555 假电话」这种破绽漏出去。
+    """
+    key = " ".join((name or "").replace(",", " ").split()).lower()
+    if not key:
+        return None
+    words = key.split()
+    while words:
+        hit = _REAL_TRAITS.get(" ".join(words))
+        if hit is not None:
+            return hit
+        words.pop()
+    return None
+
+
 @dataclass(frozen=True, slots=True)
 class BankIdentity:
     name: str
@@ -246,7 +265,7 @@ class BankIdentity:
             # 未指定行名：中性占位，build_data() 会替换成模板自带的名字。
             return cls(name="", legal="", domain="", phone="", po_box="", po_box_alt="",
                        city_state_zip="", phone_service="", phone_es="", phone_intl="", phone_metro="")
-        traits = _REAL_TRAITS.get(name.lower())
+        traits = real_traits(name)
         if traits is not None:
             return cls(name=name, **traits)
         legal = name if name.endswith((".", "N.A.", "Bank")) and "," in name else f"{name}, N.A."
@@ -320,6 +339,19 @@ class AccountRef:
         ``number``。
         """
         return "x" * max(0, len(self.number) - 4) + self.number[-4:]
+
+    @property
+    def grouped(self) -> str:
+        """印在账单页眉的账号，按真账单习惯用空格分组。
+
+        真样本：BOA ``3250 1987 0414``（4-4-4）、U.S. Bank ``1 964 9173 9161``
+        （1-3-4-4）、Mercury 15 位连写。这里按位数为 12 的账号给 4-4-4，
+        其余原样返回，模板可以自行覆盖。
+        """
+        digits = "".join(ch for ch in self.number if ch.isdigit())
+        if len(digits) == 12:
+            return f"{digits[:4]} {digits[4:8]} {digits[8:]}"
+        return self.number
 
 
 @dataclass(frozen=True, slots=True)

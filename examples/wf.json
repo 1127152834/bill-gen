@@ -1,33 +1,33 @@
 {
   "bank": {
-    "name": "Sample Bank",
-    "legal_na": "Sample Bank, N.A.",
-    "domain": "example.invalid",
-    "phone_name": "SAMPLE PHONE",
-    "phone_main": "(000-000-0000)",
-    "phone_es": "000-000-0000",
-    "po_box": "P.O. Box 0000",
-    "po_box2": "P.O. Box 0000",
-    "mac_code": "SAMPLE",
-    "zip_main": "00000-0000",
-    "des_moines": "Sample City, IA 00000",
+    "name": "Wells Fargo",
+    "legal_na": "Wells Fargo Bank, N.A.",
+    "domain": "wellsfargo.com",
+    "phone_name": "1-800-TO-WELLS",
+    "phone_main": "(1-800-869-3557)",
+    "phone_es": "1-877-727-2932",
+    "po_box": "P.O. Box 6995",
+    "po_box2": "PO Box 50947",
+    "mac_code": "MAC F2304-019",
+    "zip_main": "97228-6995",
+    "des_moines": "Des Moines, IA 50340",
     "copyright_year": 2027,
-    "office_code": "000",
-    "nmlsr_id": "000000"
+    "office_code": "115",
+    "nmlsr_id": "399801"
   },
   "statement_date": "January 31, 2027",
   "total_pages": 5,
   "customer": {
-    "name": "SAMPLE CUSTOMER",
+    "name": "Maya Okafor",
     "address_lines": [
-      "123 Sample Lane",
-      "Austin TX 78701"
+      "2104 S 1st St",
+      "Austin TX 78704"
     ]
   },
   "account": {
-    "product": "Sample Checking",
-    "number": "000000000001",
-    "rtn": "000000000",
+    "product": "Everyday Checking",
+    "number": "410737211347",
+    "rtn": "121042882",
     "primary_label": "(Primary account)"
   },
   "summary": {
@@ -42,14 +42,14 @@
   "transactions": [
     {
       "date": "1/4",
-      "desc": "SAMPLE SALARY",
+      "desc": "ACME CORP PAYROLL PPD",
       "deposit": "500.00",
       "withdrawal": "",
       "balance": "1,500.00"
     },
     {
       "date": "1/6",
-      "desc": "SAMPLE RENT",
+      "desc": "CAMDEN PROPERTY MGMT RENT",
       "deposit": "",
       "withdrawal": "120.00",
       "balance": "1,380.00"
@@ -65,12 +65,12 @@
     "paid": "$0.00"
   },
   "metadata": {
-    "title": "SAMPLE — NOT A REAL BANK STATEMENT",
+    "title": "Wells Fargo Online Statement",
     "author": "",
-    "producer": "BillGen Sample Editor",
-    "creator": "BillGen Sample Editor",
-    "subject": "Fictional sample statement",
-    "keywords": "sample",
+    "producer": "iText® Core 9.5.0 (AGPL version) ©2000-2025 iText Group NV",
+    "creator": "iText® Core 9.5.0 (AGPL version) ©2000-2025 iText Group NV",
+    "subject": "",
+    "keywords": "",
     "creation": "D:20270131000000Z",
     "mod": "D:20270131000000Z",
     "creation_date": "2027-01-31 00:00:00Z"

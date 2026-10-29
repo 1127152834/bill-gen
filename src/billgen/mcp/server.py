@@ -122,15 +122,19 @@ def _validate(template_id: str, data: Any) -> dict[str, Any]:
     except Exception as err:  # noqa: BLE001 - 引擎的 KeyError 也算数据问题，不该让工具崩
         errors.append(f"渲染失败：{type(err).__name__}: {err}")
 
-    if pdf is not None:
-        pdf = _branded(pdf, template_id, data)
-
+    # 先在「未重绘」的原始渲染上取文本层：品牌重绘会按要求擦掉行标/行址，
+    # 擦完再扫就等于自己把自己的证据抹了。
     if pdf is not None:
         with fitz.open(stream=pdf, filetype="pdf") as doc:
             flat = audit.normalize(" ".join(page.get_text() for page in doc))
         placeholders = audit.placeholder_gaps(template_id, audit.scan_placeholders(flat))
         if placeholders:
             errors.append(f"文本层仍有虚构占位行名：{placeholders}")
+        elif not flat.strip():
+            warnings.append("文本层为空：渲染结果可能只是一张图")
+
+    if pdf is not None:
+        pdf = _branded(pdf, template_id, data)
 
     return {"ok": not errors, "errors": errors, "warnings": warnings,
             "pages": pages, "bytes": len(pdf) if pdf else 0}

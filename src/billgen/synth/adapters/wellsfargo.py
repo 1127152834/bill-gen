@@ -24,14 +24,16 @@ def _desc(ledger: LedgerDocument, row) -> str:
 def build(ledger: LedgerDocument, defaults: dict[str, Any]) -> dict[str, Any]:
     d = deep(defaults)
     bank = deep(d.get("bank") or {})
-    bank.update(
-        {
-            "name": ledger.bank.name,
-            "legal_na": ledger.bank.legal,
-            "domain": ledger.bank.domain,
-        }
-    )
-    bank.update(bank_contact(ledger))
+    # 账本还没定行时保留模板自带的行名/联系方式，避免把空串写进封面。
+    if ledger.bank.name or ledger.bank.legal or ledger.bank.domain:
+        bank.update(
+            {
+                "name": ledger.bank.name,
+                "legal_na": ledger.bank.legal,
+                "domain": ledger.bank.domain,
+            }
+        )
+        bank.update(bank_contact(ledger))
 
     transactions = []
     for row in ledger.rows:

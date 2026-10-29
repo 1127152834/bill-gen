@@ -8,9 +8,9 @@
       612.0,
       792.0
     ],
-    "bytes": 285276,
-    "text_sha256_16": "4002fe16da03bdcc",
-    "text_chars": 6831,
+    "bytes": 365583,
+    "text_sha256_16": "95c26cce731943da",
+    "text_chars": 6865,
     "fonts": [
       "ConnectionsBold_CZEX0AA0",
       "ConnectionsIta_CZEX0AC0",
@@ -19,7 +19,7 @@
       "HigherStandards_CZEX0660",
       "ITC_Franklin_Gothic_Book_CZEX0080"
     ],
-    "secs_render": 0.62
+    "secs_render": 0.77
   },
   "boa-business": {
     "id": "boa-business",
@@ -30,9 +30,9 @@
       612.0,
       792.0
     ],
-    "bytes": 1011231,
-    "text_sha256_16": "bfcd69364d3222d6",
-    "text_chars": 6733,
+    "bytes": 1110857,
+    "text_sha256_16": "93db3ba92eca872c",
+    "text_chars": 6849,
     "fonts": [
       "ConnectionsBold_CZEX0AA0",
       "ConnectionsIta_CZEX0AC0",
@@ -41,7 +41,7 @@
       "HigherStandards_CZEX0660",
       "ITC_Franklin_Gothic_Book_CZEX0080"
     ],
-    "secs_render": 0.68
+    "secs_render": 0.85
   },
   "wellsfargo": {
     "id": "wellsfargo",
@@ -52,7 +52,7 @@
       612.0,
       792.0
     ],
-    "bytes": 87107,
+    "bytes": 205589,
     "text_sha256_16": "d3b317f6b2847742",
     "text_chars": 10693,
     "fonts": [
@@ -66,7 +66,7 @@
       "SymbolMT,Bold",
       "ZapfDingbatsITCbyBT-Regular"
     ],
-    "secs_render": 0.38
+    "secs_render": 0.6
   },
   "amex": {
     "id": "amex",
@@ -77,14 +77,14 @@
       612.0,
       792.0
     ],
-    "bytes": 81349,
-    "text_sha256_16": "1dc225d6690dec62",
-    "text_chars": 2344,
+    "bytes": 81760,
+    "text_sha256_16": "64c2f0ba5ba1def6",
+    "text_chars": 2370,
     "fonts": [
       "BentonSans-Bold",
       "BentonSans-Regular"
     ],
-    "secs_render": 0.15
+    "secs_render": 0.11
   },
   "mercury": {
     "id": "mercury",
@@ -95,7 +95,7 @@
       612.0,
       792.0
     ],
-    "bytes": 217109,
+    "bytes": 257555,
     "text_sha256_16": "c047a35cf5053f75",
     "text_chars": 777,
     "fonts": [
@@ -104,7 +104,7 @@
       "ArcadiaTextVariable-Variable",
       "Helvetica"
     ],
-    "secs_render": 0.39
+    "secs_render": 0.47
   },
   "capitalone": {
     "id": "capitalone",
@@ -115,15 +115,15 @@
       612.0,
       792.0
     ],
-    "bytes": 414840,
-    "text_sha256_16": "ff2149163e104ebd",
-    "text_chars": 1629,
+    "bytes": 477090,
+    "text_sha256_16": "744b18b1ce1abe95",
+    "text_chars": 1702,
     "fonts": [
       "MyFontBold",
       "MyFontMedium",
       "MyFontRegular"
     ],
-    "secs_render": 0.39
+    "secs_render": 0.51
   },
   "sofi": {
     "id": "sofi",
@@ -134,7 +134,7 @@
       612.0,
       792.0
     ],
-    "bytes": 510924,
+    "bytes": 551626,
     "text_sha256_16": "96193a4aaf9bbc46",
     "text_chars": 5983,
     "fonts": [
@@ -142,7 +142,7 @@
       "TTNormsBold",
       "TTNormsRegular"
     ],
-    "secs_render": 0.35
+    "secs_render": 0.44
   },
   "chase-personal": {
     "id": "chase-personal",
@@ -153,7 +153,7 @@
       612.0,
       792.0
     ],
-    "bytes": 171911,
+    "bytes": 212883,
     "text_sha256_16": "a7ba90b33f504084",
     "text_chars": 3931,
     "fonts": [
@@ -173,7 +173,7 @@
       "Symbol",
       "Times-Roman"
     ],
-    "secs_render": 0.08
+    "secs_render": 0.19
   },
   "chase-business": {
     "id": "chase-business",
@@ -184,7 +184,7 @@
       612.0,
       792.0
     ],
-    "bytes": 170398,
+    "bytes": 211573,
     "text_sha256_16": "27867671833f2db1",
     "text_chars": 4097,
     "fonts": [
@@ -204,7 +204,7 @@
       "Symbol",
       "Times-Roman"
     ],
-    "secs_render": 0.1
+    "secs_render": 0.25
   },
   "usbank-personal": {
     "id": "usbank-personal",
@@ -215,9 +215,9 @@
       612.0,
       792.0
     ],
-    "bytes": 181804,
-    "text_sha256_16": "27a2a36b331cfdd8",
-    "text_chars": 9480,
+    "bytes": 241492,
+    "text_sha256_16": "e8ce25c682770522",
+    "text_chars": 9504,
     "fonts": [
       "Arial-BoldItalicMT",
       "Arial-BoldMT",
@@ -230,7 +230,7 @@
       "IDAutomation2D",
       "USPSIMBCompact"
     ],
-    "secs_render": 0.18
+    "secs_render": 0.3
   },
   "usbank-business": {
     "id": "usbank-business",
@@ -241,9 +241,9 @@
       612.0,
       792.0
     ],
-    "bytes": 207893,
-    "text_sha256_16": "3b9bf067bdccc314",
-    "text_chars": 9538,
+    "bytes": 248101,
+    "text_sha256_16": "515d54be938c4552",
+    "text_chars": 9550,
     "fonts": [
       "Arial-BoldItalicMT",
       "Arial-BoldMT",
@@ -256,7 +256,7 @@
       "IDAutomation2D",
       "USPSIMBCompact"
     ],
-    "secs_render": 0.18
+    "secs_render": 0.26
   },
   "alliant": {
     "id": "alliant",

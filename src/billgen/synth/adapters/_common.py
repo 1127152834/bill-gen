@@ -61,8 +61,13 @@ def metadata(ledger: LedgerDocument) -> dict[str, str]:
     }
 
 
-def bank_block(ledger: LedgerDocument) -> dict[str, str]:
-    return {
+def bank_block(ledger: LedgerDocument, *, fallback: dict[str, str] | None = None) -> dict[str, str]:
+    """行名块；若账本还没定行（name/legal/domain 空），返回空字典，交给模板自带的行名。
+
+    空块比「全是空串的行名」有用：MCP 校验会跳过空块，渲染层回落到模板默认行名。
+    给 `fallback` 时用它兜底（例如富国的 legal_na 字段）。
+    """
+    block = {
         "name": ledger.bank.name,
         "legal": ledger.bank.legal,
         "domain": ledger.bank.domain,
@@ -74,6 +79,9 @@ def bank_block(ledger: LedgerDocument) -> dict[str, str]:
         "phone_intl": ledger.bank.phone_intl,
         "phone_metro": ledger.bank.phone_metro,
     }
+    if not (block["name"] or block["legal"] or block["domain"]):
+        return dict(fallback or {})
+    return block
 
 
 _REFERENCE = re.compile(r"[A-Z0-9#*./ -]{2,20}")

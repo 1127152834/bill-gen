@@ -165,9 +165,13 @@ def finalize(
     xmp: bool = False,
     entropy: bool = False,
     fix_stamp: bool = True,
-    grain: bool = True,
+    grain: bool = False,
 ) -> bytes:
-    """重写对象结构、随机化字体前缀，可选补 XMP 与打散字节。"""
+    """重写对象结构、随机化字体前缀，可选补 XMP 与打散字节。
+
+    ``grain`` 默认关闭：真实账单是银行系统直出的电子 PDF，纸面干净无扫描噪点。
+    只有需要「扫描件」观感时才打开。
+    """
     try:
         import pikepdf
     except ModuleNotFoundError:  # pragma: no cover - 依赖缺失时保持原样

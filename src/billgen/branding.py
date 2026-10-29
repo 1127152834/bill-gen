@@ -147,8 +147,25 @@ _CITIES = (("Columbus, OH", "43219", "614"), ("Wilmington, DE", "19801", "302"),
            ("Salt Lake City, UT", "84111", "801"))
 
 
+_CONTACT_KEYS = (
+    "po_box", "po_box_alt", "city_state_zip",
+    "phone_service", "phone_es", "phone_intl", "phone_metro",
+)
+
+
 def contact_fields(name: str, domain: str) -> dict[str, str]:
-    """只按行名/域名派生行址与客服电话（不依赖账本，供直接渲染数据时用）。"""
+    """只按行名/域名派生行址与客服电话（不依赖账本，供直接渲染数据时用）。
+
+    真行（Chase/BofA/U.S. Bank …）先走 `synth.ledger` 里那张真行联系方式表：
+    模板数据只带 name/legal/domain 时，若一律拿 555-01xx 与随机城市兜底，
+    印出来就是「Chase 的账单、555 的客服号、盐湖城的信箱」这种一眼假。
+    """
+    from .synth.ledger import real_traits
+
+    traits = real_traits(name)
+    if traits:
+        return {key: str(traits.get(key, "")) for key in _CONTACT_KEYS}
+
     digest = hashlib.sha256(f"contact:{name}|{domain}".encode()).digest()
     city, zip_code, area = _CITIES[digest[4] % len(_CITIES)]
     tail = digest[5] % 100
@@ -252,7 +269,10 @@ TEXT_SLOTS: dict[str, tuple[TextSlot, ...]] = {
     "chase-personal": (
         TextSlot((55.0, 61.0, 200.0, 73.5), (58.8, 70.6), 7.76, "{po_box}"),
         TextSlot((55.0, 73.0, 240.0, 85.0), (58.8, 79.7), 7.76, "{city_state_zip}"),
-        TextSlot((470.0, 103.0, 600.0, 117.5), (588.6, 113.6), 9.6, "{domain}", align="right"),
+        # 右边界取底稿里客服电话值列的实际右沿（530.1），不是页边 600：
+        # 底稿的 "chase.com" 就压在 CUSTOMER SERVICE INFORMATION 盒内的右列，
+        # 右对齐到页边会把域名甩到盒子外面（实测）。
+        TextSlot((470.0, 103.0, 530.1, 117.5), (528.6, 113.6), 9.6, "{domain}", align="right"),
         TextSlot((455.0, 116.0, 560.0, 129.0), (465.3, 125.8), 9.6, "{phone_service}"),
         TextSlot((455.0, 128.0, 560.0, 141.0), (465.3, 136.6), 9.6, "{phone_es}"),
         TextSlot((455.0, 140.0, 560.0, 153.0), (465.3, 148.4), 9.6, "{phone_intl}"),
@@ -488,16 +508,27 @@ def _logo_boxes(page: fitz.Page, rect: fitz.Rect) -> list[fitz.Rect]:
     各页 logo 的落点并不完全相同（首页 51.8~77、续页 46.8~72），所以按图片实际
     外框擦、按外框画；矩形里没有图就返回空，避免把正文标题一起擦掉。
     """
-    return [
-        fitz.Rect(info["bbox"])
-        for info in page.get_image_info()
-        if fitz.Rect(info["bbox"]).intersects(rect)
-    ]
+    page_area = abs(page.rect)
+    boxes = []
+    for info in page.get_image_info():
+        box = fitz.Rect(info["bbox"])
+        if not box.intersects(rect):
+            continue
+        # 铺满整页的图是「扫描颗粒」一类的底纹，不是 logo：按它的外框擦会把
+        # 整页正文一起 redact 掉，所以只认明显小于整页的图。
+        if abs(box) > page_area * 0.2:
+            continue
+        boxes.append(box)
+    return boxes
 
 
-def apply(doc: fitz.Document, template_id: str, brand: Brand) -> int:
-    """就地替换 logo 与行址/客服电话，返回替换的元素数量（0 表示该模板没有配置）。"""
-    rects = PLACEMENTS.get(template_id, ())
+def apply(doc: fitz.Document, template_id: str, brand: Brand, *, redraw_logo: bool = True) -> int:
+    """就地替换 logo 与行址/客服电话，返回替换的元素数量（0 表示该模板没有配置）。
+
+    ``redraw_logo=False`` 只换文字槽、保留原稿行标图形：账本用的就是模板自带那家
+    银行时，重画的文字词标会把 BOA 的旗、Chase 的八边形换成一行字，反而更假。
+    """
+    rects = PLACEMENTS.get(template_id, ()) if redraw_logo else ()
     slots = tuple(slot for slot in TEXT_SLOTS.get(template_id, ()) if slot.ready(brand))
     if not rects and not slots:
         return 0

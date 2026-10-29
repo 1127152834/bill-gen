@@ -5,15 +5,15 @@
   "watermark": true,
   "begin_balance": "1000.00",
   "customer_lines": [
-    "SAMPLE CUSTOMER",
-    "123 Sample Lane",
-    "Austin TX 78701"
+    "Maya Okafor",
+    "2104 S 1st St",
+    "Austin TX"
   ],
-  "account_display": "000000000001",
+  "account_display": "410737211347",
   "bank": {
-    "name": "Sample Bank",
-    "legal": "Sample Bank, N.A.",
-    "domain": "example.invalid"
+    "name": "JPMorgan Chase Bank",
+    "legal": "JPMorgan Chase Bank, N.A.",
+    "domain": "chase.com"
   },
   "period": {
     "label": "January 01, 2027 through January 31, 2027",
@@ -21,23 +21,23 @@
     "end": "Jan 31, 2027"
   },
   "metadata": {
-    "title": "SAMPLE — NOT A REAL BANK STATEMENT",
+    "title": "Chase Online Statement",
     "author": "",
-    "producer": "BillGen Sample Editor",
-    "creator": "BillGen Sample Editor",
-    "subject": "Fictional sample statement",
-    "keywords": "sample",
+    "producer": "OpenText Output Transformation Engine 16.6.0",
+    "creator": "OpenText Output Transformation Engine 16.6.0",
+    "subject": "",
+    "keywords": "",
     "creation": "D:20270131000000Z",
     "mod": "D:20270131000000Z"
   },
   "micr": {
-    "routing": "000000000",
-    "dre": "SAMPLE",
-    "cycle": "00",
-    "extra": "SAMPLE"
+    "routing": "021000021",
+    "dre": "9842 8356 1347",
+    "cycle": "1",
+    "extra": ""
   },
   "barcode_num": null,
-  "zip": "00000",
+  "zip": "78704",
   "blank_pages": "0",
   "show_atm": false,
   "show_pf": false,
@@ -47,7 +47,7 @@
     "payment_solutions": "0.00"
   },
   "atm": {
-    "name": "SAMPLE CUSTOMER",
+    "name": "Maya Okafor",
     "card_no": "0000",
     "withdrawals": "0.00",
     "purchases": "0.00",
@@ -71,13 +71,13 @@
   "transactions": [
     {
       "date": "01/04",
-      "desc": "SAMPLE SALARY",
+      "desc": "ACME CORP PAYROLL PPD",
       "amount": "500.00",
       "type": "deposit"
     },
     {
       "date": "01/06",
-      "desc": "SAMPLE RENT",
+      "desc": "CAMDEN PROPERTY MGMT RENT",
       "amount": "-120.00",
       "type": "electronic"
     }

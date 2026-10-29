@@ -13,6 +13,7 @@ import os
 import shutil
 import signal
 import subprocess
+import sys
 import threading
 import time
 import urllib.error
@@ -145,6 +146,10 @@ class HunterProcess:
             line = raw.decode("utf-8", "replace").rstrip()
             if line:
                 self._logs.append(line)
+                # 同时透传到本进程 stdout：容器里 docker logs 才能看到逐步日志
+                with contextlib.suppress(OSError, ValueError):
+                    sys.stdout.write(line + "\n")
+                    sys.stdout.flush()
         with contextlib.suppress(OSError):
             stream.close()
 

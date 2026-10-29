@@ -19,12 +19,12 @@ ENGINES = [
 DEFAULT_TEXT_SHA = {
     "mercury": "7cf685b5991c7a1e59c43d29f9d6fc1dbd0b6146da206fea992ed6571668d7e9",
     "capitalone": "af99dd0dee3dd1f70946ade4662ff046a890012b95776abd22c05aeea67be210",
-    "sofi": "abf3d09e6fbbb3d57f342fe27616efe3bb1a48b37a89fd08b1b29e76ad3281a3",
+    "sofi": "a3c1a21308e5e084bc9d6a311b89eaae64d4ce67480aeb67e84fc2754c7c4547",
 }
 DEFAULT_PIXELS = {
     "mercury": ['d9ed731aa26885935e57e5ef76e0f1c2', '13dd5aa78c45d280321384bb23bd2b7c'],
     "capitalone": ['c818c6ac19354c44c5fec09a05d7e9a6', '17ccf0f6df67c77a5ba2c41bda49b144', 'debebd7608ffdf0f0963496d5ed5735a'],
-    "sofi": ['9ef16059093df908538c354aae068df0', 'bc0b8e17881a4a67bda9d1b4ec095e87'],
+    "sofi": ['9f73361c6e72dc8f6fe59ea6c53fb527', 'ec92a65a02617d9b5498cfba5956db7a'],
 }
 
 

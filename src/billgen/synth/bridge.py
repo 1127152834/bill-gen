@@ -119,6 +119,24 @@ def _adopt_template_bank(ledger: LedgerDocument, defaults: dict[str, Any]) -> Le
     return adopted
 
 
+def _same_bank_as_template(name: str, template_id: str) -> bool:
+    """账本行名与模板自带行名是否同属一家（忽略大小写与法定后缀）。"""
+    try:
+        bank = registry.get_renderer(template_id).default_data().get("bank") or {}
+    except Exception:  # 取不到就按「不同」处理，宁可按品牌重绘
+        return False
+    template_name = str(bank.get("name") or "").strip()
+    if not template_name:
+        return False
+    from .ledger import real_traits
+
+    mine, theirs = real_traits(name), real_traits(template_name)
+    if mine is not None and mine is theirs:
+        return True
+    key = lambda text: " ".join(text.replace(",", " ").lower().split())
+    return key(name) == key(template_name)
+
+
 def build_data(template_id: str, ledger: LedgerDocument, *, verify_rows: bool = True) -> dict[str, Any]:
     binding = binding_for(template_id)
     renderer = registry.get_renderer(template_id)
@@ -175,8 +193,12 @@ def apply_brand(pdf: bytes, template_id: str, ledger: LedgerDocument) -> bytes:
         return pdf
     if template_id not in branding.PLACEMENTS:
         return pdf
+    # 账本行名就是模板自带那家时保留原稿行标：重画的 wordmark 只有字没有图形
+    # （BOA 的旗、Chase 的八边形都在原图里），换成占位字标反而更假。
+    same_bank = _same_bank_as_template(ledger.bank.name, template_id)
     with fitz.open(stream=pdf, filetype="pdf") as doc:
-        branding.apply(doc, template_id, branding.brand_of_ledger(ledger))
+        branding.apply(doc, template_id, branding.brand_of_ledger(ledger),
+                       redraw_logo=not same_bank)
         return doc.tobytes(garbage=3, deflate=True)
 
 

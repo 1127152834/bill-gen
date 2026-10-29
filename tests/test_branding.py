@@ -71,10 +71,18 @@ def ledger():
 
 
 def header_images(doc, page, rect):
+    """页眉矩形里真正的 logo 图。
+
+    出件前会铺一层近乎透明的扫描颗粒，那是**铺满整页**的位图；按外框相交判断会把
+    它也算成 logo，所以只收明显小于整页的图。
+    """
+    page_area = abs(page.rect)
     found = []
     for info in page.get_image_info(xrefs=True):
-        if fitz.Rect(info["bbox"]).intersects(rect):
-            found.append((info["xref"], fitz.Rect(info["bbox"])))
+        box = fitz.Rect(info["bbox"])
+        if not box.intersects(rect) or abs(box) > page_area * 0.2:
+            continue
+        found.append((info["xref"], box))
     return found
 
 
@@ -167,17 +175,38 @@ def test_wordmark_fits_inside_the_box():
         assert width / height >= 3.0
 
 
-def test_synth_render_replaces_logo_and_keeps_determinism(ledger):
+def test_synth_render_keeps_the_original_logo_for_the_same_bank(ledger):
+    """账本就是模板自带那家：保留原稿行标（带图形），只换文字槽。
+
+    重画的词标只有字没有图形（BOA 的旗、Chase 的八边形都在原图里），
+    换上去反而更像「拿字拼的假标」，所以同一家银行时不动 logo。
+    """
     first = render("boa-personal", ledger).pdf
     second = render("boa-personal", ledger).pdf
     assert first == second
-    with fitz.open(stream=first, filetype="pdf") as doc:
-        rect = fitz.Rect(*branding.PLACEMENTS["boa-personal"][0])
+    plain = render("boa-personal", ledger, brand=False).pdf
+    rect = fitz.Rect(*branding.PLACEMENTS["boa-personal"][0])
+    with fitz.open(stream=first, filetype="pdf") as doc, \
+            fitz.open(stream=plain, filetype="pdf") as raw:
+        branded_marks = [doc.extract_image(x)["image"] for x, _ in header_images(doc, doc[0], rect)]
+        original = [raw.extract_image(x)["image"] for x, _ in header_images(raw, raw[0], rect)]
+    assert original, "底稿页眉本来就该有行标图"
+    assert branded_marks == original
+
+
+def test_synth_render_redraws_the_logo_for_a_different_bank():
+    """换成别的银行：logo 必须重画成那家的词标，不能留着原稿的行标。"""
+    other = from_game_result(payload(), account="checking", cycle=0, bank_name="Harborline Bank")
+    pdf = render("boa-personal", other).pdf
+    rect = fitz.Rect(*branding.PLACEMENTS["boa-personal"][0])
+    brand = branding.brand_of_ledger(other)
+    with fitz.open(stream=pdf, filetype="pdf") as doc:
         images = header_images(doc, doc[0], rect)
-        brand = branding.brand_of_ledger(ledger)
-        for xref, bbox in images:
-            assert _same_mark(doc.extract_image(xref)["image"],
+        assert images
+        # 重画后页眉里应该有那家的词标；原稿行标图应已被 redaction 抹掉
+        assert any(_same_mark(doc.extract_image(xref)["image"],
                               branding.wordmark_png(brand, bbox.width, bbox.height))
+                   for xref, bbox in images)
 
 
 def test_brand_can_be_switched_off(ledger):

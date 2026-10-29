@@ -268,6 +268,9 @@ def to_env(settings: HunterSettings, *, port: int, flow_root: Path) -> dict[str,
         "DATABASE_PATH": os.environ.get("BILLGEN_HUNTER_DB") or paths.data_path("hunter/app.db"),
         "WEB_DIST": os.environ.get("WEB_DIST") or "apps/web/dist",
         "NODE_ENV": "production",
+        # 猎手的逐步日志（logfmt）默认直接打到自己的 stdout，供 docker logs / 前台查看。
+        "LOG_PROGRESS": os.environ.get("LOG_PROGRESS", "1"),
+        "LOG_RESEARCH": os.environ.get("LOG_RESEARCH", "0"),
     }
     if settings.base_url:
         env["LLM_BASE_URL"] = settings.base_url

@@ -4,22 +4,22 @@
   "watermark": true,
   "encrypt": false,
   "bank": {
-    "name": "Sample Bank",
-    "legal": "Sample Bank, N.A.",
-    "domain": "example.invalid"
+    "name": "Bank of America",
+    "legal": "Bank of America, N.A.",
+    "domain": "bankofamerica.com"
   },
   "customer_lines": [
-    "SAMPLE CUSTOMER",
-    "123 Sample Lane",
-    "Austin TX 78701"
+    "Okafor Design Studio LLC",
+    "2104 S 1st St",
+    "Austin TX 78704"
   ],
   "owner_names": [
-    "SAMPLE CUSTOMER"
+    "Okafor Design Studio LLC"
   ],
-  "owner_line": "SAMPLE CUSTOMER",
-  "strip_name": "SAMPLE CUSTOMER",
-  "account_number": "000000000001",
-  "product": "Sample Checking",
+  "owner_line": "Okafor Design Studio LLC",
+  "strip_name": "Okafor Design Studio LLC",
+  "account_number": "410737211347",
+  "product": "Advantage Plus Banking",
   "period": {
     "label": "January 1, 2027 to January 31, 2027",
     "begin": "January 1, 2027",
@@ -29,14 +29,14 @@
   "deposits": [
     {
       "date": "01/04/27",
-      "desc": "SAMPLE SALARY",
+      "desc": "ACME CORP PAYROLL PPD",
       "amount": "500.00"
     }
   ],
   "withdrawals": [
     {
       "date": "01/06/27",
-      "desc": "SAMPLE RENT",
+      "desc": "CAMDEN PROPERTY MGMT RENT",
       "amount": "-120.00"
     }
   ],
@@ -72,27 +72,27 @@
   },
   "qualifications": [
     {
-      "text": "Sample eligibility condition A",
-      "met": false
+      "text": "Make at least one qualifying direct deposit of $250 or more each statement period",
+      "met": true
     },
     {
-      "text": "Sample eligibility condition B",
-      "met": false
+      "text": "Keep a minimum daily balance of $1,500 in this account",
+      "met": true
     },
     {
-      "text": "Sample eligibility condition C",
+      "text": "Maintain a combined balance of $20,000 or more across eligible accounts",
       "met": false
     }
   ],
   "show_daily": true,
   "min_pages": 4,
   "metadata": {
-    "title": "SAMPLE — NOT A REAL BANK STATEMENT",
+    "title": "Bank of America - Online Banking Statement",
     "author": "",
-    "producer": "BillGen Sample Editor",
-    "creator": "BillGen Sample Editor",
-    "subject": "Fictional sample statement",
-    "keywords": "sample",
+    "producer": "TargetStream StreamEDS rv1.7.161 for Windows",
+    "creator": "TargetStream StreamEDS rv1.7.161 for Windows",
+    "subject": "",
+    "keywords": "",
     "creation": "D:20270131000000Z",
     "mod": "D:20270131000000Z"
   }

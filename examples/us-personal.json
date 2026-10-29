@@ -5,37 +5,37 @@
   "watermark": true,
   "begin_balance": "1000.00",
   "customer_lines": [
-    "SAMPLE CUSTOMER",
-    "123 Sample Lane",
-    "Austin TX 78701"
+    "Maya Okafor",
+    "2104 S 1st St",
+    "Austin TX 78704"
   ],
-  "account_display": "000000000001",
+  "account_display": "410737211347",
   "period": {
     "label": "January 01, 2027 through January 31, 2027",
     "start": "Jan 1, 2027",
     "end": "Jan 31, 2027"
   },
   "metadata": {
-    "title": "SAMPLE — NOT A REAL BANK STATEMENT",
+    "title": "U.S. Bank Online Statement",
     "author": "",
-    "producer": "BillGen Sample Editor",
-    "creator": "BillGen Sample Editor",
-    "subject": "Fictional sample statement",
-    "keywords": "sample",
+    "producer": "Ricoh Americas Corporation, AFP2PDF v3.2.1",
+    "creator": "Ricoh Americas Corporation, AFP2PDF v3.2.1",
+    "subject": "",
+    "keywords": "",
     "creation": "D:20270131000000Z",
     "mod": "D:20270131000000Z",
-    "x_producer": "BillGen Sample Editor",
-    "x_creator": "BillGen Sample Editor",
-    "x_title": "SAMPLE — NOT A REAL BANK STATEMENT",
-    "x_desc": "Fictional sample statement",
-    "xmptk": "BillGen Sample Editor"
+    "x_producer": "Ricoh Americas Corporation, AFP2PDF v3.2.1",
+    "x_creator": "Ricoh Americas Corporation, AFP2PDF v3.2.1",
+    "x_title": "U.S. Bank Online Statement",
+    "x_desc": "",
+    "xmptk": "Ricoh Americas Corporation, AFP2PDF v3.2.1"
   },
-  "imb_serial": "000000000",
+  "imb_serial": "00041073721",
   "deposits": [
     {
       "date": "Jan 4",
       "type": "Deposit",
-      "detail": "SAMPLE SALARY",
+      "detail": "ACME CORP PAYROLL PPD",
       "extra": [],
       "amount": "500.00"
     }
@@ -44,7 +44,7 @@
     {
       "date": "Jan 6",
       "type": "Payment",
-      "detail": "SAMPLE RENT",
+      "detail": "CAMDEN PROPERTY MGMT RENT",
       "extra": [],
       "amount": "120.00"
     }
