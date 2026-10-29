@@ -5,7 +5,7 @@
 """
 from __future__ import annotations
 
-from functools import lru_cache
+from functools import cache, lru_cache
 
 from . import paths
 from .engine.adapters import build_renderer
@@ -108,7 +108,7 @@ def loader() -> ThemeLoader:
     return ThemeLoader(paths.ROOT)
 
 
-@lru_cache(maxsize=None)
+@cache
 def get_spec(spec_id: str) -> TemplateSpec:
     try:
         return SPEC_BY_ID[spec_id]
@@ -118,7 +118,7 @@ def get_spec(spec_id: str) -> TemplateSpec:
         ) from None
 
 
-@lru_cache(maxsize=None)
+@cache
 def get_renderer(spec_id: str):
     """返回该模板的渲染器实例（引擎模块只加载一次）。"""
     return build_renderer(get_spec(spec_id), loader())

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """账单模板仓库 — 13 入口渲染基线探针（重构前的行为锚点 / P0 交付物）。
 
 用途
@@ -26,7 +25,6 @@ import 会命中 sys.modules 缓存，拿到上一个模板的模块。这正是
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import os
 import subprocess

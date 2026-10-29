@@ -104,16 +104,11 @@ def data_path(relative: str, root: Path | str = ROOT) -> str:
 
     ``relative`` 可以是搬迁前的旧路径，会被 :func:`relocated` 自动翻译。
     """
-    relative = PurePosixPath(relocated(str(relative)))
-    if (
-        relative.is_absolute()
-        or ".." in relative.parts
-        or "\\" in str(relative)
-        or not relative.parts
-    ):
+    rel = PurePosixPath(relocated(str(relative)))
+    if rel.is_absolute() or ".." in rel.parts or "\\" in str(rel) or not rel.parts:
         raise ValueError("运行数据路径必须是项目内的相对路径")
     base = _data_base(Path(root))
-    target = (base / relative).resolve()
+    target = (base / rel).resolve()
     if not target.is_relative_to(base):
         raise ValueError("运行数据路径不能通过链接跳出数据目录")
     target.parent.mkdir(parents=True, exist_ok=True)

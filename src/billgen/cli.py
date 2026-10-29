@@ -13,7 +13,7 @@ import json
 import sys
 from pathlib import Path
 
-from . import registry, paths
+from . import paths, registry
 from .spec import RenderOptions
 
 __all__ = ["main"]

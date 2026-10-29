@@ -1,9 +1,8 @@
 import importlib.util
 import json
-from pathlib import Path
 import tempfile
 import unittest
-
+from pathlib import Path
 
 NAMES = ('LOGO_DEFAULT', 'P4_BORDER_L', 'P4_BORDER_R', 'PANEL_PNG_SRC',
          'HOUSE_PNG', 'P4_STATIC', 'WT', 'TRK', 'SPACE_SPEC', 'ORDER_SPEC',

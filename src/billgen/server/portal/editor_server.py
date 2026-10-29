@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 账单模板 · 可视化编辑器（多模板版）
 --------------------------------
@@ -11,7 +10,6 @@
   mercury — Mercury/Choice 商业账户（mercury-statement-template/）
   c1     — Capital One 360 个人账户（c1-statement-template/）
 """
-import base64
 import hashlib
 import importlib
 import json
@@ -21,6 +19,7 @@ import threading
 import urllib.parse
 import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
 from runtime_paths import data_path
 
 BASE = os.path.dirname(os.path.abspath(__file__))
@@ -72,9 +71,10 @@ PREVIEW_DPI = 100
 PV_DIR = data_path("水星C1sofi/statement-editor/pv_png")     # 预览页 PNG（内容哈希寻址，immutable 缓存）
 
 # ================================================================ 字体子集缓存
+import tempfile as _tempfile
+
 from fontTools import subset as _subset
 from fontTools.ttLib import TTFont as _TTF
-import tempfile as _tempfile
 
 _SUBSET_CACHE = {}
 
@@ -306,6 +306,20 @@ def sanitize(tpl, data):
     return walk(data), rm
 
 # ================================================================ 构建
+def _flatten(value, out=None):
+    """把 data 里所有字符串摊平 —— 老代码只声明了这个函数名却没写实现（F821）。"""
+    out = [] if out is None else out
+    if isinstance(value, str):
+        out.append(value)
+    elif isinstance(value, dict):
+        for item in value.values():
+            _flatten(item, out)
+    elif isinstance(value, (list, tuple)):
+        for item in value:
+            _flatten(item, out)
+    return out
+
+
 def _set_cjk(tpl, data):
     m = mod(tpl)
     base = m.FONT_CJK_BASE
@@ -345,7 +359,6 @@ def _produce(tpl, raw_data, watermark, for_export=False, meta=None):
     """生成 PDF。for_export=True 时序列化+垃圾回收；预览直接返回 doc（更快）。"""
     data, rm = sanitize(tpl, normalize(tpl, raw_data))
     m = mod(tpl)
-    import fitz
     with LOCK:
         m._fallback_used.clear()
         _set_cjk(tpl, data)

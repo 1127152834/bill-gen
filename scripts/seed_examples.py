@@ -1,7 +1,7 @@
 """首次启动时写入合成示例，已有编辑数据保持不变。"""
 import json
-from pathlib import Path, PurePosixPath
 import sys
+from pathlib import Path, PurePosixPath
 
 ROOT=Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:sys.path.insert(0,str(ROOT))

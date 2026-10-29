@@ -3,9 +3,9 @@ import hashlib
 import http.client
 import json
 import os
-from pathlib import Path
 import re
 import tempfile
+from pathlib import Path
 from urllib.parse import urlsplit
 from urllib.request import HTTPRedirectHandler, Request, build_opener
 

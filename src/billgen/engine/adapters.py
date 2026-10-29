@@ -17,9 +17,10 @@ from __future__ import annotations
 
 import inspect
 import time
+from collections.abc import Callable
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, Callable
+from typing import Any
 
 from .. import paths
 from ..spec import RenderOptions, RenderResult, TemplateSpec
@@ -105,8 +106,8 @@ class LegacyPathRenderer(_BaseRenderer):
             raise RenderError(self.spec_id, f"模块缺少入口 {self.spec.entry!r}")
         kw = _assemble_kwargs(func, opts)
         started = time.perf_counter()
-        with self._loader.activated(self.spec.theme, self._theme_dir):
-            with TemporaryDirectory() as tmp:
+        with self._loader.activated(self.spec.theme, self._theme_dir), \
+                TemporaryDirectory() as tmp:
                 out = Path(tmp) / "statement.pdf"
                 try:
                     func(data, str(out), **kw)
@@ -134,8 +135,8 @@ class LegacyDocumentRenderer(_BaseRenderer):
         kw = _assemble_kwargs(func, opts)
         started = time.perf_counter()
         try:
-            with self._loader.activated(self.spec.theme, self._theme_dir):
-                with TemporaryDirectory() as tmp:
+            with self._loader.activated(self.spec.theme, self._theme_dir), \
+                    TemporaryDirectory() as tmp:
                     out = Path(tmp) / "statement.pdf"
                     doc = func(data, str(out), **kw)
                     if hasattr(doc, "save") and not Path(out).is_file():

@@ -65,7 +65,7 @@ class TemplateSpec:
     variant: str | None = None          # 数据里的 template 取值
     supports: frozenset[str] = field(default_factory=frozenset)  # {"watermark","encrypt","preview"}
     legacy_prefixes: tuple[str, ...] = ()   # 旧网关/URL 前缀
-    default_options: RenderOptions = RenderOptions()
+    default_options: RenderOptions = field(default_factory=RenderOptions)
 
     def __post_init__(self) -> None:
         if self.kind != "static-web" and not (self.module and self.entry):
@@ -78,4 +78,4 @@ class Renderer(Protocol):
 
     spec_id: str
 
-    def render(self, data: Any, opts: RenderOptions = RenderOptions()) -> RenderResult: ...
+    def render(self, data: Any, opts: RenderOptions | None = None) -> RenderResult: ...

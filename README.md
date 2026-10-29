@@ -13,6 +13,8 @@ python3 -m venv .venv && .venv/bin/pip install -e '.[dev]'
 .venv/bin/billgen render --all --outdir _build   # 一次渲染全部后端模板
 .venv/bin/python -m pytest tests -q              # 92 个测试
 .venv/bin/billgen parity verify                  # 版式指纹是否仍与基线一致
+.venv/bin/ruff check .                           # 风格（遗留单行代码已按文件豁免）
+.venv/bin/python -m mypy                         # 类型（spec / registry / paths）
 ```
 
 ## 目录结构

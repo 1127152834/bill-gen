@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 账单模板整合版 — 统一启动器 + 单端口反向代理网关（不修改任何子项目核心）
 用法:  python3 run.py            # 前台运行，Ctrl+C 全部停止

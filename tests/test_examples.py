@@ -1,10 +1,11 @@
 import json
-from pathlib import Path
 import tempfile
 import unittest
+from pathlib import Path
 from unittest.mock import patch
-from scripts.seed_examples import seed_examples
+
 from runtime_paths import data_path
+from scripts.seed_examples import seed_examples
 
 
 class ExampleTests(unittest.TestCase):

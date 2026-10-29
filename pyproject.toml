@@ -44,6 +44,16 @@ extend-exclude = ["src/billgen/themes"]
 select = ["E", "F", "I", "UP", "B", "SIM"]
 ignore = ["E501"]
 
+# 遗留代码（P0 之前的单测与资产脚本）保留极限单行风格，P5 统一整顿时再放开。
+[tool.ruff.lint.per-file-ignores]
+"scripts/*.py" = ["E701", "E702", "E402", "SIM117"]
+"tests/test_*.py" = ["E701", "E702"]
+"runtime_paths.py" = ["UP009"]
+"run.py" = ["SIM105"]
+"tests/test_examples.py" = ["SIM117"]
+# 服务端遗留编排代码（P3 重写），先放行风格类告警
+"src/billgen/server/**/*.py" = ["E402", "E731", "SIM105", "SIM108"]
+
 [tool.mypy]
 python_version = "3.11"
 files = ["src/billgen/spec.py", "src/billgen/registry.py", "src/billgen/paths.py"]

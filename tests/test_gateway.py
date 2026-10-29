@@ -1,11 +1,12 @@
-from http.server import BaseHTTPRequestHandler,ThreadingHTTPServer
 import tempfile
 import threading
-from pathlib import Path
 import unittest
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
 from unittest.mock import patch
-from urllib.request import Request,urlopen
 from urllib.error import HTTPError
+from urllib.request import Request, urlopen
+
 import run
 
 

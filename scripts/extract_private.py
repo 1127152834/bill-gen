@@ -6,9 +6,8 @@ written here, and errors deliberately omit source literals.
 import ast
 import json
 import math
-from pathlib import Path
 import re
-
+from pathlib import Path
 
 ALLY_CONSTANTS = (
     'LOGO_DEFAULT', 'P4_BORDER_L', 'P4_BORDER_R', 'PANEL_PNG_SRC',

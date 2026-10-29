@@ -1,9 +1,9 @@
 import hashlib
 import io
 import json
-from pathlib import Path
 import tempfile
 import unittest
+from pathlib import Path
 from urllib.request import Request
 
 from scripts.lfs_assets import _GithubRedirects, hydrate_assets, read_pointer, validate_download_url
@@ -54,7 +54,7 @@ class LfsAssetTests(unittest.TestCase):
     def test_rejects_pointer_with_invalid_hash_or_unbounded_size(self):
         with tempfile.TemporaryDirectory() as temp:
             root, path, oid, _ = self.fixture(temp)
-            for body in [f'version https://git-lfs.github.com/spec/v1\noid sha256:nope\nsize 12\n', f'version https://git-lfs.github.com/spec/v1\noid sha256:{oid}\nsize 9999999999999\n']:
+            for body in ['version https://git-lfs.github.com/spec/v1\noid sha256:nope\nsize 12\n', f'version https://git-lfs.github.com/spec/v1\noid sha256:{oid}\nsize 9999999999999\n']:
                 path.write_text(body)
                 with self.assertRaises(ValueError): read_pointer(path)
 

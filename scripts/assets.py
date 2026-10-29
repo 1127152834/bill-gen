@@ -1,8 +1,8 @@
 """检查仓库模板资产并补齐 LFS 内容；保留旧版本机导入命令。"""
 import argparse
 import json
-from pathlib import Path, PurePosixPath
 import sys
+from pathlib import Path, PurePosixPath
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:sys.path.insert(0,str(ROOT))
