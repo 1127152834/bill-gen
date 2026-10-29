@@ -1,0 +1,342 @@
+{
+  "wf": {
+    "id": "wf",
+    "name": "Wells Fargo",
+    "kind": "from-scratch",
+    "pdf": "bill-gen-refactor/_render/wf.pdf",
+    "pages": 5,
+    "size": [
+      612.0,
+      792.0
+    ],
+    "bytes": 95146,
+    "text_sha256_16": "74863165fbcfe116",
+    "text_chars": 9692,
+    "fonts": [
+      "Helvetica",
+      "Helvetica-Bold",
+      "MyriadPro-Black",
+      "MyriadPro-Bold",
+      "MyriadPro-BoldIt",
+      "MyriadPro-It",
+      "MyriadPro-Regular",
+      "SymbolMT,Bold",
+      "ZapfDingbatsITCbyBT-Regular"
+    ],
+    "secs_render": 0.35,
+    "secs_wall": 0.46,
+    "pdf_warnings": [],
+    "assets": 95146
+  },
+  "ae": {
+    "id": "ae",
+    "name": "American Express",
+    "kind": "from-scratch",
+    "pdf": "bill-gen-refactor/_render/ae.pdf",
+    "pages": 2,
+    "size": [
+      612.0,
+      792.0
+    ],
+    "bytes": 81402,
+    "text_sha256_16": "1dc225d6690dec62",
+    "text_chars": 2344,
+    "fonts": [
+      "EAAAAB+BentonSans-Bold",
+      "EAAAAC+BentonSans-Regular"
+    ],
+    "secs_render": 0.31,
+    "secs_wall": 0.41,
+    "pdf_warnings": [],
+    "assets": 81402
+  },
+  "merc": {
+    "id": "merc",
+    "name": "Mercury",
+    "kind": "from-scratch",
+    "pdf": "bill-gen-refactor/_render/merc.pdf",
+    "pages": 2,
+    "size": [
+      612.0,
+      792.0
+    ],
+    "bytes": 212226,
+    "text_sha256_16": "9b6f247efb8b9176",
+    "text_chars": 692,
+    "fonts": [
+      "CULQQO+ArcadiaText-480",
+      "Helvetica",
+      "RVFNLP+1695149660304911865-0-Arcadia-Text-480",
+      "TRGABZ+ArcadiaTextVariable-Variable"
+    ],
+    "secs_render": 0.51,
+    "secs_wall": 0.6,
+    "pdf_warnings": [
+      "2 extra bytes in post.stringData array"
+    ],
+    "assets": 212226
+  },
+  "c1": {
+    "id": "c1",
+    "name": "Capital One",
+    "kind": "from-scratch",
+    "pdf": "bill-gen-refactor/_render/c1.pdf",
+    "pages": 3,
+    "size": [
+      612.0,
+      792.0
+    ],
+    "bytes": 10624694,
+    "text_sha256_16": "86a4a8cba5a2616b",
+    "text_chars": 1646,
+    "fonts": [
+      "AAAAZD+MyFontBold",
+      "AAAAZO+.",
+      "AAAHXF+MyFontBold",
+      "AAASVG+MyFontRegular",
+      "Hiragino Sans GB W3"
+    ],
+    "secs_render": 0.98,
+    "secs_wall": 1.07,
+    "pdf_warnings": [],
+    "assets": 10624694
+  },
+  "sofi": {
+    "id": "sofi",
+    "name": "SoFi",
+    "kind": "from-scratch",
+    "pdf": "bill-gen-refactor/_render/sofi.pdf",
+    "pages": 2,
+    "size": [
+      612.0,
+      792.0
+    ],
+    "bytes": 527935,
+    "text_sha256_16": "061916139197d514",
+    "text_chars": 5964,
+    "fonts": [
+      "BAAAAA+TTNormsRegular",
+      "CAAAAA+TTNormsBold",
+      "DAAAAA+Montserrat-Thin",
+      "EAAAAA+Montserrat-Thin"
+    ],
+    "secs_render": 0.36,
+    "secs_wall": 0.44,
+    "pdf_warnings": [],
+    "assets": 527935
+  },
+  "boa-personal": {
+    "id": "boa-personal",
+    "name": "BOA Personal",
+    "kind": "from-scratch",
+    "pdf": "bill-gen-refactor/_render/boa-personal.pdf",
+    "pages": 4,
+    "size": [
+      612.0,
+      792.0
+    ],
+    "bytes": 297185,
+    "text_sha256_16": "dede8ceba43c6dec",
+    "text_chars": 6794,
+    "fonts": [
+      "AAAAAB+ITC_Franklin_Gothic_Book_CZEX0080",
+      "AAAAAD+HigherStandards_CZEX0660",
+      "AAAAAF+Connections_CZEX0A60",
+      "AAAAAH+ConnectionsIta_CZEX0AC0",
+      "AAAAAJ+Connections_Medium_CZEX0A80",
+      "AAAAAL+ConnectionsBold_CZEX0AA0"
+    ],
+    "secs_render": 0.44,
+    "secs_wall": 0.54,
+    "pdf_warnings": [],
+    "assets": 297185
+  },
+  "boa-business": {
+    "id": "boa-business",
+    "name": "BOA Business",
+    "kind": "from-scratch",
+    "pdf": "bill-gen-refactor/_render/boa-business.pdf",
+    "pages": 5,
+    "size": [
+      612.0,
+      792.0
+    ],
+    "bytes": 1023224,
+    "text_sha256_16": "7dba208fe5105aec",
+    "text_chars": 6648,
+    "fonts": [
+      "AAAAAB+ITC_Franklin_Gothic_Book_CZEX0080",
+      "AAAAAD+HigherStandards_CZEX0660",
+      "AAAAAF+Connections_CZEX0A60",
+      "AAAAAH+ConnectionsIta_CZEX0AC0",
+      "AAAAAJ+Connections_Medium_CZEX0A80",
+      "AAAAAL+ConnectionsBold_CZEX0AA0"
+    ],
+    "secs_render": 0.55,
+    "secs_wall": 0.64,
+    "pdf_warnings": [],
+    "assets": 1023224
+  },
+  "chase-personal": {
+    "id": "chase-personal",
+    "name": "Chase Personal",
+    "kind": "replay",
+    "pdf": "bill-gen-refactor/_render/chase-personal.pdf",
+    "pages": 2,
+    "size": [
+      612.0,
+      792.0
+    ],
+    "bytes": 210765,
+    "text_sha256_16": "07dbe4e74d7fdcc0",
+    "text_chars": 3930,
+    "fonts": [
+      "F10",
+      "F11",
+      "F12",
+      "F15",
+      "F2",
+      "F3",
+      "F4",
+      "F5",
+      "F6",
+      "F8",
+      "F9",
+      "Helvetica",
+      "Helvetica-Bold",
+      "Symbol",
+      "Times-Roman"
+    ],
+    "secs_render": 0.12,
+    "secs_wall": 0.18,
+    "pdf_warnings": [],
+    "assets": 210765
+  },
+  "chase-business": {
+    "id": "chase-business",
+    "name": "Chase Business",
+    "kind": "replay",
+    "pdf": "bill-gen-refactor/_render/chase-business.pdf",
+    "pages": 2,
+    "size": [
+      612.0,
+      792.0
+    ],
+    "bytes": 210011,
+    "text_sha256_16": "ca4d816b5b7dccba",
+    "text_chars": 4303,
+    "fonts": [
+      "F10",
+      "F11",
+      "F12",
+      "F14",
+      "F2",
+      "F3",
+      "F4",
+      "F5",
+      "F6",
+      "F8",
+      "F9",
+      "Helvetica",
+      "Helvetica-Bold",
+      "Symbol",
+      "Times-Roman"
+    ],
+    "secs_render": 0.12,
+    "secs_wall": 0.19,
+    "pdf_warnings": [],
+    "assets": 210011
+  },
+  "us-personal": {
+    "id": "us-personal",
+    "name": "US Bank Personal",
+    "kind": "replay",
+    "pdf": "bill-gen-refactor/_render/us-personal.pdf",
+    "pages": 3,
+    "size": [
+      612.0,
+      792.0
+    ],
+    "bytes": 219291,
+    "text_sha256_16": "134e12b551c84109",
+    "text_chars": 9464,
+    "fonts": [
+      "AAAAFD+Arial-BoldMT",
+      "AAAAFE+Arial-BoldItalicMT",
+      "AAAAFF+Arial-ItalicMT",
+      "AAAAFG+ArialMT",
+      "C0000365_T1001140_0",
+      "C0SY07_T1001140_0",
+      "C0SY09_T1001140_0",
+      "FNKAFH+IDAutomation2D",
+      "FNKAFI+Arial-ItalicMT",
+      "FNKAFJ+Arial-BoldItalicMT",
+      "FNKAFK+Arial-BoldMT",
+      "FNKAFL+ArialMT",
+      "FNKAFM+USPSIMBCompact",
+      "Helvetica-Bold"
+    ],
+    "secs_render": 0.14,
+    "secs_wall": 0.21,
+    "pdf_warnings": [],
+    "assets": 219291
+  },
+  "us-business": {
+    "id": "us-business",
+    "name": "US Bank Business",
+    "kind": "replay",
+    "pdf": "bill-gen-refactor/_render/us-business.pdf",
+    "pages": 2,
+    "size": [
+      612.0,
+      792.0
+    ],
+    "bytes": 218332,
+    "text_sha256_16": "998fc8e80f828679",
+    "text_chars": 9522,
+    "fonts": [
+      "AAAGON+Arial-BoldMT",
+      "AAAGOO+Arial-BoldItalicMT",
+      "AAAGOP+Arial-ItalicMT",
+      "AAAGPA+ArialMT",
+      "C0000365_T1001140_0",
+      "C0SY07_T1001140_0",
+      "C0SY09_T1001140_0",
+      "DLDMOL+IDAutomation2D",
+      "DLDMOM+Arial-ItalicMT",
+      "DLDMON+Arial-BoldItalicMT",
+      "DLDMOO+Arial-BoldMT",
+      "DLDMOP+ArialMT",
+      "DLDMPA+USPSIMBCompact",
+      "Helvetica-Bold"
+    ],
+    "secs_render": 0.15,
+    "secs_wall": 0.23,
+    "pdf_warnings": [],
+    "assets": 218332
+  },
+  "alliant": {
+    "id": "alliant",
+    "name": "Alliant",
+    "kind": "static-web",
+    "pages": null,
+    "size": null,
+    "bytes": 2161610,
+    "files": 32,
+    "missing_entry": [],
+    "vendor_pdf_lib": true,
+    "vendor_fontkit": true
+  },
+  "ally": {
+    "id": "ally",
+    "name": "Ally Bank",
+    "kind": "static-web",
+    "pages": null,
+    "size": null,
+    "bytes": 10644720,
+    "files": 13,
+    "missing_entry": [],
+    "vendor_pdf_lib": true,
+    "vendor_fontkit": true
+  }
+}

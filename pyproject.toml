@@ -1,0 +1,50 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "billgen"
+version = "2.0.0.dev0"
+description = "合成对账单 / 账单版式生成器（13 个模板，编辑器 + PDF 引擎）"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = [
+    "PyMuPDF==1.26.6",
+    "fonttools>=4.68",
+    "uharfbuzz>=0.57",
+    "pillow>=13.0",
+    "pystrich==0.20",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "ruff>=0.6",
+    "mypy>=1.11",
+]
+
+[project.scripts]
+billgen = "billgen.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/billgen"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = ["src/billgen/themes"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.11"
+files = ["src/billgen/spec.py", "src/billgen/registry.py", "src/billgen/paths.py"]
+ignore_missing_imports = true
