@@ -178,7 +178,9 @@ def build_personal(ledger: LedgerDocument, defaults: dict[str, Any]) -> dict[str
                 "credits": "0.00",
             },
             "msf": {
-                "lowest_daily": cents_to_plain(ledger.lowest_daily_cents()),
+                # 段落里金额自带 `$` 前缀，必须带千分位（真件 `$2,176.61`），
+                # 否则和 summary 的 `$13,081.17` 对不上，一眼就是拼出来的。
+                "lowest_daily": cents_to_grouped(ledger.lowest_daily_cents()),
                 "payment_solutions": "0.00",
             },
         }
@@ -232,7 +234,9 @@ def build_business(ledger: LedgerDocument, defaults: dict[str, Any]) -> dict[str
                 for day, balance in ledger.daily_activity()
             ],
             "msf": {
-                "lowest_daily": cents_to_plain(ledger.lowest_daily_cents()),
+                # 段落里金额自带 `$` 前缀，必须带千分位（真件 `$2,176.61`），
+                # 否则和 summary 的 `$13,081.17` 对不上，一眼就是拼出来的。
+                "lowest_daily": cents_to_grouped(ledger.lowest_daily_cents()),
                 "payment_solutions": "0.00",
             },
             "show_atm": False,

@@ -65,3 +65,16 @@ git checkout <prev> -- tests/test_explicit_engines.py         # 基线
 - `pytest`：558 passed / 16 skipped / 33 subtests。
 - 水印可见像素：Mercury 出片 56674 vs 参考 57979（修前 20012）。
 - 账期：Mercury `Sep 01, 2026-Sep 30, 2026`、SoFi `09/01/2026 - 09/30/2026`。
+
+## 第二轮补充（企业版式 + 版式漂移闸门）
+
+- `tools/e2e_compare.py` 新增：
+  - `--as-business`：离线 fixture 只有个人模型（`subjectType=business` 会在 lifeModel 被判无效，`months` 只接受 1/3/6），
+    所以把同一账本改写成 `business_checking` 来跑企业版式对比；
+  - 无参考 PDF 的版式改成 **layout json 位置比对**（`layout_spans()` + `compare_layout()`，基线用 `span["origin"][1]` 而非 bbox 底边）。
+- 结果：`boa-personal` 版式漂移 0 段；`wellsfargo` 仅 1 段（`-` 连字符，命中了别的破折号）；企业版式三套 0 差异。
+- 修的两个真问题：
+  1. Chase MSF 段落金额没有千分位（`$13081.17`，而 summary 是 `$13,081.17`）→ `chase.py` 的 `msf.lowest_daily` 改用 `cents_to_grouped`；
+  2. 正文句子被品牌替换改写成病句：参考件 `visit a Chase branch.`，我们出 `visit a JPMorgan Chase Bank branch.`
+     → `branding.Brand` 新增 `short`（`_SHORT_NAMES` 表 + 去 `Bank`/`N.A.` 后缀），槽位模板改 `{short}`。
+- 回滚：`git revert <this-commit>`；单点 `git checkout <prev> -- tools/e2e_compare.py src/billgen/branding.py src/billgen/synth/adapters/chase.py`。

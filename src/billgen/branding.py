@@ -77,6 +77,26 @@ class Brand:
     phone_metro: str = ""
     promo_code: str = ""
 
+    #: 真账单正文里用的短名（Chase 自己的句子写 "visit a Chase branch"，不用法定名）。
+    _SHORT_NAMES = {
+        "JPMorgan Chase": "Chase",
+        "JPMorgan Chase Bank": "Chase",
+        "Bank of America": "Bank of America",
+        "Wells Fargo Bank": "Wells Fargo",
+    }
+
+    @property
+    def short(self) -> str:
+        """正文里用的短品牌名：`JPMorgan Chase Bank` → `Chase`、`Wells Fargo Bank, N.A.` → `Wells Fargo`。"""
+        for full, short in self._SHORT_NAMES.items():
+            if self.name.startswith(full):
+                return short
+        name = self.name.replace(", N.A.", "").replace(", N.A", "").strip()
+        for suffix in (" National Association", " Bank", " N.A."):
+            if name.endswith(suffix):
+                name = name[: -len(suffix)].strip()
+        return name or self.name
+
     @property
     def initials(self) -> str:
         words = [word for word in self.name.replace("-", " ").split() if word]
@@ -286,7 +306,7 @@ TEXT_SLOTS: dict[str, tuple[TextSlot, ...]] = {
         TextSlot((55.0, 61.0, 200.0, 73.5), (58.8, 70.6), 7.76, "{po_box}"),
         TextSlot((55.0, 73.0, 240.0, 85.0), (58.8, 79.7), 7.76, "{city_state_zip}"),
         TextSlot((34.8, 575.8, 357.0, 584.6), (35.0, 581.8), 7.2,
-                 "Business Accounts at {domain} or visit a {name} branch.", fit=True),
+                 "Business Accounts at {domain} or visit a {short} branch.", fit=True),
     ),
     "usbank-personal": (
         TextSlot((70.0, 51.0, 230.0, 61.0), (72.0, 58.17), 7.0, "{po_box}"),

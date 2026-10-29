@@ -16,6 +16,7 @@ Mercury / SoFi 的官方 SAMPLE。没有参考 PDF 的主题（BoA / Amex / Well
 from __future__ import annotations
 
 import argparse
+import copy
 import json
 import re
 import sys
@@ -57,7 +58,7 @@ SECTION_LABELS = {
     "chase-personal": ["CHECKING SUMMARY", "CUSTOMER SERVICE INFORMATION", "TRANSACTION DETAIL"],
     "chase-business": ["CHECKING SUMMARY", "DEPOSITS AND ADDITIONS"],
     "usbank-personal": ["Uni-Statement", "SAFE DEBIT ACCOUNT", "Deposits / Credits", "Other Withdrawals"],
-    "usbank-business": ["Uni-Statement", "BUSINESS ESSENTIALS CHECKING"],
+    "usbank-business": ["Business Statement", "BUSINESS ESSENTIALS CHECKING"],
     "capitalone": ["TOTAL ENDING BALANCE", "Account Summary", "Cashflow Summary"],
     "mercury": ["Account details", "Account activity", "All Transactions"],
     "sofi": ["Primary Account Holder", "Transaction Details", "Contact Information"],
@@ -213,6 +214,70 @@ def side_by_side(gen_pdf: Path, ref_pdf: Path, out_png: Path) -> None:
     canvas.save(out_png)
 
 
+
+
+def _to_business(result: dict[str, Any]) -> dict[str, Any]:
+    """把一份个人结果改写成企业结果，只用于版式对比。
+
+    离线 fixture 的 lifeModel 只有个人字段（incomeStreams / creditLimitCents …），
+    跑 `subjectType=business` 会在 lifeModel 阶段被判无效。这里复用同一批交易，
+    把主体换成公司、账户换成 business_checking，用于检查企业版式的排版与行文。
+    """
+    cloned = copy.deepcopy(result)
+    subject = cloned.get("subject") or {}
+    company = "Okafor Design Studio LLC"
+    subject.update({"subjectType": "business", "name": company, "legalName": company})
+    cloned["subject"] = subject
+    rolled = []
+    for statement in cloned.get("statements") or []:
+        if statement.get("accountType") == "checking":
+            statement["accountType"] = "business_checking"
+            statement["accountName"] = "Business Checking"
+            rolled.append(statement)
+    cloned["statements"] = rolled or cloned.get("statements")
+    return cloned
+
+
+def layout_spans(template_id: str, layout: dict[str, Any]) -> list[dict[str, Any]]:
+    """把 layout json 归一成 [{text, x, bl}]，用于「位置是否还在原稿位置」的比对。"""
+    out: list[dict[str, Any]] = []
+    if template_id.startswith("boa"):
+        page = layout.get("p1") or {}
+        for span in page.get("spans") or []:
+            text = (span.get("text") or "").strip()
+            if text:
+                out.append({"text": text, "x": float(span["x"]), "bl": float(span["bl"])})
+    elif template_id == "wellsfargo":
+        for entry in (layout.get("spans") or {}).get("0") or []:
+            text = (entry[0] or "").strip()
+            if text:
+                out.append({"text": text, "x": float(entry[3]), "bl": float(entry[4])})
+    return out
+
+
+def compare_layout(page, ref_spans: list[dict[str, Any]], tol: float = 2.5) -> tuple[int, list[str]]:
+    """参考件每一段文字在出片第 1 页里找同文本，比较 x / 基线偏移。"""
+    ours = []
+    for block in page.get_text("rawdict")["blocks"]:
+        for line in block.get("lines", []):
+            for span in line["spans"]:
+                text = "".join(ch["c"] for ch in span["chars"]).strip()
+                if text:
+                    # origin[1] 才是基线（bbox 底边含降部，和 layout 的 bl 不同口径）
+                    ours.append((text, (span["bbox"][0], span["origin"][1])))
+    bad, notes = 0, []
+    for ref in ref_spans:
+        hit = next((bbox for text, bbox in ours if text == ref["text"]), None)
+        if hit is None:
+            continue  # 合成数据换了文案（客户名/金额），不算版式漂移
+        dx, dbl = abs(hit[0] - ref["x"]), abs(hit[1] - ref["bl"])
+        if dx > tol or dbl > tol:
+            bad += 1
+            if len(notes) < 6:
+                notes.append(f"{ref['text'][:24]!r} 偏移 x{dx:+.1f} 基线{dbl:+.1f}")
+    return bad, notes
+
+
 def layout_reference(template_id: str) -> dict[str, Any] | None:
     """没有参考 PDF 时，退回 layout json：元素位置就是原稿位置。"""
     candidates = {
@@ -234,10 +299,17 @@ def main() -> int:
     ap.add_argument("--templates", default="", help="逗号分隔；默认全部可渲染模板")
     ap.add_argument("--png", action="store_true", help="同时导出并排对比图")
     ap.add_argument("--no-watermark", action="store_true", help="出片不带 SAMPLE 水印（对比用）")
+    ap.add_argument(
+        "--as-business",
+        action="store_true",
+        help="把个人账本改写成企业账本（离线 fixture 只有个人模型，企业版式靠这条路径做版式对比）",
+    )
     args = ap.parse_args()
 
     result = json.loads(Path(args.result).read_text())
     result = result.get("result", result)  # 允许直接喂 /api/generations 的整包
+    if args.as_business:
+        result = _to_business(result)
     if "statements" not in result:
         result = result.get("result") or result
 
@@ -287,11 +359,14 @@ def main() -> int:
                 report.append(f"参考件缺失（{ref_rel}）")
         else:
             layout = layout_reference(template)
-            report.append(
-                "无参考 PDF，改用 layout json 做结构比对："
-                + ("已加载 " + json.dumps({k: len(v) for k, v in layout.items() if isinstance(v, list)}) if layout else "也没有 layout")
-            )
+            ref_spans = layout_spans(template, layout) if layout else []
+            report.append(f"无参考 PDF，改用 layout json 做结构比对（{len(ref_spans)} 段文字）")
             report.append("")
+            if ref_spans:
+                with fitz.open(pdf) as doc:
+                    bad, notes = compare_layout(doc[0], ref_spans)
+                report.append(f"- 版式漂移：{bad} 段（容差 2.5pt）")
+                report.extend(f"  - {n}" for n in notes)
             report.append(f"- 页数：{ours.pages}；墨量：{ours.ink}；字体：{', '.join(sorted(ours.fonts))[:120]}")
         report.append("")
         print()

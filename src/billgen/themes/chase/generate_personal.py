@@ -379,7 +379,11 @@ def build_subs(d):
         subs.append(("chase.com", b["domain"]))
     if b.get("name") and b["name"] not in DEFAULT_NAMES:
         subs.append(("JPMorgan Chase", b["name"]))
-        subs.append(("Chase", b["name"]))
+        # 光秃秃的 "Chase" 在正文里是行文（"visit a Chase branch"），不是行标；
+        # 换成 "JPMorgan Chase Bank" 会把句子改写成病句（实测：参考件写
+        # "visit a Chase branch"，我们出 "visit a JPMorgan Chase Bank branch"）。
+        if "Chase" not in b["name"]:
+            subs.append(("Chase", b["name"]))
     # 产品名：底稿里同时存在首字母大写与大写两种形态，两种都要换
     product = str(d.get("product") or "").strip()
     if product:
