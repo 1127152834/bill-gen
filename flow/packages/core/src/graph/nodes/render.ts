@@ -137,7 +137,12 @@ function ledgerBrief(statement: Statement): string {
   return `bank: ${statement.bankName}\naccount: ${statement.accountType} ****${statement.accountLast4}\nperiod: ${statement.periodStart}..${statement.periodEnd}\n${months}\nrows:\n${rows}`;
 }
 
-function fillMessages(contract: Contract, draft: Record<string, unknown>, brief: string): {
+function fillMessages(
+  contract: Contract,
+  draft: Record<string, unknown>,
+  brief: string,
+  bankSkill = '',
+): {
   role: 'system' | 'user';
   content: string;
 }[] {
@@ -166,7 +171,12 @@ function fillMessages(contract: Contract, draft: Record<string, unknown>, brief:
         'Field types (path: type):',
         types,
         `Description limit: ${String(contract.limits.desc_chars ?? 38)} characters; rows per page: ${String(contract.limits.rows_per_page ?? 24)}.`,
-      ].join('\n'),
+        // 这家银行的表单填写规范（字段表 + 行文 + 反例）。只给这一次要出片的银行，
+        // 别家的行文不要混进来，否则模型会把两家风格搅在一起。
+        bankSkill ? `\n${bankSkill}` : '',
+      ]
+        .filter(Boolean)
+        .join('\n'),
     },
     {
       role: 'user',
@@ -289,7 +299,12 @@ async function renderOne(
       node: 'billgen',
       message: `${templateId}: 模型补全第 ${attempts}/${maxAttempts} 次`,
     });
-    const messages = fillMessages(contract, base, ledgerBrief(statement));
+    const messages = fillMessages(
+      contract,
+      base,
+      ledgerBrief(statement),
+      deps.skills.forTemplates?.([templateId]) ?? '',
+    );
     if (lastErrors.length > 0) {
       messages.push({
         role: 'user',

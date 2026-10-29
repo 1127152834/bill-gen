@@ -2,7 +2,7 @@
  * Realism "skills": markdown knowledge files (repo-root `skills/`) injected into LLM prompts.
  * `loadSkills` reads them once; `get` returns the requested ones as `## skill: <name>` sections.
  */
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
 export const SKILL_NAMES = [
@@ -15,6 +15,24 @@ export const SKILL_NAMES = [
 
 export type SkillName = (typeof SKILL_NAMES)[number];
 
+/**
+ * 每套版式对应哪份 `references/*.md`。版式 id 形如 `chase-personal`，参考文件形如 `chase.md`，
+ * 所以按前缀归并；新增版式时如果忘了写参考文件，`referenceCoverage()` 会把它报出来。
+ */
+export const REFERENCE_BY_TEMPLATE: Record<string, string> = {
+  'boa-personal': 'boa',
+  'boa-business': 'boa',
+  'chase-personal': 'chase',
+  'chase-business': 'chase',
+  'usbank-personal': 'usbank',
+  'usbank-business': 'usbank',
+  'wellsfargo': 'wellsfargo',
+  'amex': 'amex',
+  'capitalone': 'capitalone',
+  'sofi': 'sofi',
+  'mercury': 'mercury',
+};
+
 export type SkillStore = {
   /** 整套技能文本（历史行为：全部注入）。 */
   get(names: readonly SkillName[]): string;
@@ -23,6 +41,12 @@ export type SkillStore = {
    * 一个主体只对应其中一块，其余全是噪声——每轮都重发一遍，白等输入处理时间。
    */
   getSelective(names: readonly SkillName[], keywords: readonly string[]): string;
+  /**
+   * 版式表单技能：`bank-forms/SKILL.md` + 命中模板的 `references/*.md`。
+   *
+   * 只给这一次要出片的银行，模型不用在 8 家规范里挑——按版式注入，既省 token 又不会串行文。
+   */
+  forTemplates?(templates: readonly string[]): string;
 };
 
 /** Which skills each LLM node receives. */
@@ -97,8 +121,60 @@ export function lifeModelSkills(isBusiness: boolean): readonly SkillName[] {
 const isSkillName = (name: string): name is SkillName => (SKILL_NAMES as readonly string[]).includes(name);
 
 /** Reads every skill file from `dir`; throws if any is missing so a bad deploy fails at startup. */
+/** 目录式技能的参考文件：`<dir>/bank-forms/references/*.md`，按文件名（去扩展名）索引。 */
+export function loadBankReferences(dir: string): Map<string, string> {
+  const refDir = join(dir, 'bank-forms', 'references');
+  if (!existsSync(refDir)) return new Map();
+  const out = new Map<string, string>();
+  for (const file of readdirSync(refDir)) {
+    if (!file.endsWith('.md')) continue;
+    out.set(file.slice(0, -3), readFileSync(join(refDir, file), 'utf8').trim());
+  }
+  return out;
+}
+
+/** `bank-forms/SKILL.md`：索引 + 通用规矩，永远随参考文件一起注入。 */
+export function loadBankSkillIndex(dir: string): string {
+  const file = join(dir, 'bank-forms', 'SKILL.md');
+  return existsSync(file) ? readFileSync(file, 'utf8').trim() : '';
+}
+
+/**
+ * 这次要出片的银行，各自的参考文件正文。
+ *
+ * - 命中模板 → 对应的 references/<bank>.md；
+ * - 同时总带 `common.md`（金额/日期/身份这些跨行规矩）；
+ * - 一个都没命中时返回空串（不拿别家的行文去污染提示词）。
+ */
+export function bankReferenceText(
+  references: Map<string, string>,
+  templates: readonly string[],
+): { text: string; used: string[] } {
+  const picked = new Set<string>();
+  if (references.has('common')) picked.add('common');
+  for (const template of templates) {
+    const bank = REFERENCE_BY_TEMPLATE[template];
+    if (bank && references.has(bank)) picked.add(bank);
+  }
+  const used = [...picked];
+  const text = used
+    .map((name) => `### reference: ${name}.md\n\n${references.get(name) ?? ''}`)
+    .join('\n\n');
+  return { text, used };
+}
+
+/** 哪些模板还没有参考文件（新增版式时的守卫）。 */
+export function referenceCoverage(references: Map<string, string>, templates: readonly string[]): string[] {
+  return templates.filter((template) => {
+    const bank = REFERENCE_BY_TEMPLATE[template];
+    return !bank || !references.has(bank);
+  });
+}
+
 export function loadSkills(dir: string): SkillStore {
   const sections = new Map<SkillName, string>();
+  const references = loadBankReferences(dir);
+  const bankIndex = loadBankSkillIndex(dir);
   for (const name of SKILL_NAMES) {
     const body = readFileSync(join(dir, `${name}.md`), 'utf8').trim();
     sections.set(name, `## skill: ${name}\n\n${body}\n`);
@@ -111,6 +187,12 @@ export function loadSkills(dir: string): SkillStore {
   return {
     getSelective(names, keywords) {
       return names.map((name) => `## skill: ${name}\n\n${selectSkillSections(section(name), keywords)}\n`).join('\n');
+    },
+    forTemplates(templates) {
+      const { text } = bankReferenceText(references, templates);
+      const head = bankIndex ? `## skill: bank-forms\n\n${bankIndex}\n` : '';
+      if (!head && !text) return '';
+      return [head, text].filter(Boolean).join('\n');
     },
     get(names) {
       return names

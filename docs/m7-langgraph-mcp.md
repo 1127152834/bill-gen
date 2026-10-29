@@ -167,3 +167,23 @@ BILLGEN_MCP_CMD=../.venv/bin/billgen pnpm --filter @bh/core exec vitest run test
 6. **分节点换模型**：`LLM_MODEL_LIFEMODEL=<更快的模型>`，其它节点不动。想验证质量，跑一遍
    `pnpm --filter @bh/core test` 的 403 个用例，再对比控制台里 `✔ lifeModel  x.xs` 那一行。
 
+
+## 账单填写技能（bank-forms）
+
+`flow/skills/bank-forms/` 是目录式技能，按「这次要出片的模板」注入，不整包塞进提示词：
+
+```
+flow/skills/bank-forms/
+  SKILL.md              # 用途、三步用法、11 版式索引表、通用硬规则、自检清单
+  references/common.md  # 跨行通用：身份/金额/日期/流水/五类语义/禁止词/结构一致性
+  references/<bank>.md  # 每家一份：版式、表单字段表、流水行文表、反例
+  assets/<template>.json# 这套版式的完整可填空对象（与引擎 default_data 同源）
+```
+
+- 加载：`loadSkills(dir)` 认目录式技能，`SkillStore.forTemplates(templates)` 只返回命中银行的那一份 +
+  `common`；一个都没命中时返回空串（不拿别家行文污染提示词）。
+- 注入：`graph/nodes/render.ts` 的 `fillMessages(..., bankSkill)` 把技能拼在 system 末尾，
+  调用处传 `deps.skills.forTemplates([templateId])`。
+- 同源：`tools/gen_bank_forms_assets.py`（`--check` 只比对）导出 assets；`tests/test_bank_forms_skill.py`
+  断言 assets 与 `default_data()` 逐字节一致、每套版式都有参考文件、参考里有字段表与反例。
+- 规模：单家注入约 6.5KB（SKILL.md + common + 该家），11 家不会同时出现。
