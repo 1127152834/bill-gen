@@ -342,8 +342,20 @@ export const renderStep =
     const wantsAuto = config.templates.includes(AUTO_TEMPLATES);
     const pinned = config.templates.filter((id) => id !== AUTO_TEMPLATES);
     const targets: { templateId: string; statement: Statement; recommend?: { reasons: string[]; score: number } }[] = [];
+    const skipped = new Set<string>();
     for (const statement of result.statements) {
-      if (!RENDERABLE_ACCOUNTS.has(statement.accountType)) continue;
+      if (!RENDERABLE_ACCOUNTS.has(statement.accountType)) {
+        // 不说一声就少出一份账单，会被当成 bug；这里明确记下来（credit 信用卡账单
+        // 服务端没有对应版式，只有存款账户版式）。
+        if (!skipped.has(statement.accountType)) {
+          skipped.add(statement.accountType);
+          emit({
+            type: 'warning',
+            message: `${statement.accountType}: 服务端没有该账户类型的版式，跳过出片（只有存款账户版式）`,
+          });
+        }
+        continue;
+      }
       for (const templateId of pinned) {
         targets.push({ templateId, statement });
       }

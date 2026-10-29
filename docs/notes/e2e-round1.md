@@ -275,3 +275,25 @@ capitalone `DEFAULT_TEXT_SHA=d07cdc35…e0c0b0`、第三页像素 `e94c861c64e8a
 刷新 16 例。`pytest` 562 passed / 16 skipped / 33 subtests，`realism_rules.py` 全绿。
 
 回滚：`git revert <本轮提交>`。
+
+## 第十一轮（信用卡账单被静默跳过）
+
+对着 `result.statements` 核对时发现：一次生成里有两个账户（`checking` 42 笔、`credit` 36 笔），
+但 `renders` 只出了两份 checking —— `credit` 那份**一句话没提就没了**。
+
+原因在 `flow/packages/core/src/graph/nodes/render.ts`：
+```ts
+/** Only deposit-account layouts exist server-side; credit statements cannot be rendered here. */
+const RENDERABLE_ACCOUNTS = new Set(['checking', 'business_checking']);
+```
+遇到 `credit` 直接 `continue`。版式确实只有存款账户（我们 11 套底稿全是 checking /
+business checking 的 Uni-Statement、Everyday Checking 之类），所以这里不出片是对的；
+**错在不出声**：用户看到的只是「少了一份账单」，会当成 bug。
+
+修法：循环里记一个 `skipped` 集合，命中不可渲染的账户类型时 `emit({type:'warning'})` 一条
+`credit: 服务端没有该账户类型的版式，跳过出片（只有存款账户版式）`，同一类型只报一次。
+
+验证：`./node_modules/.bin/tsc --noEmit -p packages/core` 干净；`vitest run` 411 passed / 7 skipped；
+`pytest` 562 passed。
+
+回滚：`git revert <本轮提交>`。
