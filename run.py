@@ -270,7 +270,7 @@ def main():
     from scripts.seed_examples import seed_examples
     missing = missing_assets()
     if missing:
-        print(f"缺少 {len(missing)} 个本机模板资产。先运行：python3 scripts/assets.py import /path/to/整合版")
+        print(f"有 {len(missing)} 个模板资源未就绪。请重新构建镜像，或运行：python3 scripts/assets.py hydrate")
         sys.exit(1)
     seed_examples()
     procs = []

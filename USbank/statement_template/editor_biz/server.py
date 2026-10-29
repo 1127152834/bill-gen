@@ -3,6 +3,7 @@
 """US Bank 商业版编辑器 — 独立服务（默认 8797；HOST/NO_BROWSER 环境变量可覆盖）"""
 import hashlib, json, os, sys, threading, webbrowser, shutil
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from runtime_paths import data_path
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, BASE)
@@ -10,9 +11,9 @@ import fitz
 import generate_biz as generate
 
 EDITOR = os.path.dirname(os.path.abspath(__file__))
-DATA_FILE = os.path.join(EDITOR, "data_biz.json")
-PREVIEW = os.path.join(EDITOR, "preview.pdf")
-PV_DIR = os.path.join(EDITOR, "pv_png")
+DATA_FILE = data_path("USbank/statement_template/editor_biz/data_biz.json")
+PREVIEW = data_path("USbank/statement_template/editor_biz/preview.pdf")
+PV_DIR = data_path("USbank/statement_template/editor_biz/pv_png")
 STATE = {"watermark": True}
 LOCK = threading.Lock()
 

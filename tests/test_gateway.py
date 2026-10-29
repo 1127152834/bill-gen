@@ -39,4 +39,5 @@ class GatewayTests(unittest.TestCase):
                     with urlopen(origin+'/ally/',timeout=3) as response:self.assertEqual(response.read(),b'test editor')
                     with self.assertRaises(HTTPError) as error:urlopen(origin+'/ally/%2e%2e/private.txt',timeout=3)
                     self.assertEqual(error.exception.code,403)
+                    error.exception.close()
                 finally:gateway.shutdown();gateway.server_close()

@@ -1,10 +1,11 @@
-"""只导入清单内的本机模板资产，不读取客户编辑记录。"""
+"""检查仓库模板资产并补齐 LFS 内容；保留旧版本机导入命令。"""
 import argparse
 import json
 from pathlib import Path, PurePosixPath
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:sys.path.insert(0,str(ROOT))
 EXTENSIONS = {'.pdf','.ttf','.otf','.woff','.woff2','.ttc','.png','.jpg','.jpeg','.svg','.z','.css'}
 
 
@@ -23,8 +24,16 @@ def asset_paths(root=ROOT):
     return result
 
 
+def safe_asset_path(root, name):
+    root=Path(root).resolve()
+    path=(root/name).resolve()
+    if not path.is_relative_to(root):raise ValueError('资产路径不能通过链接跳出项目目录')
+    return path
+
+
 def missing_assets(root=ROOT):
-    return [name for name in asset_paths(root) if not (root/name).is_file()]
+    from scripts.lfs_assets import read_pointer
+    return [name for name in asset_paths(root) if not (path:=safe_asset_path(root,name)).is_file() or read_pointer(path)]
 
 
 def import_assets(source,root=ROOT):
@@ -63,12 +72,16 @@ def main():
     commands=parser.add_subparsers(dest='command',required=True)
     load=commands.add_parser('import');load.add_argument('source',type=Path,help='原始整合版目录')
     commands.add_parser('check')
+    commands.add_parser('hydrate')
     args=parser.parse_args()
     try:
         if args.command=='import':print(f'已导入 {import_assets(args.source)} 个本机资产文件。')
+        if args.command=='hydrate':
+            from scripts.lfs_assets import hydrate_assets
+            print(f'已补齐 {hydrate_assets()} 个公共 LFS 模板资源。')
         missing=missing_assets()
         if missing:
-            print(f'尚缺 {len(missing)} 个模板资产；运行 python3 scripts/assets.py import /path/to/整合版')
+            print(f'有 {len(missing)} 个模板资源未就绪；请完整克隆仓库并运行 python3 scripts/assets.py hydrate')
             raise SystemExit(1)
         print('模板资产检查通过。')
     except (OSError,ValueError,KeyError) as error:parser.exit(1,f'{error}\n')

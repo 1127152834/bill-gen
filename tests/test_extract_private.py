@@ -51,6 +51,18 @@ class PrivateExtractionTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     self.extract(root)
 
+    def test_import_discards_historical_ally_text_order_cache(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp)
+            ally,_=self.fixture(root)
+            ally.write_text(ally.read_text().replace('var ORDER_SPEC = "fixture";', 'var ORDER_SPEC = {"ARCHIVED_CUSTOMER":"ARCHIVED_ACCOUNT"};'))
+            js=self.extract(root)['ally bank/private-assets.js'].decode()
+            payload=json.loads(json.loads(js.removeprefix('window.BILL_GEN_ALLY_ASSETS = JSON.parse(').removesuffix(');\n')))
+            self.assertEqual(payload['ORDER_SPEC'],{})
+            self.assertNotIn('ARCHIVED_CUSTOMER',js)
+            self.assertNotIn('ARCHIVED_ACCOUNT',js)
+            self.assertNotIn('NEVER_COPY_CUSTOMER',js)
+
     def test_rejects_python_computation_without_executing_it(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)

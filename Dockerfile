@@ -4,7 +4,7 @@ WORKDIR /app
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
-RUN python scripts/assets.py check && python scripts/seed_examples.py
-ENV HOST=0.0.0.0 PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=/app
+RUN python scripts/assets.py hydrate && python scripts/assets.py check
+ENV HOST=0.0.0.0 PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=/app BILL_GEN_DATA_DIR=/data
 EXPOSE 8800
 CMD ["python", "run.py"]

@@ -5,6 +5,7 @@
 """
 import json, os, sys, threading, webbrowser, shutil
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from runtime_paths import data_path
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, BASE)
@@ -13,11 +14,11 @@ import generate  # noqa: E402
 
 EDITOR = os.path.dirname(os.path.abspath(__file__))
 DATA_FILES = {
-    "personal": os.path.join(EDITOR, "data_personal.json"),
-    "business": os.path.join(EDITOR, "data_business.json"),
+    "personal": data_path("BOA/statement_template/editor/data_personal.json"),
+    "business": data_path("BOA/statement_template/editor/data_business.json"),
 }
-PREVIEW = {t: os.path.join(EDITOR, f"preview_{t}.pdf") for t in DATA_FILES}
-PV_DIR = os.path.join(EDITOR, "pv_png")
+PREVIEW = {t: data_path(f"BOA/statement_template/editor/preview_{t}.pdf") for t in DATA_FILES}
+PV_DIR = data_path("BOA/statement_template/editor/pv_png")
 STATE = {"watermark": True}
 LOCK = threading.Lock()
 
@@ -107,7 +108,7 @@ class Handler(BaseHTTPRequestHandler):
                        {"Content-Disposition": 'attachment; filename="boa_data.json"'})
         elif self.path == "/api/reset":
             for t, f in DATA_FILES.items():
-                shutil.copy(os.path.join(EDITOR, f"data_{t}.json") + ".bak", f)
+                shutil.copy(f + ".bak", f)
             self._send(200, json.dumps({"ok": True}))
         else:
             self._send(404, "not found", "text/plain; charset=utf-8")

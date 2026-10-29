@@ -1018,6 +1018,7 @@ def _replace_fields(pages, d, n_stmt):
     L = LAYOUTS["us"]
     dashed = str(d.get("account_display", "")).strip()
     spaced = dashed.replace("-", " ")
+    account_pattern = r"\d[ -]\d{3}[ -]\d{4}[ -]\d{4}"
     for pg in pages:
         pi = pg.page.number
         if pi == 1 or pi == len(pages) - 1 and pi > 2:
@@ -1030,8 +1031,10 @@ def _replace_fields(pages, d, n_stmt):
         # 账号（两种格式）+ 期间两日期 + 客户三行 + 页码
         for s in lsp:
             t = s["text"].strip()
-            if re.fullmatch(r"\d[ -]\d{3}[ -]\d{4}[ -]\d{4}", t):
-                pg.replace_span(s, dashed if "-" in s["text"] else spaced)
+            if re.search(account_pattern, t):
+                pg.replace_span(s, re.sub(account_pattern,
+                    lambda match: dashed if "-" in match.group(0) else spaced,
+                    s["text"]))
             elif t in ("Aug 7, 2026", "Sep 4, 2026") and s["bl"] < 130:
                 pg.replace_span(s, d["period"]["start" if t.startswith("Aug")
                                               else "end"])

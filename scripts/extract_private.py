@@ -169,6 +169,8 @@ def _ally_assets(text: str) -> bytes:
                 raise ValueError('Unexpected private asset declaration suffix')
         except (ValueError, IndexError, RecursionError):
             raise ValueError(f'Invalid static private asset constant: {name}') from None
+    # 历史文本排序缓存含原账单内容，导入资源时也不能恢复它。
+    assets['ORDER_SPEC'] = {}
     # JSON.parse avoids JS object-literal special behavior for __proto__ keys.
     payload = json.dumps(assets, ensure_ascii=True, separators=(',', ':'), allow_nan=False)
     return ('window.BILL_GEN_ALLY_ASSETS = JSON.parse(' + json.dumps(payload) + ');\n').encode()

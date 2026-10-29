@@ -3,6 +3,7 @@
 """大通商业版编辑器 — 独立服务（仅商业版，与个人版完全分离）"""
 import hashlib, json, os, sys, threading, webbrowser, shutil
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from runtime_paths import data_path
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, BASE)
@@ -10,9 +11,9 @@ import fitz
 import generate_business as generate
 
 EDITOR = os.path.dirname(os.path.abspath(__file__))
-DATA_FILE = os.path.join(EDITOR, "data_business.json")
-PREVIEW = os.path.join(EDITOR, "preview.pdf")
-PV_DIR = os.path.join(EDITOR, "pv_png")
+DATA_FILE = data_path("大通/statement_template/editor_business/data_business.json")
+PREVIEW = data_path("大通/statement_template/editor_business/preview.pdf")
+PV_DIR = data_path("大通/statement_template/editor_business/pv_png")
 STATE = {"watermark": True}
 LOCK = threading.Lock()
 

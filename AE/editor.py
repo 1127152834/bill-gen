@@ -19,6 +19,7 @@ import sys
 import threading
 import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from runtime_paths import data_path
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, BASE)
@@ -28,8 +29,8 @@ import generate_sample_statement as gen  # noqa: E402
 #   AE_HOST     监听地址（默认 127.0.0.1；容器内设 0.0.0.0）
 #   AE_SAVE_DIR "保存 PDF 到本目录" 的目标目录（默认项目目录；容器内挂载卷）
 HOST = os.environ.get("AE_HOST", "127.0.0.1")
-SAVE_DIR = os.environ.get("AE_SAVE_DIR", BASE)
-PV_DIR = os.path.join(BASE, "pv_png")     # 预览页 PNG（内容哈希寻址，immutable 缓存）
+SAVE_DIR = os.environ.get("AE_SAVE_DIR", data_path("AE"))
+PV_DIR = data_path("AE/pv_png")     # 预览页 PNG（内容哈希寻址，immutable 缓存）
 
 LOCK = threading.Lock()
 STATE = {"pdf": None, "path": None}

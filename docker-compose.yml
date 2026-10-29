@@ -4,41 +4,12 @@ services:
     image: bill-gen:local
     ports:
       - "127.0.0.1:${HUB_PORT:-8800}:8800"
+    environment:
+      BILL_GEN_DATA_DIR: /data
     init: true
     restart: unless-stopped
     volumes:
-      - type: bind
-        source: "./BOA/statement_template/editor/data_personal.json"
-        target: "/app/BOA/statement_template/editor/data_personal.json"
-        bind:
-          create_host_path: false
-      - type: bind
-        source: "./BOA/statement_template/editor/data_business.json"
-        target: "/app/BOA/statement_template/editor/data_business.json"
-        bind:
-          create_host_path: false
-      - type: bind
-        source: "./富国/statement_template/editor/data.json"
-        target: "/app/富国/statement_template/editor/data.json"
-        bind:
-          create_host_path: false
-      - type: bind
-        source: "./大通/statement_template/editor_personal/data_personal.json"
-        target: "/app/大通/statement_template/editor_personal/data_personal.json"
-        bind:
-          create_host_path: false
-      - type: bind
-        source: "./大通/statement_template/editor_business/data_business.json"
-        target: "/app/大通/statement_template/editor_business/data_business.json"
-        bind:
-          create_host_path: false
-      - type: bind
-        source: "./USbank/statement_template/editor_us/data_us.json"
-        target: "/app/USbank/statement_template/editor_us/data_us.json"
-        bind:
-          create_host_path: false
-      - type: bind
-        source: "./USbank/statement_template/editor_biz/data_biz.json"
-        target: "/app/USbank/statement_template/editor_biz/data_biz.json"
-        bind:
-          create_host_path: false
+      - bill-gen-data:/data
+
+volumes:
+  bill-gen-data:

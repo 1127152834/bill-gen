@@ -21,6 +21,7 @@ import threading
 import urllib.parse
 import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from runtime_paths import data_path
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 
@@ -68,7 +69,7 @@ for tid, cfg in TEMPLATES.items():
 
 LOCK = threading.Lock()
 PREVIEW_DPI = 100
-PV_DIR = os.path.join(BASE, "pv_png")     # 预览页 PNG（内容哈希寻址，immutable 缓存）
+PV_DIR = data_path("水星C1sofi/statement-editor/pv_png")     # 预览页 PNG（内容哈希寻址，immutable 缓存）
 
 # ================================================================ 字体子集缓存
 from fontTools import subset as _subset

@@ -7,6 +7,7 @@
 """
 import hashlib, json, os, sys, threading, webbrowser, shutil
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from runtime_paths import data_path
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # statement_template/
 sys.path.insert(0, BASE)
@@ -14,16 +15,17 @@ import fitz  # noqa: E402
 import generate  # noqa: E402  (同目录上一级的生成器)
 
 EDITOR = os.path.dirname(os.path.abspath(__file__))
-DATA_FILE = os.path.join(EDITOR, "data.json")
-PREVIEW = os.path.join(EDITOR, "preview.pdf")
-PV_DIR = os.path.join(EDITOR, "pv_png")
+DATA_FILE = data_path("富国/statement_template/editor/data.json")
+SAMPLE_DATA_FILE = data_path("富国/statement_template/data_sample.json")
+PREVIEW = data_path("富国/statement_template/editor/preview.pdf")
+PV_DIR = data_path("富国/statement_template/editor/pv_png")
 STATE = {"watermark": True, "mark": True, "fonts": "declared"}
 LOCK = threading.Lock()
 
 
 def init_data():
     if not os.path.exists(DATA_FILE):
-        shutil.copy(os.path.join(BASE, "data_sample.json"), DATA_FILE)
+        shutil.copy(SAMPLE_DATA_FILE, DATA_FILE)
     with open(DATA_FILE, encoding="utf-8") as fh:
         return json.load(fh)
 
@@ -114,7 +116,7 @@ class Handler(BaseHTTPRequestHandler):
                 self._send(200, fh.read(), "application/pdf",
                            {"Content-Disposition": "attachment; filename=statement_sample.pdf"})
         elif self.path == "/api/reset":
-            shutil.copy(os.path.join(BASE, "data_sample.json"), DATA_FILE)
+            shutil.copy(SAMPLE_DATA_FILE, DATA_FILE)
             regenerate(init_data(), STATE["watermark"], STATE["mark"], STATE["fonts"])
             self._send(200, json.dumps({"ok": True, "data": init_data()}))
         else:
