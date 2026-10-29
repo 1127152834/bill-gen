@@ -11,7 +11,7 @@ P1 把 13 个模板目录迁进 ``src/billgen/themes/`` 之后，这类调用会
 
 约定
 ----
-* ``data_path(relative)``：仓库内（或 ``BILL_GEN_DATA_DIR`` 下）的可写数据路径，
+* ``data_path(relative)``：用户数据目录（或 ``BILL_GEN_DATA_DIR`` 下）的可写数据路径，
   拒绝绝对路径、``..``、反斜杠，并防止通过符号链接跳出数据根。
 * ``theme_dir(spec_id)``：主题资产目录（只读），包内相对。
 * ``font_path(style)`` / ``cjk_font_path()``：系统字体探测，允许环境变量覆盖。
@@ -19,6 +19,7 @@ P1 把 13 个模板目录迁进 ``src/billgen/themes/`` 之后，这类调用会
 from __future__ import annotations
 
 import os
+import sys
 from pathlib import Path, PurePosixPath
 
 __all__ = [
@@ -30,10 +31,29 @@ __all__ = [
     "cjk_font_path",
     "theme_dir",
     "relocated",
+    "user_data_dir",
 ]
 
 _SRC = Path(__file__).resolve().parent.parent          # src/
 _SRC_REPO = _SRC.parent                                 # 源码树根（安装后不存在）
+
+
+def user_data_dir() -> Path:
+    """可写工作区；安装包资源始终只读，不依赖启动时 cwd。"""
+    configured = os.environ.get("BILL_GEN_DATA_DIR")
+    if configured:
+        if not Path(configured).is_absolute():
+            raise ValueError("BILL_GEN_DATA_DIR 必须是绝对路径")
+        return Path(configured).resolve()
+    if os.environ.get("BILLGEN_ROOT"):
+        return Path(os.environ["BILLGEN_ROOT"]).resolve()
+    if sys.platform == "win32":
+        base = Path(os.environ.get("LOCALAPPDATA", str(Path.home() / "AppData/Local")))
+    elif sys.platform == "darwin":
+        base = Path.home() / "Library/Application Support"
+    else:
+        base = Path(os.environ.get("XDG_DATA_HOME", str(Path.home() / ".local/share")))
+    return (base / "billgen").resolve()
 
 
 def _resolve_root() -> Path:
@@ -42,7 +62,7 @@ def _resolve_root() -> Path:
         return Path(configured).resolve()
     if (_SRC_REPO / "pyproject.toml").is_file():
         return _SRC_REPO
-    return Path.cwd().resolve()
+    return user_data_dir()
 
 
 ROOT = _resolve_root()
@@ -99,7 +119,7 @@ def _data_base(root: Path) -> Path:
     return Path(configured).resolve() if configured else Path(root).resolve()
 
 
-def data_path(relative: str, root: Path | str = ROOT) -> str:
+def data_path(relative: str, root: Path | str | None = None) -> str:
     """返回可写数据文件的绝对路径，父目录自动创建。
 
     ``relative`` 可以是搬迁前的旧路径，会被 :func:`relocated` 自动翻译。
@@ -107,7 +127,7 @@ def data_path(relative: str, root: Path | str = ROOT) -> str:
     rel = PurePosixPath(relocated(str(relative)))
     if rel.is_absolute() or ".." in rel.parts or "\\" in str(rel) or not rel.parts:
         raise ValueError("运行数据路径必须是项目内的相对路径")
-    base = _data_base(Path(root))
+    base = _data_base(Path(root) if root is not None else user_data_dir())
     target = (base / rel).resolve()
     if not target.is_relative_to(base):
         raise ValueError("运行数据路径不能通过链接跳出数据目录")

@@ -787,7 +787,9 @@ $("zFull").addEventListener("click", () => {
   const r = await fetch("/api/state?tpl=mercury");
   const st = await r.json();
   initTplSeg(st.templates || {mercury:"Mercury 商业账户"});
-  switchTpl("mercury");
+  const requestedId = new URLSearchParams(location.search).get("template");
+  const requested = requestedId === "capitalone" ? "c1" : requestedId;
+  switchTpl(Object.prototype.hasOwnProperty.call(st.templates || {}, requested) ? requested : "mercury");
 })();
 </script>
 </body>

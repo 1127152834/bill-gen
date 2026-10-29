@@ -5,10 +5,22 @@
 **/__pycache__
 **/*.pyc
 .local
+.pytest_cache
+.ruff_cache
+.mypy_cache
+dist
+build
+*.egg-info
 tests
 **/preview*.pdf
 **/preview*.png
 **/pv_png
 **/data*.json
 **/*.bak
-AE/saved
+**/saved
+# examples/manifest.json and the synthetic examples must remain in the context.
+!examples/**
+**/node_modules
+**/dist
+**/.pnpm-store
+flow/data

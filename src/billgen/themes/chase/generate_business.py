@@ -4,17 +4,16 @@
 模板=原稿字节级静态克隆；动态区经内容流单元精确重写。
 同数据回放：文本相同即跳过 → 页面内容流零改动，与原稿一致。
 几何常量均从原稿逐 span 实测（layout_raw.json）。"""
-import hashlib
-import io, json, math, os, re, sys
-from decimal import Decimal
+import io, json, os, re
+
+from billgen.themes.chase import common
 
 import fitz
 
 BASE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, BASE)
-import chstream
-import extend_fonts as EF
-import barcode as BC
+from billgen.themes.chase import chstream
+from billgen.themes.chase import extend_fonts as EF
+from billgen.themes.chase import barcode as BC
 
 PAGE_H = 792.0
 TABLES = json.load(open(os.path.join(BASE, "assets", "font_tables_business.json")))
@@ -45,38 +44,11 @@ ROW_FONT, ROW_SIZE = "F11", 0.24
 PITCH, CONT_PITCH = 12.25, 9.35          # 主行距 / 描述续行距（实测）
 
 
-def encode(tag, font, text):
-    m = CH2CODE.get(tag, {}).get(font)
-    if f"{tag}:{font}" in TABLES and TABLES[f"{tag}:{font}"]["type"] == "Type3":
-        out = bytearray()
-        for ch in text:
-            c = m.get(ch) if m else None
-            if c is None:
-                c = 63
-            out.append(c)
-        return bytes(out)
-    try:
-        return text.encode("cp1252")
-    except Exception:
-        return text.encode("latin-1", "replace")
-
-
-def char_w(tag, font, ch, size):
-    if f"{tag}:{font}" in TABLES and TABLES[f"{tag}:{font}"]["type"] == "Type3":
-        m = CH2CODE.get(tag, {}).get(font, {})
-        code = m.get(ch, 63)
-        w = WIDTHS.get(tag, {}).get(font)
-        if w and code < len(w):
-            return w[code] * size
-        return 5.0 * size * 20
-    f = _STD.get(font)
-    if f is None:
-        return size * 0.5
-    return f.text_length(ch, fontsize=1000) * size / 1000
-
-
-def text_w(tag, font, text, size):
-    return sum(char_w(tag, font, c, size) for c in text)
+# References stay live when prepared fonts extend or replace width tables.
+_FONT_CODEC = common.FontCodec(TABLES, CH2CODE, WIDTHS, CODE2CH, _STD)
+encode = _FONT_CODEC.encode
+char_w = _FONT_CODEC.char_w
+text_w = _FONT_CODEC.text_w
 
 
 def fmt_amount(v):
@@ -118,12 +90,7 @@ def make_units(tag, text, font, size, x, bl, res=None, scale=1.0):
     return b"".join(out), cx - x
 
 
-def _cents(v):
-    try:
-        s = str(v).replace(",", "").replace("$", "").replace(" ", "").strip()
-        return int((Decimal(s) * 100).quantize(Decimal("1")))
-    except Exception:
-        return 0
+_cents = common._cents
 
 
 def date_key(s):
@@ -137,12 +104,7 @@ def date_key(s):
     return f"{y:04d}{m:02d}{d:02d}"
 
 
-def _fmt(cents, dollar=False):
-    q = abs(cents)
-    s = f"{q // 100:,}.{q % 100:02d}"
-    if dollar:
-        s = "$" + s
-    return ("-" if cents < 0 else "") + s
+_fmt = common._fmt
 
 
 # ============ 布局常量（全部实测自原稿） ============
@@ -266,7 +228,7 @@ class Page:
             out.append(c2c.get(b, chr(b)) if c2c else chr(b))
         return "".join(out)
 
-    def spans_units(self, span):
+    def spans_units(self, span, allow_overflow=False):
         """精确匹配：按 span 文本的前缀逐单元解码对齐，杜绝误删相邻 span。"""
         want = span["text"]
         x1 = span.get("x1", span["x"] + len(want) * 5)
@@ -280,6 +242,11 @@ class Page:
             if u.x >= span["x"] - 1.8 and u.x <= x1 + 1.0:
                 cand.append(k)
         cand.sort(key=lambda k: self.units[k].x)
+        cand_ext = [] if not allow_overflow else [
+            k for k, u in enumerate(self.units)
+            if u.x is not None and u.x >= span["x"] - 1.8
+            and abs(u.bl - span["bl"]) < 1.5]
+        cand_ext.sort(key=lambda k: self.units[k].x)
         for k in cand:
             if consumed == want:
                 break
@@ -295,6 +262,22 @@ class Page:
                     break
             else:
                 continue
+        if consumed.replace(" ", "") != want.replace(" ", ""):
+            # 布局里的 x1 偶尔比实际绘制文本短（如持卡人姓名两行），此时放宽
+            # 右边界重扫同基线单元，按前缀继续匹配，避免整行替换被静默跳过。
+            out, consumed = [], ""
+            for k in cand_ext:
+                if consumed == want:
+                    break
+                dec = self._decode(self.units[k].font, self.units[k].text)
+                if not dec:
+                    continue
+                for cand_dec in (dec, " " + dec.lstrip(), dec.rstrip(), dec.strip(),
+                                 " " + dec.strip()):
+                    if want.startswith(consumed + cand_dec):
+                        consumed += cand_dec
+                        out.append(self._loc[k])
+                        break
         if consumed.replace(" ", "") != want.replace(" ", ""):
             return []
         return out
@@ -386,7 +369,7 @@ class Page:
     def replace_span(self, span, new_text, align=None, right_edge=None):
         if new_text.rstrip() == span["text"].rstrip():
             return True                      # 同文跳过：保住原稿字节
-        locs = self.spans_units(span)
+        locs = self.spans_units(span, allow_overflow=True)
         if not locs:
             return False
         new_x = span["x"]
@@ -427,42 +410,10 @@ class Page:
 
 
 def add_watermark(doc, page):
-    size, t = 100, "S A M P L E"
-    w = text_w("x", "HeB", t, size)
-    cx, cy = 612 / 2, 792 / 2
-    c45, s45 = math.cos(math.radians(45)), math.sin(math.radians(45))
-    x = cx - w / 2 * c45
-    y = (PAGE_H - cy) + w / 2 * s45
-    ops = (f"q 0.78 0.78 0.78 rg BT "
-           f"1 0 0 1 {x:.2f} {y:.2f} Tm {c45:.4f} {s45:.4f} {-s45:.4f} {c45:.4f} 0 0 Tm "
-           f"/W {size} Tf ({t}) Tj ET Q")
-    # 字体须注册在 Resources/Font 子字典（挂在 Resources 顶层时严格解析器
-    # 报"找不到字体 /W"）；每 doc 共用一个字体对象，追加带去重
-    if not hasattr(doc, "_wm_font_xref"):
-        doc._wm_font_xref = doc.get_new_xref()
-        doc.update_object(doc._wm_font_xref,
-                          "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>")
-    xref = doc._wm_font_xref
-    rk = doc.xref_get_key(page.xref, "Resources/Font")
-    if rk[0] == "xref":                     # Font 字典为共享/间接对象
-        fo = int(rk[1].split()[0])
-        old = doc.xref_object(fo).rstrip()
-        if "/W " not in old:
-            doc.update_object(fo, old[:-2] + f" /W {xref} 0 R>>")
-    else:
-        old = rk[1].rstrip()
-        if "/W " not in old:
-            doc.xref_set_key(page.xref, "Resources/Font",
-                             old[:-2] + f" /W {xref} 0 R>>")
-    cx2 = page.get_contents()[0]
-    doc.update_stream(cx2, doc.xref_stream(cx2) + ops.encode())
+    return common.add_watermark(doc, page, text_w)
 
 
-def find(L, pi, pred):
-    for s in L[pi]["spans"]:
-        if pred(s):
-            return s
-    return None
+find = common.find
 
 
 def build_subs(d):
@@ -473,6 +424,10 @@ def build_subs(d):
     # 域名必须先于银行短名：否则 Chase.com 先被 (Chase→name) 吃掉，
     # 编辑器"域名"字段对 Chase.com 字样失效（实测坑）
     if b.get("domain"):
+        # 带路径的串必须再先一步：只换域名时路径会留着，替换后比原 span 长得多，
+        # 会压到同一行后文的 " or call us at the number…"（实测）
+        subs.append(("chase.com/business/disclosures", b["domain"]))
+        subs.append(("chase.com/disclosures", b["domain"]))
         subs.append(("Chase.com", b["domain"]))
         subs.append(("chase.com", b["domain"]))
     if b.get("name"):
@@ -481,11 +436,7 @@ def build_subs(d):
     return subs
 
 
-def sub_text(s, subs):
-    for k, v in subs:
-        if k in s:
-            s = s.replace(k, v)
-    return s
+sub_text = common.sub_text
 
 
 def extend_all_fonts(doc, tag):
@@ -760,8 +711,7 @@ def _row_cells(tag, kind, r, frag):
     return [(t, x, ra) for t, x, ra in cells if t]
 
 
-def _col_xs(frag):
-    return [v for v in frag.values() if isinstance(v, (int, float)) and v < 600]
+_col_xs = common._col_xs
 
 
 def _rows_equal_original(tag, rows, frags, kind, first_dollar):
@@ -813,42 +763,18 @@ def _rows_equal_original(tag, rows, frags, kind, first_dollar):
     return True
 
 
-def _flat_row_count(rows, kind):
-    n = 0
-    for r in rows:
-        n += 1 + max(0, len(str(r.get("desc", "")).split("\n")) - 1)
-    return n
+_flat_row_count = common._flat_row_count
 
 
 # ---------- 元数据（原样格式） ----------
-def _pdf_esc(s):
-    return s.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
+_pdf_esc = common._pdf_esc
 
 
 def write_meta(doc, tag, md):
-    'Use explicit editor metadata or fictional sample metadata.'
-    om = ORIG_META[tag]
-    md = md or {}
-    # 缺省（用户未填）：Producer 固定 23.4.26 版串；创建/修改时间=生成时实时时间
-    # （原稿同款 D:…UTC00'00' 格式）；显式填写一律优先
-    creation = md.get("creation") or _now_pdf_date()
-    doc.set_metadata({
-        "title": md.get("title", om.get("title", "") or ""),
-        "author": md.get("author", om.get("author", "") or ""),
-        "creator": md.get("creator", om.get("creator", "") or ""),
-        "subject": om.get("subject", "") or "",
-        "keywords": om.get("keywords", "") or "",
-        "producer": md.get("producer")
-        or 'BillGen Sample Editor',
-        "creationDate": creation,
-        "modDate": md.get("mod") or creation,
-    })
+    return common.write_meta(doc, tag, md, ORIG_META)
 
 
-def _now_pdf_date():
-    from datetime import datetime, timezone
-    t = datetime.now(timezone.utc)
-    return f"D:{t:%Y%m%d%H%M%S}UTC00'00'"
+_now_pdf_date = common._now_pdf_date
 
 
 # ---------- 流式引擎 v2（989BD2E8/67974A46/14A6DFD6×2 四原稿实证） ----------
@@ -1734,83 +1660,18 @@ def _apply_daily(pages, L, tag, d, plans, snaps):
             pg.append_text(mu.raw)
 
 
-def _normalize_type3_glyphs(doc):
-    """Type3 字形过程规范化：PDF 规范要求 d0/d1 是字形首个操作符。
-    原稿与 EF 合成字形均为 q … d1 … cm BI…EI Q 序——把开头 q 移到 d1 之后，
-    绘图指令与渲染像素完全不变，消除严格解析器"指令顺序异常"告警。"""
-    seen, n = set(), 0
-    for page in doc:
-        for f in page.get_fonts(full=True):
-            if f[2] != "Type3" or f[0] in seen:
-                continue
-            seen.add(f[0])
-            m = re.search(r"/CharProcs (\d+) 0 R", doc.xref_object(f[0]))
-            if not m:
-                continue
-            for name, x in re.findall(r"/([A-Za-z0-9.]+) (\d+) 0 R",
-                                      doc.xref_object(int(m.group(1)))):
-                x = int(x)
-                st = doc.xref_stream(x)
-                if not st.startswith(b"q "):
-                    continue
-                i = st.find(b" d1 ")
-                if i < 0 or i > 80:
-                    continue
-                doc.update_stream(x, st[2:i + 4] + b" q " + st[i + 4:],
-                                  compress=False)
-                n += 1
-    return n
+_normalize_type3_glyphs = common._normalize_type3_glyphs
 
 
 def _prep_sig(tag):
-    """预备模板源指纹：静态模板/字体码表/扩展逻辑任一变化即自动重建。"""
-    h = hashlib.md5()
-    for p in (TEMPLATES[tag], os.path.join(BASE, "assets",
-                                           f"font_tables_{tag}.json"),
-              os.path.join(BASE, "extend_fonts.py"),
-              os.path.join(BASE, "assets", f"f3_donor_glyphs_{tag}.json")):
-        h.update(f"{p}:{os.path.getmtime(p)}:{os.path.getsize(p)}".encode())
-    h.update(b"prepared-v1")
-    return h.hexdigest()
+    return common.prepared_signature(tag, BASE, TEMPLATES)
 
 
 def _open_prepared(tag):
-    """预备模板缓存：字体扩展(EF 位图合成)+F3 补字与账单数据无关——
-    一次构建落盘复用（实测占单次构建 ~89% 耗时）。
-    EF 运行期码表（新增字符→码位）同步持久化；命中时载入，
-    保证 make_units 编码与预备模板字形一一对应。"""
-    pdf_fp = os.path.join(BASE, "assets", f"chase_static_{tag}_prepared.pdf")
-    tbl_fp = os.path.join(BASE, "assets", f"font_tables_{tag}_prepared.json")
-    meta_fp = os.path.join(BASE, "assets", f"prepared_{tag}.json")
-    sig = _prep_sig(tag)
-    hit = False
-    try:
-        hit = (json.load(open(meta_fp)).get("sig") == sig
-               and os.path.exists(pdf_fp) and os.path.exists(tbl_fp))
-    except Exception:
-        hit = False
-    if not hit:
-        doc = fitz.open(TEMPLATES[tag])
-        extend_all_fonts(doc, tag)
-        ensure_f3_digits(doc)
-        _normalize_type3_glyphs(doc)
-        doc.save(pdf_fp, garbage=3, deflate=True)
-        doc.close()
-        json.dump({"ch2code": CH2CODE.get(tag, {}),
-                   "code2ch": {f: {str(c): ch for c, ch in m.items()}
-                               for f, m in CODE2CH.get(tag, {}).items()},
-                   "widths": WIDTHS.get(tag, {})}, open(tbl_fp, "w"))
-        json.dump({"sig": sig}, open(meta_fp, "w"))
-    else:
-        prep = json.load(open(tbl_fp))
-        for f, m in prep["ch2code"].items():
-            CH2CODE.setdefault(tag, {}).setdefault(f, {}).update(m)
-        for f, m in prep["code2ch"].items():
-            CODE2CH.setdefault(tag, {}).setdefault(f, {}).update(
-                {int(c): ch for c, ch in m.items()})
-        for f, w in prep["widths"].items():
-            WIDTHS.setdefault(tag, {})[f] = w
-    return fitz.open(pdf_fp)
+    return common.open_prepared(
+        tag, BASE, TEMPLATES, _FONT_CODEC, _prep_sig,
+        extend_all_fonts, ensure_f3_digits,
+    )
 
 
 def build_pdf(d, out_path, watermark=True):

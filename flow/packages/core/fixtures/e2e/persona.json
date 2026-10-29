@@ -1,0 +1,20 @@
+{
+  "name": "Maya Okafor",
+  "age": 31,
+  "address": {
+    "street": "2104 S 1st St",
+    "city": "Austin",
+    "state": "TX",
+    "zip": "78704"
+  },
+  "occupation": "Freelance graphic designer",
+  "household": {
+    "maritalStatus": "single",
+    "children": 0
+  },
+  "hobbies": [
+    "cycling",
+    "screen printing",
+    "live music"
+  ]
+}

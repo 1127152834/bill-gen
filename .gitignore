@@ -2,6 +2,13 @@
 .env.*
 !.env.example
 .venv*/
+dist/
+build/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+test-results.xml
 **/__pycache__/
 *.pyc
 .local/
@@ -192,3 +199,7 @@
 !/alliant/assets/editor.css
 !/alliant/assets/fonts.css
 !/alliant/assets/statement.css
+# 本地 QA 产物与 flow 运行时数据
+_build/
+flow/data/
+flow/apps/*/data/

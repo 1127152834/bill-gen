@@ -8,21 +8,23 @@
 import hashlib, json, os, sys, threading, webbrowser, shutil
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from runtime_paths import data_path
+from copy import deepcopy
+from billgen.server.state import EditorState, RENDER_LOCK, serialized
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # statement_template/
-sys.path.insert(0, BASE)
 import fitz  # noqa: E402
-import generate  # noqa: E402  (同目录上一级的生成器)
+from billgen.themes.wellsfargo import generate
 
 EDITOR = os.path.dirname(os.path.abspath(__file__))
 DATA_FILE = data_path("富国/statement_template/editor/data.json")
-SAMPLE_DATA_FILE = data_path("富国/statement_template/data_sample.json")
+SAMPLE_DATA_FILE = os.path.join(BASE, "data_sample.json")
 PREVIEW = data_path("富国/statement_template/editor/preview.pdf")
 PV_DIR = data_path("富国/statement_template/editor/pv_png")
-STATE = {"watermark": True, "mark": True, "fonts": "declared"}
-LOCK = threading.Lock()
+STATE = EditorState()
+LOCK = RENDER_LOCK
 
 
+@serialized
 def init_data():
     if not os.path.exists(DATA_FILE):
         shutil.copy(SAMPLE_DATA_FILE, DATA_FILE)
@@ -32,9 +34,10 @@ def init_data():
 
 def regenerate(data, watermark, mark, fonts="embedded"):
     with LOCK:
+        data = deepcopy(data)
+        generate.build_pdf(data, PREVIEW, watermark=watermark, mark=mark, fonts=fonts)
         with open(DATA_FILE, "w", encoding="utf-8") as fh:
             json.dump(data, fh, ensure_ascii=False, indent=2)
-        generate.build_pdf(data, PREVIEW, watermark=watermark, mark=mark, fonts=fonts)
         # 同步渲染每页 PNG 供编辑器图片预览（绕开内嵌 PDF 查看器不自动刷新的问题）
         # 按内容哈希命名：未变化的页 URL 不变 → 浏览器 immutable 缓存直出，
         # 响应只带哈希列表；原子写避免读到半张图
@@ -59,7 +62,8 @@ def regenerate(data, watermark, mark, fonts="embedded"):
                     os.remove(os.path.join(PV_DIR, f))
                 except OSError:
                     pass
-        STATE["pages"], STATE["hashes"] = n, hs
+        STATE.watermark, STATE.mark, STATE.fonts = watermark, mark, fonts
+        STATE.pages, STATE.hashes = n, hs
         return n, hs
 
 
@@ -79,23 +83,24 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    @serialized
     def do_GET(self):
         if self.path in ("/", "/index.html"):
             with open(os.path.join(EDITOR, "index.html"), "rb") as fh:
                 self._send(200, fh.read(), "text/html; charset=utf-8")
         elif self.path == "/api/data":
             d = init_data()
-            self._send(200, json.dumps({"data": d, **STATE}))
+            self._send(200, json.dumps({"data": d, **STATE.snapshot()}))
         elif self.path == "/preview.pdf":
             if not os.path.exists(PREVIEW):
-                regenerate(init_data(), STATE["watermark"], STATE["mark"], STATE["fonts"])
+                regenerate(init_data(), STATE.watermark, STATE.mark, STATE.fonts)
             with open(PREVIEW, "rb") as fh:
                 self._send(200, fh.read(), "application/pdf")
         elif self.path == "/api/pages":
-            if not STATE.get("hashes"):
-                regenerate(init_data(), STATE["watermark"], STATE["mark"], STATE["fonts"])
-            self._send(200, json.dumps({"pages": STATE["pages"],
-                                        "hashes": STATE["hashes"]}))
+            if not STATE.hashes:
+                regenerate(init_data(), STATE.watermark, STATE.mark, STATE.fonts)
+            self._send(200, json.dumps({"pages": STATE.pages,
+                                        "hashes": STATE.hashes}))
         elif self.path.startswith("/pv/") and self.path.endswith(".png"):
             # /pv/{内容哈希}.png — 路径=内容哈希（无查询串，防内嵌浏览器对 ?t= 的
             # localhost 请求失败），未变化页同 URL 走 immutable 缓存
@@ -117,11 +122,12 @@ class Handler(BaseHTTPRequestHandler):
                            {"Content-Disposition": "attachment; filename=statement_sample.pdf"})
         elif self.path == "/api/reset":
             shutil.copy(SAMPLE_DATA_FILE, DATA_FILE)
-            regenerate(init_data(), STATE["watermark"], STATE["mark"], STATE["fonts"])
+            regenerate(init_data(), STATE.watermark, STATE.mark, STATE.fonts)
             self._send(200, json.dumps({"ok": True, "data": init_data()}))
         else:
             self._send(404, '{"error":"not found"}')
 
+    @serialized
     def do_POST(self):
         if self.path != "/api/generate":
             self._send(404, '{"error":"not found"}')
@@ -130,10 +136,9 @@ class Handler(BaseHTTPRequestHandler):
             n = int(self.headers.get("Content-Length", 0))
             payload = json.loads(self.rfile.read(n))
             data = payload["data"]
-            STATE["watermark"] = bool(payload.get("watermark", True))
-            STATE["mark"] = bool(payload.get("mark", True))
-            STATE["fonts"] = str(payload.get("fonts", "declared"))
-            regenerate(data, STATE["watermark"], STATE["mark"], STATE["fonts"])
+            regenerate(data, bool(payload.get("watermark", True)),
+                       bool(payload.get("mark", True)),
+                       str(payload.get("fonts", "declared")))
             self._send(200, '{"ok":true}')
         except Exception as e:
             self._send(200, json.dumps({"ok": False, "error": str(e)}))
@@ -144,7 +149,7 @@ def main():
     base_port = port
     host = os.environ.get("HOST", "127.0.0.1")   # Docker 内设 HOST=0.0.0.0
     init_data()
-    regenerate(init_data(), STATE["watermark"], STATE["mark"], STATE["fonts"])
+    regenerate(init_data(), STATE.watermark, STATE.mark, STATE.fonts)
     for _ in range(20):  # 端口被占则自动 +1
         try:
             srv = ThreadingHTTPServer((host, port), Handler)

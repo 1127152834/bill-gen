@@ -17,6 +17,33 @@ Edit the DATA dict and run:  python3 generate_statement.py
 import fitz, os
 import uharfbuzz as hb
 
+from copy import deepcopy
+from dataclasses import dataclass, field
+
+
+@dataclass
+class RenderContext:
+    """Per-build snapshot; never installs request state on the module."""
+
+    data: dict
+    watermark: bool
+    meta: dict
+    font_cjk: str | None
+    fallback_used: set = field(default_factory=set)
+    fitz_fonts: dict = field(default_factory=dict)
+    shapers: dict = field(default_factory=dict)
+
+
+def _render_context(data=None, watermark=None):
+    d = deepcopy(DATA if data is None else data)
+    inter = _CMAP[_VAR] & _CMAP[_480]
+    need = any(ord(ch) not in inter and ord(ch) in _CJK_CMAP
+               for text in collect_texts(d) for ch in text)
+    font_cjk = FONT_CJK_BASE if need else None
+    return RenderContext(d, WATERMARK if watermark is None else watermark,
+                         deepcopy(META), font_cjk)
+
+
 BASE = os.path.dirname(os.path.abspath(__file__))
 FONT_VAR = os.path.join(BASE, "assets/rebuilt_var.ttf")
 FONT_480 = os.path.join(BASE, "assets/rebuilt_480.ttf")
@@ -117,10 +144,11 @@ class Shaper:
         return out, pen          # pen = width without trailing ls
 
 _shapers = {}
-def shaper(fontpath):
-    if fontpath not in _shapers:
-        _shapers[fontpath] = Shaper(fontpath)
-    return _shapers[fontpath]
+def shaper(fontpath, *, ctx=None):
+    ctx = ctx if ctx is not None else _render_context()
+    if fontpath not in ctx.shapers:
+        ctx.shapers[fontpath] = Shaper(fontpath)
+    return ctx.shapers[fontpath]
 
 _VAR = "var"; _480 = "f480"; _CJK = "cjk"
 def _fp(which):
@@ -169,9 +197,10 @@ def _kern(primary, c1, c2, size):
     bucket = tab.get(_KSIZE_CACHE[sz]) or {}
     return bucket.get(f"{c1}|{c2}", 0.0) * size
 
-def layout_text(text, size, primary, kern=True, ls_em=0.0):
+def layout_text(text, size, primary, kern=True, ls_em=0.0, *, ctx=None):
     """排版文本：fitz 步进 + 2026 逐(对,字号)字距表；主字体缺字回退 CJK。
     返回 ([(font, char, x)], width)。"""
+    ctx = ctx if ctx is not None else _render_context()
     cm = _CMAP[primary]
     # split into per-font runs (kern only applies inside a run)
     runs = []
@@ -179,7 +208,7 @@ def layout_text(text, size, primary, kern=True, ls_em=0.0):
     for ch in text:
         if ord(ch) in cm:
             key = primary
-        elif FONT_CJK and ord(ch) in _CJK_CMAP:
+        elif ctx.font_cjk and ord(ch) in _CJK_CMAP:
             key = _CJK
         else:
             continue            # 两套字体都没有的字符：跳过（服务端会提前拦截并提醒）
@@ -194,7 +223,7 @@ def layout_text(text, size, primary, kern=True, ls_em=0.0):
         for ch in rs:
             seq.append((key, ch))
             if key == _CJK:
-                _fallback_used.add(ch)
+                ctx.fallback_used.add(ch)
 
     # 累积 pen：fitz 步进 + 2026 字距表 + 字距(letter-spacing)
     ls = ls_em * size
@@ -202,7 +231,7 @@ def layout_text(text, size, primary, kern=True, ls_em=0.0):
     n = len(seq)
     for i, (key, ch) in enumerate(seq):
         out.append((key, ch, pen))
-        pen += _ffont(key).text_length(ch, size)
+        pen += _ffont(key, ctx=ctx).text_length(ch, size)
         if i < n - 1:
             nk, nch = seq[i + 1]
             if kern and nk == key:
@@ -212,26 +241,28 @@ def layout_text(text, size, primary, kern=True, ls_em=0.0):
 
 # ================================================================ drawing
 _fitz_fonts = {}
-def _ffont(which):
+def _ffont(which, *, ctx=None):
     """缓存的 fitz.Font（快速查询字符自然步进）。"""
-    if which not in _fitz_fonts:
-        path = FONT_CJK if which == _CJK else _fp(which)
-        _fitz_fonts[which] = fitz.Font(fontfile=path)
-    return _fitz_fonts[which]
+    ctx = ctx if ctx is not None else _render_context()
+    if which not in ctx.fitz_fonts:
+        path = ctx.font_cjk if which == _CJK else _fp(which)
+        ctx.fitz_fonts[which] = fitz.Font(fontfile=path)
+    return ctx.fitz_fonts[which]
 
 MAX_RUN = 6   # 批量 run 上限（MuPDF 批内步进有 ~0.0075pt/字符量化漂移）
 
 def put(page, x, baseline, text, size, font=_VAR, color=INK,
-        kern=True, ls_em=0.0, ins_name=None):
+        kern=True, ls_em=0.0, ins_name=None, *, ctx=None):
     """Draw shaped text. (x, baseline) = pen position of first glyph.
     优化：无字距/字距偏移的连续字符合并为一次 insert_text（累积漂移 <0.05pt）。"""
-    glyphs, _ = layout_text(text, size, font, kern=kern, ls_em=ls_em)
+    ctx = ctx if ctx is not None else _render_context()
+    glyphs, _ = layout_text(text, size, font, kern=kern, ls_em=ls_em, ctx=ctx)
     n = len(glyphs)
     i = 0
     while i < n:
         key = glyphs[i][0]
         gx0 = glyphs[i][2]
-        ff = _ffont(key if key in (_VAR, _480) else font)
+        ff = _ffont(key if key in (_VAR, _480) else font, ctx=ctx)
         j = i + 1
         while j < n and j - i < MAX_RUN:
             if glyphs[j][0] != key:
@@ -245,18 +276,20 @@ def put(page, x, baseline, text, size, font=_VAR, color=INK,
                          fontname=ins_name or key, color=color)
         i = j
 
-def put_right(page, right_edge, baseline, text, size, font=_VAR, color=INK, kern=True, ins_name=None):
-    _, w = layout_text(text, size, font, kern=kern)
-    put(page, right_edge - w, baseline, text, size, font, color, kern=kern, ins_name=ins_name)
+def put_right(page, right_edge, baseline, text, size, font=_VAR, color=INK, kern=True, ins_name=None, *, ctx=None):
+    ctx = ctx if ctx is not None else _render_context()
+    _, w = layout_text(text, size, font, kern=kern, ctx=ctx)
+    put(page, right_edge - w, baseline, text, size, font, color, kern=kern, ins_name=ins_name, ctx=ctx)
 
-def put_center_ls(page, center, baseline, text, size, font, color, ls_em):
+def put_center_ls(page, center, baseline, text, size, font, color, ls_em, *, ctx=None):
     """Center text with letter-spacing (footer).
     CSS text-align:center uses the element box width, which includes
     trailing letter-spacing after the last character."""
-    _, w = layout_text(text, size, font, kern=True, ls_em=ls_em)
+    ctx = ctx if ctx is not None else _render_context()
+    _, w = layout_text(text, size, font, kern=True, ls_em=ls_em, ctx=ctx)
     w += ls_em * size                    # trailing letter-spacing
     put(page, center - w / 2, baseline, text, size, font, color,
-        kern=True, ls_em=ls_em)
+        kern=True, ls_em=ls_em, ctx=ctx)
 
 # ------------------------------------------------ symbols.ttf → 矢量轮廓缓存
 _SYM_CACHE = None
@@ -310,9 +343,10 @@ META = {'title': 'Fictional Sample Statement',
  'creator': 'Bill Gen',
  'creationDate': 'D:20261001000000Z'}
 
-def apply_meta(doc, meta=None):
+def apply_meta(doc, meta=None, *, ctx=None):
     """写入 PDF 元数据；创建时间留空时不写入。"""
-    m = dict(META)
+    ctx = ctx if ctx is not None else _render_context()
+    m = dict(ctx.meta)
     for k, v in (meta or {}).items():
         if k in m and v:
             m[k] = str(v)
@@ -367,22 +401,25 @@ def signed_money(v):
     """交易金额：正='$X'（绿），负='-$X'（黑）"""
     return ("-" if v < 0 else "") + f"${abs(v):,.2f}"
 
-def prepare(page):
+def prepare(page, *, ctx=None):
+    ctx = ctx if ctx is not None else _render_context()
     page.insert_font(fontname=_VAR, fontfile=FONT_VAR)
     page.insert_font(fontname=_480, fontfile=FONT_480)
-    if FONT_CJK:
-        page.insert_font(fontname=_CJK, fontfile=FONT_CJK)
+    if ctx.font_cjk:
+        page.insert_font(fontname=_CJK, fontfile=ctx.font_cjk)
     page.draw_rect(page.rect, color=None, fill=(1, 1, 1))
     page.draw_rect(fitz.Rect(0, 0, 612, 4), color=None, fill=TOPBAR)
 
-def footer(page, baselines):
+def footer(page, baselines, *, ctx=None):
     """baselines = (line1_baseline, line2_baseline) — exact from source."""
-    lines = (DATA["footer_line1"], DATA["footer_line2"])
+    ctx = ctx if ctx is not None else _render_context()
+    lines = (ctx.data["footer_line1"], ctx.data["footer_line2"])
     for line, bl in zip(lines, baselines):
-        put_center_ls(page, 306, bl, line, 8, _480, FOOTER_COL, FOOTER_LS)
+        put_center_ls(page, 306, bl, line, 8, _480, FOOTER_COL, FOOTER_LS, ctx=ctx)
 
-def watermark(page):
-    if not WATERMARK:
+def watermark(page, *, ctx=None):
+    ctx = ctx if ctx is not None else _render_context()
+    if not ctx.watermark:
         return
     tw = fitz.TextWriter(page.rect)
     f = fitz.Font(fontfile=FONT_VAR)
@@ -419,13 +456,14 @@ def autodetect_cjk(data=None):
 
 
 # ================================================================ page 1
-def _wrap_words(text, size, font, max_w):
+def _wrap_words(text, size, font, max_w, *, ctx=None):
     """按词贪婪换行（用于公司名/地址，边界 170pt，与原稿一致）。"""
+    ctx = ctx if ctx is not None else _render_context()
     words = text.split(" ")
     lines, cur = [], ""
     for wd in words:
         trial = (cur + " " + wd).strip()
-        if cur and layout_text(trial, size, font, kern=True)[1] > max_w:
+        if cur and layout_text(trial, size, font, kern=True, ctx=ctx)[1] > max_w:
             lines.append(cur)
             cur = wd
         else:
@@ -434,74 +472,75 @@ def _wrap_words(text, size, font, max_w):
         lines.append(cur)
     return lines
 
-def page_summary(doc):
+def page_summary(doc, *, ctx=None):
+    ctx = ctx if ctx is not None else _render_context()
     page = doc.new_page(width=612, height=792)
-    prepare(page)
+    prepare(page, ctx=ctx)
     # vector logo (redacted copy: only logo paths, no text)
     page.show_pdf_page(fitz.Rect(38, 38, 181, 74), _logo_doc(), 0,
                        clip=fitz.Rect(38, 38, 181, 74))
 
     # 顶部期间块：右锚定（x = 572 - 最宽行宽度，与原稿 2025/2026 均一致）
-    w1 = layout_text(DATA["period_label"], 10, _VAR, kern=True)[1]
+    w1 = layout_text(ctx.data["period_label"], 10, _VAR, kern=True, ctx=ctx)[1]
     w2 = 0.0
-    for seg in (DATA["period_start"], "-", DATA["period_end"],
-                " (", DATA["period_days"], " days)"):
-        w2 += layout_text(seg, 10, _VAR, kern=True)[1]
-    w3 = layout_text(DATA["timezone"], 10, _VAR, kern=True)[1]
+    for seg in (ctx.data["period_start"], "-", ctx.data["period_end"],
+                " (", ctx.data["period_days"], " days)"):
+        w2 += layout_text(seg, 10, _VAR, kern=True, ctx=ctx)[1]
+    w3 = layout_text(ctx.data["timezone"], 10, _VAR, kern=True, ctx=ctx)[1]
     px = 572.0 - max(w1, w2, w3)
-    put(page, px, 45.502, DATA["period_label"], 10)
+    put(page, px, 45.502, ctx.data["period_label"], 10, ctx=ctx)
     x = px
-    for seg in (DATA["period_start"], "-", DATA["period_end"],
-                " (", DATA["period_days"], " days)"):
-        put(page, x, 59.502, seg, 10)
-        _, w = layout_text(seg, 10, _VAR, kern=True)
+    for seg in (ctx.data["period_start"], "-", ctx.data["period_end"],
+                " (", ctx.data["period_days"], " days)"):
+        put(page, x, 59.502, seg, 10, ctx=ctx)
+        _, w = layout_text(seg, 10, _VAR, kern=True, ctx=ctx)
         x += w
-    put(page, px, 73.502, DATA["timezone"], 10)
+    put(page, px, 73.502, ctx.data["timezone"], 10, ctx=ctx)
 
     # 左列：公司名按词换行（15pt/行距21/边界170），地址与 EIN 顺移
     COL_W = 170.0
-    name_lines = _wrap_words(DATA["company"], 15, _480, COL_W)
+    name_lines = _wrap_words(ctx.data["company"], 15, _480, COL_W, ctx=ctx)
     for i, ln in enumerate(name_lines):
-        put(page, 40.0, 132.25 + i * 21.0, ln, 15, _480)
+        put(page, 40.0, 132.25 + i * 21.0, ln, 15, _480, ctx=ctx)
     y_addr = 132.25 + len(name_lines) * 21.0 + 11.25
     addr_lines = []
-    for a in DATA["address"]:
-        addr_lines.extend(_wrap_words(a, 10, _VAR, COL_W))
+    for a in ctx.data["address"]:
+        addr_lines.extend(_wrap_words(a, 10, _VAR, COL_W, ctx=ctx))
     for i, ln in enumerate(addr_lines):
-        put(page, 40.0, y_addr + i * 16.0, ln, 10)
-    put(page, 40.0, y_addr + len(addr_lines) * 16.0 + 16.0, DATA["ein"], 10)
+        put(page, 40.0, y_addr + i * 16.0, ln, 10, ctx=ctx)
+    put(page, 40.0, y_addr + len(addr_lines) * 16.0 + 16.0, ctx.data["ein"], 10, ctx=ctx)
 
     # 右栏（2026 版式 x=252.20；值右对齐 572 不变；标题用 480 字体）
     RC = 252.20
-    put(page, RC, 134.352, "Account details", 13, _480, BLUE)
+    put(page, RC, 134.352, "Account details", 13, _480, BLUE, ctx=ctx)
     page.draw_line(fitz.Point(RC, 141), fitz.Point(572, 141), color=GRAY_LINE, width=2)
-    rows = [("Account Type", DATA["account_type"]),
-            ("Account Number", DATA["account_number"]),
-            ("Routing Number", DATA["routing_number"])]
+    rows = [("Account Type", ctx.data["account_type"]),
+            ("Account Number", ctx.data["account_number"]),
+            ("Routing Number", ctx.data["routing_number"])]
     for i, (k, v) in enumerate(rows):
         bl = 154.552 + i * 24
-        put(page, RC, bl, k, 9)
-        put_right(page, 572.0, bl, v, 9)
+        put(page, RC, bl, k, 9, ctx=ctx)
+        put_right(page, 572.0, bl, v, 9, ctx=ctx)
 
     # Account activity
-    txs = DATA["transactions"]
+    txs = ctx.data["transactions"]
     deposits = sum(t["amount"] for t in txs if t["amount"] > 0)
     withdrawals = -sum(t["amount"] for t in txs if t["amount"] < 0)
-    end = DATA["beginning_balance"] + deposits - withdrawals
+    end = ctx.data["beginning_balance"] + deposits - withdrawals
 
-    put(page, RC, 229.352, "Account activity", 13, _480, BLUE)
+    put(page, RC, 229.352, "Account activity", 13, _480, BLUE, ctx=ctx)
     page.draw_line(fitz.Point(RC, 236), fitz.Point(572, 236), color=GRAY_LINE, width=2)
-    rows = [("Beginning Balance", money(DATA["beginning_balance"])),
+    rows = [("Beginning Balance", money(ctx.data["beginning_balance"])),
             ("Total withdrawals", signed_money(-withdrawals)),
             ("Total deposits", money(deposits)),
             ("Statement balance", money(end))]
     for i, (k, v) in enumerate(rows):
         bl = 249.552 + i * 24
-        put(page, RC, bl, k, 9)
-        put_right(page, 572.0, bl, v, 9)
+        put(page, RC, bl, k, 9, ctx=ctx)
+        put_right(page, 572.0, bl, v, 9, ctx=ctx)
 
-    footer(page, (743.602, 763.602))
-    watermark(page)
+    footer(page, (743.602, 763.602), ctx=ctx)
+    watermark(page, ctx=ctx)
 
 # ================================================================ page 2
 # 2026 交易表几何（从 Signature-Pasta 2026-10 原稿精确测量）
@@ -522,27 +561,28 @@ TRANSACTION_FOOTER_BASELINES = (739.602, 759.602)
 # capacity from the geometry keeps later row-height changes from overlapping it.
 ROWS_PER_PAGE = int((TRANSACTION_FOOTER_BASELINES[0] - 20 - ROW_TOP - TOTAL_DY) // ROW_H)
 
-def page_transactions(doc, page_index, page_count, rows, first, last_total):
+def page_transactions(doc, page_index, page_count, rows, first, last_total, *, ctx=None):
+    ctx = ctx if ctx is not None else _render_context()
     page = doc.new_page(width=612, height=792)
-    prepare(page)
+    prepare(page, ctx=ctx)
 
     # title (baseline 47.905, pen 48.0)
     label = "All Transactions /" + (f" cont. ({page_index+1}/{page_count})" if page_count > 1 else "")
-    put(page, 48.0, 47.905, label, 11, color=BLUE2)
+    put(page, 48.0, 47.905, label, 11, color=BLUE2, ctx=ctx)
 
     # column headers (baseline 73.126)
-    put(page, 48.0,   73.126, "Date (UTC)",         7.5, color=TABLE_HEAD)
-    put(page, 99.6,   73.126, "Description",        7.5, color=TABLE_HEAD)
-    put(page, 306.83, 73.126, "Type",               7.5, color=TABLE_HEAD)
-    put_right(page, 477.423, 73.126, "Amount",            7.5, color=TABLE_HEAD)
-    put_right(page, 563.959, 73.126, "End of Day Balance", 7.5, color=TABLE_HEAD)
+    put(page, 48.0,   73.126, "Date (UTC)",         7.5, color=TABLE_HEAD, ctx=ctx)
+    put(page, 99.6,   73.126, "Description",        7.5, color=TABLE_HEAD, ctx=ctx)
+    put(page, 306.83, 73.126, "Type",               7.5, color=TABLE_HEAD, ctx=ctx)
+    put_right(page, 477.423, 73.126, "Amount",            7.5, color=TABLE_HEAD, ctx=ctx)
+    put_right(page, 563.959, 73.126, "End of Day Balance", 7.5, color=TABLE_HEAD, ctx=ctx)
 
     # source content-stream order: title, headers, footer, rows, total
-    footer(page, TRANSACTION_FOOTER_BASELINES)
+    footer(page, TRANSACTION_FOOTER_BASELINES, ctx=ctx)
 
     # rows
-    transactions = DATA["transactions"]
-    running = DATA["beginning_balance"] + sum(
+    transactions = ctx.data["transactions"]
+    running = ctx.data["beginning_balance"] + sum(
         t["amount"] for t in transactions[:first])
 
     page.draw_line(fitz.Point(48, ROW_TOP), fitz.Point(564, ROW_TOP),
@@ -560,25 +600,25 @@ def page_transactions(doc, page_index, page_count, rows, first, last_total):
         day_end = next_index == len(transactions) or transactions[next_index]["date"] != t["date"]
 
         if t["date"] != prev_date:          # 2026: 交易行 kern ON
-            put(page, DATE_X, bl, t["date"], 7.5, color=BLACK)
+            put(page, DATE_X, bl, t["date"], 7.5, color=BLACK, ctx=ctx)
             prev_date = t["date"]
-        put(page, DESC_X, bl, t["desc"], 7.5, color=BLACK)
+        put(page, DESC_X, bl, t["desc"], 7.5, color=BLACK, ctx=ctx)
         draw_icon(page, _icon_cp(t), bl + ICON_DY)
-        put(page, TYPE_X, bl, t["type"], 7.5, color=BLACK)
+        put(page, TYPE_X, bl, t["type"], 7.5, color=BLACK, ctx=ctx)
         put_right(page, AMT_RIGHT, bl, signed_money(t["amount"]), 7.5,
-                  color=GREEN if t["dir"] == "in" else BLACK)
+                  color=GREEN if t["dir"] == "in" else BLACK, ctx=ctx)
         if day_end:
-            put_right(page, BAL_RIGHT, bl, money(running), 7.5, color=BLACK)
+            put_right(page, BAL_RIGHT, bl, money(running), 7.5, color=BLACK, ctx=ctx)
         page.draw_line(fitz.Point(48, band + ROW_H), fitz.Point(564, band + ROW_H),
                        color=ROW_LINE, width=1)
 
     # Total row (480 font, 原稿专用嵌入名 RVFNLP+…，字形/排版与 480 完全一致)
     tbl = ROW_TOP + n * ROW_H + TOTAL_DY
     page.insert_font(fontname="f480t", fontfile=FONT_480_TOTAL)
-    put(page, DATE_X, tbl, "Total", 7.5, _480, BLACK, ins_name="f480t")
-    put_right(page, TOTAL_RIGHT, tbl, last_total, 7.5, _480, BLACK, ins_name="f480t")
+    put(page, DATE_X, tbl, "Total", 7.5, _480, BLACK, ins_name="f480t", ctx=ctx)
+    put_right(page, TOTAL_RIGHT, tbl, last_total, 7.5, _480, BLACK, ins_name="f480t", ctx=ctx)
 
-    watermark(page)
+    watermark(page, ctx=ctx)
 
 # ================================================================ logo
 _logo = None
@@ -615,20 +655,32 @@ def _fix_font_names(doc):
                 if t2 == "xref":
                     doc.xref_set_key(int(d2.split()[0]), "FontName", "/" + full)
 
-def build(meta=None):
-    autodetect_cjk()
-    doc = fitz.open()
-    page_summary(doc)
+def build(meta=None, *, data=None, watermark=None):
+    """Build a document from a private request snapshot.
 
-    txs = DATA["transactions"]
-    total = money(DATA["beginning_balance"] + sum(t["amount"] for t in txs))
-    chunks = [txs[i:i + ROWS_PER_PAGE] for i in range(0, len(txs), ROWS_PER_PAGE)]
-    for idx, chunk in enumerate(chunks):
-        page_transactions(doc, idx, len(chunks), chunk,
-                          idx * ROWS_PER_PAGE, total)
-    _fix_font_names(doc)
-    apply_meta(doc, meta)
-    return doc
+    ``meta`` remains positional for legacy callers. Omitted data/watermark use
+    module defaults; explicit values never replace those module attributes.
+    The caller owns the returned document and must close it.
+    """
+    meta = deepcopy(meta)
+    ctx = _render_context(data, watermark)
+    doc = fitz.open()
+    try:
+        page_summary(doc, ctx=ctx)
+
+        txs = ctx.data["transactions"]
+        total = money(ctx.data["beginning_balance"] + sum(t["amount"] for t in txs))
+        chunks = [txs[i:i + ROWS_PER_PAGE] for i in range(0, len(txs), ROWS_PER_PAGE)]
+        for idx, chunk in enumerate(chunks):
+            page_transactions(doc, idx, len(chunks), chunk,
+                              idx * ROWS_PER_PAGE, total, ctx=ctx)
+        _fix_font_names(doc)
+        apply_meta(doc, meta, ctx=ctx)
+        return doc
+    except BaseException:
+        doc.close()
+        raise
+
 
 def main():
     doc = build(meta=None)

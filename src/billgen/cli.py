@@ -3,6 +3,7 @@
     billgen list                       # 13 个模板一览
     billgen render boa-personal -o out.pdf
     billgen render --all --outdir _build
+    billgen synth render boa-personal --from result.json -o out.pdf
     billgen parity record              # 记录基线
     billgen parity verify              # 与基线比对（不一致则退出码 1）
 """
@@ -39,7 +40,7 @@ def _opts(args: argparse.Namespace, base: RenderOptions | None = None) -> Render
     return replace(
         base,
         watermark=not args.no_watermark,
-        encrypt=not args.no_encrypt,
+        encrypt=False if args.no_encrypt else base.encrypt,
         page_dpi=args.dpi,
     )
 
@@ -88,6 +89,52 @@ def _cmd_render(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_synth_render(args: argparse.Namespace) -> int:
+    """把 flow 的生成结果直接渲染成某个模板的 PDF。"""
+    from dataclasses import replace
+
+    from .synth import from_game_result, render
+
+    spec = registry.get_spec(args.template)
+    payload = json.loads(Path(args.from_file).read_text(encoding="utf-8"))
+    ledger = from_game_result(
+        payload,
+        account=args.account,
+        cycle=args.cycle,
+        bank_name=args.bank_name,
+        watermark=not args.no_watermark,
+    )
+    opts = replace(
+        spec.default_options,
+        watermark=not args.no_watermark,
+        encrypt=False if args.no_encrypt else spec.default_options.encrypt,
+        page_dpi=args.dpi,
+    )
+    result = render(args.template, ledger, opts, brand=not args.no_brand,
+                    docinfo=not args.no_docinfo)
+    out = Path(args.output or f"{args.template}.pdf")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_bytes(result.pdf)
+    print(
+        json.dumps(
+            {
+                "template": args.template,
+                "account": ledger.account.kind,
+                "period": [ledger.period.start.isoformat(), ledger.period.end.isoformat()],
+                "rows": len(ledger.rows),
+                "brand": not args.no_brand,
+                "docinfo": not args.no_docinfo,
+                "pages": result.pages,
+                "bytes": len(result.pdf),
+                "elapsed_ms": result.elapsed_ms,
+                "output": str(out),
+            },
+            ensure_ascii=False,
+        )
+    )
+    return 0
+
+
 def _cmd_parity(args: argparse.Namespace) -> int:
     from .parity.baseline import compare_file, record
 
@@ -99,6 +146,12 @@ def _cmd_parity(args: argparse.Namespace) -> int:
         print(f"基线已写入 {target}（{len(payload)} 条）")
         return 0
     return 0 if compare_file(baseline, Path(args.repo or paths.ROOT)) else 1
+
+
+def _cmd_serve(args: argparse.Namespace) -> int:
+    from .server.http import serve
+
+    return serve(args.host, args.port)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -119,6 +172,27 @@ def main(argv: list[str] | None = None) -> int:
     render.add_argument("--dpi", type=int, default=110)
     render.set_defaults(func=_cmd_render)
 
+    synth = sub.add_parser("synth", help="由生成结果（flow）渲染账单 PDF")
+    synth_sub = synth.add_subparsers(dest="synth_cmd", required=True)
+    synth_render = synth_sub.add_parser("render", help="账本 → 指定模板 PDF")
+    synth_render.add_argument("template", help="模板 id，例如 boa-personal")
+    synth_render.add_argument("--from", dest="from_file", required=True,
+                              help="flow 的 GenerationResult JSON 路径")
+    synth_render.add_argument("--account", choices=["checking", "business_checking", "credit"],
+                              help="选择账户（缺省取结果里的第一个）")
+    synth_render.add_argument("--cycle", type=int, default=-1,
+                              help="结算期下标，-1 表示最后一期")
+    synth_render.add_argument("--bank-name", dest="bank_name", help="覆盖银行显示名")
+    synth_render.add_argument("-o", "--output", help="输出 PDF 路径")
+    synth_render.add_argument("--no-watermark", action="store_true")
+    synth_render.add_argument("--no-brand", action="store_true",
+                              help="保留模板原有的真实行标（默认替换成账本自己的行标）")
+    synth_render.add_argument("--no-docinfo", action="store_true",
+                              help="保留模板自带的 Producer/时间戳（默认改成真实账单引擎的痕迹）")
+    synth_render.add_argument("--no-encrypt", action="store_true")
+    synth_render.add_argument("--dpi", type=int, default=110)
+    synth_render.set_defaults(func=_cmd_synth_render)
+
     parity = sub.add_parser("parity", help="基线记录与比对")
     parity.add_argument("action", choices=["record", "verify"])
     parity.add_argument("--baseline", help="基线文件（默认包内 parity/baseline.json）")
@@ -126,8 +200,27 @@ def main(argv: list[str] | None = None) -> int:
     parity.add_argument("--repo", help="被探测仓库根（默认当前源码树）")
     parity.set_defaults(func=_cmd_parity)
 
+    mcp = sub.add_parser("mcp", help="启动 MCP 服务（stdio），供 LangGraph / Agent 调渲染")
+    mcp.add_argument("--out", help="产物目录（默认 $BILLGEN_MCP_OUT 或系统临时目录）")
+    mcp.add_argument("--transport", default="stdio", choices=["stdio", "sse", "streamable-http"])
+    mcp.set_defaults(func=_cmd_mcp)
+
+    serve = sub.add_parser("serve", help="启动单进程 Web 编辑器与统一 API")
+    serve.add_argument("--host", default="127.0.0.1")
+    serve.add_argument("--port", type=int, default=8800)
+    serve.set_defaults(func=_cmd_serve)
+
     args = parser.parse_args(argv)
     return args.func(args)
+
+
+def _cmd_mcp(args) -> int:
+    from .mcp.server import main as mcp_main
+
+    argv = ["--transport", args.transport]
+    if args.out:
+        argv += ["--out", args.out]
+    return mcp_main(argv)
 
 
 def _version() -> str:

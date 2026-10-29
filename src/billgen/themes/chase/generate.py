@@ -5,13 +5,7 @@
   generate_personal.py  ← 个人版 College Checking
   generate_business.py  ← 商业版 Business Complete
 本文件仅按 template 字段路由。"""
-import os, sys
-
-BASE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, BASE)
-
-import generate_personal
-import generate_business
+from billgen.themes.chase import generate_business, generate_personal
 
 
 def build_pdf(d, out_path, watermark=True):

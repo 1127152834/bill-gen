@@ -1,0 +1,97 @@
+import { z } from 'zod';
+import { isValidDate } from '../date.js';
+
+/** `YYYY-MM-DD` calendar date string. */
+export const DateStringSchema = z
+  .string()
+  .regex(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/, 'expected YYYY-MM-DD')
+  .refine(isValidDate, 'not a real calendar date');
+export type DateString = z.infer<typeof DateStringSchema>;
+
+/** `YYYY-MM` month string. */
+export const MonthStringSchema = z
+  .string()
+  .regex(/^\d{4}-(0[1-9]|1[0-2])$/, 'expected YYYY-MM');
+export type MonthString = z.infer<typeof MonthStringSchema>;
+
+/** Monthly transaction-count range for one account (hard constraint downstream). */
+export const CountRangeSchema = z
+  .object({
+    min: z.number().int().min(1),
+    max: z.number().int().max(200),
+  })
+  .refine((r) => r.min <= r.max, { message: 'min must be <= max', path: ['min'] });
+export type CountRange = z.infer<typeof CountRangeSchema>;
+
+export const AddressSchema = z.object({
+  street: z.string().min(1),
+  city: z.string().min(1),
+  state: z.string().regex(/^[A-Z]{2}$/, 'expected 2-letter uppercase state'),
+  zip: z.string().regex(/^\d{5}$/, 'expected 5-digit zip'),
+});
+export type Address = z.infer<typeof AddressSchema>;
+
+export const PersonalProfileSchema = z.object({
+  name: z.string().min(1),
+  age: z.number().int().min(18).max(90),
+  address: AddressSchema,
+  occupation: z.string().min(1),
+  household: z.object({
+    maritalStatus: z.enum(['single', 'married', 'partnered']),
+    children: z.number().int().min(0).max(6),
+  }),
+  hobbies: z.array(z.string().min(1)).max(8),
+});
+export type PersonalProfile = z.infer<typeof PersonalProfileSchema>;
+
+export const BusinessProfileSchema = z.object({
+  legalName: z.string().min(1),
+  entityType: z.enum(['LLC', 'S-Corp', 'Sole Prop']),
+  industry: z.string().min(1),
+  description: z.string().min(1),
+  founded: MonthStringSchema,
+  employeeCount: z.number().int().min(0).max(500),
+  address: AddressSchema,
+});
+export type BusinessProfile = z.infer<typeof BusinessProfileSchema>;
+
+export const ProfileSchema = z.union([PersonalProfileSchema, BusinessProfileSchema]);
+export type Profile = z.infer<typeof ProfileSchema>;
+
+export const SubjectTypeSchema = z.enum(['personal', 'business']);
+export type SubjectType = z.infer<typeof SubjectTypeSchema>;
+
+export const GenerationRequestSchema = z
+  .object({
+    subjectType: SubjectTypeSchema,
+    /** Omitted = a later task generates a random profile. */
+    profile: ProfileSchema.optional(),
+    accounts: z.object({
+      checking: CountRangeSchema.optional(),
+      credit: CountRangeSchema.optional(),
+    }),
+    months: z.union([z.literal(1), z.literal(3), z.literal(6)]),
+    endMonth: MonthStringSchema.optional(),
+    seed: z.string().optional(),
+  })
+  .superRefine((req, ctx) => {
+    if (!req.accounts.checking && !req.accounts.credit) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['accounts'],
+        message: 'at least one of checking / credit is required',
+      });
+    }
+    if (req.profile) {
+      const profileSchema =
+        req.subjectType === 'personal' ? PersonalProfileSchema : BusinessProfileSchema;
+      if (!profileSchema.safeParse(req.profile).success) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['profile'],
+          message: `profile shape does not match subjectType "${req.subjectType}"`,
+        });
+      }
+    }
+  });
+export type GenerationRequest = z.infer<typeof GenerationRequestSchema>;

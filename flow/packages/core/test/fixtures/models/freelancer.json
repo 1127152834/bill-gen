@@ -1,0 +1,203 @@
+{
+  "incomeStreams": [
+    {
+      "id": "client-ach",
+      "label": "Design client invoices",
+      "payerName": "Lumen Creative LLC",
+      "channel": "ach_client",
+      "cadence": { "kind": "irregular", "perMonth": { "min": 1, "max": 2 } },
+      "amountCents": { "min": 185000, "max": 465000 },
+      "seasonality": [0.85, 0.9, 1, 1, 1, 0.95, 0.9, 0.95, 1, 1.05, 1.1, 1.15]
+    }
+  ],
+  "recurring": [
+    {
+      "id": "rent",
+      "label": "Apartment rent",
+      "kind": "rent",
+      "dayRule": { "kind": "dayOfMonth", "day": 1 },
+      "amount": { "kind": "fixed", "cents": 165000 },
+      "account": "checking",
+      "priority": 1,
+      "factId": "fact-camden-lamar-heights-austin",
+      "txnType": "ACH"
+    },
+    {
+      "id": "austin-energy",
+      "label": "Electric and water",
+      "kind": "utility",
+      "dayRule": { "kind": "dayOfMonth", "day": 18 },
+      "amount": { "kind": "seasonal", "minCents": 8900, "maxCents": 24100, "peakMonths": [6, 7, 8, 9] },
+      "account": "checking",
+      "priority": 3,
+      "factId": "fact-austin-energy",
+      "txnType": "ACH"
+    },
+    {
+      "id": "aca-health",
+      "label": "Marketplace health plan",
+      "kind": "insurance",
+      "dayRule": { "kind": "dayOfMonth", "day": 5 },
+      "amount": { "kind": "fixed", "cents": 41237 },
+      "account": "checking",
+      "priority": 3,
+      "factId": "fact-bcbstx-marketplace",
+      "txnType": "ACH"
+    },
+    {
+      "id": "irs-estimated",
+      "label": "Quarterly estimated tax",
+      "kind": "tax_estimated",
+      "dayRule": { "kind": "taxDates" },
+      "amount": { "kind": "fixed", "cents": 240000 },
+      "account": "checking",
+      "priority": 3,
+      "factId": "fact-irs-direct-pay",
+      "txnType": "ACH"
+    },
+    {
+      "id": "adobe-cc",
+      "label": "Adobe Creative Cloud",
+      "kind": "subscription",
+      "dayRule": { "kind": "dayOfMonth", "day": 9 },
+      "amount": { "kind": "fixed", "cents": 5999 },
+      "account": "credit",
+      "priority": 4,
+      "factId": "fact-adobe-creative-cloud",
+      "txnType": "POS"
+    },
+    {
+      "id": "spotify",
+      "label": "Spotify Premium",
+      "kind": "subscription",
+      "dayRule": { "kind": "dayOfMonth", "day": 22 },
+      "amount": { "kind": "fixed", "cents": 1199 },
+      "account": "credit",
+      "priority": 5,
+      "factId": "fact-spotify-premium",
+      "txnType": "POS"
+    }
+  ],
+  "discretionaryPool": [
+    {
+      "factId": "fact-heb-austin",
+      "weight": 5,
+      "perMonth": { "min": 2, "max": 6 },
+      "ticketCents": { "min": 2400, "max": 16500 },
+      "pricing": "basket",
+      "taxable": false,
+      "tip": false,
+      "account": "credit",
+      "weekendBias": 0.45,
+      "location": "local"
+    },
+    {
+      "factId": "fact-epoch-coffee-austin",
+      "weight": 4,
+      "perMonth": { "min": 2, "max": 10 },
+      "ticketCents": { "min": 450, "max": 1400 },
+      "pricing": "fixed_menu",
+      "taxable": true,
+      "tip": false,
+      "account": "credit",
+      "weekendBias": 0.3,
+      "location": "local"
+    },
+    {
+      "factId": "fact-uchiko-austin",
+      "weight": 1,
+      "perMonth": { "min": 0, "max": 2 },
+      "ticketCents": { "min": 5500, "max": 16000 },
+      "pricing": "fixed_menu",
+      "taxable": true,
+      "tip": true,
+      "account": "credit",
+      "weekendBias": 0.6,
+      "location": "local"
+    },
+    {
+      "factId": "fact-shell-burnet-rd-austin",
+      "weight": 2,
+      "perMonth": { "min": 1, "max": 4 },
+      "ticketCents": { "min": 2300, "max": 4700 },
+      "pricing": "fuel",
+      "unitPriceCents": 289,
+      "taxable": false,
+      "tip": false,
+      "account": "credit",
+      "weekendBias": 0.3,
+      "location": "local"
+    },
+    {
+      "factId": "fact-amazon-us",
+      "weight": 2,
+      "perMonth": { "min": 0, "max": 4 },
+      "ticketCents": { "min": 1200, "max": 9000 },
+      "pricing": "basket",
+      "taxable": true,
+      "tip": false,
+      "account": "credit",
+      "weekendBias": 0.35,
+      "location": "online"
+    },
+    {
+      "factId": "fact-bucees-new-braunfels",
+      "weight": 0.5,
+      "perMonth": { "min": 0, "max": 1 },
+      "ticketCents": { "min": 1200, "max": 4800 },
+      "pricing": "basket",
+      "taxable": true,
+      "tip": false,
+      "account": "credit",
+      "weekendBias": 0.7,
+      "location": "travel"
+    },
+    {
+      "factId": "fact-walgreens-austin",
+      "weight": 2,
+      "perMonth": { "min": 0, "max": 3 },
+      "ticketCents": { "min": 800, "max": 4500 },
+      "pricing": "basket",
+      "taxable": true,
+      "tip": false,
+      "account": "checking",
+      "weekendBias": 0.35,
+      "location": "local"
+    },
+    {
+      "factId": "fact-whole-foods-lamar-austin",
+      "weight": 2,
+      "perMonth": { "min": 0, "max": 4 },
+      "ticketCents": { "min": 1800, "max": 9500 },
+      "pricing": "basket",
+      "taxable": false,
+      "tip": false,
+      "account": "checking",
+      "weekendBias": 0.5,
+      "location": "local"
+    },
+    {
+      "factId": "fact-blick-art-austin",
+      "weight": 1,
+      "perMonth": { "min": 0, "max": 2 },
+      "ticketCents": { "min": 1500, "max": 12000 },
+      "pricing": "basket",
+      "taxable": true,
+      "tip": false,
+      "account": "checking",
+      "weekendBias": 0.4,
+      "location": "local"
+    }
+  ],
+  "atm": {
+    "perMonth": { "min": 0, "max": 2 },
+    "amountChoicesCents": [4000, 6000, 8000, 10000],
+    "feeCents": 300
+  },
+  "openingBalanceCents": 842316,
+  "creditLimitCents": 1200000,
+  "apr": 0.2499,
+  "creditOpeningBalanceCents": 184237,
+  "cardPaymentStrategy": "full",
+  "closingDay": 14
+}

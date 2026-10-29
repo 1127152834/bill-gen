@@ -28,4 +28,4 @@ __all__ = ["ROOT", "cjk_font_path", "data_path", "font_path"]
 
 def data_path(relative: str, root: Path | str | None = None) -> str:
     """旧签名 ``data_path(relative, root=...)`` → 新实现（含搬迁映射）。"""
-    return _paths.data_path(relative, root=Path(root) if root else _paths.ROOT)
+    return _paths.data_path(relative, root=Path(root) if root is not None else None)

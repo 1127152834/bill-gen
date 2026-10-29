@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>BillGen · 文档工作台</title>
+    <link rel="stylesheet" href="/web-assets/app.css" />
+    <script type="module" src="/web-assets/app.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#editor">跳至编辑区</a>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="模板导航">
+        <a class="brand" href="/" aria-label="BillGen 首页"
+          ><span class="brand-mark">B<span>·</span></span
+          ><span>BillGen<small>文档工作台</small></span></a
+        >
+        <div class="nav-label">
+          模板资料库 <span id="template-count">13</span>
+        </div>
+        <label class="search-wrap"
+          ><span aria-hidden="true">⌕</span
+          ><input
+            id="template-search"
+            type="search"
+            placeholder="搜索模板…"
+            aria-label="搜索模板"
+        /></label>
+        <nav id="template-nav" aria-label="选择文档模板">
+          <p class="nav-loading">正在载入模板…</p>
+        </nav>
+        <div class="sidebar-footer">
+          <span class="connection-dot"></span>本地工作空间<span class="version"
+            >V2</span
+          >
+          <p>数据留在你的浏览器与本地服务</p>
+        </div>
+      </aside>
+      <div class="workspace">
+        <header class="topbar">
+          <div class="breadcrumb">
+            工作空间 <span>/</span>
+            <strong id="breadcrumb-name">文档编辑</strong>
+          </div>
+          <div class="topbar-actions">
+            <button id="synth-open" class="button small" type="button">
+              场景导入
+            </button>
+            <span class="keyboard-hint">⌘ / Ctrl S 生成预览</span
+            ><button
+              id="help-button"
+              class="icon-button"
+              aria-label="使用说明"
+              title="使用说明"
+            >
+              ?
+            </button>
+          </div>
+        </header>
+        <main id="main">
+          <section class="document-header">
+            <div>
+              <div class="eyebrow">
+                DOCUMENT STUDIO <span id="template-kind">统一编辑</span>
+              </div>
+              <h1 id="document-title">你的下一份文档，从这里开始。</h1>
+              <p id="document-description">
+                选择模板，编辑数据，然后在右侧检查每一页。
+              </p>
+            </div>
+            <span
+              id="document-status"
+              class="status"
+              role="status"
+              aria-live="polite"
+              >正在连接</span
+            >
+          </section>
+          <section class="actionbar" aria-label="文档操作">
+            <div class="action-group">
+              <button id="import-button" class="button">导入 JSON</button
+              ><input
+                id="import-file"
+                type="file"
+                accept="application/json,.json"
+                hidden
+              /><button id="export-json" class="button">导出 JSON</button
+              ><button id="reset-button" class="button quiet">恢复示例</button>
+            </div>
+            <div class="action-group">
+              <button id="preview-button" class="button primary">
+                <span aria-hidden="true">▷</span> 生成预览</button
+              ><button id="download-button" class="button dark">
+                <span aria-hidden="true">↓</span> 下载 PDF
+              </button>
+            </div>
+          </section>
+          <div id="message" class="message" role="alert" hidden></div>
+          <div id="studio" class="studio">
+            <section id="editor" class="editor-panel" aria-label="文档数据编辑">
+              <div class="panel-heading">
+                <div>
+                  <span class="section-number">01</span>
+                  <h2>文档数据</h2>
+                </div>
+                <a id="legacy-link" target="_blank" rel="noopener" href="/boa/"
+                  >完整模板编辑器 <span aria-hidden="true">↗</span></a
+                >
+              </div>
+              <div class="editor-tabs" role="tablist" aria-label="编辑模式">
+                <button
+                  id="form-tab"
+                  role="tab"
+                  aria-selected="true"
+                  aria-controls="form-panel"
+                  tabindex="0"
+                >
+                  结构化表单</button
+                ><button
+                  id="json-tab"
+                  role="tab"
+                  aria-selected="false"
+                  aria-controls="json-panel"
+                  tabindex="-1"
+                >
+                  JSON 高级编辑
+                </button>
+              </div>
+              <div id="form-panel" role="tabpanel" aria-labelledby="form-tab">
+                <p class="panel-intro">
+                  完整保留原始字段与数据类型。展开分组开始编辑。
+                </p>
+                <div id="schema-form">
+                  <div class="empty-inline">正在准备文档数据…</div>
+                </div>
+              </div>
+              <div
+                id="json-panel"
+                role="tabpanel"
+                aria-labelledby="json-tab"
+                hidden
+              >
+                <label for="json-editor" class="json-label"
+                  >完整文档对象 <span>编辑后自动校验并保存草稿</span></label
+                ><textarea
+                  id="json-editor"
+                  spellcheck="false"
+                  aria-describedby="json-feedback"
+                  aria-label="完整 JSON 数据"
+                ></textarea>
+                <p id="json-feedback" class="json-feedback" role="status">
+                  有效的 JSON 对象
+                </p>
+              </div>
+              <details class="render-settings" id="render-settings">
+                <summary>输出设置 <span>沿用模板默认值</span></summary>
+                <div id="options-form"></div>
+              </details>
+              <div class="editor-footer">
+                <span id="draft-status">草稿自动保存在当前浏览器</span
+                ><span>本地草稿</span>
+              </div>
+            </section>
+            <section class="preview-panel" aria-label="分页文档预览">
+              <div class="panel-heading">
+                <div>
+                  <span class="section-number">02</span>
+                  <h2>实时预览</h2>
+                </div>
+                <span id="preview-meta">等待生成</span>
+              </div>
+              <div class="preview-toolbar">
+                <div class="page-controls">
+                  <button
+                    id="previous-page"
+                    class="icon-button"
+                    aria-label="上一页"
+                    disabled
+                  >
+                    ‹</button
+                  ><span id="page-label">— / —</span
+                  ><button
+                    id="next-page"
+                    class="icon-button"
+                    aria-label="下一页"
+                    disabled
+                  >
+                    ›
+                  </button>
+                </div>
+                <div class="zoom-controls">
+                  <button
+                    id="zoom-out"
+                    class="icon-button"
+                    aria-label="缩小预览"
+                  >
+                    −</button
+                  ><button
+                    id="zoom-reset"
+                    class="zoom-value"
+                    aria-label="重置缩放为百分之百"
+                  >
+                    100%</button
+                  ><button
+                    id="zoom-in"
+                    class="icon-button"
+                    aria-label="放大预览"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+              <div id="preview-viewport" class="preview-viewport">
+                <div id="preview-empty" class="preview-empty">
+                  <div class="paper-symbol" aria-hidden="true">
+                    <i></i><i></i><i></i><i></i>
+                  </div>
+                  <h3>把数据变成一份好文档</h3>
+                  <p>
+                    完成左侧编辑后，点击「生成预览」。<br />每一页，都能在这里仔细检查。
+                  </p>
+                  <button id="empty-preview-button" class="button">
+                    生成第一份预览 <span aria-hidden="true">→</span>
+                  </button>
+                </div>
+                <div id="preview-paper" class="preview-paper" hidden>
+                  <img id="page-image" alt="文档页面预览" />
+                </div>
+                <div id="render-overlay" class="render-overlay" hidden>
+                  <span class="spinner"></span><strong>正在生成文档</strong
+                  ><span>请稍候，正在排版与渲染页面…</span>
+                </div>
+              </div>
+              <div class="preview-footer">
+                <span id="preview-note">预览会保留模板原有水印设置</span
+                ><span>PDF · 分页预览</span>
+              </div>
+            </section>
+          </div>
+          <section id="static-panel" class="static-panel" hidden>
+            <div class="static-notice">
+              <div>
+                <strong>浏览器内模板编辑器</strong>
+                <p>此模板使用原生浏览器工作流，编辑与导出请在下方完成。</p>
+              </div>
+              <a id="static-open" class="button" target="_blank" rel="noopener"
+                >独立窗口打开 ↗</a
+              >
+            </div>
+            <iframe id="static-editor" title="浏览器模板完整编辑器"></iframe>
+          </section>
+          <footer class="workspace-footer">
+            <span>BillGen / 统一文档工作台</span><span>编辑 · 预览 · 导出</span>
+          </footer>
+        </main>
+      </div>
+    </div>
+    <dialog id="synth-dialog">
+      <div class="dialog-heading">
+        <h2>从场景结果渲染账单</h2>
+        <button id="synth-close" class="icon-button" aria-label="关闭场景导入">
+          ×
+        </button>
+      </div>
+      <p class="synth-intro">
+        粘贴场景生成器的结果包（含
+        <code>statements[].transactions</code>），选择模板与账期，直接排版成账单，并载入编辑器微调。
+      </p>
+      <div class="synth-grid">
+        <label
+          >模板<select id="synth-template" aria-label="目标模板"></select
+        ></label>
+        <label
+          >账户<select id="synth-account" aria-label="账户类型"></select
+        ></label>
+        <label
+          >账期下标<input
+            id="synth-cycle"
+            type="number"
+            value="-1"
+            min="-60"
+            max="59"
+            step="1"
+            aria-label="账期下标（-1 为最后一期）" /></label
+        >
+        <label class="synth-check"
+          ><input id="synth-watermark" type="checkbox" checked />保留 SAMPLE
+          水印</label
+        >
+        <label class="synth-check"
+          ><input id="synth-brand" type="checkbox" checked />行标替换为场景银行</label
+        >
+      </div>
+      <div class="synth-source">
+        <label for="synth-json">结果包 JSON</label>
+        <textarea
+          id="synth-json"
+          spellcheck="false"
+          placeholder='{"statements": [...]}'
+          aria-label="场景结果 JSON"
+        ></textarea>
+        <div class="synth-source-actions">
+          <button id="synth-file-button" class="button small" type="button">
+            选择文件
+          </button>
+          <input
+            id="synth-file"
+            type="file"
+            accept="application/json,.json"
+            hidden
+          />
+          <span id="synth-status" role="status">等待结果包</span>
+        </div>
+      </div>
+      <div class="dialog-actions">
+        <button id="synth-cancel" class="button quiet" type="button">
+          取消</button
+        ><button id="synth-submit" class="button primary" type="button">
+          渲染账单
+        </button>
+      </div>
+    </dialog>
+    <dialog id="help-dialog">
+      <div class="dialog-heading">
+        <h2>让编辑更顺手</h2>
+        <button id="help-close" class="icon-button" aria-label="关闭使用说明">
+          ×
+        </button>
+      </div>
+      <p>
+        <kbd>⌘</kbd> / <kbd>Ctrl</kbd> + <kbd>S</kbd> 随时生成当前文档预览。
+      </p>
+      <p>
+        表单由完整数据结构生成。对象可折叠，数组每页显示 10
+        项，保留未知字段与金额字符串。复杂修改可使用 JSON 高级编辑。
+      </p>
+      <p>
+        草稿按模板保存在当前浏览器；切换模板不会覆盖其他模板。原有高级操作可从「完整模板编辑器」进入。
+      </p>
+    </dialog>
+  </body>
+</html>

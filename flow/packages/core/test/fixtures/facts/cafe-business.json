@@ -1,0 +1,133 @@
+[
+  {
+    "id": "fact-larimer-square-lease-denver",
+    "name": "Larimer Square",
+    "city": "Denver",
+    "state": "CO",
+    "category": "lease",
+    "priceItems": [],
+    "sourceUrl": "https://larimersquare.com/"
+  },
+  {
+    "id": "fact-gusto-payroll",
+    "name": "Gusto",
+    "chain": "Gusto",
+    "city": "San Francisco",
+    "state": "CA",
+    "category": "payroll",
+    "priceItems": [],
+    "sourceUrl": "https://gusto.com/product/payroll"
+  },
+  {
+    "id": "fact-sysco-denver",
+    "name": "Sysco",
+    "city": "Denver",
+    "state": "CO",
+    "category": "food distributor",
+    "priceItems": [],
+    "sourceUrl": "https://sysco.com/"
+  },
+  {
+    "id": "fact-huckleberry-roasters-denver",
+    "name": "Huckleberry Roasters",
+    "city": "Denver",
+    "state": "CO",
+    "category": "coffee roaster",
+    "priceItems": [
+      {
+        "item": "Wholesale coffee per pound",
+        "priceCents": 1450,
+        "sourceUrl": "https://www.huckleberryroasters.com/"
+      }
+    ],
+    "sourceUrl": "https://www.huckleberryroasters.com/"
+  },
+  {
+    "id": "fact-xcel-energy-colorado",
+    "name": "Xcel Energy",
+    "city": "Denver",
+    "state": "CO",
+    "category": "utilities",
+    "priceItems": [],
+    "sourceUrl": "https://co.my.xcelenergy.com/s/business"
+  },
+  {
+    "id": "fact-the-hartford-bop",
+    "name": "The Hartford",
+    "city": "Hartford",
+    "state": "CT",
+    "category": "insurance",
+    "priceItems": [],
+    "sourceUrl": "https://www.thehartford.com/business-insurance/business-owners-policy"
+  },
+  {
+    "id": "fact-comcast-business",
+    "name": "Comcast Business",
+    "chain": "Comcast",
+    "city": "Philadelphia",
+    "state": "PA",
+    "category": "internet",
+    "priceItems": [],
+    "sourceUrl": "https://business.comcast.com/"
+  },
+  {
+    "id": "fact-restaurant-depot-denver",
+    "name": "Restaurant Depot",
+    "chain": "Restaurant Depot",
+    "city": "Denver",
+    "state": "CO",
+    "category": "wholesale",
+    "priceItems": [],
+    "sourceUrl": "https://www.restaurantdepot.com/locations"
+  },
+  {
+    "id": "fact-king-soopers-colfax-denver",
+    "name": "King Soopers",
+    "chain": "King Soopers",
+    "city": "Denver",
+    "state": "CO",
+    "category": "grocery",
+    "priceItems": [],
+    "sourceUrl": "https://www.kingsoopers.com/stores/search"
+  },
+  {
+    "id": "fact-home-depot-denver",
+    "name": "The Home Depot",
+    "chain": "Home Depot",
+    "city": "Denver",
+    "state": "CO",
+    "category": "hardware",
+    "priceItems": [],
+    "sourceUrl": "https://www.homedepot.com/l/Denver/CO"
+  },
+  {
+    "id": "fact-costco-business-denver",
+    "name": "Costco Business Center",
+    "chain": "Costco",
+    "city": "Denver",
+    "state": "CO",
+    "category": "wholesale",
+    "priceItems": [],
+    "sourceUrl": "https://www.costco.com/warehouse-locations"
+  },
+  {
+    "id": "fact-webstaurantstore",
+    "name": "WebstaurantStore",
+    "chain": "WebstaurantStore",
+    "city": "Lancaster",
+    "state": "PA",
+    "category": "restaurant supply",
+    "priceItems": [],
+    "sourceUrl": "https://www.webstaurantstore.com/"
+  },
+  {
+    "id": "fact-amazon-business",
+    "name": "Amazon Business",
+    "chain": "Amazon",
+    "city": "Seattle",
+    "state": "WA",
+    "category": "online retail",
+    "priceItems": [],
+    "sourceUrl": "https://business.amazon.com/"
+  }
+]

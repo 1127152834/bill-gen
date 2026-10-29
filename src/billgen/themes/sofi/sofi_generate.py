@@ -11,6 +11,33 @@ SoFi 银行账单模板 — 1:1 排版复刻
 """
 import fitz, os, math, json
 
+from copy import deepcopy
+from dataclasses import dataclass, field
+
+
+@dataclass
+class RenderContext:
+    """Per-build snapshot; never installs request state on the module."""
+
+    data: dict
+    watermark: bool
+    meta: dict
+    font_cjk: str | None
+    fallback_used: set = field(default_factory=set)
+    fitz_fonts: dict = field(default_factory=dict)
+    shapers: dict = field(default_factory=dict)
+
+
+def _render_context(data=None, watermark=None):
+    d = deepcopy(DATA if data is None else data)
+    inter = _CMAP[_REG] & _CMAP[_BOLD]
+    need = any(ord(ch) not in inter and ord(ch) in _CJK_CMAP
+               for text in collect_texts(d) for ch in text)
+    font_cjk = FONT_CJK_BASE if need else None
+    return RenderContext(d, WATERMARK if watermark is None else watermark,
+                         deepcopy(META), font_cjk)
+
+
 BASE = os.path.dirname(os.path.abspath(__file__))
 A = lambda n: os.path.join(BASE, "assets", n)
 FONT_REG  = A("sofi_regular.ttf")
@@ -226,15 +253,17 @@ def _wrap(text, size, first_w, rest_w):
     if cur: lines.append(" ".join(cur))
     return lines
 
-def prepare(page):
+def prepare(page, *, ctx=None):
+    ctx = ctx if ctx is not None else _render_context()
     for name, path in (("reg", FONT_REG), ("bold", FONT_BOLD), ("thin", FONT_THIN),
                        ("thinD", FONT_THIN_D)):
         page.insert_font(fontname=name, fontfile=path)
-    if FONT_CJK:
-        page.insert_font(fontname="cjk", fontfile=FONT_CJK)
+    if ctx.font_cjk:
+        page.insert_font(fontname="cjk", fontfile=ctx.font_cjk)
 
-def watermark(page):
-    if not WATERMARK: return
+def watermark(page, *, ctx=None):
+    ctx = ctx if ctx is not None else _render_context()
+    if not ctx.watermark: return
     tw = fitz.TextWriter(page.rect)
     f = fitz.Font(fontfile=FONT_REG)
     txt = "S A M P L E"; sz = 92
@@ -251,12 +280,13 @@ def _logo_doc():
     return _logo
 
 # ================================================================ 交易表（页1/续页共用）
-def _tx_account_label(page, bl):
+def _tx_account_label(page, bl, *, ctx=None):
     """账户标签（页1基线 399.5 / 续页基线 32.4，其余几何一致）"""
-    label = f"{DATA['account_type']} Account - "
+    ctx = ctx if ctx is not None else _render_context()
+    label = f"{ctx.data['account_type']} Account - "
     put(page, 20.9, bl, label, SZ12, "bold")
     lw = width(label, SZ12, "bold")
-    put(page, 20.9 + lw + 0.08, bl, DATA["account_last4"], SZ12, "bold")
+    put(page, 20.9 + lw + 0.08, bl, ctx.data["account_last4"], SZ12, "bold")
 
 def _tx_header_row(page):
     """表头（仅页1；续页无表头）"""
@@ -287,18 +317,20 @@ def _tx_rows(page, txs, balances, band_top, first_bl, first_beige, omit_last_bg)
                   color=GREEN if t["amount"] > 0 else BLACK)
         put_right(page, TX_R[1], bl, money(balances[i]), SZ8)
 
-def _tx_table(page, txs, balances):
+def _tx_table(page, txs, balances, *, ctx=None):
     """页1完整交易表：标签(399.5) + 表头 + 行"""
-    _tx_account_label(page, 399.5)
+    ctx = ctx if ctx is not None else _render_context()
+    _tx_account_label(page, 399.5, ctx=ctx)
     _tx_header_row(page)
     _tx_rows(page, txs, balances, TX_HDR_TOP + RH, TX_FIRST_BL, False, True)
 
 # ================================================================ 页面
-def page_statement(doc, page_num, total_pages, txs=None, balances=None):
+def page_statement(doc, page_num, total_pages, txs=None, balances=None, *, ctx=None):
+    ctx = ctx if ctx is not None else _render_context()
     page = doc.new_page(width=612, height=792)
-    prepare(page)
-    txs = DATA["transactions"] if txs is None else txs
-    acct_label = f"{DATA['account_type']} Account - {DATA['account_last4']}"
+    prepare(page, ctx=ctx)
+    txs = ctx.data["transactions"] if txs is None else txs
+    acct_label = f"{ctx.data['account_type']} Account - {ctx.data['account_last4']}"
 
     # ---- 顶部信息区 ----
     rect(page, CONTENT_L, 25.1, CONTENT_R, 320.85, BG_GRAY)
@@ -306,50 +338,50 @@ def page_statement(doc, page_num, total_pages, txs=None, balances=None):
         rect(page, CARD_B[i], 25.1, CARD_B[i+1], 152.25, BG_WHITE)
 
     put(page, COL_X[0], 38.6, "Primary Account Holder", SZ8)
-    put(page, COL_X[0], 52.7, DATA["holder_name"], SZ8, color=GRAY_999)
-    put(page, COL_X[0], 66.9, DATA["member_since"], SZ8, color=GRAY_909)
+    put(page, COL_X[0], 52.7, ctx.data["holder_name"], SZ8, color=GRAY_999)
+    put(page, COL_X[0], 66.9, ctx.data["member_since"], SZ8, color=GRAY_909)
 
     put(page, COL_X[1], 38.6, "Address", SZ8)
-    addr_txt = [l for l in DATA["address_lines"] if l.strip()][:3]
+    addr_txt = [l for l in ctx.data["address_lines"] if l.strip()][:3]
     for i, (line_txt, y) in enumerate(zip(addr_txt, (52.7, 95.2, 123.5))):
         put(page, COL_X[1], y, line_txt, SZ8, color=GRAY_909)
 
     put(page, COL_X[2], 38.6, "Account Number", SZ8)
-    put(page, COL_X[2], 52.7, DATA["account_number"], SZ8, color=GRAY_909)
+    put(page, COL_X[2], 52.7, ctx.data["account_number"], SZ8, color=GRAY_909)
     put(page, COL_X[2], 66.9, "Monthly Statement Period", SZ8)
-    put(page, COL_X[2], 81.0, DATA["statement_period"], SZ8, color=GRAY_909)
+    put(page, COL_X[2], 81.0, ctx.data["statement_period"], SZ8, color=GRAY_909)
 
     # Logo（矢量，从原稿提取的 #00a9ce 路径）
     page.show_pdf_page(fitz.Rect(*LOGO_RECT), _logo_doc(), 0)
 
     # ---- 指标区 ----
     rect(page, CONTENT_L, 152.3, CONTENT_R, 178.25, BG_BEIGE)
-    label1_w = width(f"{DATA['account_type']} Account - ", SZ12, "bold")
-    put(page, 23.9, 169.6, f"{DATA['account_type']} Account - ", SZ12, "bold")
-    put(page, 23.9 + label1_w + 0.08, 169.6, DATA["account_last4"], SZ12, "bold")
+    label1_w = width(f"{ctx.data['account_type']} Account - ", SZ12, "bold")
+    put(page, 23.9, 169.6, f"{ctx.data['account_type']} Account - ", SZ12, "bold")
+    put(page, 23.9 + label1_w + 0.08, 169.6, ctx.data["account_last4"], SZ12, "bold")
 
     rect(page, CONTENT_L, 178.3, CONTENT_R, 229.85, BG_BEIGE)
     put(page, COL_X[0], 191.7, "Current Balance", SZ8)
-    put(page, COL_X[0], 210.8, money(DATA["current_balance"]), SZ18)
-    put(page, COL_X[0], 222.4, DATA["current_as_of"], SZ8, color=GRAY_757)
+    put(page, COL_X[0], 210.8, money(ctx.data["current_balance"]), SZ18)
+    put(page, COL_X[0], 222.4, ctx.data["current_as_of"], SZ8, color=GRAY_757)
     miw = width("Monthly Interest Paid", SZ8)
     put(page, COL_X[1], 191.7, "Monthly Interest Paid", SZ8)
     put(page, COL_X[1] + miw + 0.063, 188.4, "1", 4.6)
-    put(page, COL_X[1], 210.8, money(DATA["monthly_interest"]), SZ18)
+    put(page, COL_X[1], 210.8, money(ctx.data["monthly_interest"]), SZ18)
     apw = width("Annual Percentage Yield Earned", SZ8)
     put(page, COL_X[2], 191.7, "Annual Percentage Yield Earned", SZ8)
     put(page, COL_X[2] + apw + 0.195, 188.4, "1", 4.6)
-    put(page, COL_X[2], 210.8, DATA["apy"], SZ18)
+    put(page, COL_X[2], 210.8, ctx.data["apy"], SZ18)
 
     rect(page, CONTENT_L, 229.9, CONTENT_R, 298.95, BG_BEIGE)
     put(page, COL_X[0], 243.4, "Beginning Balance", SZ8)
-    put(page, COL_X[0], 262.4, money(DATA["beginning_balance"]), SZ18)
-    put(page, COL_X[0], 274.1, DATA["beginning_as_of"], SZ8, color=GRAY_626)
+    put(page, COL_X[0], 262.4, money(ctx.data["beginning_balance"]), SZ18)
+    put(page, COL_X[0], 274.1, ctx.data["beginning_as_of"], SZ8, color=GRAY_626)
     put(page, COL_X[1], 243.4, "Year-to-date Interest Paid", SZ8)
-    put(page, COL_X[1], 262.4, money(DATA["ytd_interest"]), SZ18)
+    put(page, COL_X[1], 262.4, money(ctx.data["ytd_interest"]), SZ18)
 
     rect(page, CONTENT_L, 299.0, CONTENT_R, 320.85, BG_BEIGE)
-    put(page, 23.9, 312.5, DATA["balance_note"], SZ8, color=GRAY_626)
+    put(page, 23.9, 312.5, ctx.data["balance_note"], SZ8, color=GRAY_626)
 
     # ---- 交易明细 ----
     put(page, 18.1, 351.6, "Transaction Details", SZ11)
@@ -361,12 +393,12 @@ def page_statement(doc, page_num, total_pages, txs=None, balances=None):
     # 余额（从最新到最旧逐行回推；分页时由 build 预计算传入）
     if balances is None:
         balances = []
-        bal = DATA["current_balance"]
+        bal = ctx.data["current_balance"]
         for t in txs:
             balances.append(bal)
             bal -= t["amount"]
 
-    _tx_table(page, txs, balances)
+    _tx_table(page, txs, balances, ctx=ctx)
 
     # ---- 联系信息（固定位置，原稿精确坐标；页1最多6行流水不与此重叠） ----
     contact_y = CONTACT_MIN_Y
@@ -392,37 +424,38 @@ def page_statement(doc, page_num, total_pages, txs=None, balances=None):
                       filename=A("icon_phone.png"))
 
     put(page, 20.9, label_y, "Website", SZ8, "thin")
-    put(page, 20.9, value_y, DATA["contact_website"], SZ8, "thin", color=GRAY_909,
+    put(page, 20.9, value_y, ctx.data["contact_website"], SZ8, "thin", color=GRAY_909,
         ins_name="thinD")
     put(page, 214.4, label_y, "Mailing Address", SZ8, "thin")
-    put(page, 214.4, value_y, DATA["contact_address"][0], SZ8, color=GRAY_909)
-    put(page, 214.4, addr2_y, DATA["contact_address"][1], SZ8, color=GRAY_909)
-    put(page, 214.4, addr3_y, DATA["contact_address"][2], SZ8, color=GRAY_909)
+    put(page, 214.4, value_y, ctx.data["contact_address"][0], SZ8, color=GRAY_909)
+    put(page, 214.4, addr2_y, ctx.data["contact_address"][1], SZ8, color=GRAY_909)
+    put(page, 214.4, addr3_y, ctx.data["contact_address"][2], SZ8, color=GRAY_909)
     put(page, 403.4, label_y, "Contact Us", SZ8, "thin")
-    put(page, 403.4, value_y, DATA["contact_phone"], SZ8, color=GRAY_909)
+    put(page, 403.4, value_y, ctx.data["contact_phone"], SZ8, color=GRAY_909)
 
     # ---- 脚注/页脚（跟随联系区，脚注自动换行匹配原稿宽度） ----
     put(page, 20.9, fnum_y, "1", 3.5)
-    fn_lines = _wrap(DATA["footnote1"], SZ6, 562.7, 564.6)
+    fn_lines = _wrap(ctx.data["footnote1"], SZ6, 562.7, 564.6)
     for fi, fl in enumerate(fn_lines):
         put_fast(page, 22.8 if fi == 0 else 20.9, ftext_y + fi * 7.1, fl, SZ6)
     footer_y = ftext_y + (len(fn_lines) - 1) * 7.1 + 24.6
-    put_fast(page, 20.9, footer_y, DATA["legal_footer"], SZ6)
+    put_fast(page, 20.9, footer_y, ctx.data["legal_footer"], SZ6)
     put_fast(page, 563.5, footer_y, f"Page {page_num} of {total_pages}", SZ6)
 
-    watermark(page)
+    watermark(page, ctx=ctx)
 
 # ================================================================ 续页（仅账户标签+流水+页脚）
-def page_continuation(doc, page_num, total_pages, txs, balances):
+def page_continuation(doc, page_num, total_pages, txs, balances, *, ctx=None):
     """续页（参考原版）：账户标签置顶 → 流水（无表头，从 y=38.2 起）→ 页脚。
     流水下方无联系区/脚注。"""
+    ctx = ctx if ctx is not None else _render_context()
     page = doc.new_page(width=612, height=792)
-    prepare(page)
-    _tx_account_label(page, CONT_LABEL_BL)
+    prepare(page, ctx=ctx)
+    _tx_account_label(page, CONT_LABEL_BL, ctx=ctx)
     _tx_rows(page, txs, balances, CONT_BAND_TOP, CONT_ROW1_BL, True, False)
-    put_fast(page, 20.9, FOOTER_Y, DATA["legal_footer"], SZ6)
+    put_fast(page, 20.9, FOOTER_Y, ctx.data["legal_footer"], SZ6)
     put_fast(page, 563.5, FOOTER_Y, f"Page {page_num} of {total_pages}", SZ6)
-    watermark(page)
+    watermark(page, ctx=ctx)
 
 # ================================================================ 法律页
 LEGAL_LINE_GAP = 8.15               # 正文行距网格（原稿精确：8.15pt）
@@ -448,23 +481,140 @@ def _put_legal_line(page, y, text, bold):
     else:
         put_fast(page, 18.1, y, text, SZ6, f)
 
-def page_legal(doc, page_num, total_pages):
+# ---------------------------------------------------------------- 行名替换
+# 法务段落按原稿逐行断好了字，行数与 y 值都是量出来的：虚构行名比 “SoFi Bank”
+# 长，直接逐行改字会撞行，所以品牌态下把整段拼回去重新断行，再由长到短试字号，
+# 直到塞回原来的行数。默认数据没有 bank 时走老路径，逐字不动。
+_LEGAL_W = CONTENT_R - 18.1 - 0.6      # 正文可用宽度（右边留 0.6pt 余量）
+
+
+def _brand_texts(ctx):
+    """返回 (name, legal, domain)；没有虚构行名时返回 None。"""
+    if ctx is None:
+        return None
+    bank = ctx.data.get("bank")
+    if not isinstance(bank, dict):
+        return None
+    name = str(bank.get("name") or "").strip()
+    if not name:
+        return None
+    legal = str(bank.get("legal") or "").strip() or name
+    domain = str(bank.get("domain") or "").strip() or name.lower().replace(" ", "-") + ".example"
+    return name, legal, domain
+
+
+def _subst(text, brand, contact=None):
+    if brand is None:
+        return text
+    name, legal, domain = brand
+    if contact:
+        # 原稿把「联系我们」写成真实总部地址与客服线，整句一起换
+        for old, new in contact:
+            text = text.replace(old, new)
+    for old, new in (
+        ("SoFi Insured Deposit Program", f"{name} Insured Deposit Program"),
+        ("SoFi Bank, N.A.", legal),
+        ("SoFi Bank", name),
+        ("SoFi", name),
+        ("sofi.com", domain),
+    ):
+        text = text.replace(old, new)
+    return text
+
+
+def _contact_subs(ctx):
+    """原稿法务段落里的总部地址与客服热线 → 数据里的虚构联系方式。
+
+    地址在原稿里跨了两行（`…Cottonwood Heights,` / `Utah 84121 as soon as possible.`），
+    而替换是逐行做的，所以这里按行拆成两条，最后再补一条整句匹配给不分行的场合。
+    """
+    if ctx is None:
+        return ()
+    phone = str(ctx.data.get("contact_phone") or "").strip()
+    lines = [str(x).strip() for x in (ctx.data.get("contact_address") or []) if str(x).strip()]
+    subs: list[tuple[str, str]] = []
+    if phone:
+        subs.append(("1-855-456-7634", phone))
+    if lines:
+        joined = ", ".join(lines)
+        subs.append(("2750 East Cottonwood Parkway #300, Cottonwood Heights, Utah 84121", joined))
+        subs.append(("2750 East Cottonwood Parkway #300, Cottonwood Heights,", f"{lines[0]},"))
+        if len(lines) > 1:
+            subs.append(("Utah 84121", lines[-1]))
+    return tuple(subs)
+
+
+def _legal_text(page, x, y, text, brand, font, size):
+    """写一行法务文本；出现域名时按原稿样式加下划线与链接注释。"""
+    put(page, x, y, text, size, font)
+    if brand is None:
+        return
+    domain = brand[2]
+    for token in (f"www.{domain}", domain):
+        i = text.find(token)
+        if i < 0:
+            continue
+        left = x + width(text[:i], size, font)
+        right = left + width(token, size, font)
+        page.draw_line(fitz.Point(left, y + 0.60), fitz.Point(right, y + 0.60),
+                       color=LEGAL_NAVY, width=0.3)
+        page.insert_link({"kind": fitz.LINK_URI,
+                          "from": fitz.Rect(left - 0.02, y - 6.8, right + 0.02, y + 1.35),
+                          "uri": f"https://{domain}/"})
+        return
+
+
+def _put_legal_para(page, para, brand, contact=()):
+    """一段法务文本：标题单独一行，正文拼回去重断行、必要时缩字号。"""
+    body_ys: list[float] = []
+    body_parts: list[str] = []
+    for bold, y, text in para:
+        if bold:
+            line = _subst(text, brand, contact)
+            size = SZ6
+            while size > 5.0 and width(line, size, "bold") > _LEGAL_W:
+                size -= 0.1
+            _legal_text(page, 18.1, y, line, brand, "bold", size)
+        else:
+            body_ys.append(y)
+            body_parts.append(_subst(text, brand, contact).strip())
+    if not body_parts:
+        return
+    joined = " ".join(body_parts)
+    size = SZ6
+    lines = _wrap(joined, size, _LEGAL_W, _LEGAL_W)
+    while len(lines) > len(body_ys) and size > 5.0:
+        size = round(size - 0.1, 2)
+        lines = _wrap(joined, size, _LEGAL_W, _LEGAL_W)
+    for y, line in zip(body_ys, lines):
+        _legal_text(page, 18.1, y, line, brand, "reg", size)
+
+
+def page_legal(doc, page_num, total_pages, *, ctx=None):
+    ctx = ctx if ctx is not None else _render_context()
     page = doc.new_page(width=612, height=792)
-    prepare(page)
+    prepare(page, ctx=ctx)
     put(page, 18.1, 28.6, "Important Information", SZ11)
     # 标题下分隔线（原稿 y=38.25, #808080, 0.1pt）
     page.draw_line(fitz.Point(CONTENT_L, 38.25), fitz.Point(CONTENT_R, 38.25),
                    color=DIVIDER, width=0.1)
-    # 正文：逐行使用原稿精确 y 值（内容固定）
-    for para in LEGAL_PARAS:
-        for bold, y, text in para:
-            _put_legal_line(page, y, text, bold)
+    brand = _brand_texts(ctx)
+    # 正文：默认数据逐行使用原稿精确 y 值；有虚构行名时重排
+    if brand is None:
+        for para in LEGAL_PARAS:
+            for bold, y, text in para:
+                _put_legal_line(page, y, text, bold)
+    else:
+        contact = _contact_subs(ctx)
+        for para in LEGAL_PARAS:
+            _put_legal_para(page, para, brand, contact)
     # 落款：居中粗体（原稿 y=457.5, x=223.2）
-    put_fast(page, LEGAL_SIGN_X, LEGAL_SIGN_Y, LEGAL_SIGN, SZ6, "bold")
+    put_fast(page, LEGAL_SIGN_X, LEGAL_SIGN_Y,
+             _subst(LEGAL_SIGN, brand, _contact_subs(ctx) if brand else ()), SZ6, "bold")
     # 页脚（原稿页码 x=562.3）
-    put_fast(page, 20.9, FOOTER_Y, DATA["legal_footer"], SZ6)
+    put_fast(page, 20.9, FOOTER_Y, ctx.data["legal_footer"], SZ6)
     put_fast(page, 562.3, FOOTER_Y, f"Page {page_num} of {total_pages}", SZ6)
-    watermark(page)
+    watermark(page, ctx=ctx)
 
 LEGAL_PARAS = [
     [
@@ -538,9 +688,10 @@ META = {'title': 'Fictional Sample Statement',
  'creator': 'Bill Gen',
  'creationDate': 'D:20261001000000Z'}
 
-def apply_meta(doc, meta=None):
+def apply_meta(doc, meta=None, *, ctx=None):
     """写入 PDF 元数据；创建时间留空时不写入。"""
-    m = dict(META)
+    ctx = ctx if ctx is not None else _render_context()
+    m = dict(ctx.meta)
     for k, v in (meta or {}).items():
         if k in m and v:
             m[k] = str(v)
@@ -559,31 +710,43 @@ def apply_meta(doc, meta=None):
     doc.set_metadata(md)
 
 # ================================================================ build
-def build(meta=None):
-    autodetect_cjk()
+def build(meta=None, *, data=None, watermark=None):
+    """Build a document from a private request snapshot.
+
+    ``meta`` remains positional for legacy callers. Omitted data/watermark use
+    module defaults; explicit values never replace those module attributes.
+    The caller owns the returned document and must close it.
+    """
+    meta = deepcopy(meta)
+    ctx = _render_context(data, watermark)
     doc = fitz.open()
-    txs = DATA["transactions"]
-    # 全局余额（从最新到最旧回推，跨页一致）
-    balances = []
-    bal = DATA["current_balance"]
-    for t in txs:
-        balances.append(bal)
-        bal -= t["amount"]
-    # 分页：页1 最多 TX_PER_PAGE 行（联系区固定 581.8），
-    # 续页各 TX_PER_CONT 行（仅标签+流水+页脚），末页固定为条款页
-    n_extra = len(txs) - TX_PER_PAGE
-    n_cont = max(0, math.ceil(n_extra / TX_PER_CONT)) if n_extra > 0 else 0
-    total = 1 + n_cont + 1  # 页1 + 续页 + 条款页
-    page_statement(doc, 1, total,
-                   txs[:TX_PER_PAGE], balances[:TX_PER_PAGE])
-    for p in range(n_cont):
-        lo = TX_PER_PAGE + p * TX_PER_CONT
-        page_continuation(doc, p + 2, total,
-                          txs[lo:lo + TX_PER_CONT],
-                          balances[lo:lo + TX_PER_CONT])
-    page_legal(doc, total, total)
-    apply_meta(doc, meta)
-    return doc
+    try:
+        txs = ctx.data["transactions"]
+        # 全局余额（从最新到最旧回推，跨页一致）
+        balances = []
+        bal = ctx.data["current_balance"]
+        for t in txs:
+            balances.append(bal)
+            bal -= t["amount"]
+        # 分页：页1 最多 TX_PER_PAGE 行（联系区固定 581.8），
+        # 续页各 TX_PER_CONT 行（仅标签+流水+页脚），末页固定为条款页
+        n_extra = len(txs) - TX_PER_PAGE
+        n_cont = max(0, math.ceil(n_extra / TX_PER_CONT)) if n_extra > 0 else 0
+        total = 1 + n_cont + 1  # 页1 + 续页 + 条款页
+        page_statement(doc, 1, total,
+                       txs[:TX_PER_PAGE], balances[:TX_PER_PAGE], ctx=ctx)
+        for p in range(n_cont):
+            lo = TX_PER_PAGE + p * TX_PER_CONT
+            page_continuation(doc, p + 2, total,
+                              txs[lo:lo + TX_PER_CONT],
+                              balances[lo:lo + TX_PER_CONT], ctx=ctx)
+        page_legal(doc, total, total, ctx=ctx)
+        apply_meta(doc, meta, ctx=ctx)
+        return doc
+    except BaseException:
+        doc.close()
+        raise
+
 
 def main():
     doc = build(meta=None)

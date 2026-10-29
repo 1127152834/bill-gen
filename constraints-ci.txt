@@ -1,0 +1,12 @@
+# Tested release/CI toolchain. Install with pip -c constraints-ci.txt -e '.[dev]'.
+# Runtime/library updates require golden regression review, not baseline overwrite.
+PyMuPDF==1.26.6
+fonttools==4.68.0
+uharfbuzz==0.57.0
+pillow==13.0.0
+pystrich==0.20
+pytest==9.2.0
+ruff==0.17.3
+mypy==2.4.1
+build==1.6.1
+hatchling==1.33.0

@@ -7,16 +7,39 @@
 - 流水：p1 摘要后 Deposits→Other Withdrawals→Balance Summary 串行，
   页底 709.3 截断→续页 188.5 起；尾空白页；"Page X of Y" 按账单页计数。
 """
-import io, json, math, os, re, sys
-from decimal import Decimal
+import json, math, os, re, sys
+
+import io
 
 import fitz
-from fontTools.ttLib import TTFont
 
 from runtime_paths import font_path
-import chstream
-import barcode_us as BC2D
-import imb_us as IMB
+from billgen.themes.usbank import chstream
+from billgen.themes.usbank import barcode_us as BC2D
+from billgen.themes.usbank import imb_us as IMB
+
+from billgen.themes.usbank.shared import (
+    parse_cmap,
+    UsFont,
+    esc,
+    _build_layouts,
+    find,
+    _cents,
+    _fmt_amt,
+    _usd_span,
+    _month_key,
+    _band_locs,
+    _snap,
+    _erase,
+    _emit,
+    _norm,
+    ending_of,
+    _zip_of,
+    _street_of,
+    _now_pdf_date,
+    _iso_from_pdf_date,
+    write_metadata as _write_metadata,
+)
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 PAGE_H = 792.0
@@ -45,113 +68,7 @@ COL = {"date": 20.1, "day": 43.9, "type": 56.2, "detail": 207.4,
 BAL_COLS = [(20.1, 174.8), (207.4, 362.0), (394.5, 549.2)]
 BAL_CONT = (20.1, 174.8)
 
-# ============ 字体机制 ============
-def parse_cmap(txt):
-    """ToUnicode CMap 解析：bfchar(<c><u>) + bfrange(<lo><hi><u>/<u,u,...>)。
-    成对正则会把 bfrange 误读成 bfchar——CID 映射全错（实测坑）。"""
-    out = {}
-
-    def uni_chars(hexs):
-        chars = []
-        for i in range(0, len(hexs) - len(hexs) % 4, 4):
-            v = int(hexs[i:i + 4], 16)
-            if 0 < v < 0x110000:
-                chars.append(chr(v))
-        return chars or ["?"]
-
-    for block in re.findall(r"beginbfchar(.*?)endbfchar", txt, re.S):
-        for c, u in re.findall(r"<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>", block):
-            chs = uni_chars(u)
-            out[int(c, 16)] = chs[0] if len(chs) == 1 else "".join(chs)
-    for block in re.findall(r"beginbfrange(.*?)endbfrange", txt, re.S):
-        for lo, hi, dst in re.findall(
-                r"<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>",
-                block):
-            lo_i, hi_i = int(lo, 16), int(hi, 16)
-            base = uni_chars(dst)[0]
-            for c in range(lo_i, min(hi_i, lo_i + 65535) + 1):
-                out[c] = chr(min(0x10FFFF, ord(base) + (c - lo_i)))
-        for lo, hi, arr in re.findall(
-                r"<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>\s*\[(.*?)\]", block,
-                re.S):
-            lo_i = int(lo, 16)
-            dsts = re.findall(r"<([0-9A-Fa-f]+)>", arr)
-            for k, dh in enumerate(dsts):
-                chs = uni_chars(dh)
-                out[lo_i + k] = chs[0] if len(chs) == 1 else "".join(chs)
-    return out
-
-
-class UsFont:
-    """Type0 全量字体程序：char→GID(CID)、per-1000 宽度、ToUnicode/W 增量补写。"""
-
-    def __init__(self, doc, font_xref):
-        self.xref = font_xref
-        self.cmap, self.widths = {}, {}
-        self.new_cids = set()
-        obj = doc.xref_object(font_xref)
-        m = re.search(r"/DescendantFonts \[ (\d+) 0 R", obj)
-        self.df = int(m.group(1)) if m else None
-        mu = re.search(r"/ToUnicode (\d+) 0 R", obj)
-        self.tou = int(mu.group(1)) if mu else None
-        self.cid2ch = {}
-        if self.tou:
-            self.cid2ch = parse_cmap(doc.xref_stream(self.tou).decode(
-                "latin1"))
-        buf = doc.extract_font(font_xref)[-1]
-        self.tt = TTFont(io.BytesIO(buf), fontNumber=0, lazy=True)
-        upm = self.tt["head"].unitsPerEm
-        best = self.tt.getBestCmap() or {}
-        hmtx = self.tt["hmtx"]
-        for u, gname in best.items():
-            try:
-                gid = self.tt.getGlyphID(gname)
-            except Exception:
-                continue
-            self.cmap[chr(u)] = gid
-            self.widths[gid] = round(hmtx[gname][0] * 1000.0 / upm)
-        self.mapped_cids = set(self.cid2ch)
-
-    def cid(self, ch):
-        g = self.cmap.get(ch)
-        if g is not None and g not in self.mapped_cids:
-            self.new_cids.add(g)
-        return g
-
-    def adv(self, ch):
-        return self.widths.get(self.cmap.get(ch), 500)
-
-    def commit(self, doc):
-        """收尾：新用字符补 ToUnicode bfchar + DescendantFonts /W。"""
-        if not self.new_cids or self.tou is None or self.df is None:
-            return
-        inv = {}
-        for ch, g in self.cmap.items():
-            inv.setdefault(g, ch)
-        add = sorted(g for g in self.new_cids if g in inv)
-        if not add:
-            return
-        cmap = doc.xref_stream(self.tou).decode("latin1")
-        block = "".join(f"<{g:04X}><{ord(inv[g]):04X}>\n" for g in add)
-        cnt = re.search(r"(\d+) beginbfchar", cmap)
-        if cnt:
-            cmap = cmap.replace(f"{cnt.group(1)} beginbfchar",
-                                f"{int(cnt.group(1)) + len(add)} beginbfchar", 1)
-            cmap = cmap.replace("endbfchar", block + "endbfchar", 1)
-        else:
-            # 原 CMap 只有 bfrange（无 bfchar 块）——新建一块插在 endcmap 前
-            cmap = cmap.replace(
-                "endcmap",
-                f"{len(add)} beginbfchar\n{block}endbfchar\nendcmap", 1)
-        doc.update_stream(self.tou, cmap.encode("latin1"), compress=False)
-        warr = doc.xref_object(self.df)
-        mm = re.search(r"(/W \[)(.*?)(\]\s*>>)", warr, re.S)
-        if mm:
-            seg = " ".join(f"{g} [{self.widths.get(g, 500)}]" for g in add)
-            doc.update_object(self.df, warr[:mm.start(2)] + mm.group(2).rstrip()
-                              + " " + seg + " " + warr[mm.end(2):])
-
-
+# ============ 字体机制（状态由本生成器独立持有） ============
 FONTS = {}
 for _pi in range(len(_DOC)):
     for _f in _DOC[_pi].get_fonts(full=True):
@@ -197,28 +114,6 @@ def text_w(pg_i, fname, text, size):
     return sum(uf.adv(ch) for ch in text) * size / 1000.0
 
 
-def esc(b):
-    out = bytearray()
-    for c in b:
-        if c in (0x28, 0x29, 0x5c):
-            out += b"\\" + bytes([c])
-        elif c == 0x0d:
-            out += b"\\r"
-        elif c == 0x0a:
-            out += b"\\n"
-        elif c == 0x08:
-            out += b"\\b"
-        elif c == 0x0c:
-            out += b"\\f"
-        elif c == 0x09:
-            out += b"\\t"
-        elif c < 0x20 or c > 0x7e:
-            out += f"\\{c:03o}".encode()
-        else:
-            out.append(c)
-    return bytes(out)
-
-
 def make_units(pg_i, fname, text, size, x, bl):
     b = cid_bytes(pg_i, fname, text)
     if b is None:
@@ -228,27 +123,6 @@ def make_units(pg_i, fname, text, size, x, bl):
 
 
 # ============ LAYOUTS（导入时提取：文本/坐标/资源名/字号） ============
-def _build_layouts(doc):
-    pages = []
-    for pi in range(len(doc)):
-        base2res = {f[3].split("+")[-1]: f[4]
-                   for f in doc[pi].get_fonts(full=True)}
-        spans = []
-        for b in doc[pi].get_text("dict")["blocks"]:
-            for l in b.get("lines", []):
-                for s in l["spans"]:
-                    if not s["text"].strip():
-                        continue
-                    spans.append({"text": s["text"],
-                                  "x": round(s["origin"][0], 2),
-                                  "bl": round(s["origin"][1], 2),
-                                  "x1": round(s["bbox"][2], 2),
-                                  "font": base2res.get(s["font"], s["font"]),
-                                  "size": round(s["size"], 2)})
-        pages.append({"spans": spans})
-    return pages
-
-
 LAYOUTS = {"usbiz": _build_layouts(_DOC)}
 
 
@@ -302,7 +176,7 @@ class Page:
             out.append(ch or "?")
         return "".join(out)
 
-    def spans_units(self, span):
+    def spans_units(self, span, allow_overflow=False):
         want = span["text"]
         x1 = span.get("x1", span["x"] + len(want) * 5)
         out, consumed = [], ""
@@ -310,6 +184,11 @@ class Page:
                 if u.x is not None and abs(u.bl - span["bl"]) < 1.5
                 and span["x"] - 1.8 <= u.x <= x1 + 1.0]
         cand.sort(key=lambda k: self.units[k].x)
+        cand_ext = [] if not allow_overflow else [
+            k for k, u in enumerate(self.units)
+            if u.x is not None and u.x >= span["x"] - 1.8
+            and abs(u.bl - span["bl"]) < 1.5]
+        cand_ext.sort(key=lambda k: self.units[k].x)
         for k in cand:
             if consumed == want:
                 break
@@ -322,6 +201,22 @@ class Page:
                     consumed += cd
                     out.append(self._loc[k])
                     break
+        if consumed.replace(" ", "") != want.replace(" ", ""):
+            # 布局里的 x1 偶尔比实际绘制文本短（如持卡人姓名两行），此时放宽
+            # 右边界重扫同基线单元，按前缀继续匹配，避免整行替换被静默跳过。
+            out, consumed = [], ""
+            for k in cand_ext:
+                if consumed == want:
+                    break
+                dec = self._decode(self.units[k].font, self.units[k].text)
+                if not dec:
+                    continue
+                for cand_dec in (dec, " " + dec.lstrip(), dec.rstrip(), dec.strip(),
+                                 " " + dec.strip()):
+                    if want.startswith(consumed + cand_dec):
+                        consumed += cand_dec
+                        out.append(self._loc[k])
+                        break
         if consumed.replace(" ", "") != want.replace(" ", ""):
             return []
         return out
@@ -348,7 +243,7 @@ class Page:
     def replace_span(self, span, new_text, align=None, right=None):
         if new_text.rstrip() == span["text"].rstrip():
             return True
-        locs = self.spans_units(span)
+        locs = self.spans_units(span, allow_overflow=True)
         if not locs:
             return False
         x = span["x"]
@@ -421,48 +316,6 @@ class Page:
             self.doc.update_object(x, "<< >>")
             self.doc.update_stream(x, data)
             self.doc.xref_set_key(self.page.xref, "Contents", f"{x} 0 R")
-
-
-def find(L, pi, pred):
-    for s in L[pi]["spans"]:
-        if pred(s):
-            return s
-    return None
-
-
-# ============ 帮助函数 ============
-def _cents(v):
-    try:
-        s = str(v).replace(",", "").replace("$", "").replace(" ", "").strip()
-        if s.endswith("-"):
-            s = "-" + s[:-1]
-        return int(Decimal(s) * 100)
-    except Exception:
-        return 0
-
-
-def _fmt_amt(cents, dollar=False):
-    q = abs(cents)
-    s = f"{q // 100:,}.{q % 100:02d}" + ("-" if cents < 0 else "")
-    return ("$" if dollar else "") + s
-
-
-def _usd_span(v):
-    """金额拆 (has_dollar, value)：负数尾 '-'，$ 仅显式。"""
-    c = _cents(v)
-    return c
-
-
-def _month_key(ds):
-    MONTHS = {m: i for i, m in enumerate(
-        ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep",
-         "Oct", "Nov", "Dec"], 1)}
-    p = re.findall(r"[A-Za-z]+|\d+", str(ds or ""))
-    if not p:
-        return ""
-    mo = MONTHS.get(p[0][:3].title(), 0)
-    day = int(p[1]) if len(p) > 1 else 0
-    return f"{mo:02d}{day:02d}"
 
 
 # ============ 自动计算 ============
@@ -580,34 +433,6 @@ SECTIONS = [
     ("deposits", "Other Deposits ", "Total Other Deposits"),
     ("withdrawals", "Other Withdrawals ", "Total Other Withdrawals"),
 ]
-
-
-def _band_locs(pg, lo, hi):
-    return [(si, ui) for si, ui in pg._loc
-            if lo <= pg.segs[si].units[ui].bl < hi]
-
-
-def _snap(pg, band):
-    pgi, lo, hi = band
-    return {"units": [pg.segs[si].units[ui].raw for si, ui in _band_locs(pg, lo, hi)],
-            "src": pgi}
-
-
-def _erase(pg, lo, hi):
-    pg.delete_units(_band_locs(pg, lo, hi))
-
-
-def _emit(snap, pages, dst_pg, dy):
-    """快照单元发射（dy=bl 增量）。跨页/同页统一走快照。"""
-    if not snap["units"]:
-        return
-    blob = []
-    for raw in snap["units"]:
-        u = chstream.Unit(raw)
-        if u.pdf_y is not None:
-            u.set_y_pdf(u.pdf_y - dy)
-        blob.append(u.raw)
-    pages[dst_pg].append_text(b"".join(blob))
 
 
 def _date_units(pg_i, date, bl, x=None, day_x=None, font=ROW_FONT,
@@ -790,10 +615,6 @@ def _tpl_lines(lay, lo, hi):
     return out
 
 
-def _norm(t):
-    return re.sub(r"\s+", " ", str(t)).strip()
-
-
 def _rb(bl):
     return round(bl, 1)
 
@@ -915,12 +736,6 @@ def _emit_summary(pages, d, sum_lines):
     pages[0].add_line(ending_of(sum_lines) - 11.8, 192.9, 100.8)
 
 
-def ending_of(sum_lines):
-    return sum_lines[-1][0]
-
-
-
-
 def _del_zebra(pg, lo=140.0, hi=730.0):
     """擦除交易区斑马纹（0.952 灰 path f*，五段拼接）。"""
     pat = re.compile(
@@ -983,7 +798,6 @@ def _add_banner_bg(pg):
             seg.raw = op + seg.raw
             return
     pg.segs.append(chstream.RawSeg(op))
-
 
 
 def _add_zebra(pg, bl2, bl3, x_segs=((20.1, 36.0), (56.1, 151.2), (207.3, 201.6),
@@ -1142,29 +956,6 @@ def _materialize(doc, pages, plans, d, sum_lines):
         _emit_page_items(pages, plan, d, snaps)
 
 
-def _zip_of(d):
-    import re as _re
-    for ln in reversed(d.get("customer_lines", [])):
-        m = _re.search(r"\d{5}(?:-?\d{4})?", str(ln))
-        if m:
-            return m.group(0)
-    return "00000"
-
-
-def _street_of(d):
-    """门牌号所在行：扫描客户行取首个以数字开头的行（门牌号实证在地址行）。"""
-    import re as _re
-    for ln in d.get("customer_lines", []):
-        if _re.match(r"\s*\d", str(ln)):
-            return ln
-    for ln in d.get("customer_lines", []):
-        if _re.search(r"\d", str(ln)):
-            return ln
-    return ""
-
-
-
-
 def _emit_blank_page(doc, pages, pg_i):
     """尾空白页：居中 "This page intentionally left blank"（个户空白页同款）。"""
     pg = pages[pg_i]
@@ -1320,66 +1111,12 @@ def _replace_fields(pages, d, n_stmt):
                 break
 
 
-
 # ===== 元数据（缺省=原稿值，时间为实时；显式填写优先）=====
 META_DEFAULTS = {'title': 'SAMPLE — NOT A REAL BANK STATEMENT', 'creator': 'BillGen Sample Editor', 'producer': 'BillGen Sample Editor', 'subject': 'Fictional sample statement', 'x_producer': 'BillGen Sample Editor', 'x_creator': 'BillGen Sample Editor', 'x_title': 'SAMPLE — NOT A REAL BANK STATEMENT', 'x_desc': 'Fictional sample statement', 'xmptk': 'BillGen Sample Editor'}
 
 
-def _now_pdf_date():
-    """实时时间 → 原稿同款 D:YYYYMMDDHHMMSS-05'00'（美东 UTC-5）格式"""
-    from datetime import datetime, timedelta, timezone
-    t = datetime.now(timezone(timedelta(hours=-5)))
-    return f"D:{t:%Y%m%d%H%M%S}-05'00'"
-
-
-def _iso_from_pdf_date(s):
-    """D:YYYYMMDDHHMMSS±hh'mm' → ISO YYYY-MM-DDTHH:MM:SS±hh:mm（XMP 用）"""
-    m = re.match(r"D:(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})([+-]\d{2})'(\d{2})'", s or "")
-    if not m:
-        return None
-    y, mo, dd, h, mi, se, tz, tg = m.groups()
-    return f"{y}-{mo}-{dd}T{h}:{mi}:{se}{tz}:{tg}"
-
-
 def write_metadata(doc, md):
-    """Info + XMP（结构复刻原稿包：属性式字段 + dc:title/description 的 Alt 容器）"""
-    md = md or {}
-    def g(k):
-        return str(md.get(k, "")).strip() or META_DEFAULTS[k]
-    creation = str(md.get("creation", "")).strip() or _now_pdf_date()
-    mod = str(md.get("mod", "")).strip() or creation
-    doc.set_metadata({
-        "title": g("title"), "author": "", "creator": g("creator"),
-        "subject": g("subject"), "keywords": "",
-        "producer": g("producer"),
-        "creationDate": creation, "modDate": mod,
-    })
-    esc = lambda s: (str(s).replace("&", "&amp;").replace("<", "&lt;")
-                     .replace(">", "&gt;").replace('"', "&quot;"))   # 属性值用
-    txt = lambda s: (str(s).replace("&", "&amp;").replace("<", "&lt;")
-                     .replace(">", "&gt;"))                          # 元素文本用（裸引号合法，与原稿一致）
-    iso_c, iso_m = _iso_from_pdf_date(creation), _iso_from_pdf_date(mod)
-    xmp = ('<?xpacket begin="\ufeff" id="W5M0MpCehiHzreSzNTczkc9d"?>\n'
-           f'<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="{esc(g("xmptk"))}">\n'
-           '  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">\n'
-           '    <rdf:Description rdf:about=""\n'
-           '        xmlns:dc="http://purl.org/dc/elements/1.1/"\n'
-           '        xmlns:pdf="http://ns.adobe.com/pdf/1.3/"\n'
-           '        xmlns:xmp="http://ns.adobe.com/xap/1.0/"\n'
-           '      dc:format="application/pdf"\n'
-           f'      pdf:Producer="{esc(g("x_producer"))}"\n'
-           + (f'      xmp:CreateDate="{iso_c}"\n' if iso_c else "")
-           + (f'      xmp:ModifyDate="{iso_m}"\n' if iso_m else "")
-           + f'      xmp:CreatorTool="{esc(g("x_creator"))}">\n'
-           '      <dc:description>\n        <rdf:Alt>\n'
-           f'          <rdf:li xml:lang="x-default">{txt(g("x_desc"))}</rdf:li>\n'
-           '        </rdf:Alt>\n      </dc:description>\n'
-           '      <dc:title>\n        <rdf:Alt>\n'
-           f'          <rdf:li xml:lang="x-default">{txt(g("x_title"))}</rdf:li>\n'
-           '        </rdf:Alt>\n      </dc:title>\n'
-           '    </rdf:Description>\n  </rdf:RDF>\n</x:xmpmeta>\n'
-           + " " * 2048 + '\n<?xpacket end="w"?>')
-    doc.set_xml_metadata(xmp)
+    return _write_metadata(doc, md, META_DEFAULTS, _now_pdf_date)
 
 
 def build_pdf(d, out_path, watermark=True):

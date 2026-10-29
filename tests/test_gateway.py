@@ -1,44 +1,97 @@
-import tempfile
+"""Real single-service HTTP contracts, replacing the P0 mock proxy tests."""
+import json
 import threading
-import unittest
-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from pathlib import Path
-from unittest.mock import patch
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
-import run
+import fitz
+import pytest
+
+from billgen.server.http import make_server
 
 
-class Upstream(BaseHTTPRequestHandler):
-    def do_GET(self):
-        body=self.path.encode()
-        self.send_response(200);self.send_header('Content-Length',str(len(body)));self.end_headers();self.wfile.write(body)
-    def log_message(self,*args):pass
+@pytest.fixture
+def web(tmp_path, monkeypatch):
+    monkeypatch.setenv("BILL_GEN_DATA_DIR", str(tmp_path))
+    server = make_server("127.0.0.1", 0)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    yield f"http://127.0.0.1:{server.server_port}"
+    server.shutdown()
+    server.server_close()
+    thread.join(timeout=5)
 
 
-class GatewayTests(unittest.TestCase):
-    def test_explicit_prefix_and_editor_referer_reach_the_same_upstream(self):
-        upstream=ThreadingHTTPServer(('127.0.0.1',0),Upstream)
-        threading.Thread(target=upstream.serve_forever,daemon=True).start()
-        service={'id':'wf','name':'Test','prefix':'/wf','port':upstream.server_port}
-        with patch.multiple(run,HOST='127.0.0.1',GATE_PORT=0,SERVICES=[service]):
-            gateway=run.make_gateway();threading.Thread(target=gateway.serve_forever,daemon=True).start()
-            origin=f'http://127.0.0.1:{gateway.server_port}'
-            try:
-                for path,headers in [('/wf/api/test?x=1',{}),('/api/test?x=1',{'Referer':origin+'/wf/'})]:
-                    with urlopen(Request(origin+path,headers=headers),timeout=3) as response:self.assertEqual(response.read(),b'/api/test?x=1')
-            finally:gateway.shutdown();gateway.server_close();upstream.shutdown();upstream.server_close()
+def get(origin, path):
+    with urlopen(origin + path, timeout=30) as response:
+        return response.status, response.headers, response.read()
 
-    def test_static_editor_assets_cannot_escape_the_selected_directory(self):
-        with tempfile.TemporaryDirectory() as temp,patch.multiple(run,HOST='127.0.0.1',GATE_PORT=0):
-            root=Path(temp);(root/'public').mkdir();(root/'public/index.html').write_text('test editor');(root/'private.txt').write_text('not public')
-            with patch.object(run,'SERVICES',[{'id':'ally','name':'Test','prefix':'/ally','static':str(root/'public')}]):
-                gateway=run.make_gateway();threading.Thread(target=gateway.serve_forever,daemon=True).start()
-                origin=f'http://127.0.0.1:{gateway.server_port}'
-                try:
-                    with urlopen(origin+'/ally/',timeout=3) as response:self.assertEqual(response.read(),b'test editor')
-                    with self.assertRaises(HTTPError) as error:urlopen(origin+'/ally/%2e%2e/private.txt',timeout=3)
-                    self.assertEqual(error.exception.code,403)
-                    error.exception.close()
-                finally:gateway.shutdown();gateway.server_close()
+
+def post(origin, path, data):
+    request = Request(origin + path, json.dumps(data).encode(), {"Content-Type": "application/json"})
+    with urlopen(request, timeout=60) as response:
+        return response.status, response.headers, json.loads(response.read())
+
+
+def test_index_health_registry(web):
+    assert b"BillGen" in get(web, "/")[2]
+    assert json.loads(get(web, "/healthz")[2])["status"] == "ok"
+    specs = json.loads(get(web, "/api/v1/templates")[2])["templates"]
+    assert len(specs) == 13
+    assert all(any("\u4e00" <= char <= "\u9fff" for char in row["display_name"]) for row in specs)
+    assert sum(row["server_render"] for row in specs) == 11
+
+
+def test_workbench_assets_and_traversal(web):
+    html = get(web, "/")[2]
+    assert b"/web-assets/app.js" in html
+    for name, kind in [("app.js", "javascript"), ("app.css", "text/css"),
+                       ("legacy.css", "text/css"), ("legacy.js", "javascript")]:
+        status, headers, body = get(web, "/web-assets/" + name)
+        assert status == 200 and body
+        assert kind in headers["Content-Type"]
+    with pytest.raises(HTTPError) as caught:
+        get(web, "/web-assets/../http.py")
+    assert caught.value.code == 404
+
+
+def test_preview_pdf_png_and_metadata(web):
+    status, headers, job = post(web, "/api/v1/templates/mercury/preview", {"options": {"page_dpi": 72}})
+    assert status == 201
+    assert job["request_id"] == headers["X-Request-ID"]
+    assert job["pages"] >= 1
+    _, headers, pdf = get(web, job["links"]["pdf"])
+    assert headers["Content-Type"] == "application/pdf"
+    with fitz.open(stream=pdf, filetype="pdf") as document:
+        assert len(document) == job["pages"]
+    _, headers, image = get(web, job["links"]["pages"][0])
+    assert headers["Content-Type"] == "image/png"
+    assert image.startswith(b"\x89PNG")
+    assert json.loads(get(web, job["links"]["self"])[2])["job_id"] == job["job_id"]
+
+
+def test_export_and_invalid_body(web):
+    _, _, job = post(web, "/api/v1/templates/wellsfargo/export", {})
+    assert get(web, job["links"]["pdf"])[2].startswith(b"%PDF")
+    request = Request(web + "/api/v1/templates/wellsfargo/preview", b"{", {"Content-Type": "application/json"})
+    with pytest.raises(HTTPError) as caught:
+        urlopen(request, timeout=30)
+    with caught.value as error:
+        assert error.code == 400
+        assert json.loads(error.read())["error"]["code"] == "invalid_json"
+
+
+@pytest.mark.parametrize("path,status", [
+    ("/api/v1/templates/unknown/data", 404),
+    ("/api/v1/jobs/missing", 404),
+    ("/api/v1/templates/alliant/data", 422),
+    ("/api/v1/unknown", 404),
+])
+def test_structured_errors(web, path, status):
+    with pytest.raises(HTTPError) as caught:
+        get(web, path)
+    with caught.value as error:
+        assert error.code == status
+        result = json.loads(error.read())
+        assert result["request_id"]
+        assert "Traceback" not in result["error"]["message"]

@@ -1,0 +1,72 @@
+[
+  {
+    "merchantKey": "fact-larimer-square-lease-denver",
+    "template": "LARIMER SQUARE LEASE PMT",
+    "memo": "Storefront lease"
+  },
+  {
+    "merchantKey": "fact-gusto-payroll",
+    "template": "GUSTO PAYROLL {REF}",
+    "memo": "Payroll run"
+  },
+  {
+    "merchantKey": "fact-sysco-denver",
+    "template": "SYSCO DENVER ACH PMT",
+    "memo": "Food and dairy distributor invoice"
+  },
+  {
+    "merchantKey": "fact-huckleberry-roasters-denver",
+    "template": "HUCKLEBERRY ROASTERS ACH PMT",
+    "memo": "Green coffee invoice"
+  },
+  {
+    "merchantKey": "fact-xcel-energy-colorado",
+    "template": "XCEL ENERGY ACH PMT",
+    "memo": "Gas and electric"
+  },
+  {
+    "merchantKey": "fact-the-hartford-bop",
+    "template": "THE HARTFORD BOP PREMIUM",
+    "memo": "Business owner policy premium"
+  },
+  {
+    "merchantKey": "fact-comcast-business",
+    "template": "COMCAST BUSINESS {CITY} {ST}",
+    "memo": "Business internet"
+  },
+  {
+    "merchantKey": "fact-restaurant-depot-denver",
+    "template": "RESTAURANT DEPOT #{STORE} {CITY} {ST}",
+    "memo": "Wholesale supplies"
+  },
+  {
+    "merchantKey": "fact-king-soopers-colfax-denver",
+    "template": "KING SOOPERS #{STORE} {CITY} {ST}",
+    "memo": "Groceries"
+  },
+  {
+    "merchantKey": "fact-home-depot-denver",
+    "template": "THE HOME DEPOT #{STORE} {CITY} {ST}",
+    "memo": "Hardware and supplies"
+  },
+  {
+    "merchantKey": "fact-costco-business-denver",
+    "template": "COSTCO WHSE #{STORE} {CITY} {ST}",
+    "memo": "Wholesale supplies"
+  },
+  {
+    "merchantKey": "fact-webstaurantstore",
+    "template": "WEBSTAURANTSTORE {CITY} {ST}",
+    "memo": "Restaurant supplies"
+  },
+  {
+    "merchantKey": "fact-amazon-business",
+    "template": "AMAZON BUSINESS*{REF} SEATTLE WA",
+    "memo": "Online business purchase"
+  },
+  {
+    "merchantKey": "square-settlements",
+    "template": "SQUARE INC SETTLEMENT {REF}",
+    "memo": "Card sales settlement"
+  }
+]

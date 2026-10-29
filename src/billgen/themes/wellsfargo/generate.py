@@ -311,7 +311,7 @@ def apply_auto_calc(d):
 # 与原稿逐对象一致：简单 TrueType/Type1 + WinAnsi/MacRoman 声明（无 FontFile），
 # 内容流由 CID(Identity-H) 改写为 WinAnsi 单字节。资产提取自原稿（declared_fonts.py）。
 try:
-    from declared_fonts import DECLARED_FONTS, ENCODING_OBJ, META_DEFAULTS
+    from billgen.themes.wellsfargo.declared_fonts import DECLARED_FONTS, ENCODING_OBJ, META_DEFAULTS
 except ImportError:  # 允许独立运行于无资产环境
     DECLARED_FONTS, ENCODING_OBJ, META_DEFAULTS = {}, "", {}
 

@@ -68,7 +68,18 @@ def compare(baseline: dict[str, Any], current: dict[str, Any]) -> list[str]:
     diffs: list[str] = []
     for spec_id, before in baseline.items():
         after = current.get(spec_id) or current.get(LEGACY_IDS.get(spec_id, ""), {})
-        for key in PARITY_KEYS:
+        if not after:
+            diffs.append(f"{spec_id}: missing template")
+            continue
+        if before.get("kind") == "static-web":
+            before = dict(before)
+            for old, new in (("vendor_pdf_lib", "pdf_lib"), ("vendor_fontkit", "fontkit")):
+                if old in before:
+                    before[new] = before[old]
+            keys = tuple(key for key in ("files", "bytes", "entry", "pdf_lib", "fontkit") if key in before)
+        else:
+            keys = PARITY_KEYS
+        for key in keys:
             if before.get(key) != after.get(key):
                 diffs.append(f"{spec_id}.{key}: {before.get(key)!r} -> {after.get(key)!r}")
         for key in ("bytes", "files"):

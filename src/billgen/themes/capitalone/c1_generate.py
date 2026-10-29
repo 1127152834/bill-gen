@@ -19,6 +19,30 @@ Capital One 360 风格个人账户账单模板 — 1:1 排版复刻（v2，依�
 import fitz, os, math
 import uharfbuzz as hb
 
+from copy import deepcopy
+from dataclasses import dataclass, field
+
+
+@dataclass
+class RenderContext:
+    """Per-build snapshot; never installs request state on the module."""
+
+    data: dict
+    watermark: bool
+    meta: dict
+    font_cjk: str | None
+    fallback_used: set = field(default_factory=set)
+    fitz_fonts: dict = field(default_factory=dict)
+    shapers: dict = field(default_factory=dict)
+
+
+def _render_context(data=None, watermark=None):
+    d = deepcopy(DATA if data is None else data)
+    font_cjk = FONT_CJK if data is None else FONT_CJK_BASE
+    return RenderContext(d, WATERMARK if watermark is None else watermark,
+                         deepcopy(META), font_cjk)
+
+
 BASE = os.path.dirname(os.path.abspath(__file__))
 A = lambda n: os.path.join(BASE, "assets", n)
 FONT_REG  = A("c1_regular.ttf")
@@ -110,10 +134,11 @@ class Shaper:
         return out, pen
 
 _shapers = {}
-def shaper(p):
-    if p not in _shapers:
-        _shapers[p] = Shaper(p)
-    return _shapers[p]
+def shaper(p, *, ctx=None):
+    ctx = ctx if ctx is not None else _render_context()
+    if p not in ctx.shapers:
+        ctx.shapers[p] = Shaper(p)
+    return ctx.shapers[p]
 
 _REG, _BOLD, _MED, _CJK = "reg", "bold", "med", "cjk"
 _BOLD_D = "boldd"   # (n) 标签专用嵌入名（与原稿一致）
@@ -135,7 +160,8 @@ if FONT_CJK_BASE:
         _CJK_CMAP = set()
 _fallback_used = set()
 
-def layout_text(text, size, primary):
+def layout_text(text, size, primary, *, ctx=None):
+    ctx = ctx if ctx is not None else _render_context()
     cm = _CMAP[primary]
     runs, cur_key, cur = [], None, ""
     for ch in text:
@@ -147,8 +173,8 @@ def layout_text(text, size, primary):
         runs.append((cur_key, cur))
     seq = []
     for key, rs in runs:
-        path = FONT_CJK if key == _CJK else _FP[key]
-        sh = shaper(path)
+        path = ctx.font_cjk if key == _CJK else _FP[key]
+        sh = shaper(path, ctx=ctx)
         buf = hb.Buffer(); buf.add_str(rs)
         buf.guess_segment_properties()
         hb.shape(sh.font, buf, {"kern": False, "liga": False})
@@ -156,7 +182,7 @@ def layout_text(text, size, primary):
         for info, pos in zip(buf.glyph_infos, buf.glyph_positions):
             seq.append((key, rs[info.cluster], pos.x_advance * s))
             if key == _CJK:
-                _fallback_used.add(rs[info.cluster])
+                ctx.fallback_used.add(rs[info.cluster])
     out, pen = [], 0.0
     for key, ch, adv in seq:
         out.append((key, ch, pen))
@@ -165,25 +191,27 @@ def layout_text(text, size, primary):
 
 # ================================================================ drawing
 _fitz_fonts = {}
-def _ffont(key):
+def _ffont(key, *, ctx=None):
     """缓存的 fitz.Font（用于快速查询字符自然步进）。"""
-    path = FONT_CJK if key == _CJK else _FP[key]
-    if path not in _fitz_fonts:
-        _fitz_fonts[path] = fitz.Font(fontfile=path)
-    return _fitz_fonts[path]
+    ctx = ctx if ctx is not None else _render_context()
+    path = ctx.font_cjk if key == _CJK else _FP[key]
+    if path not in ctx.fitz_fonts:
+        ctx.fitz_fonts[path] = fitz.Font(fontfile=path)
+    return ctx.fitz_fonts[path]
 
 MAX_RUN = 6   # 批量 run 上限（约束 MuPDF 批内量化漂移 <0.05pt）
 
-def put(page, x, baseline, text, size, font=_REG, color=TEXT, ins_name=None):
+def put(page, x, baseline, text, size, font=_REG, color=TEXT, ins_name=None, *, ctx=None):
     """绘制整形文本，返回 pen 终点。
     优化：同一字体且步进无偏移的连续字符合并为一次 insert_text。"""
-    glyphs, w = layout_text(text, size, font)
+    ctx = ctx if ctx is not None else _render_context()
+    glyphs, w = layout_text(text, size, font, ctx=ctx)
     n = len(glyphs)
     i = 0
     while i < n:
         key = glyphs[i][0]
         gx0 = glyphs[i][2]
-        ff = _ffont(key)
+        ff = _ffont(key, ctx=ctx)
         j = i + 1
         while j < n and j - i < MAX_RUN:
             if glyphs[j][0] != key:
@@ -198,12 +226,14 @@ def put(page, x, baseline, text, size, font=_REG, color=TEXT, ins_name=None):
         i = j
     return x + w
 
-def width(text, size, font=_REG):
-    _, w = layout_text(text, size, font)
+def width(text, size, font=_REG, *, ctx=None):
+    ctx = ctx if ctx is not None else _render_context()
+    _, w = layout_text(text, size, font, ctx=ctx)
     return w
 
-def put_right(page, right, baseline, text, size, font=_REG, color=TEXT):
-    put(page, right - width(text, size, font), baseline, text, size, font, color)
+def put_right(page, right, baseline, text, size, font=_REG, color=TEXT, *, ctx=None):
+    ctx = ctx if ctx is not None else _render_context()
+    put(page, right - width(text, size, font, ctx=ctx), baseline, text, size, font, color, ctx=ctx)
 
 def rect(page, x0, y0, x1, y1, color):
     page.draw_rect(fitz.Rect(x0, y0, x1, y1), color=None, fill=color)
@@ -219,14 +249,16 @@ def money(v):
 def signed(v):
     return ("+ " if v >= 0 else "- ") + money(v)
 
-def prepare(page):
+def prepare(page, *, ctx=None):
+    ctx = ctx if ctx is not None else _render_context()
     for k in (_REG, _BOLD):
         page.insert_font(fontname=k, fontfile=_FP[k])
-    if FONT_CJK:
-        page.insert_font(fontname=_CJK, fontfile=FONT_CJK)
+    if ctx.font_cjk:
+        page.insert_font(fontname=_CJK, fontfile=ctx.font_cjk)
 
-def watermark(page):
-    if not WATERMARK:
+def watermark(page, *, ctx=None):
+    ctx = ctx if ctx is not None else _render_context()
+    if not ctx.watermark:
         return
     tw = fitz.TextWriter(page.rect)
     f = fitz.Font(fontfile=FONT_REG)
@@ -237,13 +269,14 @@ def watermark(page):
     tw.append(pt, txt, font=f, fontsize=size)
     tw.write_text(page, color=(0.93, 0.93, 0.95), morph=(pt, fitz.Matrix(45)))
 
-def footer(page, page_num, total_pages):
+def footer(page, page_num, total_pages, *, ctx=None):
+    ctx = ctx if ctx is not None else _render_context()
     runs = ["Page ", str(page_num), " of ", str(total_pages)]
-    total = sum(width(r, SZ8, _BOLD) for r in runs)
+    total = sum(width(r, SZ8, _BOLD, ctx=ctx) for r in runs)
     pen = math.floor((305.99 - total / 2) / 0.075) * 0.075
     for r in runs:
-        put(page, pen, 740.6625, r, SZ8, _BOLD, FOOT_GRAY)
-        pen = q0375(pen + width(r, SZ8, _BOLD))
+        put(page, pen, 740.6625, r, SZ8, _BOLD, FOOT_GRAY, ctx=ctx)
+        pen = q0375(pen + width(r, SZ8, _BOLD, ctx=ctx))
     page.insert_image(fitz.Rect(81.4125, 764.625, 94.1625, 777.375),
                       filename=A("icon_globe.png"))
     page.insert_image(fitz.Rect(182.4375, 761.5125, 198.4125, 777.525),
@@ -254,25 +287,26 @@ def footer(page, page_num, total_pages):
                       filename=A("icon_f3.jpg"))
     page.insert_image(fitz.Rect(467.1, 764.6625, 483.1125, 774.3375),
                       filename=A("icon_f5.jpg"))
-    put(page, 97.1625, 774.0, DATA["footer_site"], SZ8)
-    put(page, 201.4125, 774.0, DATA["footer_phone"], SZ8)
-    put(page, 308.2125, 774.0, DATA["footer_address"], SZ8)
+    put(page, 97.1625, 774.0, ctx.data["footer_site"], SZ8, ctx=ctx)
+    put(page, 201.4125, 774.0, ctx.data["footer_phone"], SZ8, ctx=ctx)
+    put(page, 308.2125, 774.0, ctx.data["footer_address"], SZ8, ctx=ctx)
 
-def cont_header(page):
+def cont_header(page, *, ctx=None):
     """续页头部：右对齐块（0.0375 量化）。"""
-    label_w = width("STATEMENT PERIOD ", SZ9)
-    range_w = width(DATA["period_range"], SZ9, _BOLD)
+    ctx = ctx if ctx is not None else _render_context()
+    label_w = width("STATEMENT PERIOD ", SZ9, ctx=ctx)
+    range_w = width(ctx.data["period_range"], SZ9, _BOLD, ctx=ctx)
     block_w = q0375(max(label_w, range_w + 2.3625))
     block_left = 554.4 - block_w
     bar_right = block_left - 12.975
     bar_left = bar_right - 0.75
     rect(page, bar_left, 44.0625, bar_right, 62.0625, BLUE)
-    put(page, block_left, 53.25, "STATEMENT PERIOD ", SZ9, _REG, BLUE)
-    put(page, block_left, 62.25, DATA["period_range"], SZ9, _BOLD, BLUE)
+    put(page, block_left, 53.25, "STATEMENT PERIOD ", SZ9, _REG, BLUE, ctx=ctx)
+    put(page, block_left, 62.25, ctx.data["period_range"], SZ9, _BOLD, BLUE, ctx=ctx)
     # 姓名：右对齐到竖条左侧（含不可见尾随空格 run，与原稿一致）
-    sp_w = width(" ", SZ7)
-    put(page, bar_left - 0.0094 - sp_w, 62.25, " ", SZ7)   # 空格（不可见）
-    put_right(page, bar_left - 9.31, 54.75, DATA["customer_name"], SZ7, _BOLD)
+    sp_w = width(" ", SZ7, ctx=ctx)
+    put(page, bar_left - 0.0094 - sp_w, 62.25, " ", SZ7, ctx=ctx)   # 空格（不可见）
+    put_right(page, bar_left - 9.31, 54.75, ctx.data["customer_name"], SZ7, _BOLD, ctx=ctx)
 
 # 表格几何
 COL_SEP_X = (386.7, 463.05)
@@ -280,13 +314,14 @@ ROW_SEGS = ((59.1, 91.5), (91.5, 329.1), (329.1, 386.7),
             (386.7, 463.05), (463.05, 553.8))
 AMT_RIGHT, BAL_RIGHT, CAT_RIGHT = 452.234, 553.767, 375.892
 
-def table_header(page, top):
+def table_header(page, top, *, ctx=None):
+    ctx = ctx if ctx is not None else _render_context()
     bl, blb = top + 10.65, top + 10.7625
-    put(page, 59.1, bl, "DATE", SZ7, _REG, BLUE)
-    put(page, 102.3, bl, "DESCRIPTION", SZ7, _REG, BLUE)
-    put(page, 341.925, bl, "CATEGORY", SZ7, _REG, BLUE)
-    put(page, 421.9875, blb, "AMOUNT", SZ7, _BOLD, BLUE)
-    put(page, 524.3625, bl, "BALANCE", SZ7, _REG, BLUE)
+    put(page, 59.1, bl, "DATE", SZ7, _REG, BLUE, ctx=ctx)
+    put(page, 102.3, bl, "DESCRIPTION", SZ7, _REG, BLUE, ctx=ctx)
+    put(page, 341.925, bl, "CATEGORY", SZ7, _REG, BLUE, ctx=ctx)
+    put(page, 421.9875, blb, "AMOUNT", SZ7, _BOLD, BLUE, ctx=ctx)
+    put(page, 524.3625, bl, "BALANCE", SZ7, _REG, BLUE, ctx=ctx)
     bot = top + 18.525
     for x in COL_SEP_X:
         rect(page, x, top, x + 0.75, bot, GRAY_SEP)
@@ -296,19 +331,21 @@ def row_separator(page, y):
     for x0, x1 in ROW_SEGS:
         rect(page, x0, y, x1, y + 0.75, GRAY_SEP)
 
-def band_row(page, top, date_str, label, balance):
+def band_row(page, top, date_str, label, balance, *, ctx=None):
+    ctx = ctx if ctx is not None else _render_context()
     bot = top + 20.25
     rect(page, 0, top, 612.9, bot, GRAY_BG)
     rect(page, 59.1, top, 553.8, top + 0.75, GRAY_SEP)
     for x in COL_SEP_X:
         rect(page, x, top, x + 0.75, bot, GRAY_SEP)
     bl = top + 12.4875
-    put(page, 59.1, bl, date_str, SZ8, _BOLD)
-    put(page, 102.3, bl, label, SZ8, _BOLD)
-    put_right(page, BAL_RIGHT, bl, balance, SZ8, _BOLD)
+    put(page, 59.1, bl, date_str, SZ8, _BOLD, ctx=ctx)
+    put(page, 102.3, bl, label, SZ8, _BOLD, ctx=ctx)
+    put_right(page, BAL_RIGHT, bl, balance, SZ8, _BOLD, ctx=ctx)
 
-def tx_row(page, top, t, running):
+def tx_row(page, top, t, running, *, ctx=None):
     """交易行：支持 memo 第二行，其他列垂直居中。"""
+    ctx = ctx if ctx is not None else _render_context()
     lines = [t["desc"]] + ([t["memo"]] if t.get("memo") else [])
     row_h = 20.25 + (len(lines) - 1) * 7.9875
     row_separator(page, top)
@@ -316,19 +353,20 @@ def tx_row(page, top, t, running):
         rect(page, x, top, x + 0.75, top + row_h, GRAY_SEP)
     bl_c = top + row_h / 2 + 2.25          # 垂直居中基线
     for i, ln in enumerate(lines):
-        put(page, 102.3, top + 12.375 + i * 7.9875, ln, SZ8)
-    put(page, 59.1, bl_c, t["date"], SZ8)
+        put(page, 102.3, top + 12.375 + i * 7.9875, ln, SZ8, ctx=ctx)
+    put(page, 59.1, bl_c, t["date"], SZ8, ctx=ctx)
     put_right(page, CAT_RIGHT, bl_c,
-              "Credit" if t["amount"] >= 0 else "Debit", SZ8)
+              "Credit" if t["amount"] >= 0 else "Debit", SZ8, ctx=ctx)
     put_right(page, AMT_RIGHT, bl_c + 0.1125, signed(t["amount"]), SZ8, _BOLD,
-              GREEN if t["amount"] >= 0 else TEXT)
-    put_right(page, BAL_RIGHT, bl_c, money(running), SZ8)
+              GREEN if t["amount"] >= 0 else TEXT, ctx=ctx)
+    put_right(page, BAL_RIGHT, bl_c, money(running), SZ8, ctx=ctx)
     return top + row_h
 
 # ================================================================ 页 1
-def page1_layout():
+def page1_layout(*, ctx=None):
     """根据地址行数计算页 1 全部纵向坐标。"""
-    addr = [l for l in DATA["address_lines"] if l.strip()]
+    ctx = ctx if ctx is not None else _render_context()
+    addr = [l for l in ctx.data["address_lines"] if l.strip()]
     last_bl = 134.475 + (len(addr) - 1) * 12.0
     bar_top = last_bl + 58.9525
     divider_top = bar_top + 50.4
@@ -363,176 +401,181 @@ def page1_layout():
         "table_top": band_top + 220.0125,
     }
 
-def summary_columns():
+def summary_columns(*, ctx=None):
     """汇总表动态列宽（线性拟合原稿）。返回 (sep1, sep2, end_bal)。"""
-    end_bal = DATA["opening_balance"] + sum(t["amount"] for t in DATA["transactions"])
-    c2 = max(width(DATA["summary_start_label"], SZ7),
-             width(money(DATA["opening_balance"]), SZ8))
-    c3 = max(width(DATA["summary_end_label"], SZ7),
-             width(money(end_bal), SZ8, _BOLD))
+    ctx = ctx if ctx is not None else _render_context()
+    end_bal = ctx.data["opening_balance"] + sum(t["amount"] for t in ctx.data["transactions"])
+    c2 = max(width(ctx.data["summary_start_label"], SZ7, ctx=ctx),
+             width(money(ctx.data["opening_balance"]), SZ8, ctx=ctx))
+    c3 = max(width(ctx.data["summary_end_label"], SZ7, ctx=ctx),
+             width(money(end_bal), SZ8, _BOLD, ctx=ctx))
     w2 = 0.8976 * c2 + 22.887
     w3 = 0.7367 * c3 + 42.48
     sep2 = 287.1 - w3
     sep1 = sep2 - w2
     return sep1, sep2, end_bal
 
-def page_summary(doc, page_num, total_pages):
+def page_summary(doc, page_num, total_pages, *, ctx=None):
+    ctx = ctx if ctx is not None else _render_context()
     page = doc.new_page(width=612, height=792)
-    prepare(page)
-    L = page1_layout()
-    sep1, sep2, end_bal = summary_columns()
+    prepare(page, ctx=ctx)
+    L = page1_layout(ctx=ctx)
+    sep1, sep2, end_bal = summary_columns(ctx=ctx)
 
     page.insert_image(fitz.Rect(57.6, 21.6, 201.6, 72.0), filename=A("logo.png"))
 
     for i, line in enumerate(L["addr"]):
-        put(page, 57.6, L["addr_first_bl"] + i * 12.0, line, SZ12)
+        put(page, 57.6, L["addr_first_bl"] + i * 12.0, line, SZ12, ctx=ctx)
 
     # 蓝条 + 标语（原稿画两遍）
     rect(page, 57.6, L["bar_top"], 58.6125, L["bar_top"] + 28.8, BLUE)
-    tag_end = put(page, 76.6125, L["tagline_bl"], DATA["tagline"], SZ12, _REG, BLUE)
-    put(page, 76.6125, L["tagline_bl"], DATA["tagline"], SZ12, _REG, BLUE)
-    put(page, tag_end + 0.1035, L["tagline_bl"], "\u00ae", SZ12, _REG, BLUE)
+    tag_end = put(page, 76.6125, L["tagline_bl"], ctx.data["tagline"], SZ12, _REG, BLUE, ctx=ctx)
+    put(page, 76.6125, L["tagline_bl"], ctx.data["tagline"], SZ12, _REG, BLUE, ctx=ctx)
+    put(page, tag_end + 0.1035, L["tagline_bl"], "\u00ae", SZ12, _REG, BLUE, ctx=ctx)
 
     # 分隔竖线 + 标题
     rect(page, 366.6, L["divider"][0], 367.35, L["divider"][1], BLUE)
-    x = put(page, 57.6, L["headline_bl"], "Here's your ", SZ14, _REG, BLUE) + 0.046
-    x = put(page, x, L["headline_bl"], DATA["headline_month"], SZ14, _BOLD, BLUE) + 0.064
-    put(page, x, L["headline_bl"], " bank statement.", SZ14, _REG, BLUE)
-    put(page, 385.35, L["period_bl"], "STATEMENT PERIOD ", SZ9, _REG, BLUE)
-    put(page, 385.35, L["period_bl"] + 9.0, DATA["period_range"], SZ9, _BOLD, BLUE)
+    x = put(page, 57.6, L["headline_bl"], "Here's your ", SZ14, _REG, BLUE, ctx=ctx) + 0.046
+    x = put(page, x, L["headline_bl"], ctx.data["headline_month"], SZ14, _BOLD, BLUE, ctx=ctx) + 0.064
+    put(page, x, L["headline_bl"], " bank statement.", SZ14, _REG, BLUE, ctx=ctx)
+    put(page, 385.35, L["period_bl"], "STATEMENT PERIOD ", SZ9, _REG, BLUE, ctx=ctx)
+    put(page, 385.35, L["period_bl"] + 9.0, ctx.data["period_range"], SZ9, _BOLD, BLUE, ctx=ctx)
 
     # 蓝色横幅（标签跟随余额宽度）
     page.insert_image(fitz.Rect(0, L["banner_top"], 612, L["banner_top"] + 108),
                       filename=A("banner.png"))
     bal_str = money(end_bal)
-    bal_w = width(bal_str, SZ44)
-    put(page, 57.6, L["big_bl"], bal_str, SZ44, _REG, WHITE)
+    bal_w = width(bal_str, SZ44, ctx=ctx)
+    put(page, 57.6, L["big_bl"], bal_str, SZ44, _REG, WHITE, ctx=ctx)
     lbl_x = 57.6 + bal_w + 21.0
-    put(page, lbl_x, L["lbl1_bl"], "TOTAL ENDING BALANCE", SZ9, _REG, WHITE)
-    put(page, lbl_x, L["lbl2_bl"], "IN ALL ACCOUNTS", SZ9, _REG, WHITE)
+    put(page, lbl_x, L["lbl1_bl"], "TOTAL ENDING BALANCE", SZ9, _REG, WHITE, ctx=ctx)
+    put(page, lbl_x, L["lbl2_bl"], "IN ALL ACCOUNTS", SZ9, _REG, WHITE, ctx=ctx)
 
     # 灰带
     rect(page, 0, L["band_top"], 612, L["band_top"] + 120.675, GRAY_BG)
 
     # 账户汇总（动态列）
-    put(page, 58.35, L["sum_heading_bl"], "Account Summary", SZ14, _REG, BLUE)
-    put(page, 58.35, L["sum_hdr_bl"], "ACCOUNT NAME", SZ7, _REG, BLUE)
+    put(page, 58.35, L["sum_heading_bl"], "Account Summary", SZ14, _REG, BLUE, ctx=ctx)
+    put(page, 58.35, L["sum_hdr_bl"], "ACCOUNT NAME", SZ7, _REG, BLUE, ctx=ctx)
     col2_right = sep2 - 0.77
-    put_right(page, col2_right, L["sum_hdr_bl"], DATA["summary_start_label"], SZ7, _REG, BLUE)
-    put_right(page, 287.08, L["sum_hdr_bl"], DATA["summary_end_label"], SZ7, _REG, BLUE)
+    put_right(page, col2_right, L["sum_hdr_bl"], ctx.data["summary_start_label"], SZ7, _REG, BLUE, ctx=ctx)
+    put_right(page, 287.08, L["sum_hdr_bl"], ctx.data["summary_end_label"], SZ7, _REG, BLUE, ctx=ctx)
     for y in (L["sum_sep1_y"], L["sum_sep2_y"]):
         for x0, x1 in ((57.6, sep1), (sep1, sep2), (sep2, 287.1)):
             rect(page, x0, y, x1, y + 0.75, GRAY_SEP)
-    put(page, 58.35, L["sum_row1_bl"], DATA["account_name"], SZ8, _BOLD)
-    put_right(page, col2_right, L["sum_row1_bl"] - 0.1125, money(DATA["opening_balance"]), SZ8)
-    put_right(page, 287.08, L["sum_row1_bl"], money(end_bal), SZ8, _BOLD)
-    put(page, 58.35, L["sum_row2_bl"], "All Accounts", SZ8, _BOLD)
-    put_right(page, col2_right, L["sum_row2_bl"] - 0.1125, money(DATA["opening_balance"]), SZ8)
-    put_right(page, 287.08, L["sum_row2_bl"], money(end_bal), SZ8, _BOLD)
+    put(page, 58.35, L["sum_row1_bl"], ctx.data["account_name"], SZ8, _BOLD, ctx=ctx)
+    put_right(page, col2_right, L["sum_row1_bl"] - 0.1125, money(ctx.data["opening_balance"]), SZ8, ctx=ctx)
+    put_right(page, 287.08, L["sum_row1_bl"], money(end_bal), SZ8, _BOLD, ctx=ctx)
+    put(page, 58.35, L["sum_row2_bl"], "All Accounts", SZ8, _BOLD, ctx=ctx)
+    put_right(page, col2_right, L["sum_row2_bl"] - 0.1125, money(ctx.data["opening_balance"]), SZ8, ctx=ctx)
+    put_right(page, 287.08, L["sum_row2_bl"], money(end_bal), SZ8, _BOLD, ctx=ctx)
 
     # 现金流摘要（3 项）
     stats = [
-        (money(DATA["interest_earned"]), "INTEREST EARNED", "THIS PERIOD", GREEN, "icon_interest.jpg"),
-        (money(DATA["overdraft_fees"]), "OVERDRAFT AND RETURN", "ITEM FEES THIS PERIOD", TEXT, "icon_fee.jpg"),
-        (money(DATA["finance_charges"]), "FINANCE CHARGES", "THIS PERIOD", TEXT, "icon_fee.jpg"),
+        (money(ctx.data["interest_earned"]), "INTEREST EARNED", "THIS PERIOD", GREEN, "icon_interest.jpg"),
+        (money(ctx.data["overdraft_fees"]), "OVERDRAFT AND RETURN", "ITEM FEES THIS PERIOD", TEXT, "icon_fee.jpg"),
+        (money(ctx.data["finance_charges"]), "FINANCE CHARGES", "THIS PERIOD", TEXT, "icon_fee.jpg"),
     ]
     vbs = [L["cashflow_first_bl"] + i * 16.9875 for i in range(3)]
     bar_bottom = vbs[-1] + 2.925
     rect(page, 366.6, L["bar_top_cashflow"], 367.35, bar_bottom, BLUE)
-    put(page, 386.1, L["cashflow_bl"], "Cashflow Summary", SZ14, _REG, BLUE)
-    max_val_w = max(width(s[0], SZ14) for s in stats)
+    put(page, 386.1, L["cashflow_bl"], "Cashflow Summary", SZ14, _REG, BLUE, ctx=ctx)
+    max_val_w = max(width(s[0], SZ14, ctx=ctx) for s in stats)
     val_x = 401.85
     lbl_x2 = val_x + max_val_w + 3.77
     for (val, l1, l2, col, icon), vb in zip(stats, vbs):
         page.insert_image(fitz.Rect(386.1, vb - 11.555, 398.1, vb + 0.445),
                           filename=A(icon))
-        put(page, val_x, vb, val, SZ14, _REG, col)
-        put(page, lbl_x2, vb - 5.55, l1, SZ6, _REG, col)
-        put(page, lbl_x2, vb + 0.45, l2, SZ6, _REG, col)
+        put(page, val_x, vb, val, SZ14, _REG, col, ctx=ctx)
+        put(page, lbl_x2, vb - 5.55, l1, SZ6, _REG, col, ctx=ctx)
+        put(page, lbl_x2, vb + 0.45, l2, SZ6, _REG, col, ctx=ctx)
 
     # 账户标题 + APY 统计
-    w = width(DATA["account_title"], SZ12, _BOLD)
-    sp = width(" ", SZ12, _REG)
-    put(page, 57.6, L["acct_bl"], DATA["account_title"], SZ12, _BOLD, BLUE)
-    put(page, 57.6 + w + sp, L["acct_bl"], f"- {DATA['account_number']}", SZ12, _REG, BLUE)
-    put(page, 58.35, L["apy_bl"], DATA["apy"], SZ9, _REG, BLUE)
-    put(page, 223.95, L["apy_bl"] + 0.15, money(DATA["ytd_interest"]), SZ9, _BOLD, GREEN)
-    put(page, 389.55, L["apy_bl"], DATA["days_in_cycle"], SZ9, _REG, BLUE)
-    put(page, 58.35, L["apy_lbl1_bl"], "ANNUAL PERCENTAGE YIELD", SZ6, _REG, BLUE)
-    put(page, 58.35, L["apy_lbl2_bl"], "(APY) EARNED", SZ6, _REG, BLUE)
-    put(page, 223.95, L["apy_lbl1_bl"], "YTD INTEREST AND BONUSES", SZ6, _REG, BLUE)
-    put(page, 389.55, L["apy_lbl1_bl"], "DAYS IN STATEMENT", SZ6, _REG, BLUE)
-    put(page, 389.55, L["apy_lbl2_bl"], "CYCLE", SZ6, _REG, BLUE)
+    w = width(ctx.data["account_title"], SZ12, _BOLD, ctx=ctx)
+    sp = width(" ", SZ12, _REG, ctx=ctx)
+    put(page, 57.6, L["acct_bl"], ctx.data["account_title"], SZ12, _BOLD, BLUE, ctx=ctx)
+    put(page, 57.6 + w + sp, L["acct_bl"], f"- {ctx.data['account_number']}", SZ12, _REG, BLUE, ctx=ctx)
+    put(page, 58.35, L["apy_bl"], ctx.data["apy"], SZ9, _REG, BLUE, ctx=ctx)
+    put(page, 223.95, L["apy_bl"] + 0.15, money(ctx.data["ytd_interest"]), SZ9, _BOLD, GREEN, ctx=ctx)
+    put(page, 389.55, L["apy_bl"], ctx.data["days_in_cycle"], SZ9, _REG, BLUE, ctx=ctx)
+    put(page, 58.35, L["apy_lbl1_bl"], "ANNUAL PERCENTAGE YIELD", SZ6, _REG, BLUE, ctx=ctx)
+    put(page, 58.35, L["apy_lbl2_bl"], "(APY) EARNED", SZ6, _REG, BLUE, ctx=ctx)
+    put(page, 223.95, L["apy_lbl1_bl"], "YTD INTEREST AND BONUSES", SZ6, _REG, BLUE, ctx=ctx)
+    put(page, 389.55, L["apy_lbl1_bl"], "DAYS IN STATEMENT", SZ6, _REG, BLUE, ctx=ctx)
+    put(page, 389.55, L["apy_lbl2_bl"], "CYCLE", SZ6, _REG, BLUE, ctx=ctx)
 
     # 页 1 底部表格（放得下才画：表头 + Opening Balance）
     t_top = L["table_top"]
     if t_top + 18.525 + 20.25 + 20.25 <= PAGE_BOTTOM_LIMIT:
-        hb_bot = table_header(page, t_top)
-        band_row(page, hb_bot, DATA["summary_start_label"], "Opening Balance",
-                 money(DATA["opening_balance"]))
+        hb_bot = table_header(page, t_top, ctx=ctx)
+        band_row(page, hb_bot, ctx.data["summary_start_label"], "Opening Balance",
+                 money(ctx.data["opening_balance"]), ctx=ctx)
         table_on_p1 = True
     else:
         table_on_p1 = False
 
-    footer(page, page_num, total_pages)
-    watermark(page)
+    footer(page, page_num, total_pages, ctx=ctx)
+    watermark(page, ctx=ctx)
     return table_on_p1
 
 # ================================================================ 费用汇总
-def fees_summary(page, fy):
+def fees_summary(page, fy, *, ctx=None):
     """费用汇总：fy = 标题基线。返回段落底部 y。"""
-    put(page, 68.36, fy, "Fees Summary", SZ12, _BOLD, BLUE)
-    put_right(page, 223.40, fy + 18.34, "TOTAL FOR THIS", SZ7, _REG, BLUE)
-    put_right(page, 223.40, fy + 25.35, "PERIOD", SZ7, _REG, BLUE)
-    put_right(page, 292.72, fy + 18.34, "TOTAL YEAR-TO-", SZ7, _REG, BLUE)
-    put_right(page, 292.72, fy + 25.35, "DATE", SZ7, _REG, BLUE)
+    ctx = ctx if ctx is not None else _render_context()
+    put(page, 68.36, fy, "Fees Summary", SZ12, _BOLD, BLUE, ctx=ctx)
+    put_right(page, 223.40, fy + 18.34, "TOTAL FOR THIS", SZ7, _REG, BLUE, ctx=ctx)
+    put_right(page, 223.40, fy + 25.35, "PERIOD", SZ7, _REG, BLUE, ctx=ctx)
+    put_right(page, 292.72, fy + 18.34, "TOTAL YEAR-TO-", SZ7, _REG, BLUE, ctx=ctx)
+    put_right(page, 292.72, fy + 25.35, "DATE", SZ7, _REG, BLUE, ctx=ctx)
     for yy in (fy + 33.225, fy + 53.475):
         for x0, x1 in ((67.6125, 147.2625), (147.2625, 224.175), (224.175, 293.5125)):
             rect(page, x0, yy, x1, yy + 0.75, GRAY_SEP)
-    put(page, 68.36, fy + 45.60, "Total Overdraft Fees", SZ8)
-    put_right(page, 223.42, fy + 45.71, money(DATA["fees_overdraft_period"]), SZ8, _BOLD)
-    put_right(page, 292.75, fy + 45.71, money(DATA["fees_overdraft_ytd"]), SZ8, _BOLD)
-    put(page, 68.36, fy + 65.85, "Total Return Item", SZ8)
-    put(page, 68.36, fy + 73.84, "Fees", SZ8)
-    put_right(page, 223.42, fy + 69.94, money(DATA["fees_return_period"]), SZ8, _BOLD)
-    put_right(page, 292.75, fy + 69.94, money(DATA["fees_return_ytd"]), SZ8, _BOLD)
+    put(page, 68.36, fy + 45.60, "Total Overdraft Fees", SZ8, ctx=ctx)
+    put_right(page, 223.42, fy + 45.71, money(ctx.data["fees_overdraft_period"]), SZ8, _BOLD, ctx=ctx)
+    put_right(page, 292.75, fy + 45.71, money(ctx.data["fees_overdraft_ytd"]), SZ8, _BOLD, ctx=ctx)
+    put(page, 68.36, fy + 65.85, "Total Return Item", SZ8, ctx=ctx)
+    put(page, 68.36, fy + 73.84, "Fees", SZ8, ctx=ctx)
+    put_right(page, 223.42, fy + 69.94, money(ctx.data["fees_return_period"]), SZ8, _BOLD, ctx=ctx)
+    put_right(page, 292.75, fy + 69.94, money(ctx.data["fees_return_ytd"]), SZ8, _BOLD, ctx=ctx)
     return fy + 78.0
 
 # ================================================================ 交易页
 def page_transactions(doc, page_num, total_pages, rows, first_idx,
-                      opening_on_this_page):
+                      opening_on_this_page, *, ctx=None):
+    ctx = ctx if ctx is not None else _render_context()
     page = doc.new_page(width=612, height=792)
-    prepare(page)
-    cont_header(page)
-    hb_bot = table_header(page, 108.0)
+    prepare(page, ctx=ctx)
+    cont_header(page, ctx=ctx)
+    hb_bot = table_header(page, 108.0, ctx=ctx)
 
-    running = DATA["opening_balance"] + sum(
-        t["amount"] for t in DATA["transactions"][:first_idx])
+    running = ctx.data["opening_balance"] + sum(
+        t["amount"] for t in ctx.data["transactions"][:first_idx])
 
     top = hb_bot
     if opening_on_this_page:
-        band_row(page, top, DATA["summary_start_label"], "Opening Balance",
-                 money(DATA["opening_balance"]))
+        band_row(page, top, ctx.data["summary_start_label"], "Opening Balance",
+                 money(ctx.data["opening_balance"]), ctx=ctx)
         top += 20.25
 
     for t in rows:
         running += t["amount"]
-        top = tx_row(page, top, t, running)
+        top = tx_row(page, top, t, running, ctx=ctx)
 
-    band_row(page, top, DATA["closing_date"], "Closing Balance", money(running))
-    fees_summary(page, top + 20.25 + 54.6375)
+    band_row(page, top, ctx.data["closing_date"], "Closing Balance", money(running), ctx=ctx)
+    fees_summary(page, top + 20.25 + 54.6375, ctx=ctx)
 
-    footer(page, page_num, total_pages)
-    watermark(page)
+    footer(page, page_num, total_pages, ctx=ctx)
+    watermark(page, ctx=ctx)
 
 # ================================================================ 页 3（法律文本）
-def _wrap_lines(text, size, first_prefix_w=0.0, font=_REG, x_start=57.6):
+def _wrap_lines(text, size, first_prefix_w=0.0, font=_REG, x_start=57.6, *, ctx=None):
+    ctx = ctx if ctx is not None else _render_context()
     budget = WRAP_RIGHT - x_start
     words = text.split(" ")
     tokens = [w + " " for w in words[:-1]] + ([words[-1]] if words else [])
     lines, cur, cur_w = [], "", first_prefix_w
     for tk in tokens:
-        tw = width(tk, size, font)
+        tw = width(tk, size, font, ctx=ctx)
         if cur and cur_w + tw > budget:
             lines.append(cur)
             cur, cur_w = "", 0.0
@@ -542,58 +585,59 @@ def _wrap_lines(text, size, first_prefix_w=0.0, font=_REG, x_start=57.6):
         lines.append(cur)
     return lines
 
-def page_notes(doc, page_num, total_pages):
+def page_notes(doc, page_num, total_pages, *, ctx=None):
+    ctx = ctx if ctx is not None else _render_context()
     page = doc.new_page(width=612, height=792)
-    prepare(page)
+    prepare(page, ctx=ctx)
     # 原稿仅条款页有 medium 与第二个 bold 子集
     page.insert_font(fontname=_MED, fontfile=FONT_MED)
     page.insert_font(fontname=_BOLD_D, fontfile=FONT_BOLD_D)
-    cont_header(page)
+    cont_header(page, ctx=ctx)
 
     y = 115.5
-    lbl_w = width("Note:", SZ7, _MED)
-    sp_w = width(" ", SZ7)
+    lbl_w = width("Note:", SZ7, _MED, ctx=ctx)
+    sp_w = width(" ", SZ7, ctx=ctx)
     prefix = lbl_w + 0.07 + sp_w
-    body_lines = _wrap_lines(DATA["note_text"], SZ7, first_prefix_w=prefix)
-    put(page, 57.6, y, "Note:", SZ7, _MED)
-    put(page, 57.6, y, "Note:", SZ7, _MED)
-    put(page, 57.6 + prefix, y, body_lines[0], SZ7)
+    body_lines = _wrap_lines(ctx.data["note_text"], SZ7, first_prefix_w=prefix, ctx=ctx)
+    put(page, 57.6, y, "Note:", SZ7, _MED, ctx=ctx)
+    put(page, 57.6, y, "Note:", SZ7, _MED, ctx=ctx)
+    put(page, 57.6 + prefix, y, body_lines[0], SZ7, ctx=ctx)
     y += LINE_PITCH
     for ln in body_lines[1:]:
-        put(page, 57.6, y, ln, SZ7)
+        put(page, 57.6, y, ln, SZ7, ctx=ctx)
         y += LINE_PITCH
 
     y += 19.3875 - LINE_PITCH
-    put(page, 57.6, y, DATA["error_heading"], SZ12, _BOLD, BLUE)
+    put(page, 57.6, y, ctx.data["error_heading"], SZ12, _BOLD, BLUE, ctx=ctx)
     y += 14.02
 
-    for para in DATA["error_paragraphs"]:
-        for ln in _wrap_lines(para, SZ7):
-            put(page, 57.6, y, ln, SZ7)
+    for para in ctx.data["error_paragraphs"]:
+        for ln in _wrap_lines(para, SZ7, ctx=ctx):
+            put(page, 57.6, y, ln, SZ7, ctx=ctx)
             y += LINE_PITCH
         y += 14.32 - LINE_PITCH
 
-    for n, item in enumerate(DATA["error_items"], 1):
+    for n, item in enumerate(ctx.data["error_items"], 1):
         label = f"({n}) "
-        lbl_w = width(label, SZ7, _BOLD)
-        lines = _wrap_lines(item, SZ7, first_prefix_w=lbl_w, x_start=87.6)
-        put(page, 87.6, y, label, SZ7, _BOLD, ins_name=_BOLD_D)
-        put(page, 87.6 + lbl_w + 0.03, y, lines[0], SZ7)
+        lbl_w = width(label, SZ7, _BOLD, ctx=ctx)
+        lines = _wrap_lines(item, SZ7, first_prefix_w=lbl_w, x_start=87.6, ctx=ctx)
+        put(page, 87.6, y, label, SZ7, _BOLD, ins_name=_BOLD_D, ctx=ctx)
+        put(page, 87.6 + lbl_w + 0.03, y, lines[0], SZ7, ctx=ctx)
         y += LINE_PITCH
         for ln in lines[1:]:
-            put(page, 87.6, y, ln, SZ7)
+            put(page, 87.6, y, ln, SZ7, ctx=ctx)
             y += LINE_PITCH
         y += 14.32 - LINE_PITCH
     y -= 0.11
 
-    for para in DATA["final_paragraphs"]:
-        for ln in _wrap_lines(para, SZ7):
-            put(page, 57.6, y, ln, SZ7)
+    for para in ctx.data["final_paragraphs"]:
+        for ln in _wrap_lines(para, SZ7, ctx=ctx):
+            put(page, 57.6, y, ln, SZ7, ctx=ctx)
             y += LINE_PITCH
         y += 14.32 - LINE_PITCH
 
-    footer(page, page_num, total_pages)
-    watermark(page)
+    footer(page, page_num, total_pages, ctx=ctx)
+    watermark(page, ctx=ctx)
 
 # ================================================================ 组装
 def collect_texts(data=None):
@@ -622,12 +666,13 @@ def autodetect_cjk(data=None):
                for s in collect_texts(data) for ch in s)
     FONT_CJK = FONT_CJK_BASE if need else None
 
-def _estimate_tx_pages(table_on_p1):
+def _estimate_tx_pages(table_on_p1, *, ctx=None):
     """估算交易页数（行高含 memo）。"""
+    ctx = ctx if ctx is not None else _render_context()
     top = 126.525 if not table_on_p1 else 126.525
     # 每页从 126.525 开始；opening 已在页1时本页无 opening 行
     pages, cur = 1, 126.525 + (0 if table_on_p1 else 20.25)
-    for t in DATA["transactions"]:
+    for t in ctx.data["transactions"]:
         rh = 20.25 + (7.9875 if t.get("memo") else 0)
         if cur + rh > 712:
             pages += 1
@@ -710,9 +755,10 @@ def _apply_xmp(doc, m):
         x = _re.sub(r'<rdf:li rdf:parseType="Resource">\s*<pdfaSchema:schema>PDF/UA Universal Accessibility Schema</pdfaSchema:schema>.*?</rdf:li>\s*', "", x, flags=_re.S)
     doc.set_xml_metadata(x)   # PyMuPDF 接受 str，内部自行 utf-8 编码
 
-def apply_meta(doc, meta=None):
+def apply_meta(doc, meta=None, *, ctx=None):
     """写入 PDF 元数据；创建时间留空时不写入。"""
-    m = dict(META)
+    ctx = ctx if ctx is not None else _render_context()
+    m = dict(ctx.meta)
     for k, v in (meta or {}).items():
         if k not in m:
             continue
@@ -731,39 +777,110 @@ def apply_meta(doc, meta=None):
     doc.set_metadata(md)
     _apply_xmp(doc, m)
 
-def build(meta=None):
-    import copy
-    txs = DATA["transactions"]
+def _subset_cjk_font(doc, *, fallback_used=False):
+    """Shrink only the fallback font program, preserving PDF text and resources.
+
+    MuPDF's native subsetter does not handle every TTC/CFF fallback. Its
+    fontTools fallback replaces font dictionaries and drops the .notdef outline.
+    Instead retain glyph IDs and replace only the existing embedded font stream.
+    ASCII is retained for MuPDF's inferred space metrics, even in CJK-only runs.
+    Names, widths, ToUnicode, content streams and metadata remain untouched.
+    Subsetting is optional: unsupported fonts keep their original full program.
+    """
+    import io
+    import warnings
+    from fontTools import subset
+
+    fonts = {f[0] for page in doc for f in page.get_fonts() if f[4] == _CJK}
+    if not fonts:
+        return
+    traces = [span for page in doc for span in page.get_texttrace()]
+    for xref in fonts:
+        try:
+            original = doc.extract_font(xref)[-1]
+            with _TT(io.BytesIO(original)) as font:
+                name = font['name'].getDebugName(6)
+                matching = [span for span in traces if span['font'] == name]
+                # Never guess glyph usage when a renderer reports another name.
+                if not name or (fallback_used and not matching):
+                    continue
+                glyphs = {ch[1] for span in matching for ch in span['chars']}
+                options = subset.Options()
+                options.retain_gids = True
+                options.notdef_outline = True
+                options.layout_features = ['*']
+                options.passthrough_tables = True
+                subsetter = subset.Subsetter(options=options)
+                subsetter.populate(gids=glyphs | {0}, unicodes=range(32, 127))
+                subsetter.subset(font)
+                output = io.BytesIO()
+                font.save(output)
+                reduced = output.getvalue()
+            if len(reduced) >= len(original):
+                continue
+            descendants = doc.xref_get_key(xref, 'DescendantFonts')
+            if descendants[0] != 'array':
+                continue
+            descendant = int(descendants[1].split()[0][1:])
+            descriptor = int(doc.xref_get_key(descendant, 'FontDescriptor')[1].split()[0])
+            for key in ('FontFile2', 'FontFile3'):
+                kind, value = doc.xref_get_key(descriptor, key)
+                if kind == 'xref':
+                    stream = int(value.split()[0])
+                    doc.update_stream(stream, reduced)
+                    if doc.xref_get_key(stream, 'Length1')[0] != 'null':
+                        doc.xref_set_key(stream, 'Length1', str(len(reduced)))
+                    break
+        except Exception as exc:
+            warnings.warn(f'C1 fallback font kept in full: {exc}', RuntimeWarning, stacklevel=2)
+
+
+def build(meta=None, *, data=None, watermark=None):
+    """Build a document from a private request snapshot.
+
+    ``meta`` remains positional for legacy callers. Omitted data/watermark use
+    module defaults; explicit values never replace those module attributes.
+    The caller owns the returned document and must close it.
+    """
+    meta = deepcopy(meta)
+    ctx = _render_context(data, watermark)
+    txs = ctx.data["transactions"]
     table_on_p1 = None
     # 先用布局函数判断（不渲染）
-    L = page1_layout()
+    L = page1_layout(ctx=ctx)
     table_on_p1 = (L["table_top"] + 59.025 <= PAGE_BOTTOM_LIMIT)
-    n_tx_pages = _estimate_tx_pages(table_on_p1)
+    n_tx_pages = _estimate_tx_pages(table_on_p1, ctx=ctx)
     total = 1 + n_tx_pages + 1
 
     doc = fitz.open()
-    table_on_p1 = page_summary(doc, 1, total)
+    try:
+        table_on_p1 = page_summary(doc, 1, total, ctx=ctx)
 
-    # 交易分页
-    pages, cur_rows, cur_top, cur_first = [], [], 126.525, 0
-    top = 126.525 + (0 if table_on_p1 else 20.25)
-    for i, t in enumerate(txs):
-        rh = 20.25 + (7.9875 if t.get("memo") else 0)
-        if top + rh > 712 and cur_rows:
+        # 交易分页
+        pages, cur_rows, cur_top, cur_first = [], [], 126.525, 0
+        top = 126.525 + (0 if table_on_p1 else 20.25)
+        for i, t in enumerate(txs):
+            rh = 20.25 + (7.9875 if t.get("memo") else 0)
+            if top + rh > 712 and cur_rows:
+                pages.append((cur_rows, cur_first))
+                cur_rows, top = [], 126.525
+                cur_first = i
+            cur_rows.append(t)
+            top += rh
+        if cur_rows:
             pages.append((cur_rows, cur_first))
-            cur_rows, top = [], 126.525
-            cur_first = i
-        cur_rows.append(t)
-        top += rh
-    if cur_rows:
-        pages.append((cur_rows, cur_first))
 
-    for idx, (rows, first) in enumerate(pages):
-        page_transactions(doc, 2 + idx, total, rows, first,
-                          opening_on_this_page=not table_on_p1 and idx == 0)
-    page_notes(doc, total, total)
-    apply_meta(doc, meta)
-    return doc
+        for idx, (rows, first) in enumerate(pages):
+            page_transactions(doc, 2 + idx, total, rows, first,
+                              opening_on_this_page=not table_on_p1 and idx == 0, ctx=ctx)
+        page_notes(doc, total, total, ctx=ctx)
+        apply_meta(doc, meta, ctx=ctx)
+        _subset_cjk_font(doc, fallback_used=bool(ctx.fallback_used))
+        return doc
+    except BaseException:
+        doc.close()
+        raise
+
 
 def main():
     autodetect_cjk()

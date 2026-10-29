@@ -6,11 +6,12 @@
 import json, os, sys, threading, webbrowser, shutil
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from runtime_paths import data_path
+from copy import deepcopy
+from billgen.server.state import EditorState, RENDER_LOCK, serialized
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, BASE)
 import fitz  # noqa: E402
-import generate  # noqa: E402
+from billgen.themes.boa import generate
 
 EDITOR = os.path.dirname(os.path.abspath(__file__))
 DATA_FILES = {
@@ -19,8 +20,8 @@ DATA_FILES = {
 }
 PREVIEW = {t: data_path(f"BOA/statement_template/editor/preview_{t}.pdf") for t in DATA_FILES}
 PV_DIR = data_path("BOA/statement_template/editor/pv_png")
-STATE = {"watermark": True}
-LOCK = threading.Lock()
+STATES = {tpl: EditorState() for tpl in DATA_FILES}
+LOCK = RENDER_LOCK
 
 
 def _make_bak():
@@ -30,6 +31,7 @@ def _make_bak():
             shutil.copy(f, bak)
 
 
+@serialized
 def load_data(tpl):
     with open(DATA_FILES[tpl], encoding="utf-8") as fh:
         return json.load(fh)
@@ -37,10 +39,12 @@ def load_data(tpl):
 
 def regenerate(tpl, data, watermark):
     with LOCK:
+        data = deepcopy(data)
+        state = STATES[tpl]
         data["watermark"] = watermark
+        generate.build_pdf(data, PREVIEW[tpl], watermark=watermark)
         with open(DATA_FILES[tpl], "w", encoding="utf-8") as fh:
             json.dump(data, fh, ensure_ascii=False, indent=2)
-        generate.build_pdf(data, PREVIEW[tpl], watermark=watermark)
         os.makedirs(PV_DIR, exist_ok=True)
         doc = fitz.open(PREVIEW[tpl])
         for i, page in enumerate(doc):
@@ -55,6 +59,8 @@ def regenerate(tpl, data, watermark):
                 m = stale[len(tpl) + 2:-4]
                 if m.isdigit() and int(m) > n:
                     os.remove(os.path.join(PV_DIR, stale))
+        state.watermark = watermark
+        state.pages = n
         return n
 
 
@@ -73,6 +79,7 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    @serialized
     def do_GET(self):
         if self.path in ("/", "/index.html"):
             with open(os.path.join(EDITOR, "index.html"), "rb") as fh:
@@ -81,7 +88,8 @@ class Handler(BaseHTTPRequestHandler):
             tpl = "business" if "business" in (self.path + "|" + str(self.headers.get("Referer", ""))) else None
             self._send(200, json.dumps({"personal": load_data("personal"),
                                         "business": load_data("business"),
-                                        "watermark": STATE["watermark"]}, ensure_ascii=False))
+                                        "watermark": STATES["personal"].watermark,
+                                        "watermarks": {t: st.watermark for t, st in STATES.items()}}, ensure_ascii=False))
         elif self.path == "/api/pages":
             qs = self.path
             n1 = len(fitz.open(PREVIEW["personal"])) if os.path.exists(PREVIEW["personal"]) else 0
@@ -113,6 +121,7 @@ class Handler(BaseHTTPRequestHandler):
         else:
             self._send(404, "not found", "text/plain; charset=utf-8")
 
+    @serialized
     def do_POST(self):
         if self.path != "/api/generate":
             self._send(404, "not found", "text/plain; charset=utf-8")
@@ -128,8 +137,7 @@ class Handler(BaseHTTPRequestHandler):
             self._send(400, json.dumps({"error": "unknown template"}))
             return
         data = payload.get("data")
-        wm = bool(payload.get("watermark", STATE["watermark"]))
-        STATE["watermark"] = wm
+        wm = bool(payload.get("watermark", STATES[tpl].watermark))
         try:
             pages = regenerate(tpl, data, wm)
             self._send(200, json.dumps({"ok": True, "pages": pages, "tpl": tpl}))
@@ -146,7 +154,7 @@ def main():
     # 初始预生成
     for t in DATA_FILES:
         try:
-            regenerate(t, load_data(t), STATE["watermark"])
+            regenerate(t, load_data(t), STATES[t].watermark)
         except Exception as e:
             print(f"初始生成 {t} 失败: {e}")
     print(f"BOA 对账单模板编辑器已启动: http://{'127.0.0.1' if host in ('0.0.0.0','') else host}:{port}  (Ctrl+C 退出)")

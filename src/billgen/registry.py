@@ -25,19 +25,19 @@ _DOCUMENT = frozenset({"watermark", "encrypt", "preview"})
 SPECS: tuple[TemplateSpec, ...] = (
     # ---- 从零绘制：坐标 + 布局 JSON -------------------------------------
     TemplateSpec(
-        "boa-personal", "BOA Personal", "from-scratch", "boa", "path-out",
+        "boa-personal", "美国银行 · 个人账单", "from-scratch", "boa", "path-out",
         module="generate", entry="build_pdf",
         default_data="editor/data_personal.json", variant="personal",
         supports=_CREDIT_CARD, legacy_prefixes=("/boa",),
     ),
     TemplateSpec(
-        "boa-business", "BOA Business", "from-scratch", "boa", "path-out",
+        "boa-business", "美国银行 · 商业账单", "from-scratch", "boa", "path-out",
         module="generate", entry="build_pdf",
         default_data="editor/data_business.json", variant="business",
         supports=_CREDIT_CARD, legacy_prefixes=("/boa/business",),
     ),
     TemplateSpec(
-        "wellsfargo", "Wells Fargo", "from-scratch", "wellsfargo", "path-out",
+        "wellsfargo", "富国银行", "from-scratch", "wellsfargo", "path-out",
         module="generate", entry="build_pdf",
         default_data="editor/data.json",
         supports=_CREDIT_CARD, legacy_prefixes=("/wf", "/wellsfargo"),
@@ -45,57 +45,58 @@ SPECS: tuple[TemplateSpec, ...] = (
         default_options=RenderOptions(font_policy="declared"),
     ),
     TemplateSpec(
-        "amex", "American Express", "from-scratch", "amex", "document",
+        "amex", "美国运通", "from-scratch", "amex", "document",
         module="generate_sample_statement", entry="build_pdf",
         supports=_CREDIT_CARD, legacy_prefixes=("/ae",),
+        default_options=RenderOptions(encrypt=True),
     ),
     TemplateSpec(
-        "mercury", "Mercury", "from-scratch", "mercury", "global",
+        "mercury", "水星银行", "from-scratch", "mercury", "global",
         module="generate_statement", entry="build",
         supports=_DOCUMENT, legacy_prefixes=("/mercury",),
     ),
     TemplateSpec(
-        "capitalone", "Capital One", "from-scratch", "capitalone", "global",
+        "capitalone", "第一资本银行", "from-scratch", "capitalone", "global",
         module="c1_generate", entry="build",
         supports=_DOCUMENT, legacy_prefixes=("/c1", "/capitalone"),
     ),
     TemplateSpec(
-        "sofi", "SoFi", "from-scratch", "sofi", "global",
+        "sofi", "索菲银行", "from-scratch", "sofi", "global",
         module="sofi_generate", entry="build",
         supports=_DOCUMENT, legacy_prefixes=("/sofi",),
     ),
     # ---- 底稿重放：打开 prepared PDF，按 span 表原位替换 -----------------
     TemplateSpec(
-        "chase-personal", "Chase Personal", "replay", "chase", "path-out",
+        "chase-personal", "大通银行 · 个人账单", "replay", "chase", "path-out",
         module="generate_personal", entry="build_pdf",
         default_data="editor_personal/data_personal.json", variant="personal",
         supports=_CREDIT_CARD, legacy_prefixes=("/chase", "/chase/personal"),
     ),
     TemplateSpec(
-        "chase-business", "Chase Business", "replay", "chase", "path-out",
+        "chase-business", "大通银行 · 商业账单", "replay", "chase", "path-out",
         module="generate_business", entry="build_pdf",
         default_data="editor_business/data_business.json", variant="business",
         supports=_CREDIT_CARD, legacy_prefixes=("/chase/business",),
     ),
     TemplateSpec(
-        "usbank-personal", "US Bank Personal", "replay", "usbank", "path-out",
+        "usbank-personal", "美国合众银行 · 个人账单", "replay", "usbank", "path-out",
         module="generate_us", entry="build_pdf",
         default_data="editor_us/data_us.json",
         supports=_CREDIT_CARD, legacy_prefixes=("/us", "/usbank"),
     ),
     TemplateSpec(
-        "usbank-business", "US Bank Business", "replay", "usbank", "path-out",
+        "usbank-business", "美国合众银行 · 商业账单", "replay", "usbank", "path-out",
         module="generate_biz", entry="build_pdf",
         default_data="editor_biz/data_biz.json",
         supports=_CREDIT_CARD, legacy_prefixes=("/us/business", "/usbank/business"),
     ),
     # ---- 纯前端：浏览器内 pdf-lib 渲染 -----------------------------------
     TemplateSpec(
-        "alliant", "Alliant", "static-web", "web/alliant", "static",
+        "alliant", "联合信用合作社", "static-web", "web/alliant", "static",
         legacy_prefixes=("/alliant",),
     ),
     TemplateSpec(
-        "ally", "Ally Bank", "static-web", "web/ally", "static",
+        "ally", "盟友银行", "static-web", "web/ally", "static",
         legacy_prefixes=("/ally",),
     ),
 )

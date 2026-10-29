@@ -1,0 +1,314 @@
+{
+  "_source": {
+    "salesTax": "Tax Foundation, \"State and Local Sales Tax Rates, Midyear 2026\" (published 2026-07-06, rates as of 2026-07-01), https://taxfoundation.org/data/all/state/2026-sales-tax-rates-midyear/ . combinedSalesTaxRate = state rate + population-weighted average local rate, stored as a fraction. West Virginia is 6.60% in the table (6.00% state + 0.60% avg local).",
+    "colTier": "Approximate state cost-of-living tier from BEA state Regional Price Parities (national = 100): high >= ~106, low <= ~95, mid otherwise. Assigned from general knowledge of the published parities, not a per-state fetch."
+  },
+  "states": [
+    {
+      "code": "AL",
+      "name": "Alabama",
+      "combinedSalesTaxRate": 0.0946,
+      "colTier": "low"
+    },
+    {
+      "code": "AK",
+      "name": "Alaska",
+      "combinedSalesTaxRate": 0.0182,
+      "colTier": "mid"
+    },
+    {
+      "code": "AZ",
+      "name": "Arizona",
+      "combinedSalesTaxRate": 0.0854,
+      "colTier": "mid"
+    },
+    {
+      "code": "AR",
+      "name": "Arkansas",
+      "combinedSalesTaxRate": 0.0948,
+      "colTier": "low"
+    },
+    {
+      "code": "CA",
+      "name": "California",
+      "combinedSalesTaxRate": 0.0903,
+      "colTier": "high"
+    },
+    {
+      "code": "CO",
+      "name": "Colorado",
+      "combinedSalesTaxRate": 0.0789,
+      "colTier": "mid"
+    },
+    {
+      "code": "CT",
+      "name": "Connecticut",
+      "combinedSalesTaxRate": 0.0635,
+      "colTier": "mid"
+    },
+    {
+      "code": "DE",
+      "name": "Delaware",
+      "combinedSalesTaxRate": 0,
+      "colTier": "mid"
+    },
+    {
+      "code": "DC",
+      "name": "District of Columbia",
+      "combinedSalesTaxRate": 0.06,
+      "colTier": "high"
+    },
+    {
+      "code": "FL",
+      "name": "Florida",
+      "combinedSalesTaxRate": 0.0698,
+      "colTier": "mid"
+    },
+    {
+      "code": "GA",
+      "name": "Georgia",
+      "combinedSalesTaxRate": 0.0756,
+      "colTier": "mid"
+    },
+    {
+      "code": "HI",
+      "name": "Hawaii",
+      "combinedSalesTaxRate": 0.045,
+      "colTier": "high"
+    },
+    {
+      "code": "ID",
+      "name": "Idaho",
+      "combinedSalesTaxRate": 0.0603,
+      "colTier": "mid"
+    },
+    {
+      "code": "IL",
+      "name": "Illinois",
+      "combinedSalesTaxRate": 0.0898,
+      "colTier": "mid"
+    },
+    {
+      "code": "IN",
+      "name": "Indiana",
+      "combinedSalesTaxRate": 0.07,
+      "colTier": "low"
+    },
+    {
+      "code": "IA",
+      "name": "Iowa",
+      "combinedSalesTaxRate": 0.0694,
+      "colTier": "low"
+    },
+    {
+      "code": "KS",
+      "name": "Kansas",
+      "combinedSalesTaxRate": 0.0871,
+      "colTier": "low"
+    },
+    {
+      "code": "KY",
+      "name": "Kentucky",
+      "combinedSalesTaxRate": 0.06,
+      "colTier": "low"
+    },
+    {
+      "code": "LA",
+      "name": "Louisiana",
+      "combinedSalesTaxRate": 0.1013,
+      "colTier": "low"
+    },
+    {
+      "code": "ME",
+      "name": "Maine",
+      "combinedSalesTaxRate": 0.055,
+      "colTier": "mid"
+    },
+    {
+      "code": "MD",
+      "name": "Maryland",
+      "combinedSalesTaxRate": 0.06,
+      "colTier": "high"
+    },
+    {
+      "code": "MA",
+      "name": "Massachusetts",
+      "combinedSalesTaxRate": 0.0625,
+      "colTier": "high"
+    },
+    {
+      "code": "MI",
+      "name": "Michigan",
+      "combinedSalesTaxRate": 0.06,
+      "colTier": "low"
+    },
+    {
+      "code": "MN",
+      "name": "Minnesota",
+      "combinedSalesTaxRate": 0.0814,
+      "colTier": "mid"
+    },
+    {
+      "code": "MS",
+      "name": "Mississippi",
+      "combinedSalesTaxRate": 0.0706,
+      "colTier": "low"
+    },
+    {
+      "code": "MO",
+      "name": "Missouri",
+      "combinedSalesTaxRate": 0.0844,
+      "colTier": "low"
+    },
+    {
+      "code": "MT",
+      "name": "Montana",
+      "combinedSalesTaxRate": 0,
+      "colTier": "mid"
+    },
+    {
+      "code": "NE",
+      "name": "Nebraska",
+      "combinedSalesTaxRate": 0.0698,
+      "colTier": "low"
+    },
+    {
+      "code": "NV",
+      "name": "Nevada",
+      "combinedSalesTaxRate": 0.0824,
+      "colTier": "mid"
+    },
+    {
+      "code": "NH",
+      "name": "New Hampshire",
+      "combinedSalesTaxRate": 0,
+      "colTier": "mid"
+    },
+    {
+      "code": "NJ",
+      "name": "New Jersey",
+      "combinedSalesTaxRate": 0.066,
+      "colTier": "high"
+    },
+    {
+      "code": "NM",
+      "name": "New Mexico",
+      "combinedSalesTaxRate": 0.0768,
+      "colTier": "low"
+    },
+    {
+      "code": "NY",
+      "name": "New York",
+      "combinedSalesTaxRate": 0.0854,
+      "colTier": "high"
+    },
+    {
+      "code": "NC",
+      "name": "North Carolina",
+      "combinedSalesTaxRate": 0.071,
+      "colTier": "mid"
+    },
+    {
+      "code": "ND",
+      "name": "North Dakota",
+      "combinedSalesTaxRate": 0.0709,
+      "colTier": "low"
+    },
+    {
+      "code": "OH",
+      "name": "Ohio",
+      "combinedSalesTaxRate": 0.0729,
+      "colTier": "low"
+    },
+    {
+      "code": "OK",
+      "name": "Oklahoma",
+      "combinedSalesTaxRate": 0.0906,
+      "colTier": "low"
+    },
+    {
+      "code": "OR",
+      "name": "Oregon",
+      "combinedSalesTaxRate": 0,
+      "colTier": "mid"
+    },
+    {
+      "code": "PA",
+      "name": "Pennsylvania",
+      "combinedSalesTaxRate": 0.0634,
+      "colTier": "mid"
+    },
+    {
+      "code": "RI",
+      "name": "Rhode Island",
+      "combinedSalesTaxRate": 0.07,
+      "colTier": "mid"
+    },
+    {
+      "code": "SC",
+      "name": "South Carolina",
+      "combinedSalesTaxRate": 0.0749,
+      "colTier": "mid"
+    },
+    {
+      "code": "SD",
+      "name": "South Dakota",
+      "combinedSalesTaxRate": 0.0611,
+      "colTier": "low"
+    },
+    {
+      "code": "TN",
+      "name": "Tennessee",
+      "combinedSalesTaxRate": 0.0961,
+      "colTier": "low"
+    },
+    {
+      "code": "TX",
+      "name": "Texas",
+      "combinedSalesTaxRate": 0.082,
+      "colTier": "mid"
+    },
+    {
+      "code": "UT",
+      "name": "Utah",
+      "combinedSalesTaxRate": 0.0742,
+      "colTier": "mid"
+    },
+    {
+      "code": "VT",
+      "name": "Vermont",
+      "combinedSalesTaxRate": 0.0643,
+      "colTier": "mid"
+    },
+    {
+      "code": "VA",
+      "name": "Virginia",
+      "combinedSalesTaxRate": 0.0577,
+      "colTier": "mid"
+    },
+    {
+      "code": "WA",
+      "name": "Washington",
+      "combinedSalesTaxRate": 0.0957,
+      "colTier": "high"
+    },
+    {
+      "code": "WV",
+      "name": "West Virginia",
+      "combinedSalesTaxRate": 0.066,
+      "colTier": "low"
+    },
+    {
+      "code": "WI",
+      "name": "Wisconsin",
+      "combinedSalesTaxRate": 0.0572,
+      "colTier": "mid"
+    },
+    {
+      "code": "WY",
+      "name": "Wyoming",
+      "combinedSalesTaxRate": 0.0539,
+      "colTier": "mid"
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+[
+  {
+    "merchantKey": "fact-camden-lamar-heights-austin",
+    "template": "CAMDEN LIVING RENT PMT {MMDD}",
+    "memo": "Monthly apartment rent"
+  },
+  {
+    "merchantKey": "fact-austin-energy",
+    "template": "AUSTIN ENERGY UTILITY ACH PMT",
+    "memo": "Electric and water utilities"
+  },
+  {
+    "merchantKey": "fact-bcbstx-marketplace",
+    "template": "BCBSTX MARKETPLACE PREMIUM",
+    "memo": "Marketplace health plan premium"
+  },
+  {
+    "merchantKey": "fact-irs-direct-pay",
+    "template": "IRS USATAXPYMT {REF}",
+    "memo": "Quarterly estimated federal tax payment"
+  },
+  {
+    "merchantKey": "fact-adobe-creative-cloud",
+    "template": "ADOBE *CREATIVE CLOUD {CITY} {ST}",
+    "memo": "Software subscription"
+  },
+  {
+    "merchantKey": "fact-spotify-premium",
+    "template": "SPOTIFY USA {CITY} {ST}",
+    "memo": "Music streaming subscription"
+  },
+  {
+    "merchantKey": "fact-heb-austin",
+    "template": "H-E-B #{STORE} {CITY} {ST}",
+    "memo": "Groceries"
+  },
+  {
+    "merchantKey": "fact-epoch-coffee-austin",
+    "template": "TST* EPOCH COFFEE {STORE} {CITY} {ST}",
+    "memo": "Coffee and food"
+  },
+  {
+    "merchantKey": "fact-uchiko-austin",
+    "template": "TST* UCHIKO {STORE} {CITY} {ST}",
+    "memo": "Dinner out"
+  },
+  {
+    "merchantKey": "fact-shell-burnet-rd-austin",
+    "template": "SHELL OIL {STORE} {CITY} {ST}",
+    "memo": "Fuel"
+  },
+  {
+    "merchantKey": "fact-amazon-us",
+    "template": "AMAZON.COM*{REF} AMZN.COM/BILL WA",
+    "memo": "Online purchase"
+  },
+  {
+    "merchantKey": "fact-bucees-new-braunfels",
+    "template": "BUC-EE'S #{STORE} {CITY} {ST}",
+    "memo": "Road trip stop"
+  },
+  {
+    "merchantKey": "fact-walgreens-austin",
+    "template": "WALGREENS #{STORE} {CITY} {ST}",
+    "memo": "Pharmacy and household items"
+  },
+  {
+    "merchantKey": "fact-whole-foods-lamar-austin",
+    "template": "WHOLEFDS LMR {STORE} {CITY} {ST}",
+    "memo": "Groceries"
+  },
+  {
+    "merchantKey": "fact-blick-art-austin",
+    "template": "BLICK ART MATERIALS {STORE} {CITY} {ST}",
+    "memo": "Art supplies"
+  },
+  {
+    "merchantKey": "client-ach",
+    "template": "ACH CREDIT LUMEN CREATIVE LLC {REF}",
+    "memo": "Client invoice payment"
+  }
+]

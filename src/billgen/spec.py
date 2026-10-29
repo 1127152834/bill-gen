@@ -33,7 +33,7 @@ class RenderOptions:
     这里把它拉出来当作纯输出选项，引擎不得回写数据。"""
 
     watermark: bool = True
-    encrypt: bool = True
+    encrypt: bool = False
     font_policy: FontPolicy = "declared"
     page_dpi: int = 110
 

@@ -1,15 +1,48 @@
 services:
-  bill-gen:
+  billgen:
+    image: billgen:full
     build: .
-    image: bill-gen:local
     ports:
+      # LangGraph 服务 + 前端（同一端口，前端走 WEB_DIST 静态托管）
+      - "127.0.0.1:${FLOW_PORT:-8797}:8797"
+      # billgen 工作台 + 渲染 API
       - "127.0.0.1:${HUB_PORT:-8800}:8800"
     environment:
-      BILL_GEN_DATA_DIR: /data
+      BILL_GEN_DATA_DIR: /data/billgen
+      BILLGEN_OUT: /data/renders
+      BILLGEN_MCP_CMD: /opt/billgen/bin/billgen
+      # auto = 由推荐器按账本形状挑模板（boa/chase/usbank/... 前 N 名）
+      BILLGEN_TEMPLATES: ${BILLGEN_TEMPLATES:-auto}
+      BILLGEN_AUTO_LIMIT: ${BILLGEN_AUTO_LIMIT:-2}
+      BILLGEN_AI_FILL: ${BILLGEN_AI_FILL:-1}
+      DATABASE_PATH: /data/flow/app.db
+      WEB_DIST: apps/web/dist
+      HOST: 0.0.0.0
+      PORT: "8797"
+      BANK_DISPLAY_NAME: ${BANK_DISPLAY_NAME:-Harborline Bank}
+      API_KEY: ${API_KEY:-devlocal}
+      # 真实 LLM / 调研：不提供则自动走离线 fixture（LLM_FAKE）
+      LLM_FAKE: ${LLM_FAKE:-1}
+      LLM_BASE_URL: ${LLM_BASE_URL:-}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-gpt-6.1-sol}
+      LLM_STRUCTURED_MODE: ${LLM_STRUCTURED_MODE:-json_schema}
+      TAVILY_API_KEY: ${TAVILY_API_KEY:-}
     init: true
-    restart: unless-stopped
     volumes:
-      - bill-gen-data:/data
+      - billgen-data:/data
+    restart: unless-stopped
+    # 一个容器两个进程：任一挂掉容器即退出重启（entrypoint 里互相看护）
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -fsS http://127.0.0.1:8800/healthz >/dev/null && curl -fsS http://127.0.0.1:8797/api/health >/dev/null",
+        ]
+      interval: 15s
+      timeout: 6s
+      start_period: 25s
+      retries: 3
 
 volumes:
-  bill-gen-data:
+  billgen-data:

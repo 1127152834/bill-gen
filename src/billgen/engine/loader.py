@@ -1,4 +1,10 @@
-"""主题模块的隔离加载。
+"""主题模块的包加载与外部旧式主题兼容。
+
+P4: 内置主题使用 billgen.themes.* 规范包导入，load() 与 activated()
+不再注入主题路径或切换短名模块。以下隔离逻辑仅留给外部旧式主题测试/
+兼容使用，执行窗口仍由共享锁保护。
+
+历史背景：
 
 为什么需要它
 ------------
@@ -18,19 +24,20 @@
 * 同一个进程里可以并存 13 套同名模块（各自持有自己的全局），
 * 渲染顺序执行 + 锁保护，不存在跨主题污染。
 
-P2 的终局是把引擎内部的短名 import 改成包内相对导入，那时本模块可以退化成
-一行 ``importlib.import_module("billgen.themes.chase.engine")``。
+P2 在完整调用窗口内串行化，并在退出时恢复外部导入环境。
+短名 import 的包内相对化仍是后续工作；完成后本模块可退化为普通包导入。
 """
 from __future__ import annotations
 
 import importlib
 import os
 import sys
-import threading
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
 from types import ModuleType
+
+from ..server.state import RENDER_LOCK
 
 __all__ = ["ThemeLoader", "LoaderError"]
 
@@ -60,6 +67,10 @@ def _modules_under(directory: Path, namespace: dict[str, ModuleType]) -> dict[st
     return found
 
 
+# sys.path/sys.modules 是进程级资源；所有 loader 实例必须共用同一把锁。
+_IMPORT_LOCK = RENDER_LOCK
+
+
 class ThemeLoader:
     """按主题加载并切换引擎模块，保证同名模块互不干扰。"""
 
@@ -67,13 +78,23 @@ class ThemeLoader:
         self._root = Path(root)
         self._states: dict[str, _ThemeState] = {}
         self._active: str | None = None
-        self._lock = threading.RLock()
+        self._lock = _IMPORT_LOCK
 
     # -- 公共 API ---------------------------------------------------------
     def load(self, theme: str, theme_dir: Path, module: str) -> ModuleType:
         """返回 ``theme`` 的主题主模块（首次调用时加载）。"""
-        with self._lock:
-            state = self._activate(theme, theme_dir)
+        package = _package_for(theme_dir)
+        if package is not None:
+            with self._lock:
+                state = self._states.setdefault(theme, _ThemeState(Path(theme_dir)))
+                if module not in state.modules:
+                    loaded = importlib.import_module(f"{package}.{module}")
+                    if not _is_own(Path(theme_dir), loaded):
+                        raise LoaderError(f"主题模块不属于指定目录：{module} ({theme_dir})")
+                    state.modules[module] = loaded
+                return state.modules[module]
+        with self.activated(theme, theme_dir):
+            state = self._states[theme]
             if module not in state.modules:
                 self._import_into(state, module)
             return state.modules[module]
@@ -91,14 +112,39 @@ class ThemeLoader:
         老服务端靠启动时 ``sys.path.insert(0, BASE)`` 一次性满足了这个假设。
         这里显式在调用窗口内维持该假设，窗口外恢复，避免污染其它主题。
         """
+        if _package_for(theme_dir) is not None:
+            # Built-in themes use qualified imports; retain serialization only.
+            # No mutation of process-wide sys.path or short-name sys.modules.
+            with self._lock:
+                yield self
+            return
         with self._lock:
             saved = sys.path[:]
+            previous_modules = dict(sys.modules)
+            previous_active = self._active
+            # 记录入口同名项，即使 import 中途失败也恢复外部缓存。
+            local_names = {path.stem for path in Path(theme_dir).glob("*.py")}
             sys.path.insert(0, str(self._root))
             sys.path.insert(0, str(Path(theme_dir)))
+            # 间接 import 同样可能命中外部同名模块，须在入口执行前切换。
+            state = self._activate(theme, Path(theme_dir))
+            for name in local_names:
+                if name in state.modules:
+                    sys.modules[name] = state.modules[name]
+                else:
+                    sys.modules.pop(name, None)
             try:
-                self._activate(theme, Path(theme_dir))
                 yield self
             finally:
+                # 包括函数体内的惰性导入；下次切主题时这些模块也必须切换。
+                state.modules.update(_modules_under(state.directory, dict(sys.modules)))
+                owned = local_names | {name for item in self._states.values() for name in item.modules}
+                for name in owned:
+                    if name in previous_modules:
+                        sys.modules[name] = previous_modules[name]
+                    else:
+                        sys.modules.pop(name, None)
+                self._active = previous_active
                 sys.path[:] = saved
 
     # -- 内部实现 ---------------------------------------------------------
@@ -130,7 +176,14 @@ class ThemeLoader:
         sys.path.insert(0, str(self._root))
         sys.path.insert(0, str(state.directory))
         try:
+            # 显式加载主题入口，避免命中进程中无关包的同名短模块缓存。
+            candidate = state.directory / (module.replace(".", os.sep) + ".py")
+            cached = sys.modules.get(module)
+            if candidate.is_file() and cached is not None and not _is_own(state.directory, cached):
+                sys.modules.pop(module)
             mod = importlib.import_module(module)
+            if not _is_own(state.directory, mod):
+                raise LoaderError(f"主题模块不属于指定目录：{module} ({state.directory})")
         finally:
             sys.path[:] = saved
         seen = _modules_under(state.directory, dict(sys.modules))
@@ -145,6 +198,15 @@ class ThemeLoader:
             sys.modules.pop(name, None)
         for name, obj in state.modules.items():
             sys.modules[name] = obj
+
+
+def _package_for(directory: Path) -> str | None:
+    """Only actual bundled theme directories take the qualified import path."""
+    root = Path(__file__).resolve().parents[1] / "themes"
+    directory = Path(directory).resolve()
+    if directory.parent == root.resolve() and directory.is_dir():
+        return f"billgen.themes.{directory.name}"
+    return None
 
 
 def _is_own(directory: Path, mod: ModuleType) -> bool:

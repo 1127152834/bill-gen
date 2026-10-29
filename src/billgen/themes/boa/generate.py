@@ -108,6 +108,20 @@ def add_watermark(page):
 
 
 # ---------------------------------------------------------------- 替换
+# 促销/法务段落里出现的真实商品名与评奖来源（顺序无意义，最后统一按长度倒序）
+_PROMO_KEYS = (
+    ("Balance Connect™", "overdraft_product"),
+    ("Business Fundamentals® Checking", "business_checking"),
+    ("Business Fundamentals®", "business_checking_short"),
+    ("Best Banks for Small Business", "award_name"),
+    ("SmartAsset.com", "award_domain"),
+    ("SmartAsset", "award_source"),
+    ("SafeBalance Banking®", "safebalance_product"),
+    ("SSM-03-25-0560.B", "form_code"),
+    ("Merrill", "brokerage_brand"),
+)
+
+
 def build_subs(d):
     b = d.get("bank", {})
     name, legal, domain = b.get("name", ""), b.get("legal", ""), b.get("domain", "")
@@ -121,6 +135,12 @@ def build_subs(d):
     if domain:
         subs["bankofamerica.com"] = domain
     subs["BKOFAMERICA"] = abbr
+    # 版式里烙死的自家产品名与第三方评奖文案：数据给了就换，不给保持原稿（保 parity）
+    promo = d.get("promo") or {}
+    for original, key in _PROMO_KEYS:
+        value = promo.get(key)
+        if value:
+            subs[original] = str(value)
     return sorted(subs.items(), key=lambda kv: -len(kv[0]))
 
 
@@ -665,7 +685,7 @@ def build_pdf(d, out_path, watermark=True):
 
     md = d.get("metadata", {})
     md_all = {}
-    for k in ("author", "creator", "producer"):
+    for k in ("title", "author", "subject", "keywords", "creator", "producer"):
         if md.get(k):
             md_all[k] = md[k]
     if md.get("creation"):
@@ -678,7 +698,7 @@ def build_pdf(d, out_path, watermark=True):
 
     cmyk_postpass(doc)
     # 复刻原稿嵌入方式：Type1 + FontFile3(Type1C) + 原字体名/编码（替换默认 CID 嵌入）
-    import orig_embed
+    from billgen.themes.boa import orig_embed
     orig_embed.apply_orig_embed(doc)
     doc.save(out_path, garbage=3, deflate=True)
     doc.close()

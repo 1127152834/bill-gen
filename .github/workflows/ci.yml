@@ -1,0 +1,79 @@
+name: quality-and-delivery
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.11', '3.12', '3.13', '3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: |
+            pyproject.toml
+            constraints-ci.txt
+      - name: System fonts
+        run: sudo apt-get update && sudo apt-get install -y fonts-liberation2 fonts-noto-cjk
+      - name: Install constrained toolchain
+        run: python -m pip install -c constraints-ci.txt -e '.[dev]'
+      - name: Verify assets
+        run: python scripts/assets.py check
+      - run: python -m ruff check .
+      - run: python -m mypy
+      - name: Tests including wheel resource inspection
+        run: python -m pytest -o addopts='' -q --junitxml=test-results.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-py${{ matrix.python }}
+          path: test-results.xml
+
+  distribution:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: sudo apt-get update && sudo apt-get install -y fonts-liberation2 fonts-noto-cjk
+      - run: python -m pip install -c constraints-ci.txt -e '.[dev]'
+      - run: python scripts/assets.py check
+      - name: Build sdist and wheel
+        run: python -m build --no-isolation
+      - name: Prepare offline wheelhouse
+        run: python -m pip download -c constraints-ci.txt --dest dist/wheelhouse dist/billgen-*.whl
+      - name: Install wheel outside source and exercise HTTP
+        run: python tools/smoke_install.py --wheel dist/billgen-*.whl --wheelhouse dist/wheelhouse
+      - name: Container build
+        run: docker build -t billgen:ci .
+      - name: Container HTTP smoke
+        run: python tools/smoke_container.py --image billgen:ci
+      - name: Strict portable regression in controlled container
+        run: docker run --rm --entrypoint python -v "$PWD/tools:/checks/tools:ro" -v "$PWD/tests/fixtures:/checks/tests/fixtures:ro" billgen:ci /checks/tools/render_regression.py check
+      - uses: actions/upload-artifact@v4
+        with:
+          name: distributions
+          path: |
+            dist/*.whl
+            dist/*.tar.gz
+          retention-days: 14

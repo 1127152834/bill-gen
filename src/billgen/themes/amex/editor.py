@@ -20,10 +20,10 @@ import threading
 import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from runtime_paths import data_path
+from billgen.server.state import BrowserSessions, RENDER_LOCK, browser_session
 
 BASE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, BASE)
-import generate_sample_statement as gen  # noqa: E402
+from billgen.themes.amex import generate_sample_statement as gen
 
 # Docker/服务器环境可用环境变量覆盖：
 #   AE_HOST     监听地址（默认 127.0.0.1；容器内设 0.0.0.0）
@@ -32,8 +32,8 @@ HOST = os.environ.get("AE_HOST", "127.0.0.1")
 SAVE_DIR = os.environ.get("AE_SAVE_DIR", data_path("AE"))
 PV_DIR = data_path("AE/pv_png")     # 预览页 PNG（内容哈希寻址，immutable 缓存）
 
-LOCK = threading.Lock()
-STATE = {"pdf": None, "path": None}
+LOCK = RENDER_LOCK
+SESSIONS = BrowserSessions()
 
 # 字段 → 渲染字体（用于字符覆盖检查；both = 该字段同时出现在 Regular/Bold 文本中）
 SCALAR_FONTS = {
@@ -784,6 +784,14 @@ loadPreset('demo');
 
 # ---------------------------------------------------------------- HTTP 服务
 class Handler(BaseHTTPRequestHandler):
+    sessions = SESSIONS
+
+    def end_headers(self):
+        if getattr(self, "_session_cookie", None):
+            self.send_header("Set-Cookie", self._session_cookie)
+            self._session_cookie = None
+        super().end_headers()
+
     protocol_version = "HTTP/1.1"
 
     def log_message(self, fmt, *args):
@@ -805,6 +813,7 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    @browser_session
     def do_GET(self):
         if self.path == "/":
             self._html()
@@ -832,7 +841,7 @@ class Handler(BaseHTTPRequestHandler):
             self._json({"reg": cov["reg"], "bold": cov["bold"]})
         elif self.path == "/api/download":
             with LOCK:
-                pdf = STATE["pdf"]
+                pdf = self.session.pdf
             if not pdf:
                 self._json({"ok": False, "error": "尚未生成，请先编辑内容"}, 400)
                 return
@@ -847,6 +856,7 @@ class Handler(BaseHTTPRequestHandler):
             self.send_response(204)
             self.end_headers()
 
+    @browser_session
     def do_POST(self):
         try:
             length = int(self.headers.get("Content-Length") or 0)
@@ -893,13 +903,16 @@ class Handler(BaseHTTPRequestHandler):
                                 f.write(png)
                             os.replace(tmp, fp)
                         hashes.append(h)
+                    self.session.hashes = list(hashes)
+                    referenced = SESSIONS.referenced_hashes()
                     for f in os.listdir(PV_DIR):      # 清理不再引用的页（防累积）
-                        if f.endswith(".png") and f[:-4] not in hashes:
+                        if f.endswith(".png") and f[:-4] not in referenced:
                             try:
                                 os.remove(os.path.join(PV_DIR, f))
                             except OSError:
                                 pass
-                    STATE["pdf"] = pdf
+                    self.session.pdf = pdf
+                    self.session.path = None
                     d.close()
             except Exception as e:
                 self._json({"ok": False, "error": f"生成失败: {e}"}, 500)
@@ -910,7 +923,7 @@ class Handler(BaseHTTPRequestHandler):
 
         elif self.path == "/api/save":
             with LOCK:
-                pdf = STATE["pdf"]
+                pdf = self.session.pdf
             if not pdf:
                 self._json({"ok": False, "error": "尚未生成，请先编辑内容"}, 400)
                 return
@@ -928,13 +941,13 @@ class Handler(BaseHTTPRequestHandler):
                 self._json({"ok": False, "error": f"写入失败: {e}"}, 500)
                 return
             with LOCK:
-                STATE["path"] = path
+                self.session.path = path
             self._json({"ok": True, "path": path})
 
         elif self.path == "/api/reveal":
             action = body.get("action")
             with LOCK:
-                path = STATE.get("path")
+                path = self.session.path
             if not path or not os.path.exists(path):
                 self._json({"ok": False, "error": "尚未保存过文件"}, 400)
                 return

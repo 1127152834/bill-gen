@@ -1,0 +1,117 @@
+{
+  "id": "refs-fixture",
+  "seed": "refs-fixture",
+  "createdAt": "2027-02-01T00:00:00.000Z",
+  "subject": {
+    "name": "Maya Okafor",
+    "age": 34,
+    "address": {
+      "street": "2104 S 1st St",
+      "city": "Austin",
+      "state": "TX",
+      "zip": "78704"
+    },
+    "occupation": "Designer",
+    "household": "single",
+    "hobbies": [
+      "cycling"
+    ]
+  },
+  "statements": [
+    {
+      "bankName": "Harborline Bank",
+      "accountType": "checking",
+      "accountLast4": "1347",
+      "periodStart": "2027-01-01",
+      "periodEnd": "2027-01-31",
+      "months": [
+        {
+          "cycleStart": "2027-01-01",
+          "cycleEnd": "2027-01-31",
+          "openingBalanceCents": 100000,
+          "closingBalanceCents": 209489,
+          "totalCreditsCents": 250000,
+          "totalDebitsCents": 140511,
+          "transactionCount": 6
+        }
+      ],
+      "checking": {
+        "opening": 100000,
+        "closing": 209489
+      },
+      "transactions": [
+        {
+          "id": "t04ach",
+          "transactionDate": "2027-01-04",
+          "postedDate": "2027-01-04",
+          "description": "ACME PAYROLL DIRECT DEP",
+          "memo": "",
+          "type": "ACH",
+          "direction": "credit",
+          "amountCents": 250000
+        },
+        {
+          "id": "t06ach",
+          "transactionDate": "2027-01-06",
+          "postedDate": "2027-01-06",
+          "description": "CAMDEN LIVING RENT PMT 0106",
+          "memo": "",
+          "type": "ACH",
+          "direction": "debit",
+          "amountCents": 120000
+        },
+        {
+          "id": "t09pos",
+          "transactionDate": "2027-01-09",
+          "postedDate": "2027-01-09",
+          "description": "H-E-B #2604 AUSTIN TX",
+          "memo": "",
+          "type": "POS",
+          "direction": "debit",
+          "amountCents": 4311
+        },
+        {
+          "id": "t12atm",
+          "transactionDate": "2027-01-12",
+          "postedDate": "2027-01-12",
+          "description": "ATM WITHDRAWAL 0112 TERMINAL",
+          "memo": "",
+          "type": "ATM",
+          "direction": "debit",
+          "amountCents": 10000
+        },
+        {
+          "id": "t15fee",
+          "transactionDate": "2027-01-15",
+          "postedDate": "2027-01-15",
+          "description": "SERVICE FEE",
+          "memo": "",
+          "type": "FEE",
+          "direction": "debit",
+          "amountCents": 1200
+        },
+        {
+          "id": "t20check",
+          "transactionDate": "2027-01-20",
+          "postedDate": "2027-01-20",
+          "description": "CHECK 1042",
+          "memo": "",
+          "type": "CHECK",
+          "direction": "debit",
+          "amountCents": 5000
+        }
+      ]
+    }
+  ],
+  "audit": {
+    "rules": [],
+    "findings": []
+  },
+  "usage": {
+    "llmCalls": 0,
+    "tokens": 0,
+    "tavilyQueries": 0
+  },
+  "warnings": [],
+  "status": "completed"
+}

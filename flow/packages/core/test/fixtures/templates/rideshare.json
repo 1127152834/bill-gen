@@ -1,0 +1,67 @@
+[
+  {
+    "merchantKey": "fact-greystar-westchase-houston",
+    "template": "GREYSTAR WESTCHASE RENT {MMDD}",
+    "memo": "Monthly apartment rent"
+  },
+  {
+    "merchantKey": "fact-toyota-financial-services",
+    "template": "TOYOTA FINANCIAL SVCS ACH PMT",
+    "memo": "Auto loan payment"
+  },
+  {
+    "merchantKey": "fact-reliant-energy-houston",
+    "template": "RELIANT ENERGY ELECTRIC ACH",
+    "memo": "Electric bill"
+  },
+  {
+    "merchantKey": "fact-progressive-auto",
+    "template": "PROGRESSIVE *INSURANCE {CITY} {ST}",
+    "memo": "Auto insurance premium"
+  },
+  {
+    "merchantKey": "fact-t-mobile-essentials",
+    "template": "T-MOBILE*AUTOPAY {CITY} {ST}",
+    "memo": "Phone plan"
+  },
+  {
+    "merchantKey": "fact-shell-westheimer-houston",
+    "template": "SHELL OIL {STORE} {CITY} {ST}",
+    "memo": "Fuel"
+  },
+  {
+    "merchantKey": "fact-whataburger-houston",
+    "template": "WHATABURGER {STORE} {CITY} {ST}",
+    "memo": "Fast food"
+  },
+  {
+    "merchantKey": "fact-heb-montrose-houston",
+    "template": "H-E-B #{STORE} {CITY} {ST}",
+    "memo": "Groceries"
+  },
+  {
+    "merchantKey": "fact-mister-car-wash-houston",
+    "template": "MISTER CAR WASH #{STORE} {CITY} {ST}",
+    "memo": "Car wash"
+  },
+  {
+    "merchantKey": "fact-autozone-houston",
+    "template": "AUTOZONE #{STORE} {CITY} {ST}",
+    "memo": "Auto parts"
+  },
+  {
+    "merchantKey": "fact-exxon-katy-fwy-houston",
+    "template": "EXXONMOBIL {STORE} {CITY} {ST}",
+    "memo": "Fuel"
+  },
+  {
+    "merchantKey": "fact-taqueria-arandas-houston",
+    "template": "TST* TAQUERIA ARANDAS {STORE} {CITY} {ST}",
+    "memo": "Dinner"
+  },
+  {
+    "merchantKey": "uber-weekly",
+    "template": "UBER USA DRIVER PAYMENT",
+    "memo": "Weekly driver payout"
+  }
+]

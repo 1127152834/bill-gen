@@ -11,15 +11,18 @@
   c1     — Capital One 360 个人账户（c1-statement-template/）
 """
 import hashlib
-import importlib
 import json
 import os
 import sys
 import threading
 import urllib.parse
 import webbrowser
+from copy import deepcopy
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
+from billgen import paths
+from billgen.engine.loader import ThemeLoader
+from billgen.server.state import RENDER_LOCK, EditorState, serialized
 from runtime_paths import data_path
 
 BASE = os.path.dirname(os.path.abspath(__file__))
@@ -27,21 +30,21 @@ BASE = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES = {
     "mercury": {
         "name": "Mercury 商业账户",
-        "dir": os.path.join(os.path.dirname(BASE), "mercury-statement-template"),
+        "dir": str(paths.theme_dir("mercury")),
         "module": "generate_statement",
         "filename": "Demo-Bank-Statement",
         "accent_ban": True,          # 模板字体缺重音字母 → 禁止输入
     },
     "c1": {
         "name": "Capital One 个人账户",
-        "dir": os.path.join(os.path.dirname(BASE), "c1-statement-template"),
+        "dir": str(paths.theme_dir("capitalone")),
         "module": "c1_generate",
         "filename": "C1-Personal-Statement",
         "accent_ban": False,         # Optimist 字体重音全覆盖 → 允许
     },
     "sofi": {
         "name": "SoFi 个人账户",
-        "dir": os.path.join(os.path.dirname(BASE), "sofi-statement-template"),
+        "dir": str(paths.theme_dir("sofi")),
         "module": "sofi_generate",
         "filename": "SoFi-Statement",
         "accent_ban": False,         # TTNorms 字体重音全覆盖 → 允许
@@ -49,12 +52,11 @@ TEMPLATES = {
 }
 
 _mods = {}
+_LOADER = ThemeLoader(paths.ROOT)
 def mod(tpl):
     if tpl not in _mods:
-        d = TEMPLATES[tpl]["dir"]
-        if d not in sys.path:
-            sys.path.insert(0, d)
-        _mods[tpl] = importlib.import_module(TEMPLATES[tpl]["module"])
+        theme = {"c1": "capitalone"}.get(tpl, tpl)
+        _mods[tpl] = _LOADER.load(theme, paths.theme_dir(theme), TEMPLATES[tpl]["module"])
     return _mods[tpl]
 
 DEFAULT_STATE = {}
@@ -66,7 +68,8 @@ for tid, cfg in TEMPLATES.items():
         "filename": cfg["filename"],
     }
 
-LOCK = threading.Lock()
+LOCK = RENDER_LOCK
+STATES = {tid: EditorState() for tid in TEMPLATES}
 PREVIEW_DPI = 100
 PV_DIR = data_path("水星C1sofi/statement-editor/pv_png")     # 预览页 PNG（内容哈希寻址，immutable 缓存）
 
@@ -344,17 +347,7 @@ def _set_cjk(tpl, data):
         except Exception:
             m.FONT_CJK = base
 
-def _build_mercury(m, data, meta=None):
-    return m.build(meta=meta)
-
-def _build_c1(m, data, meta=None):
-    return m.build(meta=meta)
-
-def _build_sofi(m, data, meta=None):
-    return m.build(meta=meta)
-
-BUILDERS = {"mercury": _build_mercury, "c1": _build_c1, "sofi": _build_sofi}
-
+@serialized
 def _produce(tpl, raw_data, watermark, for_export=False, meta=None):
     """生成 PDF。for_export=True 时序列化+垃圾回收；预览直接返回 doc（更快）。"""
     data, rm = sanitize(tpl, normalize(tpl, raw_data))
@@ -362,9 +355,7 @@ def _produce(tpl, raw_data, watermark, for_export=False, meta=None):
     with LOCK:
         m._fallback_used.clear()
         _set_cjk(tpl, data)
-        m.DATA = data
-        m.WATERMARK = bool(watermark)
-        doc = BUILDERS[tpl](m, data, meta)
+        doc = m.build(meta=meta, data=data, watermark=bool(watermark))
         if for_export:
             out = doc.tobytes(garbage=4, deflate=True)
             doc.close()
@@ -375,6 +366,7 @@ def _produce(tpl, raw_data, watermark, for_export=False, meta=None):
             "fallback": sorted(m._fallback_used)}
     return out, info
 
+@serialized
 def render_previews(tpl, raw_data, watermark, meta=None):
     """预览：构建后直接光栅化（跳过 PDF 序列化，约省 40% 耗时）。
     页 PNG 按内容哈希落盘（响应只带哈希，未变化页走浏览器 immutable 缓存，
@@ -393,8 +385,11 @@ def render_previews(tpl, raw_data, watermark, meta=None):
                     f.write(png)
                 os.replace(tmp, fp)
             hs.append(h)
+        STATES[tpl].hashes = list(hs)
+        STATES[tpl].watermark = bool(watermark)
+        referenced = {h for state in STATES.values() for h in state.hashes}
         for f in os.listdir(PV_DIR):        # 清理不再引用的页（防累积）
-            if f.endswith(".png") and f[:-4] not in hs:
+            if f.endswith(".png") and f[:-4] not in referenced:
                 try:
                     os.remove(os.path.join(PV_DIR, f))
                 except OSError:
@@ -424,6 +419,7 @@ class Handler(BaseHTTPRequestHandler):
         if body:
             self.wfile.write(body)
 
+    @serialized
     def do_GET(self):
         p = urllib.parse.urlparse(self.path).path
         qs = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
@@ -441,7 +437,7 @@ class Handler(BaseHTTPRequestHandler):
                 self._reply(404, "unknown template")
                 return
             _init_policy(tpl)
-            state = dict(DEFAULT_STATE[tpl])
+            state = deepcopy(DEFAULT_STATE[tpl])
             state["accent_ban"] = TEMPLATES[tpl]["accent_ban"]
             state["meta"] = json.loads(json.dumps(getattr(mod(tpl), "META", {})))
             state["template"] = tpl
@@ -463,6 +459,7 @@ class Handler(BaseHTTPRequestHandler):
         else:
             self._reply(404, "not found", "text/plain; charset=utf-8")
 
+    @serialized
     def do_POST(self):
         p = urllib.parse.urlparse(self.path).path
         try:

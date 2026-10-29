@@ -26,7 +26,9 @@ def asset_paths(root=ROOT):
 
 def safe_asset_path(root, name):
     root=Path(root).resolve()
-    path=(root/name).resolve()
+    import runtime_paths  # noqa: F401 — bootstrap src for direct script execution
+    from billgen.paths import relocated
+    path=(root/relocated(name)).resolve()
     if not path.is_relative_to(root):raise ValueError('资产路径不能通过链接跳出项目目录')
     return path
 
@@ -47,7 +49,7 @@ def import_assets(source,root=ROOT):
         if set(derived)!=set(manifest['derived']):raise ValueError('派生资产与清单不一致')
     plan=[]
     for name in asset_paths(root):
-        outgoing=(root/name).resolve()
+        outgoing=safe_asset_path(root,name)
         if not outgoing.is_relative_to(root):
             raise ValueError('资产路径不能通过链接跳出项目目录')
         if name in derived:

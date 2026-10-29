@@ -1,0 +1,459 @@
+{
+  "_source": {
+    "salesTax": "Tax Foundation, \"Sales Tax Rates in Major Cities, Midyear 2021\" (rates as of 2021-07-01; page updated 2024-09-24), https://taxfoundation.org/data/all/state/sales-tax-rates-by-city-2021/ . This is the most recent edition of the Tax Foundation city-level table; Tax Foundation has not republished city-level rates since. City combined rate = state + county + city, stored as a fraction.",
+    "population": "US Census Bureau 2020 Decennial Census, city (incorporated place) population; the 50 most populous cities (NYC counted as New York).",
+    "colTier": "Approximate cost-of-living tier from the BEA Regional Price Parities (metro area, all items, national = 100): high >= ~106, low <= ~95, mid otherwise. Assigned from general knowledge of those published parities, not a per-city fetch; treat as approximate synthetic-data buckets."
+  },
+  "metros": [
+    {
+      "metroId": "new-york-ny",
+      "metroName": "New York City",
+      "city": "New York",
+      "state": "NY",
+      "population": 8804190,
+      "combinedSalesTaxRate": 0.08875,
+      "colTier": "high"
+    },
+    {
+      "metroId": "los-angeles-ca",
+      "metroName": "Los Angeles",
+      "city": "Los Angeles",
+      "state": "CA",
+      "population": 3898747,
+      "combinedSalesTaxRate": 0.095,
+      "colTier": "high"
+    },
+    {
+      "metroId": "chicago-il",
+      "metroName": "Chicago",
+      "city": "Chicago",
+      "state": "IL",
+      "population": 2746388,
+      "combinedSalesTaxRate": 0.1025,
+      "colTier": "mid"
+    },
+    {
+      "metroId": "houston-tx",
+      "metroName": "Houston",
+      "city": "Houston",
+      "state": "TX",
+      "population": 2304580,
+      "combinedSalesTaxRate": 0.0825,
+      "colTier": "mid"
+    },
+    {
+      "metroId": "phoenix-az",
+      "metroName": "Phoenix",
+      "city": "Phoenix",
+      "state": "AZ",
+      "population": 1608139,
+      "combinedSalesTaxRate": 0.086,
+      "colTier": "mid"
+    },
+    {
+      "metroId": "philadelphia-pa",
+      "metroName": "Philadelphia",
+      "city": "Philadelphia",
+      "state": "PA",
+      "population": 1603797,
+      "combinedSalesTaxRate": 0.08,
+      "colTier": "mid"
+    },
+    {
+      "metroId": "san-antonio-tx",
+      "metroName": "San Antonio",
+      "city": "San Antonio",
+      "state": "TX",
+      "population": 1434625,
+      "combinedSalesTaxRate": 0.0825,
+      "colTier": "low"
+    },
+    {
+      "metroId": "san-diego-ca",
+      "metroName": "San Diego",
+      "city": "San Diego",
+      "state": "CA",
+      "population": 1386932,
+      "combinedSalesTaxRate": 0.0775,
+      "colTier": "high"
+    },
+    {
+      "metroId": "dallas-tx",
+      "metroName": "Dallas",
+      "city": "Dallas",
+      "state": "TX",
+      "population": 1304379,
+      "combinedSalesTaxRate": 0.0825,
+      "colTier": "mid"
+    },
+    {
+      "metroId": "san-jose-ca",
+      "metroName": "San Jose",
+      "city": "San Jose",
+      "state": "CA",
+      "population": 1013240,
+      "combinedSalesTaxRate": 0.09375,
+      "colTier": "high"
+    },
+    {
+      "metroId": "austin-tx",
+      "metroName": "Austin",
+      "city": "Austin",
+      "state": "TX",
+      "population": 961855,
+      "combinedSalesTaxRate": 0.0825,
+      "colTier": "mid"
+    },
+    {
+      "metroId": "jacksonville-fl",
+      "metroName": "Jacksonville",
+      "city": "Jacksonville",
+      "state": "FL",
+      "population": 949611,
+      "combinedSalesTaxRate": 0.075,
+      "colTier": "mid"
+    },
+    {
+      "metroId": "fort-worth-tx",
+      "metroName": "Fort Worth",
+      "city": "Fort Worth",
+      "state": "TX",
+      "population": 918915,
+      "combinedSalesTaxRate": 0.0825,
+      "colTier": "mid"
+    },
+    {
+      "metroId": "columbus-oh",
+      "metroName": "Columbus",
+      "city": "Columbus",
+      "state": "OH",
+      "population": 905748,
+      "combinedSalesTaxRate": 0.075,
+      "colTier": "low"
+    },
+    {
+      "metroId": "indianapolis-in",
+      "metroName": "Indianapolis",
+      "city": "Indianapolis",
+      "state": "IN",
+      "population": 887642,
+      "combinedSalesTaxRate": 0.07,
+      "colTier": "low"
+    },
+    {
+      "metroId": "charlotte-nc",
+      "metroName": "Charlotte",
+      "city": "Charlotte",
+      "state": "NC",
+      "population": 874579,
+      "combinedSalesTaxRate": 0.0725,
+      "colTier": "mid"
+    },
+    {
+      "metroId": "san-francisco-ca",
+      "metroName": "San Francisco",
+      "city": "San Francisco",
+      "state": "CA",
+      "population": 873965,
+      "combinedSalesTaxRate": 0.08625,
+      "colTier": "high"
+    },
+    {
+      "metroId": "seattle-wa",
+      "metroName": "Seattle",
+      "city": "Seattle",
+      "state": "WA",
+      "population": 737015,
+      "combinedSalesTaxRate": 0.1025,
+      "colTier": "high"
+    },
+    {
+      "metroId": "denver-co",
+      "metroName": "Denver",
+      "city": "Denver",
+      "state": "CO",
+      "population": 715522,
+      "combinedSalesTaxRate": 0.0881,
+      "colTier": "high"
+    },
+    {
+      "metroId": "oklahoma-city-ok",
+      "metroName": "Oklahoma City",
+      "city": "Oklahoma City",
+      "state": "OK",
+      "population": 681054,
+      "combinedSalesTaxRate": 0.08625,
+      "colTier": "low"
+    },
+    {
+      "metroId": "nashville-tn",
+      "metroName": "Nashville",
+      "city": "Nashville",
+      "state": "TN",
+      "population": 689447,
+      "combinedSalesTaxRate": 0.0925,
+      "colTier": "mid"
+    },
+    {
+      "metroId": "washington-dc",
+      "metroName": "Washington",
+      "city": "Washington",
+      "state": "DC",
+      "population": 689545,
+      "combinedSalesTaxRate": 0.06,
+      "colTier": "high"
+    },
+    {
+      "metroId": "el-paso-tx",
+      "metroName": "El Paso",
+      "city": "El Paso",
+      "state": "TX",
+      "population": 678815,
+      "combinedSalesTaxRate": 0.0825,
+      "colTier": "low"
+    },
+    {
+      "metroId": "las-vegas-nv",
+      "metroName": "Las Vegas",
+      "city": "Las Vegas",
+      "state": "NV",
+      "population": 641903,
+      "combinedSalesTaxRate": 0.08375,
+      "colTier": "mid"
+    },
+    {
+      "metroId": "boston-ma",
+      "metroName": "Boston",
+      "city": "Boston",
+      "state": "MA",
+      "population": 675647,
+      "combinedSalesTaxRate": 0.0625,
+      "colTier": "high"
+    },
+    {
+      "metroId": "detroit-mi",
+      "metroName": "Detroit",
+      "city": "Detroit",
+      "state": "MI",
+      "population": 639111,
+      "combinedSalesTaxRate": 0.06,
+      "colTier": "low"
+    },
+    {
+      "metroId": "portland-or",
+      "metroName": "Portland",
+      "city": "Portland",
+      "state": "OR",
+      "population": 652503,
+      "combinedSalesTaxRate": 0,
+      "colTier": "mid"
+    },
+    {
+      "metroId": "louisville-ky",
+      "metroName": "Louisville",
+      "city": "Louisville",
+      "state": "KY",
+      "population": 633045,
+      "combinedSalesTaxRate": 0.06,
+      "colTier": "low"
+    },
+    {
+      "metroId": "memphis-tn",
+      "metroName": "Memphis",
+      "city": "Memphis",
+      "state": "TN",
+      "population": 633104,
+      "combinedSalesTaxRate": 0.0975,
+      "colTier": "low"
+    },
+    {
+      "metroId": "baltimore-md",
+      "metroName": "Baltimore",
+      "city": "Baltimore",
+      "state": "MD",
+      "population": 585708,
+      "combinedSalesTaxRate": 0.06,
+      "colTier": "mid"
+    },
+    {
+      "metroId": "milwaukee-wi",
+      "metroName": "Milwaukee",
+      "city": "Milwaukee",
+      "state": "WI",
+      "population": 577222,
+      "combinedSalesTaxRate": 0.055,
+      "colTier": "mid"
+    },
+    {
+      "metroId": "albuquerque-nm",
+      "metroName": "Albuquerque",
+      "city": "Albuquerque",
+      "state": "NM",
+      "population": 564559,
+      "combinedSalesTaxRate": 0.07875,
+      "colTier": "low"
+    },
+    {
+      "metroId": "tucson-az",
+      "metroName": "Tucson",
+      "city": "Tucson",
+      "state": "AZ",
+      "population": 542629,
+      "combinedSalesTaxRate": 0.087,
+      "colTier": "mid"
+    },
+    {
+      "metroId": "fresno-ca",
+      "metroName": "Fresno",
+      "city": "Fresno",
+      "state": "CA",
+      "population": 542107,
+      "combinedSalesTaxRate": 0.0835,
+      "colTier": "mid"
+    },
+    {
+      "metroId": "sacramento-ca",
+      "metroName": "Sacramento",
+      "city": "Sacramento",
+      "state": "CA",
+      "population": 524943,
+      "combinedSalesTaxRate": 0.0875,
+      "colTier": "mid"
+    },
+    {
+      "metroId": "mesa-az",
+      "metroName": "Mesa",
+      "city": "Mesa",
+      "state": "AZ",
+      "population": 504258,
+      "combinedSalesTaxRate": 0.083,
+      "colTier": "mid"
+    },
+    {
+      "metroId": "atlanta-ga",
+      "metroName": "Atlanta",
+      "city": "Atlanta",
+      "state": "GA",
+      "population": 498715,
+      "combinedSalesTaxRate": 0.089,
+      "colTier": "mid"
+    },
+    {
+      "metroId": "kansas-city-mo",
+      "metroName": "Kansas City",
+      "city": "Kansas City",
+      "state": "MO",
+      "population": 508090,
+      "combinedSalesTaxRate": 0.0885,
+      "colTier": "low"
+    },
+    {
+      "metroId": "colorado-springs-co",
+      "metroName": "Colorado Springs",
+      "city": "Colorado Springs",
+      "state": "CO",
+      "population": 478961,
+      "combinedSalesTaxRate": 0.082,
+      "colTier": "mid"
+    },
+    {
+      "metroId": "omaha-ne",
+      "metroName": "Omaha",
+      "city": "Omaha",
+      "state": "NE",
+      "population": 486051,
+      "combinedSalesTaxRate": 0.07,
+      "colTier": "low"
+    },
+    {
+      "metroId": "raleigh-nc",
+      "metroName": "Raleigh",
+      "city": "Raleigh",
+      "state": "NC",
+      "population": 467665,
+      "combinedSalesTaxRate": 0.0725,
+      "colTier": "mid"
+    },
+    {
+      "metroId": "miami-fl",
+      "metroName": "Miami",
+      "city": "Miami",
+      "state": "FL",
+      "population": 442241,
+      "combinedSalesTaxRate": 0.07,
+      "colTier": "high"
+    },
+    {
+      "metroId": "virginia-beach-va",
+      "metroName": "Virginia Beach",
+      "city": "Virginia Beach",
+      "state": "VA",
+      "population": 459470,
+      "combinedSalesTaxRate": 0.06,
+      "colTier": "mid"
+    },
+    {
+      "metroId": "long-beach-ca",
+      "metroName": "Long Beach",
+      "city": "Long Beach",
+      "state": "CA",
+      "population": 466742,
+      "combinedSalesTaxRate": 0.1025,
+      "colTier": "high"
+    },
+    {
+      "metroId": "oakland-ca",
+      "metroName": "Oakland",
+      "city": "Oakland",
+      "state": "CA",
+      "population": 440646,
+      "combinedSalesTaxRate": 0.1025,
+      "colTier": "high"
+    },
+    {
+      "metroId": "minneapolis-mn",
+      "metroName": "Minneapolis",
+      "city": "Minneapolis",
+      "state": "MN",
+      "population": 429954,
+      "combinedSalesTaxRate": 0.08025,
+      "colTier": "mid"
+    },
+    {
+      "metroId": "bakersfield-ca",
+      "metroName": "Bakersfield",
+      "city": "Bakersfield",
+      "state": "CA",
+      "population": 403455,
+      "combinedSalesTaxRate": 0.0825,
+      "colTier": "mid"
+    },
+    {
+      "metroId": "tulsa-ok",
+      "metroName": "Tulsa",
+      "city": "Tulsa",
+      "state": "OK",
+      "population": 413066,
+      "combinedSalesTaxRate": 0.08517,
+      "colTier": "low"
+    },
+    {
+      "metroId": "tampa-fl",
+      "metroName": "Tampa",
+      "city": "Tampa",
+      "state": "FL",
+      "population": 384959,
+      "combinedSalesTaxRate": 0.07,
+      "colTier": "mid"
+    },
+    {
+      "metroId": "arlington-tx",
+      "metroName": "Arlington",
+      "city": "Arlington",
+      "state": "TX",
+      "population": 394266,
+      "combinedSalesTaxRate": 0.08,
+      "colTier": "mid"
+    }
+  ]
+}

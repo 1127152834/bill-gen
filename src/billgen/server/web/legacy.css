@@ -1,0 +1,433 @@
+/* Presentation-only, intentionally scoped away from statement pages and print. */
+@media screen {
+  body.bg-legacy {
+    --accent: #087f72;
+    --accent-dk: #06695f;
+    --blue: #087f72;
+    --bg: #f4f6f7;
+    --card: #fff;
+    --border: #dfe6e8;
+    --line: #dfe6e8;
+    --text: #202e35;
+    --muted: #697b83;
+    --bg-nav-height: 64px;
+    --bg-toolbar-height: 64px;
+    margin: 0;
+    padding-top: var(--bg-nav-height);
+    box-sizing: border-box;
+    height: 100vh;
+    height: 100dvh;
+    color: var(--text);
+    background: var(--bg);
+    font:
+      13px/1.55 -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      "PingFang SC",
+      sans-serif;
+  }
+  #bg-legacy-nav {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 100;
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 12px 24px;
+    box-sizing: border-box;
+    color: #202e35;
+    background: #fff;
+    border-bottom: 1px solid #dfe6e8;
+  }
+  #bg-legacy-nav a {
+    color: #60747c;
+    font-size: 13px;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  #bg-legacy-nav a:hover {
+    color: #087f72;
+  }
+  #bg-legacy-nav strong {
+    font-size: 15px;
+    font-weight: 650;
+    letter-spacing: -0.25px;
+  }
+  #bg-legacy-nav .bg-editor-tag {
+    font-size: 11px;
+    color: #087568;
+    background: #e8f5f1;
+    padding: 3px 8px;
+    border-radius: 5px;
+  }
+  .bg-nav-actions {
+    margin-left: auto;
+    display: flex;
+    gap: 6px;
+  }
+  #bg-legacy-nav button,
+  .bg-legacy :is(#toolbar, #bar, header, .toolbar).bg-editor-toolbar button,
+  .bg-legacy .bg-editor-panel button,
+  .bg-legacy .bg-editor-panel .btn {
+    font: inherit;
+    font-weight: 550;
+    color: #344a53;
+    background: #fff;
+    border: 1px solid #d7e0e3;
+    border-radius: 7px;
+    padding: 7px 11px;
+    cursor: pointer;
+    min-height: 34px;
+    transition:
+      background 0.15s,
+      border-color 0.15s;
+  }
+  #bg-legacy-nav button:hover,
+  .bg-legacy
+    :is(#toolbar, #bar, header, .toolbar).bg-editor-toolbar
+    button:hover,
+  .bg-legacy .bg-editor-panel button:hover {
+    background: #edf5f3;
+    border-color: #abc9c1;
+  }
+  .bg-legacy
+    :is(#toolbar, #bar, header, .toolbar).bg-editor-toolbar
+    button.primary,
+  .bg-legacy .bg-editor-panel button.primary,
+  .bg-legacy :is(#toolbar, #bar, header, .toolbar).bg-editor-toolbar .on,
+  .bg-legacy .bg-editor-panel .tab.on {
+    background: #087f72;
+    border-color: #087f72;
+    color: #fff;
+  }
+  .bg-legacy .bg-editor-panel button.del,
+  .bg-legacy .bg-editor-panel .danger {
+    color: #b34242;
+    background: #fff3f2;
+    border-color: #f0d3d0;
+  }
+  .bg-legacy button:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+  #bg-legacy-nav :focus-visible,
+  .bg-legacy .bg-editor-panel :focus-visible,
+  .bg-legacy
+    :is(#toolbar, #bar, header, .toolbar).bg-editor-toolbar
+    :focus-visible {
+    outline: 3px solid #90cdbf;
+    outline-offset: 2px;
+  }
+  .bg-legacy :is(#form, #side, #editor, #panel).bg-editor-panel,
+  .bg-legacy-ae .bg-editor-panel,
+  .bg-legacy-merc .bg-editor-panel {
+    box-sizing: border-box;
+    width: clamp(360px, 39vw, 570px);
+    min-width: 0;
+    flex: 0 0 clamp(360px, 39vw, 570px);
+    padding: 20px 20px 64px;
+    overflow: auto;
+    background: #f8fafb;
+    border-right: 1px solid #dfe6e8;
+    scrollbar-width: thin;
+    scrollbar-color: #c7d4d8 transparent;
+  }
+  .bg-legacy .bg-editor-panel h1 {
+    color: #243940;
+    font-size: 17px;
+    margin: 0 0 6px;
+  }
+  .bg-legacy .bg-editor-panel :is(h2, h3, summary, legend) {
+    color: #264a47;
+  }
+  .bg-legacy .bg-editor-panel h3 {
+    margin-top: 24px;
+    padding-bottom: 9px;
+    border-bottom-color: #dfe6e8;
+  }
+  .bg-legacy .bg-editor-panel :is(.card, details, fieldset, .grp) {
+    background: #fff;
+    border: 1px solid #e0e7e9;
+    border-radius: 10px;
+    box-shadow: 0 2px 3px #20343a03;
+    margin-bottom: 14px;
+  }
+  .bg-legacy .bg-editor-panel summary {
+    padding: 12px;
+  }
+  .bg-legacy .bg-editor-panel label {
+    color: #556b74;
+    line-height: 1.55;
+  }
+  .bg-legacy
+    .bg-editor-panel
+    :is(
+      input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+      textarea,
+      select
+    ),
+  .bg-legacy
+    :is(#toolbar, #bar, header, .toolbar).bg-editor-toolbar
+    :is(input[type="text"], select) {
+    box-sizing: border-box;
+    min-width: 0;
+    border: 1px solid #d6e0e3 !important;
+    border-radius: 6px;
+    padding: 7px 9px;
+    background: #fff !important;
+    color: #263b44 !important;
+    font: inherit;
+  }
+  .bg-legacy .bg-editor-panel :is(input[type="checkbox"], input[type="radio"]),
+  .bg-legacy :is(#toolbar, #bar, header, .toolbar).bg-editor-toolbar input {
+    accent-color: #087f72;
+  }
+  .bg-legacy .bg-editor-panel textarea {
+    resize: vertical;
+  }
+  .bg-legacy .bg-editor-panel .row > div {
+    min-width: 0;
+  }
+  .bg-legacy .bg-editor-panel .hint {
+    color: #74868e;
+    line-height: 1.65;
+  }
+  .bg-legacy .bg-editor-panel :is(.txwrap, #sec_tx) {
+    overflow-x: auto;
+  }
+  .bg-legacy .bg-editor-panel table input {
+    padding: 6px !important;
+  }
+  .bg-legacy :is(#toolbar, #bar, header, .toolbar).bg-editor-toolbar {
+    background: #fff;
+    color: #344a53;
+    border-bottom: 1px solid #dfe6e8;
+    padding: 12px;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .bg-legacy :is(#toolbar, #bar, header, .toolbar).bg-editor-toolbar label {
+    color: #556b74;
+  }
+  .bg-legacy .bg-editor-panel .toolbar {
+    top: -20px;
+    margin: 14px -4px;
+    z-index: 10;
+    border-radius: 8px;
+    box-shadow: 0 3px 8px #20343a06;
+  }
+  .bg-legacy .bg-preview-panel {
+    min-width: 0;
+    min-height: 0;
+    background: #edf1f3;
+  }
+  .bg-legacy #preview:not(.bg-editor-panel),
+  .bg-legacy #pvImages {
+    background: #edf1f3;
+  }
+  .bg-legacy :is(#pvImages, #preview) img {
+    box-shadow: 0 4px 22px #223a4214;
+  }
+  .bg-legacy:not(.bg-legacy-ally):not(.bg-legacy-alliant) #preview img {
+    max-width: 100%;
+    height: auto;
+  }
+  .bg-legacy.bg-preview-actual :is(#preview, #pvImages) img {
+    width: 816px !important;
+    max-width: none !important;
+  }
+  .bg-legacy.bg-panel-collapsed .bg-editor-panel {
+    display: none !important;
+  }
+  /* WF: keep its toolbar outside the independently scrolling image/PDF area. */
+  .bg-legacy-wf #main {
+    min-width: 0;
+    min-height: 0;
+  }
+  .bg-legacy-wf #bar {
+    flex-shrink: 0;
+  }
+  .bg-legacy-wf #pvImages {
+    padding: 16px;
+  }
+  /* AE: retain cards, presets, diagnostics and the right-hand sticky preview. */
+  body.bg-legacy-ae {
+    height: auto;
+    min-height: 100dvh;
+  }
+  .bg-legacy-ae main {
+    grid-template-columns: minmax(360px, 500px) minmax(0, 1fr);
+    padding: 20px;
+    gap: 20px;
+  }
+  .bg-legacy-ae .bg-editor-panel {
+    width: auto;
+    padding: 0;
+    border: 0;
+    overflow: visible;
+  }
+  .bg-legacy-ae #previewWrap {
+    position: sticky;
+    top: calc(var(--bg-nav-height) + 16px);
+    max-height: calc(100dvh - var(--bg-nav-height) - 32px);
+    overflow: auto;
+    border-radius: 10px;
+  }
+  .bg-legacy-ae.bg-panel-collapsed main {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  /* Portal's template selector/export toolbar is fixed below the shared nav. */
+  .bg-legacy-merc > header {
+    top: var(--bg-nav-height);
+    height: auto;
+    min-height: 60px;
+    padding: 12px 20px;
+  }
+  .bg-legacy-merc #layout {
+    margin-top: var(--bg-toolbar-height);
+    height: calc(100dvh - var(--bg-nav-height) - var(--bg-toolbar-height));
+    grid-template-columns: clamp(360px, 39vw, 570px) minmax(0, 1fr);
+  }
+  .bg-legacy-merc .bg-editor-panel {
+    width: auto;
+  }
+  .bg-legacy-merc.bg-panel-collapsed #layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  /* Client-only editors keep statement element dimensions and native zoom. */
+  .bg-legacy-alliant #main,
+  .bg-legacy-ally #body {
+    min-height: 0;
+    min-width: 0;
+  }
+  .bg-legacy-alliant #toolbar {
+    flex-shrink: 0;
+  }
+  .bg-legacy-alliant #toolbar .brand {
+    color: #263e46;
+  }
+  .bg-legacy-alliant #toolbar .btn {
+    background: #fff;
+    color: #344a53;
+    border: 1px solid #d7e0e3;
+  }
+  .bg-legacy-alliant #toolbar .btn.primary {
+    color: #fff;
+    background: #087f72;
+    border-color: #087f72;
+  }
+  .bg-legacy-ally #app {
+    min-height: 0;
+  }
+  .bg-legacy-ally #toolbar h1 {
+    color: #263e46;
+  }
+  .bg-legacy-ally #preview,
+  .bg-legacy-alliant #preview {
+    padding: 0;
+  }
+  @media (max-width: 800px) {
+    body.bg-legacy {
+      height: auto;
+      min-height: 100dvh;
+      overflow: auto;
+      display: block;
+    }
+    #bg-legacy-nav {
+      padding: 10px 14px;
+      gap: 8px 12px;
+    }
+    #bg-legacy-nav strong {
+      font-size: 13px;
+    }
+    #bg-legacy-nav .bg-editor-tag {
+      display: none;
+    }
+    .bg-nav-actions {
+      gap: 4px;
+    }
+    #bg-legacy-nav button {
+      font-size: 12px;
+      padding: 6px 8px;
+    }
+    .bg-legacy :is(#form, #side, #editor, #panel).bg-editor-panel,
+    .bg-legacy-merc .bg-editor-panel {
+      width: 100%;
+      max-height: 58dvh;
+      padding: 16px;
+      border-right: 0;
+      border-bottom: 1px solid #dfe6e8;
+    }
+    .bg-legacy .bg-editor-panel .toolbar {
+      top: -16px;
+    }
+    .bg-legacy .bg-preview-panel {
+      min-height: 55dvh;
+    }
+    .bg-legacy-wf #main {
+      height: 70dvh;
+    }
+    .bg-legacy-ae main {
+      display: block;
+      padding: 12px;
+    }
+    .bg-legacy-ae .bg-editor-panel {
+      max-height: none;
+      padding: 0;
+    }
+    .bg-legacy-ae #previewWrap {
+      position: static;
+      max-height: none;
+    }
+    .bg-legacy-ae .txn .row {
+      grid-template-columns: 1fr 1fr;
+    }
+    .bg-legacy-merc > header {
+      position: sticky;
+      top: var(--bg-nav-height);
+    }
+    .bg-legacy-merc #layout {
+      display: block;
+      margin-top: 0;
+      height: auto;
+    }
+    .bg-legacy-merc #layout main {
+      min-height: 60dvh;
+    }
+    .bg-legacy-alliant #main,
+    .bg-legacy-ally #body {
+      display: block;
+    }
+    .bg-legacy-ally #app {
+      height: auto;
+    }
+    .bg-legacy-ally #preview,
+    .bg-legacy-alliant #preview {
+      height: 65dvh;
+      overflow: auto;
+    }
+    .bg-legacy-ally #pdfFrame {
+      min-height: 65dvh;
+    }
+    .bg-legacy-alliant #toolbar,
+    .bg-legacy-ally #toolbar {
+      position: sticky;
+      top: var(--bg-nav-height);
+      z-index: 20;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #bg-legacy-nav *,
+    .bg-legacy .bg-editor-panel *,
+    .bg-legacy :is(#toolbar, #bar, header, .toolbar).bg-editor-toolbar * {
+      transition: none !important;
+    }
+  }
+}
+@media print {
+  #bg-legacy-nav {
+    display: none !important;
+  }
+}

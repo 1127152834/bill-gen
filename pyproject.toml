@@ -18,17 +18,33 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+mcp = ["mcp>=1.2,<2"]
 dev = [
     "pytest>=8",
     "ruff>=0.6",
     "mypy>=1.11",
+    "build>=1.2,<2",
+    "hatchling>=1.27,<2",
 ]
 
 [project.scripts]
 billgen = "billgen.cli:main"
 
+[tool.hatch.build]
+ignore-vcs = true
+exclude = ["**/__pycache__", "**/*.pyc", "**/*.bak", "**/pv_png", "**/preview*.pdf", "**/preview*.png", "**/data*.json"]
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/billgen"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"runtime_paths.py" = "runtime_paths.py"
+"examples" = "billgen/examples"
+"scripts/private-assets.json" = "billgen/resources/private-assets.json"
+"examples/wf.json" = "billgen/themes/wellsfargo/data_sample.json"
+
+[tool.hatch.build.targets.sdist]
+include = ["src", "scripts", "examples", "tests", "tools", "docs", "runtime_paths.py", "README.md", "pyproject.toml", "constraints-ci.txt", "Makefile", "Dockerfile", ".dockerignore"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -56,5 +72,12 @@ ignore = ["E501"]
 
 [tool.mypy]
 python_version = "3.11"
-files = ["src/billgen/spec.py", "src/billgen/registry.py", "src/billgen/paths.py"]
+files = [
+    "src/billgen/spec.py",
+    "src/billgen/registry.py",
+    "src/billgen/paths.py",
+    "src/billgen/synth",
+    "src/billgen/server/application.py",
+    "src/billgen/server/http.py",
+]
 ignore_missing_imports = true

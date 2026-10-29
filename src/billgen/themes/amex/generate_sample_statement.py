@@ -41,6 +41,7 @@ import datetime
 import os
 import re
 import sys
+from dataclasses import dataclass
 from datetime import timedelta
 
 import fitz  # PyMuPDF
@@ -171,9 +172,13 @@ CONTINUED = "Continued on next page"   # 8pt 斜体，右对齐至 Balance 列�
 P1_CONT_SHIFT = -5.67        # 流水跨页时第 1 页底部区块 + 页脚整体上移
 NOTICE_FULL_DY = 19.845      # 通知页为完整页眉（0 基偶数页）时正文整体下移
 
-# 运行期全局（build_pdf 设置；绘制辅助函数读取）
-DATA = None
-doc = None
+
+@dataclass(frozen=True)
+class _RenderContext:
+    """单次生成请求的状态；辅助函数显式接收，避免请求间共享数据或文档。"""
+
+    data: dict
+    document: fitz.Document
 
 
 # ---------------------------------------------------------------- 小工具
@@ -239,54 +244,74 @@ def watermark(page):
     )
 
 
-def footer(page, top=742.3):
-    put(page, 306, top,
-        "Accounts offered by American Express National Bank. Member FDIC.",
+DEFAULT_BANK = {
+    "name": "American Express",
+    "legal": "American Express National Bank",
+    "domain": "americanexpress.com",
+}
+
+
+def bank_of(data):
+    """行名/法务实体/域名：默认保持原稿字样，数据给了就用数据。"""
+    block = dict(DEFAULT_BANK)
+    supplied = data.get("bank")
+    if isinstance(supplied, dict):
+        for key in block:
+            value = supplied.get(key)
+            if isinstance(value, str) and value.strip():
+                block[key] = value.strip()
+    return block
+
+
+def footer(page, top=742.3, bank=None):
+    bank = bank or DEFAULT_BANK
+    put(page, 306, top, f"Accounts offered by {bank['legal']}. Member FDIC.",
         reg, 9, align="c", edge=306)
 
 
-def header_full(pageno_text):
+def header_full(context, pageno_text):
     """第 1 页页眉：Logo + 标题 + 姓名 + 信息行。"""
-    page = doc.new_page(width=PAGE_W, height=PAGE_H)
+    page = context.document.new_page(width=PAGE_W, height=PAGE_H)
     page.insert_image(fitz.Rect(50.4, 26.406, 92.64, 69.126), filename=LOGO)
-    put(page, 107.1, 22.3, "American Express\u00ae Rewards Checking Statement",
+    bank = bank_of(context.data)
+    put(page, 107.1, 22.3, f"{bank['name']}\u00ae Rewards Checking Statement",
         bold, 14, color=BLUE)
-    put(page, 107.1, 42.0, DATA["customer_name"], reg, 9)
+    put(page, 107.1, 42.0, context.data["customer_name"], reg, 9)
     put(page, 107.1, 56.0, "Statement Date:", bold, 9)
-    put(page, 180.3, 56.1, " " + DATA["statement_date"] + " ", reg, 9)
+    put(page, 180.3, 56.1, " " + context.data["statement_date"] + " ", reg, 9)
     put(page, 251.1, 56.0, "Account Ending:", bold, 9)
-    put(page, 323.6, 56.1, " " + DATA["account_ending"], reg, 9)
+    put(page, 323.6, 56.1, " " + context.data["account_ending"], reg, 9)
     put(page, 352.3, 56.0, " Account Name:", bold, 9)
-    put(page, 426.7, 56.1, DATA["account_name"], reg, 9)
+    put(page, 426.7, 56.1, context.data["account_name"], reg, 9)
     put(page, 558.4, 28.3, pageno_text, reg, 9, align="r", edge=558.4)
     return page
 
 
-def header_compact(page, pageno_text):
+def header_compact(context, page, pageno_text):
     """第 2 页起的页眉：姓名 + 信息行。"""
-    put(page, 50.4, 25.2, DATA["customer_name"], reg, 9)
+    put(page, 50.4, 25.2, context.data["customer_name"], reg, 9)
     put(page, 50.4, 39.2, "Statement Date:", bold, 9)
-    put(page, 123.6, 39.3, " " + DATA["statement_date"] + " ", reg, 9)
+    put(page, 123.6, 39.3, " " + context.data["statement_date"] + " ", reg, 9)
     put(page, 194.4, 39.2, "Account Ending:", bold, 9)
-    put(page, 266.9, 39.3, " " + DATA["account_ending"], reg, 9)
+    put(page, 266.9, 39.3, " " + context.data["account_ending"], reg, 9)
     put(page, 295.6, 39.2, " Account Name:", bold, 9)
-    put(page, 370.1, 39.3, DATA["account_name"], reg, 9)
+    put(page, 370.1, 39.3, context.data["account_name"], reg, 9)
     put(page, 558.4, 28.3, pageno_text, reg, 9, align="r", edge=558.4)
 
 
 # ---------------------------------------------------------------- 第 1 页区块
-def draw_summary(page, totals):
+def draw_summary(context, page, totals):
     put(page, 50.4, 102.3, "Statement Summary", bold, 11, color=BLUE)
     rule(page, 50.4, 306.0, 118.52)
     put(page, 306.0, 102.3, "Interest Summary", bold, 11, color=BLUE)
     rule(page, 306.0, 561.6, 118.52)
 
     rows = [
-        (125.1, f"Beginning Balance as of {DATA['period_start']}",
-         money(DATA["beginning_balance"]), True),
+        (125.1, f"Beginning Balance as of {context.data['period_start']}",
+         money(context.data["beginning_balance"]), True),
         (139.4, "Total Credits This Period", money(totals["credits"]), False),
         (153.6, "Total Debits This Period", money(totals["debits"]), False),
-        (167.6, f"Ending Balance as of {DATA['period_end']}",
+        (167.6, f"Ending Balance as of {context.data['period_end']}",
          money(totals["ending"]), True),
     ]
     for top, label, value, is_bold in rows:
@@ -295,12 +320,12 @@ def draw_summary(page, totals):
         put(page, SUM_R, top, value, f, 9, align="r", edge=SUM_R)
 
     irows = [
-        (125.1, "Earned Period", f"{DATA['period_start']} - {DATA['period_end']}", True),
-        (139.4, "Days in Statement Period", str(DATA["days_in_period"]), False),
-        (153.6, "Interest Rate", DATA["interest_rate"], False),
-        (167.8, "Annual Percentage Yield Earned", DATA["apy"], False),
+        (125.1, "Earned Period", f"{context.data['period_start']} - {context.data['period_end']}", True),
+        (139.4, "Days in Statement Period", str(context.data["days_in_period"]), False),
+        (153.6, "Interest Rate", context.data["interest_rate"], False),
+        (167.8, "Annual Percentage Yield Earned", context.data["apy"], False),
         (181.8, "Interest Earned This Period", money(totals["interest"]), True),
-        (198.9, "Interest Paid This Year", money(DATA["interest_paid_ytd"]), False),
+        (198.9, "Interest Paid This Year", money(context.data["interest_paid_ytd"]), False),
     ]
     for top, label, value, is_bold in irows:
         f = bold if is_bold else reg
@@ -341,7 +366,7 @@ def draw_balance_row(page, top, label, value):
     return top + 12.5
 
 
-def draw_bottom_block(page, dy=0.0):
+def draw_bottom_block(context, page, dy=0.0):
     """第 1 页底部：Account Details + Contact Us 双栏与边框盒。
     dy: 流水跨页时第 1 页整体上移量（P1_CONT_SHIFT）。"""
     put(page, 50.4, 547.2 + dy, "Account Details", bold, 11, color=BLUE)
@@ -350,7 +375,7 @@ def draw_bottom_block(page, dy=0.0):
     rule(page, 331.56, 561.6, 563.475 + dy)
 
     tops = [604.8, 618.9, 633.1, 647.3]
-    for top, ln in zip(tops, [DATA["customer_name"]] + DATA["address_lines"]):
+    for top, ln in zip(tops, [context.data["customer_name"]] + context.data["address_lines"]):
         put(page, 129.8, top + dy, ln, reg, 9)
 
     # 联系方式盒（原版为 4 条略有出头的独立线段，逐线复刻）
@@ -365,7 +390,14 @@ def draw_bottom_block(page, dy=0.0):
     b = "24/7 Account Access. World-Class Service"
     put(page, 362.2, 605.4 + dy, b, bold, 8)
     put(page, 362.2 + bold.text_length(b, fontsize=8), 605.6 + dy, ".", reg, 8)
-    put(page, 362.2, 619.7 + dy, "americanexpress.com/rewardscheckingdashboard", reg, 8)
+    # 虚构行名的域名可能比原稿长，盒子宽度固定，按可用宽度缩字号（最小 6pt）
+    url = f"{bank_of(context.data)['domain']}/rewardscheckingdashboard"
+    # 盒子右内边 561.34；留 2pt 余量给原版线条的出头
+    width = reg.text_length(url, fontsize=8)  # 用真实字体的度量，别拿 Helvetica 估
+    limit = 8.0 * (561.3435 - 3.0 - 362.2) / max(width, 1e-6)
+    put(page, 362.2, 619.7 + dy,
+        f"{bank_of(context.data)['domain']}/rewardscheckingdashboard", reg,
+        max(6.0, min(8.0, limit)))
     put(page, 362.2, 633.9 + dy, "1-877-221-2639", reg, 8)
     put(page, 362.2, 648.1 + dy, "P.O. Box 31492, Salt Lake City, UT 84131", reg, 8)
 
@@ -589,9 +621,19 @@ def build_pdf(data, dataset_label="custom", with_watermark=True, metadata=None,
     保存时生效——用 save_pdf() / pdf_bytes() 序列化即默认加密；
     传 encrypt=False 或自行 save 可输出不加密版本。
     """
-    global DATA, doc
-    DATA = data
-    doc = fitz.open()
+    context = _RenderContext(data=data, document=fitz.open())
+    try:
+        return _build_pdf(context, with_watermark, metadata, xmp)
+    except BaseException:
+        if not context.document.is_closed:
+            context.document.close()
+        raise
+
+
+def _build_pdf(context, with_watermark, metadata, xmp):
+    """绘制请求；成功后由调用方持有文档，异常由 build_pdf 释放。"""
+    data = context.data
+    doc = context.document
 
     txns = data["transactions"]
     totals = {
@@ -661,8 +703,8 @@ def build_pdf(data, dataset_label="custom", with_watermark=True, metadata=None,
     N = end_page + 2  # 活动表最后一页 + Important Notice 独立页
 
     # --- 第 1 页 ---
-    header_full(f"p. 1/{N}")
-    draw_summary(doc[0], totals)
+    header_full(context, f"p. 1/{N}")
+    draw_summary(context, doc[0], totals)
     put(doc[0], 50.4, 246.9, "Account Activity", bold, 11, color=BLUE)
     rule(doc[0], 50.4, 561.6, 263.165)
     draw_table_header(doc[0])
@@ -672,7 +714,7 @@ def build_pdf(data, dataset_label="custom", with_watermark=True, metadata=None,
     # --- 续页：紧凑页眉 + 表头（无标题、无横线，同 JUN 原稿） ---
     for pi in range(1, end_page + 1):
         pg = doc.new_page(width=PAGE_W, height=PAGE_H)
-        header_compact(pg, f"p. {pi + 1}/{N}")
+        header_compact(context, pg, f"p. {pi + 1}/{N}")
         draw_table_header(pg, PN_HEADER_TOP)
 
     # --- 交易行 ---（绘制时按索引取页，避免页对象因文档变更失效）
@@ -691,24 +733,24 @@ def build_pdf(data, dataset_label="custom", with_watermark=True, metadata=None,
 
     # --- 第 1 页底部区块 + 页脚（流水跨页时整体上移，同 JUN 原稿） ---
     dy = P1_CONT_SHIFT if end_page >= 1 else 0.0
-    draw_bottom_block(doc[0], dy)
-    footer(doc[0], 742.3 + dy)
+    draw_bottom_block(context, doc[0], dy)
+    footer(doc[0], 742.3 + dy, bank_of(data))
 
     # --- Important Notice 独立成页 ---
     # 页眉随页码奇偶切换（JUN 第 3 页完整页眉 / APR 第 2 页紧凑页眉）：
     # 0 基偶数页用完整页眉，且通知正文整体下移 NOTICE_FULL_DY。
     if (N - 1) % 2 == 0:
-        header_full(f"p. {N}/{N}")           # 创建新页（含 Logo 与 14pt 标题）
+        header_full(context, f"p. {N}/{N}")           # 创建新页（含 Logo 与 14pt 标题）
         draw_notice(doc[N - 1], NOTICE_FULL_DY)
     else:
         pn = doc.new_page(width=PAGE_W, height=PAGE_H)
-        header_compact(pn, f"p. {N}/{N}")
+        header_compact(context, pn, f"p. {N}/{N}")
         draw_notice(pn)
 
     # --- 页脚（第 1 页已画）+ 水印（可选） ---
     for i, pg in enumerate(doc):
         if i != 0:
-            footer(pg)
+            footer(pg, bank=bank_of(data))
         if with_watermark:
             watermark(pg)
 

@@ -1,0 +1,8 @@
+.superpowers/
+.env
+node_modules
+dist
+data/*.db*
+*.tsbuildinfo
+data/smoke/
+.DS_Store
