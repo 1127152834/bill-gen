@@ -1,0 +1,16 @@
+.git
+.env*
+!.env.example
+.venv*
+**/__pycache__
+**/*.pyc
+.local
+tests
+**/preview*.pdf
+**/preview*.png
+**/pv_png
+**/editor/data*.json
+**/editor_personal/data*.json
+**/editor_business/data*.json
+**/editor_us/data*.json
+**/editor_biz/data*.json

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>US Bank 个户对账单编辑器</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font: 13px/1.45 -apple-system,"PingFang SC",sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+  #form { width: 560px; overflow-y: auto; padding: 14px 16px 60px; border-right: 1px solid #dfe3e8; background: #fafbfc; }
+  #preview { flex: 1; overflow: auto; background: #eef1f4; padding: 14px; text-align: center; }
+  h1 { font-size: 16px; margin: 0 0 4px; }
+  h3 { font-size: 12.5px; margin: 18px 0 6px; color: #0f4c81; border-bottom: 1px solid #eee; padding-bottom: 3px; }
+  label { display: block; margin: 5px 0 1px; color: #444; }
+  input[type=text] { width: 100%; padding: 4px 7px; border: 1px solid #cfd6de; border-radius: 5px; font: inherit; }
+  .row { display: flex; gap: 8px; } .row > div { flex: 1; }
+  .hint { color: #8a94a0; font-size: 11.5px; margin: 2px 0 4px; }
+  table { width: 100%; border-collapse: collapse; margin: 4px 0; }
+  th { text-align: left; font-size: 11px; color: #666; padding: 2px 3px; }
+  td { padding: 2px 2px; vertical-align: top; }
+  td input { padding: 3px 5px; }
+  /* 行内字段列宽分档 + 容器内横滚兜底（防页面级溢出；明细/附加行给足输入宽） */
+  .txwrap { overflow-x: auto; }
+  .txwrap table { min-width: 790px; }
+  .txwrap th:nth-child(1), .txwrap td:nth-child(1) { width: 78px; }
+  .txwrap th:nth-child(2), .txwrap td:nth-child(2) { width: 96px; }
+  .txwrap th:nth-child(3), .txwrap td:nth-child(3) { width: 240px; }
+  .txwrap th:nth-child(4), .txwrap td:nth-child(4) { width: 175px; }
+  .txwrap th:nth-child(5), .txwrap td:nth-child(5) { width: 92px; }
+  .txwrap th:nth-child(6), .txwrap td:nth-child(6) { width: 88px; }
+  .del { color: #c33; cursor: pointer; font-weight: 700; }
+  button { padding: 6px 12px; border-radius: 6px; border: 1px solid #cfd6de; background: #fff; cursor: pointer; }
+  button.primary { background: #0f4c81; border-color: #0f4c81; color: #fff; }
+  .toolbar { position: sticky; top: -14px; background: #fafbfc; padding: 10px 0 8px; z-index: 5; border-bottom: 1px solid #e5e9ee; }
+  .status { font-size: 11.5px; color: #678; margin-top: 4px; min-height: 15px; }
+  img.page { max-width: 100%; margin: 8px auto; box-shadow: 0 1px 6px rgba(0,0,0,.18); background: #fff; }
+  .toggle { display: inline-flex; align-items: center; gap: 5px; margin: 4px 10px 4px 0; }
+</style>
+</head>
+<body>
+<div id="form">
+  <h1>US Bank 个户对账单模板编辑器</h1>
+  <div class="hint">US Bank 个人 SAFE DEBIT ACCOUNT 独立编辑器；输出带 SAMPLE 水印；默认导出与原稿一致（无加密）。金额：存款填正数、取款填正数（自动取负、尾加 -）。</div>
+  <div class="toolbar">
+    <span class="toggle"><input type="checkbox" id="wm" checked onchange="sched()"> SAMPLE 水印</span>
+    <span class="toggle"><input type="checkbox" id="auto" checked onchange="sched()"> 自动计算</span>
+    <button class="primary" onclick="downloadPdf()">下载 PDF</button>
+    <button onclick="exportJson()">导出 JSON</button>
+    <button onclick="resetAll()">恢复示例</button>
+    <div class="status" id="status">加载中…</div>
+  </div>
+  <div id="fields"></div>
+</div>
+<div id="preview"></div>
+<script>
+let DATA = {us: null}, TPL = "us", timer = null, seq = 0, pagesCache = {};
+function el(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (k === "oninput") e.addEventListener("input", v);
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
+    else e.setAttribute(k, v);
+  }
+  for (const k of kids) if (k != null) e.append(k);
+  return e;
+}
+const lbl = t => el("label", null, t);
+const h3 = t => el("h3", null, t);
+const hint = t => el("div", {class: "hint"}, t);
+function inp(path, val, ph) {
+  return el("input", {type: "text", value: val ?? "", placeholder: ph || "",
+    oninput: ev => { setPath(DATA[TPL], path, ev.target.value); sched(); }});
+}
+function setPath(o, path, v) {
+  const ks = path.split("."); let c = o;
+  for (let i = 0; i < ks.length - 1; i++) c = c[ks[i]];
+  c[ks.at(-1)] = v;
+}
+function txRows(secKey, cols, headers) {
+  const d = DATA[TPL];
+  d[secKey] = d[secKey] || [];
+  const rows = d[secKey];
+  const t = el("table", null);
+  t.append(el("tr", null, ...headers.map(h => el("th", null, h)), el("th")));
+  rows.forEach((r, i) => {
+    const tr = el("tr", null);
+    cols.forEach(([key]) => {
+      tr.append(el("td", null, el("input", {type: "text", value: r[key] ?? "",
+        oninput: ev => { r[key] = ev.target.value; sched(); }})));
+    });
+    tr.append(el("td", {class: "del",
+      onclick: () => { rows.splice(i, 1); render(); sched(); }}, "✕"));
+    t.append(tr);
+  });
+  const wrap = el("div", {class: "txwrap"}, t);
+  wrap.append(el("button", {onclick: () => {
+    rows.push(cols.reduce((o, [k]) => (o[k] = "", o), {})); render(); sched();
+  }}, "+ 添加一行"));
+  return wrap;
+}
+function nowPdfDate() {   // 美东 UTC-5，原稿同款 D:…-05'00' 格式
+  const d = new Date(Date.now() - 5 * 3600 * 1000), p = n => String(n).padStart(2, "0");
+  return `D:${d.getUTCFullYear()}${p(d.getUTCMonth() + 1)}${p(d.getUTCDate())}` +
+         `${p(d.getUTCHours())}${p(d.getUTCMinutes())}${p(d.getUTCSeconds())}-05'00'`;
+}
+function render() {
+  const d = DATA[TPL];
+  document.getElementById("wm").checked = !!d.watermark;
+  document.getElementById("auto").checked = d.auto !== false;
+  const F = document.getElementById("fields");
+  F.textContent = "";
+  F.append(h3("账单头"));
+  const r0 = el("div", {class: "row"});
+  r0.append(el("div", null, lbl("账号（连字符格式 1-964-9173-9161）"), inp("account_display", d.account_display)),
+            el("div", null, lbl("期初余额"), inp("begin_balance", d.begin_balance)));
+  F.append(r0);
+  const r1 = el("div", {class: "row"});
+  r1.append(el("div", null, lbl("期间开始（如 Aug 7, 2026）"), inp("period.start", d.period?.start)),
+            el("div", null, lbl("期间结束（如 Sep 4, 2026）"), inp("period.end", d.period?.end)));
+  F.append(r1);
+  const rIMB = el("div", {class: "row"});
+  rIMB.append(el("div", null, lbl("IMB 条码序列号（9 位，每封邮件唯一）"),
+    inp("imb_serial", d.imb_serial ?? "031168735")),
+    el("div", null, hint("IMB 邮政条码+ER 行自动派生：00+260+106481+序列号 / ZIP+4+门牌末2位（改客户地址即变）")));
+  F.append(rIMB);
+  F.append(h3("客户信息（3 行）"));
+  F.append(el("textarea", {style: "width:100%;min-height:60px",
+    oninput: e => { d.customer_lines = e.target.value.split("\n"); sched(); }},
+    (d.customer_lines || []).join("\n")));
+  F.append(h3("存款 / 入账（Deposits / Credits）"));
+  F.append(txRows("deposits", [["date"],["type"],["detail"],["extra"],["ref"],["amount"]],
+    ["日期", "类型", "明细", "附加行(左|右)", "参考号", "金额"]));
+  F.append(hint('日期如 "Aug 28"（单数字日自动拆两段）；附加行每行 "左栏|右栏"，如 "On 08/28/26|PMT ID=XXX"。'));
+  F.append(h3("其他取款（Other Withdrawals）"));
+  F.append(txRows("withdrawals", [["date"],["type"],["detail"],["extra"],["ref"],["amount"]],
+    ["日期", "类型", "明细", "附加行(左|右)", "参考号", "金额"]));
+  F.append(hint("摘要/合计/每日余额表自动计算（勾选\"自动计算\"）；取款金额自动显示为尾负号（如 25.00-）。"));
+  // ===== 元数据（留空=默认值=原稿；时间为实时，可点击"写入现在"）=====
+  F.append(h3("元数据（Info 字典）"));
+  d.metadata = d.metadata || {};
+  const md = d.metadata;
+  const rm1 = el("div", {class: "row"});
+  rm1.append(el("div", null, lbl("生成器 Producer"), inp("metadata.producer", md.producer),
+      hint("留空=Ricoh Americas Corporation, AFP2PDF Plus Version: 1.100.01, Linux")),
+    el("div", null, lbl("创建工具 Creator"), inp("metadata.creator", md.creator),
+      hint("留空=AIM, F3")));
+  F.append(rm1);
+  const rm2 = el("div", {class: "row"});
+  rm2.append(el("div", null, lbl("标题 Title"), inp("metadata.title", md.title),
+      hint('留空="Internet Banking"（含引号）')),
+    el("div", null, lbl("主题 Subject"), inp("metadata.subject", md.subject),
+      hint('留空="Statement Presentment"（含引号）')));
+  F.append(rm2);
+  const dtRow = (path, val) => {
+    const box = el("div", {style: "display:flex;gap:6px"});
+    const i = el("input", {type: "text", value: val ?? "", placeholder: "D:YYYYMMDDHHMMSS-05'00'",
+      oninput: (ev) => { setPath(DATA[TPL], path, ev.target.value); sched(); }});
+    const b = el("button", {onclick: () => {
+      i.value = nowPdfDate();
+      i.dispatchEvent(new Event("input", {bubbles: true}));
+    }}, "写入现在");
+    box.append(i, b);
+    return box;
+  };
+  F.append(lbl("创建时间（留空=生成时实时时间）"), dtRow("metadata.creation", md.creation));
+  F.append(lbl("修改时间（留空=同创建时间）"), dtRow("metadata.mod", md.mod));
+  F.append(h3("元数据（XMP）"));
+  const rx1 = el("div", {class: "row"});
+  rx1.append(el("div", null, lbl("XMP Producer"), inp("metadata.x_producer", md.x_producer),
+      hint("留空=Ricoh AFP2PDF Plus 1.100.01")),
+    el("div", null, lbl("XMP 创建工具"), inp("metadata.x_creator", md.x_creator),
+      hint("留空=AIM, F3")));
+  F.append(rx1);
+  const rx2 = el("div", {class: "row"});
+  rx2.append(el("div", null, lbl("XMP 标题"), inp("metadata.x_title", md.x_title),
+      hint('留空="Internet Banking"')),
+    el("div", null, lbl("XMP 描述"), inp("metadata.x_desc", md.x_desc),
+      hint('留空="Statement Presentment"')));
+  F.append(rx2);
+  F.append(lbl("XMP 工具标识"), inp("metadata.xmptk", md.xmptk),
+    hint("留空=Adobe XMP Core 5.1.0-jc003；dc:format 恒为 application/pdf；时间同步写入 xmp:CreateDate/ModifyDate"));
+
+}
+function sched() {
+  clearTimeout(timer);
+  document.getElementById("status").textContent = "修改中…";
+  timer = setTimeout(runGen, 450);
+}
+async function runGen() {
+  // 文本输入中不刷新（输完整个值才算一次输入）；勾选框/按钮不属"输入中"
+  const ae = document.activeElement;
+  if (ae && ((ae.tagName === "INPUT" && ae.type === "text") || ae.tagName === "TEXTAREA")
+      && document.getElementById("form").contains(ae)) {
+    timer = setTimeout(runGen, 500);
+    return;
+  }
+  // 同步开关到数据源（修复：勾选 SAMPLE 水印被旧数据回弹）
+  DATA[TPL].watermark = document.getElementById("wm").checked;
+  DATA[TPL].auto = document.getElementById("auto").checked;
+  const d = JSON.parse(JSON.stringify(DATA[TPL]));
+  const my = ++seq;
+  try {
+    const res = await fetch("/api/generate", {method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({template: TPL, data: d, watermark: d.watermark})});
+    const j = await res.json();
+    if (my !== seq) return;
+    if (!j.ok) { document.getElementById("status").textContent = "❌ " + (j.error || "生成失败"); return; }
+    pagesCache[TPL] = j.hashes || j.pages;
+    // 不重建表单（保住输入焦点与勾选状态），只更新预览
+    renderPreview(j.hashes);
+    document.getElementById("status").textContent = "已更新 " + new Date().toLocaleTimeString();
+  } catch (e) {
+    document.getElementById("status").textContent = "❌ " + e.message;
+  }
+}
+// 焦点离开任一文本输入 → 立即按完整值刷新
+document.getElementById("form").addEventListener("focusout", () => sched());
+function renderPreview(hashes) {
+  // img 复用：只重载内容真正变化的页，不重建不闪烁
+  const P = document.getElementById("preview");
+  const list = hashes || pagesCache[TPL] || 3;
+  const n = typeof list === "number" ? list : list.length;
+  let imgs = [...P.querySelectorAll("img.page")];
+  while (imgs.length < n) {
+    const img = el("img", {class: "page", loading: "eager"});
+    img.onerror = () => { img.classList.add("retry"); setTimeout(() => {
+      img.src = img.src.replace(/\/pv\/[^/]+\//, `/pv/${Date.now()}/`); }, 800); };
+    P.append(img);
+    imgs.push(img);
+  }
+  while (imgs.length > n) imgs.pop().remove();
+  for (let i = 0; i < n; i++) {
+    const key = typeof list === "number" ? Date.now() : list[i];
+    const src = `/pv/${key}/p${i + 1}.png`;
+    if (!imgs[i].src.endsWith(src)) imgs[i].src = src;
+  }
+}
+function downloadPdf() {
+  location.href = "/export/statement.pdf?wm=" + (document.getElementById("wm").checked ? 1 : 0);
+}
+function exportJson() { location.href = "/export/data.json"; }
+async function resetAll() {
+  if (!confirm("恢复示例数据？")) return;
+  await fetch("/api/reset");
+  await init();
+}
+async function init() {
+  const res = await fetch("/api/data");
+  const j = await res.json();
+  DATA = {us: j.us};
+  document.getElementById("wm").checked = j.watermark;
+  render();
+  sched();
+}
+init();
+</script>
+</body>
+</html>

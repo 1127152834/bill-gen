@@ -1,0 +1,595 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+SoFi 银行账单模板 — 1:1 排版复刻
+====================================
+仅供设计/演示用途。所有文本可通过 DATA 字典编辑。
+
+字体：TTNorms Regular/Bold + Montserrat Thin（从原稿提取）
+排版：kern 开启（从原稿逐字符提取的 kern 表）
+布局：联系信息位置动态（随交易行数自适应），支持分页
+"""
+import fitz, os, math, json
+
+BASE = os.path.dirname(os.path.abspath(__file__))
+A = lambda n: os.path.join(BASE, "assets", n)
+FONT_REG  = A("sofi_regular.ttf")
+FONT_BOLD = A("sofi_bold.ttf")
+FONT_THIN = A("sofi_thin.ttf")
+FONT_THIN_D = A("sofi_thin_d.ttf")   # DAAAAA+ 子集名（Contact Information 标题 / www.sofi.com）
+
+# ---------------------------------------------------------------- palette
+BLACK     = (0, 0, 0)
+GRAY_909  = (0x90/255, 0x91/255, 0x96/255)
+GRAY_626  = (0x62/255, 0x62/255, 0x62/255)
+GRAY_757  = (0x75/255, 0x75/255, 0x75/255)
+GRAY_999  = (0x99/255, 0x99/255, 0x99/255)
+GREEN     = (0x00/255, 0xa3/255, 0x16/255)
+BG_GRAY   = (0xee/255, 0xee/255, 0xee/255)
+BG_BEIGE  = (0xf4/255, 0xf2/255, 0xf1/255)
+BG_WHITE  = (1, 1, 1)
+DIVIDER   = (0x80/255, 0x80/255, 0x80/255)
+LOGO_BLUE = (0x00/255, 0xa9/255, 0xce/255)
+
+SZ6, SZ75, SZ8, SZ11, SZ12, SZ18 = 6.0, 7.5, 8.0, 11.0, 12.0, 18.0
+
+# ---------------------------------------------------------------- 几何
+CONTENT_L, CONTENT_R = 18.0, 593.95
+COL_X  = (23.9, 167.7, 311.7, 455.5)
+CARD_B = (18.0, 161.75, 305.75, 450.05, 593.95)
+TX_B   = (18.0, 103.05, 215.95, 413.75, 503.85, 593.95)
+TX_X   = (20.9, 105.9, 218.9)
+TX_R   = (501.3, 591.4)
+RH     = 24.4                   # 行距（行顶与文本基线通用，原稿精确测量）
+RH_BG  = 24.35                  # 行背景矩形高度（与下一行间留 0.05 缝隙）
+TX_HDR_BL  = 415.1              # 表头基线
+TX_FIRST_BL = 430.0             # 首行主文本基线
+TX_SUB_DY  = 9.4                # Transaction ID 行偏移
+TX_HDR_TOP = 419.5              # 表头 bg 顶
+# 联系区固定位置（原稿 4 笔交易时 y=581.8，交易更多时自动下移）
+CONTACT_MIN_Y = 581.8           # 联系区标题最小 y
+FOOTNOTE_Y    = 710.7           # 脚注上标 y
+FOOTER_Y      = 744.8           # 页脚 y
+LOGO_RECT = (470.85, 49.85, 574.40, 77.45)
+
+# ---------------------------------------------------------------- data
+DATA = {'holder_name': 'ALEX EXAMPLE',
+ 'member_since': 'October 2026',
+ 'address_lines': ['100 EXAMPLE STREET', 'DEMO CITY CA 90000', '', ''],
+ 'account_number': '000000000001',
+ 'statement_period': '10/01/2026 - 10/31/2026',
+ 'account_type': 'Checking',
+ 'account_last4': '0001',
+ 'current_balance': 1214.5,
+ 'current_as_of': '10/31/2026',
+ 'monthly_interest': 0.0,
+ 'apy': '0.00%',
+ 'beginning_balance': 1000.0,
+ 'beginning_as_of': '10/01/2026',
+ 'ytd_interest': 0.0,
+ 'balance_note': 'Fictional sample account activity',
+ 'transactions': [{'date': '10/07/2026',
+                   'desc': 'Sample grocery purchase',
+                   'amount': -35.5,
+                   'id': 'DEMO0002',
+                   'txid': 'DEMO0002',
+                   'memo': '',
+                   'type': 'Withdrawal'},
+                  {'date': '10/02/2026',
+                   'desc': 'Sample payroll credit',
+                   'amount': 250.0,
+                   'id': 'DEMO0001',
+                   'txid': 'DEMO0001',
+                   'memo': '',
+                   'type': 'Deposit'}],
+ 'contact_website': 'example.invalid',
+ 'contact_address': ['100 EXAMPLE STREET', 'DEMO CITY CA 90000', ''],
+ 'contact_phone': '000-000-0000',
+ 'legal_footer': 'Fictional sample account',
+ 'footnote1': 'All examples are fictional.'}
+
+WATERMARK = True
+TX_PER_PAGE = 6               # 页1 最大交易行数（联系区固定 581.8，第6行子行 561.4 不重叠）
+TX_PER_CONT = 27              # 续页行数（参考原版续页实测：27 行，末带底 696.95，页脚 744.8）
+
+# 续页几何（参考原版续页图实测）
+CONT_LABEL_BL = 32.4            # 账户标签基线（页面顶部）
+CONT_BAND_TOP = 38.2            # 首行背景顶（无表头，紧贴标签下方）
+CONT_ROW1_BL  = 48.7            # 首行主文本基线（= 带顶 + 10.5，与页1一致）
+
+# ================================================================ CJK
+from fontTools.ttLib import TTFont as _TT
+_FP = {"reg": FONT_REG, "bold": FONT_BOLD, "med": FONT_THIN, "cjk": None}
+_REG, _BOLD = "reg", "bold"
+_CJK = "cjk"
+def _resolve_cjk():
+    from runtime_paths import cjk_font_path
+    return cjk_font_path()
+FONT_CJK_BASE = _resolve_cjk()
+FONT_CJK = FONT_CJK_BASE
+_CJK_CMAP = set()
+if FONT_CJK_BASE:
+    try: _CJK_CMAP = set(_TT(FONT_CJK_BASE, fontNumber=0).getBestCmap().keys())
+    except Exception: pass
+_CMAP = {k: set(_TT(v).getBestCmap().keys()) for k, v in _FP.items() if v}
+_LATIN_CM = _CMAP[_REG] & _CMAP[_BOLD]
+_fallback_used = set()
+
+def collect_texts(data=None):
+    d = data if data is not None else DATA
+    out = [d.get(k, "") or "" for k in
+           ("holder_name", "member_since", "tagline", "headline_month",
+            "period_range", "account_number", "apy", "statement_period",
+            "account_type", "account_last4", "closing_date",
+            "footer_site", "footer_phone", "footer_address",
+            "note_text", "error_heading", "legal_footer",
+            "footnote1", "current_as_of", "beginning_as_of", "balance_note")]
+    out += [l for l in (d.get("address_lines") or []) if str(l).strip()]
+    for t in d.get("transactions") or []:
+        out += [str(t.get("date", "")), str(t.get("desc", "")),
+                str(t.get("type", "")), str(t.get("txid", ""))]
+    return [str(s) for s in out]
+
+def autodetect_cjk(data=None):
+    global FONT_CJK
+    if not FONT_CJK_BASE: return
+    inter = _CMAP[_REG] & _CMAP[_BOLD]
+    need = any(ord(ch) not in inter and ord(ch) in _CJK_CMAP
+               for s in collect_texts(data) for ch in s)
+    FONT_CJK = FONT_CJK_BASE if need else None
+
+# ================================================================ kern
+_KERN = json.load(open(A("kern_sofi.json"))) if os.path.exists(A("kern_sofi.json")) else {}
+_KCACHE = {}
+def _kern(font, c1, c2, size):
+    tab = _KERN.get(font, {})
+    if not tab: return 0.0
+    sz = round(size, 2)
+    ck = f"{font}:{sz}"
+    if ck not in _KCACHE:
+        _KCACHE[ck] = min(tab.keys(), key=lambda k: abs(float(k) - sz)) if tab else None
+    bucket = tab.get(_KCACHE[ck]) or {}
+    return bucket.get(f"{c1}|{c2}", 0.0) * size
+
+# ================================================================ shaping
+_fonts = {}
+def _font(which):
+    if which not in _fonts:
+        p = {"reg": FONT_REG, "bold": FONT_BOLD, "thin": FONT_THIN}.get(which, FONT_REG)
+        _fonts[which] = fitz.Font(fontfile=p)
+    return _fonts[which]
+
+def width(text, size, font="reg"):
+    n = len(text)
+    if n == 0: return 0.0
+    w = _font(font).text_length(text[-1], size)
+    for i in range(n-1):
+        w += _font(font).text_length(text[i], size) + _kern(font, text[i], text[i+1], size)
+    return w
+
+# ================================================================ drawing
+MAX_RUN = 8
+KERN_BREAK = 0.15            # 低于此值的 kern 噪声不断行（原稿真实 kern >0.15pt）
+
+def put(page, x, baseline, text, size, font="reg", color=BLACK, ins_name=None):
+    n = len(text)
+    if n == 0: return x
+    ff = _font(font)
+    pens = [0.0] * n
+    for i in range(1, n):
+        pens[i] = pens[i-1] + ff.text_length(text[i-1], size) \
+                  + _kern(font, text[i-1], text[i], size)
+    i = 0
+    while i < n:
+        j = i + 1
+        while j < n and j - i < MAX_RUN:
+            gap = (pens[j] - pens[j-1]) - ff.text_length(text[j-1], size)
+            if abs(gap) > KERN_BREAK:
+                break
+            j += 1
+        page.insert_text((x + pens[i], baseline), text[i:j], fontsize=size,
+                         fontname=ins_name or font, color=color)
+        i = j
+    return x + pens[-1] + ff.text_length(text[-1], size)
+
+def put_fast(page, x, baseline, text, size, font="reg", color=BLACK):
+    page.insert_text((x, baseline), text, fontsize=size, fontname=font, color=color)
+
+def put_right(page, right, baseline, text, size, font="reg", color=BLACK):
+    put(page, right - width(text, size, font), baseline, text, size, font, color)
+
+def rect(page, x0, y0, x1, y1, color):
+    page.draw_rect(fitz.Rect(x0, y0, x1, y1), color=None, fill=color)
+
+def hline(page, y, w=0.1):
+    page.draw_line(fitz.Point(CONTENT_L, y), fitz.Point(CONTENT_R, y),
+                   color=DIVIDER, width=w)
+
+def money(v): return f"${abs(v):,.2f}"
+def signed_money(v): return ("-" if v < 0 else "") + f"${abs(v):,.2f}"
+
+def _wrap(text, size, first_w, rest_w):
+    """按测量宽度换行：首行与续行可用不同宽度（悬挂缩进）。"""
+    words = text.split()
+    lines, cur, cur_w, cap = [], [], 0.0, first_w
+    for w in words:
+        ww = width(w + " ", size) if cur else width(w, size)
+        if cur and cur_w + width(" " + w, size) > cap:
+            lines.append(" ".join(cur))
+            cur, cur_w, cap = [w], width(w, size), rest_w
+        else:
+            if cur:
+                cur_w += width(" " + w, size)
+            else:
+                cur_w = ww
+            cur.append(w)
+    if cur: lines.append(" ".join(cur))
+    return lines
+
+def prepare(page):
+    for name, path in (("reg", FONT_REG), ("bold", FONT_BOLD), ("thin", FONT_THIN),
+                       ("thinD", FONT_THIN_D)):
+        page.insert_font(fontname=name, fontfile=path)
+    if FONT_CJK:
+        page.insert_font(fontname="cjk", fontfile=FONT_CJK)
+
+def watermark(page):
+    if not WATERMARK: return
+    tw = fitz.TextWriter(page.rect)
+    f = fitz.Font(fontfile=FONT_REG)
+    txt = "S A M P L E"; sz = 92
+    w = f.text_length(txt, sz)
+    pt = fitz.Point((612 - w * 0.707) / 2, 792 * 0.62)
+    tw.append(pt, txt, font=f, fontsize=sz)
+    tw.write_text(page, color=(0.93, 0.93, 0.95), morph=(pt, fitz.Matrix(45)))
+
+# ================================================================ logo
+_logo = None
+def _logo_doc():
+    global _logo
+    if _logo is None: _logo = fitz.open(A("logo.pdf"))
+    return _logo
+
+# ================================================================ 交易表（页1/续页共用）
+def _tx_account_label(page, bl):
+    """账户标签（页1基线 399.5 / 续页基线 32.4，其余几何一致）"""
+    label = f"{DATA['account_type']} Account - "
+    put(page, 20.9, bl, label, SZ12, "bold")
+    lw = width(label, SZ12, "bold")
+    put(page, 20.9 + lw + 0.08, bl, DATA["account_last4"], SZ12, "bold")
+
+def _tx_header_row(page):
+    """表头（仅页1；续页无表头）"""
+    for i in range(5):
+        rect(page, TX_B[i], TX_HDR_TOP, TX_B[i+1], TX_HDR_TOP + RH_BG, BG_BEIGE)
+    put(page, TX_X[0], TX_HDR_BL, "DATE", SZ75, "bold")
+    put(page, TX_X[1], TX_HDR_BL, "TYPE", SZ75, "bold")
+    put(page, TX_X[2], TX_HDR_BL, "DESCRIPTION", SZ75, "bold")
+    put_right(page, TX_R[0], TX_HDR_BL, "AMOUNT", SZ75, "bold")
+    put_right(page, TX_R[1], TX_HDR_BL, "BALANCE", SZ75, "bold")
+
+def _tx_rows(page, txs, balances, band_top, first_bl, first_beige, omit_last_bg):
+    """交易行。页1: 带443.9/白色起始/末行无背景；续页: 带38.2/米色起始/全部背景"""
+    for i, t in enumerate(txs):
+        top = band_top + i * RH
+        if not (omit_last_bg and i == len(txs) - 1):
+            even_beach = first_beige if i % 2 == 0 else not first_beige
+            bg = BG_BEIGE if even_beach else BG_WHITE
+            for j in range(5):
+                rect(page, TX_B[j], top, TX_B[j+1], top + RH_BG, bg)
+        bl  = first_bl + i * RH
+        bl2 = bl + TX_SUB_DY
+        put(page, TX_X[0], bl, t["date"], SZ8)
+        put(page, TX_X[1], bl, t["type"], SZ8)
+        put(page, TX_X[2], bl, t["desc"], SZ8)
+        put(page, TX_X[2], bl2, f"Transaction ID: {t['txid']}", SZ8)
+        put_right(page, TX_R[0], bl, signed_money(t["amount"]), SZ8,
+                  color=GREEN if t["amount"] > 0 else BLACK)
+        put_right(page, TX_R[1], bl, money(balances[i]), SZ8)
+
+def _tx_table(page, txs, balances):
+    """页1完整交易表：标签(399.5) + 表头 + 行"""
+    _tx_account_label(page, 399.5)
+    _tx_header_row(page)
+    _tx_rows(page, txs, balances, TX_HDR_TOP + RH, TX_FIRST_BL, False, True)
+
+# ================================================================ 页面
+def page_statement(doc, page_num, total_pages, txs=None, balances=None):
+    page = doc.new_page(width=612, height=792)
+    prepare(page)
+    txs = DATA["transactions"] if txs is None else txs
+    acct_label = f"{DATA['account_type']} Account - {DATA['account_last4']}"
+
+    # ---- 顶部信息区 ----
+    rect(page, CONTENT_L, 25.1, CONTENT_R, 320.85, BG_GRAY)
+    for i in range(4):
+        rect(page, CARD_B[i], 25.1, CARD_B[i+1], 152.25, BG_WHITE)
+
+    put(page, COL_X[0], 38.6, "Primary Account Holder", SZ8)
+    put(page, COL_X[0], 52.7, DATA["holder_name"], SZ8, color=GRAY_999)
+    put(page, COL_X[0], 66.9, DATA["member_since"], SZ8, color=GRAY_909)
+
+    put(page, COL_X[1], 38.6, "Address", SZ8)
+    addr_txt = [l for l in DATA["address_lines"] if l.strip()][:3]
+    for i, (line_txt, y) in enumerate(zip(addr_txt, (52.7, 95.2, 123.5))):
+        put(page, COL_X[1], y, line_txt, SZ8, color=GRAY_909)
+
+    put(page, COL_X[2], 38.6, "Account Number", SZ8)
+    put(page, COL_X[2], 52.7, DATA["account_number"], SZ8, color=GRAY_909)
+    put(page, COL_X[2], 66.9, "Monthly Statement Period", SZ8)
+    put(page, COL_X[2], 81.0, DATA["statement_period"], SZ8, color=GRAY_909)
+
+    # Logo（矢量，从原稿提取的 #00a9ce 路径）
+    page.show_pdf_page(fitz.Rect(*LOGO_RECT), _logo_doc(), 0)
+
+    # ---- 指标区 ----
+    rect(page, CONTENT_L, 152.3, CONTENT_R, 178.25, BG_BEIGE)
+    label1_w = width(f"{DATA['account_type']} Account - ", SZ12, "bold")
+    put(page, 23.9, 169.6, f"{DATA['account_type']} Account - ", SZ12, "bold")
+    put(page, 23.9 + label1_w + 0.08, 169.6, DATA["account_last4"], SZ12, "bold")
+
+    rect(page, CONTENT_L, 178.3, CONTENT_R, 229.85, BG_BEIGE)
+    put(page, COL_X[0], 191.7, "Current Balance", SZ8)
+    put(page, COL_X[0], 210.8, money(DATA["current_balance"]), SZ18)
+    put(page, COL_X[0], 222.4, DATA["current_as_of"], SZ8, color=GRAY_757)
+    miw = width("Monthly Interest Paid", SZ8)
+    put(page, COL_X[1], 191.7, "Monthly Interest Paid", SZ8)
+    put(page, COL_X[1] + miw + 0.063, 188.4, "1", 4.6)
+    put(page, COL_X[1], 210.8, money(DATA["monthly_interest"]), SZ18)
+    apw = width("Annual Percentage Yield Earned", SZ8)
+    put(page, COL_X[2], 191.7, "Annual Percentage Yield Earned", SZ8)
+    put(page, COL_X[2] + apw + 0.195, 188.4, "1", 4.6)
+    put(page, COL_X[2], 210.8, DATA["apy"], SZ18)
+
+    rect(page, CONTENT_L, 229.9, CONTENT_R, 298.95, BG_BEIGE)
+    put(page, COL_X[0], 243.4, "Beginning Balance", SZ8)
+    put(page, COL_X[0], 262.4, money(DATA["beginning_balance"]), SZ18)
+    put(page, COL_X[0], 274.1, DATA["beginning_as_of"], SZ8, color=GRAY_626)
+    put(page, COL_X[1], 243.4, "Year-to-date Interest Paid", SZ8)
+    put(page, COL_X[1], 262.4, money(DATA["ytd_interest"]), SZ18)
+
+    rect(page, CONTENT_L, 299.0, CONTENT_R, 320.85, BG_BEIGE)
+    put(page, 23.9, 312.5, DATA["balance_note"], SZ8, color=GRAY_626)
+
+    # ---- 交易明细 ----
+    put(page, 18.1, 351.6, "Transaction Details", SZ11)
+    put(page, 18.1, 362.1,
+        "Balances below are the total funds resulting from the transaction(s) posted on that day.",
+        SZ8, color=GRAY_909)
+    hline(page, 371.05)
+
+    # 余额（从最新到最旧逐行回推；分页时由 build 预计算传入）
+    if balances is None:
+        balances = []
+        bal = DATA["current_balance"]
+        for t in txs:
+            balances.append(bal)
+            bal -= t["amount"]
+
+    _tx_table(page, txs, balances)
+
+    # ---- 联系信息（固定位置，原稿精确坐标；页1最多6行流水不与此重叠） ----
+    contact_y = CONTACT_MIN_Y
+
+    # 间距链（从原稿精确测量）
+    sep_y     = contact_y + 9.75     # 分隔线
+    icon_y    = contact_y + 25.20    # 图标顶
+    label_y   = contact_y + 68.00    # Website/Mailing Address/Contact Us
+    value_y   = contact_y + 82.60    # 第一行值
+    addr2_y   = contact_y + 93.40    # 地址第二行
+    addr3_y   = contact_y + 104.30   # 地址第三行
+    fnum_y    = contact_y + 128.90   # 脚注上标 "1"
+    ftext_y   = contact_y + 131.30   # 脚注第一行
+
+    hline(page, sep_y)
+    put(page, 18.1, contact_y, "Contact Information", SZ11, "thin", ins_name="thinD")
+
+    page.insert_image(fitz.Rect(15.75, icon_y, 45.05, icon_y + 29.3),
+                      filename=A("icon_web.png"))
+    page.insert_image(fitz.Rect(212.2, icon_y + 0.45, 239.95, icon_y + 27.75),
+                      filename=A("icon_mail.png"))
+    page.insert_image(fitz.Rect(405.45, icon_y + 0.30, 434.5, icon_y + 29.35),
+                      filename=A("icon_phone.png"))
+
+    put(page, 20.9, label_y, "Website", SZ8, "thin")
+    put(page, 20.9, value_y, DATA["contact_website"], SZ8, "thin", color=GRAY_909,
+        ins_name="thinD")
+    put(page, 214.4, label_y, "Mailing Address", SZ8, "thin")
+    put(page, 214.4, value_y, DATA["contact_address"][0], SZ8, color=GRAY_909)
+    put(page, 214.4, addr2_y, DATA["contact_address"][1], SZ8, color=GRAY_909)
+    put(page, 214.4, addr3_y, DATA["contact_address"][2], SZ8, color=GRAY_909)
+    put(page, 403.4, label_y, "Contact Us", SZ8, "thin")
+    put(page, 403.4, value_y, DATA["contact_phone"], SZ8, color=GRAY_909)
+
+    # ---- 脚注/页脚（跟随联系区，脚注自动换行匹配原稿宽度） ----
+    put(page, 20.9, fnum_y, "1", 3.5)
+    fn_lines = _wrap(DATA["footnote1"], SZ6, 562.7, 564.6)
+    for fi, fl in enumerate(fn_lines):
+        put_fast(page, 22.8 if fi == 0 else 20.9, ftext_y + fi * 7.1, fl, SZ6)
+    footer_y = ftext_y + (len(fn_lines) - 1) * 7.1 + 24.6
+    put_fast(page, 20.9, footer_y, DATA["legal_footer"], SZ6)
+    put_fast(page, 563.5, footer_y, f"Page {page_num} of {total_pages}", SZ6)
+
+    watermark(page)
+
+# ================================================================ 续页（仅账户标签+流水+页脚）
+def page_continuation(doc, page_num, total_pages, txs, balances):
+    """续页（参考原版）：账户标签置顶 → 流水（无表头，从 y=38.2 起）→ 页脚。
+    流水下方无联系区/脚注。"""
+    page = doc.new_page(width=612, height=792)
+    prepare(page)
+    _tx_account_label(page, CONT_LABEL_BL)
+    _tx_rows(page, txs, balances, CONT_BAND_TOP, CONT_ROW1_BL, True, False)
+    put_fast(page, 20.9, FOOTER_Y, DATA["legal_footer"], SZ6)
+    put_fast(page, 563.5, FOOTER_Y, f"Page {page_num} of {total_pages}", SZ6)
+    watermark(page)
+
+# ================================================================ 法律页
+LEGAL_LINE_GAP = 8.15               # 正文行距网格（原稿精确：8.15pt）
+LEGAL_SIGN_X   = 223.2              # 落款 x（原稿居中位置）
+LEGAL_NAVY     = (0, 0, 0x80/255)   # 链接藏青 #000080
+
+def _put_legal_line(page, y, text, bold):
+    """渲染一行条款文本；独立的 www.sofi.com 渲染为藏青 + 下划线 + 链接注释（原稿样式）。"""
+    f = "bold" if bold else "reg"
+    i = text.find(" www.sofi.com ")
+    if i >= 0:
+        i += 1
+        pre, post = text[:i], text[i + len("www.sofi.com"):]
+        put_fast(page, 18.1, y, pre, SZ6, f)
+        put_fast(page, 366.1, y, "www.sofi.com", SZ6, "reg", color=LEGAL_NAVY)
+        page.draw_line(fitz.Point(366.1, y + 0.60), fitz.Point(402.5, y + 0.60),
+                       color=LEGAL_NAVY, width=0.3)
+        page.insert_link({"kind": fitz.LINK_URI,
+                          "from": fitz.Rect(365.99, y - 6.8, 402.46, y + 1.35),
+                          "uri": "http://www.sofi.com/"})
+        if post.strip():
+            put_fast(page, 402.5, y, post, SZ6, f)
+    else:
+        put_fast(page, 18.1, y, text, SZ6, f)
+
+def page_legal(doc, page_num, total_pages):
+    page = doc.new_page(width=612, height=792)
+    prepare(page)
+    put(page, 18.1, 28.6, "Important Information", SZ11)
+    # 标题下分隔线（原稿 y=38.25, #808080, 0.1pt）
+    page.draw_line(fitz.Point(CONTENT_L, 38.25), fitz.Point(CONTENT_R, 38.25),
+                   color=DIVIDER, width=0.1)
+    # 正文：逐行使用原稿精确 y 值（内容固定）
+    for para in LEGAL_PARAS:
+        for bold, y, text in para:
+            _put_legal_line(page, y, text, bold)
+    # 落款：居中粗体（原稿 y=457.5, x=223.2）
+    put_fast(page, LEGAL_SIGN_X, LEGAL_SIGN_Y, LEGAL_SIGN, SZ6, "bold")
+    # 页脚（原稿页码 x=562.3）
+    put_fast(page, 20.9, FOOTER_Y, DATA["legal_footer"], SZ6)
+    put_fast(page, 562.3, FOOTER_Y, f"Page {page_num} of {total_pages}", SZ6)
+    watermark(page)
+
+LEGAL_PARAS = [
+    [
+        (True, 58.2, 'SoFi Insured Deposit Program'),
+        (False, 66.3, 'For participants in the SoFi Insured Deposit Program (the “Program”), SoFi Bank may place your cash balances, including amounts below the Standard Maximum Deposit Insurance Amount (the “SMDIA,” currently'),
+        (False, 74.5, '$250,000 for individual accounts and $500,000 for joint accounts), into deposit accounts at multiple FDIC-insured participating banks, as set forth in the Program Terms and Conditions, which can be found at'),
+        (False, 82.6, 'https://www.sofi.com/banking/fdic/sidpterms. The maximum FDIC insurance coverage available through the Program is $3.0 million per depositor per legal category of account ownership (including balances retained'),
+        (False, 90.8, 'at SoFi Bank). You can find the most recent list of participating banks and the how funds are distributed at https://www.sofi.com/my/banking/accounts/sidp'),
+    ],
+    [
+        (False, 107.1, 'If you have designated Payable on Death (“POD”) beneficiaries to your Checking and Savings accounts, your FDIC insurance coverage may be increased. For individual accounts, deposits will be insured up to $250,000'),
+        (False, 115.2, 'per unique primary beneficiary, up to a maximum of $1,250,000 if five or more beneficiaries are named. For joint accounts, deposits will be insured up to $500,000 per unique primary beneficiary, up to a maximum of'),
+        (False, 123.4, '$1,250,000 per account owner, subject to FDIC rules. If you have designated only secondary beneficiaries (i.e., no primary beneficiaries), SoFi Bank will treat these secondary beneficiaries as primary beneficiaries for'),
+        (False, 131.5, 'purposes of calculating FDIC insurance coverage and determining the amount of your cash balances placed into the Program.'),
+    ],
+    [
+        (True, 147.8, 'How to Contact Us'),
+        (False, 156.0, 'You may call us using the phone number on the front of this statement.'),
+    ],
+    [
+        (True, 172.3, 'Deposit Agreement'),
+        (False, 180.4, 'When you opened your account, you received the SoFi Bank Deposit Account Agreement (the “Customer Agreement”), which discussed the terms and conditions governing your account, as well as a fee schedule, a'),
+        (False, 188.6, 'rate sheet and, if applicable, a debit card agreement. You agreed that your account would be governed by these documents as amended from time to time, as well as any other documents provided to you at account'),
+        (False, 196.7, 'opening or subsequently. Copies of the Customer Agreement, the Fee Sheet and Rate Sheet are available through the SoFi website www.sofi.com or mobile app.'),
+    ],
+    [
+        (True, 213.0, 'Questions About Your Statement or Electronic Transfer Errors'),
+        (False, 221.2, 'You are in the best position to discover errors and unauthorized transactions on your account statement. It is your duty to review your account statements promptly and carefully and immediately notify us of any errors. If'),
+        (False, 229.3, 'you (a) have questions about your statement, (b) think your statement or receipt is wrong, (c) need more information about a transaction, or  (d) think an electronic transaction (e.g., ATM transaction, direct deposit,'),
+        (False, 237.5, 'withdrawal, or point of sale transaction) is incorrect or unauthorized,  please telephone us at 1-855-456-7634 immediately or write us at SoFi Bank, N.A., 2750 East Cottonwood Parkway #300, Cottonwood Heights,'),
+        (False, 245.6, 'Utah 84121 as soon as possible.'),
+    ],
+    [
+        (False, 261.9, 'We must hear from you no later than 60 days after we sent the FIRST statement on which the problem or error appeared.  We are not liable to you for any damages resulting from an error you fail to timely report and you'),
+        (False, 270.1, 'agree to not make a claim against us for such damages.'),
+    ],
+    [
+        (False, 286.4, 'If you write us, please include the following information: (1) Your full name and account number (if any); (2) describe the error, transfer or suspected unauthorized transaction you are unsure  about and explain as clearly'),
+        (False, 294.5, 'as you can, why you believe there is an error or why you need more information; and  (3) the dollar amount of any suspected error.'),
+    ],
+    [
+        (False, 310.8, 'We will investigate your complaint and will correct any error promptly. If we take more than 10 business days to do this, we will credit your account for the amount you think is in error, so that you will have the use of the'),
+        (False, 319.0, 'money during the time it takes us to complete our investigation.'),
+    ],
+    [
+        (True, 335.3, 'Preauthorized Credits'),
+        (False, 343.4, 'If you have arranged to have direct deposits made to your account at least once every 60 days from the same person or company, you can call us at 1-855-456-7634 to find out whether or not the deposit has been made.'),
+    ],
+    [
+        (True, 359.7, 'Reporting Other Problems'),
+        (False, 367.9, 'You are in the best position to discover errors and unauthorized transactions on your account statement. It is your duty to review your account statements promptly and carefully and immediately notify us of any errors or'),
+        (False, 376.0, 'concerns.'),
+    ],
+    [
+        (True, 392.3, 'Interest/Dividends'),
+        (False, 400.5, 'We are required by law to report annually to you and to the Internal Revenue Service on Form 1099 any taxable interest credited to your account, as well as any taxes withheld. The year-to-date figures shown on your'),
+        (False, 408.6, 'statement reflect these amounts classified to the best of our current knowledge. However, some payments are subject to reclassification, which will be reflected on subsequent statements if we are advised of them prior'),
+        (False, 416.8, 'to the end of the calendar year.'),
+    ],
+]
+LEGAL_SIGN  = 'SoFi Bank, N.A. Member of FDIC and Equal Housing Lender'
+LEGAL_SIGN_Y = 457.5
+
+
+# ================================================================ PDF 元数据（编辑器可编辑，创建时间留空不写入）
+META = {'title': 'Fictional Sample Statement',
+ 'author': 'Bill Gen',
+ 'subject': 'Fictional sample data',
+ 'keywords': 'sample, fictional',
+ 'producer': 'Bill Gen',
+ 'creator': 'Bill Gen',
+ 'creationDate': 'D:20261001000000Z'}
+
+def apply_meta(doc, meta=None):
+    """写入 PDF 元数据；创建时间留空时不写入。"""
+    m = dict(META)
+    for k, v in (meta or {}).items():
+        if k in m and v:
+            m[k] = str(v)
+    md = {}
+    if m["creationDate"]:
+        md["creationDate"] = m["creationDate"]
+        md["modDate"] = m["creationDate"]
+    if m["title"]:    md["title"] = m["title"]
+    if m["author"]:   md["author"] = m["author"]
+    if m["subject"]:  md["subject"] = m["subject"]
+    if m["keywords"]: md["keywords"] = m["keywords"]
+    if m["producer"]:
+        md["producer"] = m["producer"]
+    if m["creator"]:
+        md["creator"] = m["creator"]
+    doc.set_metadata(md)
+
+# ================================================================ build
+def build(meta=None):
+    autodetect_cjk()
+    doc = fitz.open()
+    txs = DATA["transactions"]
+    # 全局余额（从最新到最旧回推，跨页一致）
+    balances = []
+    bal = DATA["current_balance"]
+    for t in txs:
+        balances.append(bal)
+        bal -= t["amount"]
+    # 分页：页1 最多 TX_PER_PAGE 行（联系区固定 581.8），
+    # 续页各 TX_PER_CONT 行（仅标签+流水+页脚），末页固定为条款页
+    n_extra = len(txs) - TX_PER_PAGE
+    n_cont = max(0, math.ceil(n_extra / TX_PER_CONT)) if n_extra > 0 else 0
+    total = 1 + n_cont + 1  # 页1 + 续页 + 条款页
+    page_statement(doc, 1, total,
+                   txs[:TX_PER_PAGE], balances[:TX_PER_PAGE])
+    for p in range(n_cont):
+        lo = TX_PER_PAGE + p * TX_PER_CONT
+        page_continuation(doc, p + 2, total,
+                          txs[lo:lo + TX_PER_CONT],
+                          balances[lo:lo + TX_PER_CONT])
+    page_legal(doc, total, total)
+    apply_meta(doc, meta)
+    return doc
+
+def main():
+    doc = build(meta=None)
+    out = "SoFi-Statement-SAMPLE.pdf"
+    doc.save(out, garbage=4, deflate=True)
+    print(f"wrote {out} ({doc.page_count} pages)")
+
+if __name__ == "__main__":
+    main()

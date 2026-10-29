@@ -1,0 +1,794 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>账单模板编辑器</title>
+<style>
+  :root{
+    --accent:#5266EB; --accent-dk:#3E4FD4;
+    --bg:#F4F5FA; --card:#FFFFFF; --border:#E4E6F0;
+    --text:#363644; --muted:#8A8CA0; --ok:#0C8A6D; --warn:#D97706;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;font:13px/1.5 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Helvetica Neue",Arial,sans-serif;color:var(--text);background:var(--bg)}
+
+  header{position:fixed;inset:0 0 auto 0;height:54px;display:flex;align-items:center;gap:12px;padding:0 18px;background:#fff;border-bottom:1px solid var(--border);z-index:20}
+  header .logo{width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,#5266EB,#8DA4F5);flex:none}
+  header h1{font-size:14px;margin:0;font-weight:650;letter-spacing:.2px;white-space:nowrap}
+  #status{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;white-space:nowrap}
+  #status .dot{width:7px;height:7px;border-radius:50%;background:var(--ok);flex:none}
+  #status.busy .dot{background:var(--warn);animation:pulse 1s infinite}
+  @keyframes pulse{50%{opacity:.3}}
+  .spacer{flex:1}
+  .tplseg{display:flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;flex:none}
+  .tplseg button{border:0;background:#fff;padding:6px 14px;font-size:12.5px;cursor:pointer;color:var(--muted);font-weight:600}
+  .tplseg button.on{background:var(--accent);color:#fff}
+  .seg{display:flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;flex:none}
+  .seg button{border:0;background:#fff;padding:6px 12px;font-size:12px;cursor:pointer;color:var(--muted)}
+  .seg button.on{background:var(--accent);color:#fff}
+  .switch{display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;user-select:none;white-space:nowrap}
+  .switch input{accent-color:var(--accent);margin:0}
+  button.primary{appearance:none;border:0;background:var(--accent);color:#fff;font-size:13px;font-weight:600;padding:8px 18px;border-radius:8px;cursor:pointer;box-shadow:0 1px 2px rgba(60,70,180,.25);white-space:nowrap}
+  button.primary:hover{background:var(--accent-dk)}
+  button.primary:disabled{opacity:.5;cursor:default}
+
+  #layout{display:grid;grid-template-columns:460px 1fr;height:calc(100vh - 54px);margin-top:54px}
+  aside{overflow-y:auto;overflow-x:auto;padding:10px 10px 60px;border-right:1px solid var(--border);background:var(--bg)}
+  main{overflow:auto;padding:20px 24px 60px;background:#E9EAF2}
+
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 10px 8px;margin-bottom:12px;box-shadow:0 1px 2px rgba(30,35,80,.04)}
+  .card h3{margin:0 0 10px;font-size:12px;font-weight:650;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;display:flex;align-items:baseline;gap:8px}
+  .card h3 .hint{font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:#B0B2C4}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+  .field{display:flex;flex-direction:column;gap:4px;margin-bottom:8px}
+  .field label{font-size:11.5px;color:var(--muted)}
+  .field input,.field textarea{font:inherit;padding:6px 8px;border:1px solid var(--border);border-radius:7px;background:#fff;color:var(--text);width:100%}
+  .field textarea{resize:vertical;min-height:34px;line-height:1.45}
+  .field input:focus,.field textarea:focus{outline:2px solid rgba(82,102,235,.35);border-color:var(--accent)}
+
+  .txwrap{overflow-x:auto}
+  table.tx{width:100%;border-collapse:collapse;table-layout:fixed;min-width:660px}  /* 描述/备注列给足输入宽，超宽在 aside 内横滚 */
+  table.tx th{font-size:11px;color:var(--muted);text-align:left;padding:2px 3px;font-weight:600}
+  table.tx td{padding:2px 1px;vertical-align:top}
+  table.tx input,table.tx select{font:inherit;font-size:12px;padding:4px 5px;border:1px solid var(--border);border-radius:6px;width:100%;background:#fff;color:var(--text)}
+  table.tx input:focus,table.tx select:focus{outline:2px solid rgba(82,102,235,.35);border-color:var(--accent)}
+  table.tx input[type=number]{text-align:right}
+  button.del{border:0;background:transparent;color:#C3C5D5;font-size:15px;line-height:1;cursor:pointer;padding:2px 4px;border-radius:6px}
+  button.del:hover{color:#E5484D;background:#FDECEC}
+  button.ghost{margin-top:6px;width:100%;border:1px dashed var(--border);background:#FAFBFF;color:var(--accent);font-size:12px;padding:7px;border-radius:8px;cursor:pointer}
+  button.ghost:hover{border-color:var(--accent);background:#F0F2FF}
+  .note{font-size:11.5px;color:var(--muted);margin:4px 0 8px}
+
+  main figure{margin:0 auto 22px;width:100%;max-width:880px;background:#fff;box-shadow:0 2px 10px rgba(25,30,70,.12);border-radius:4px;overflow:hidden}
+  main figcaption{font-size:11.5px;color:var(--muted);padding:6px 10px;background:#FAFBFE;border-bottom:1px solid var(--border)}
+  main img{display:block;width:100%;height:auto}
+  main.zfull figure{max-width:none;width:850px}
+  main.zfull img{width:850px}
+  .loading{color:var(--muted);text-align:center;padding:80px 0;font-size:13px}
+  .notice{max-width:880px;margin:0 auto 14px;background:#FFF7E6;border:1px solid #F5DFA1;color:#8A6116;font-size:12px;padding:8px 12px;border-radius:8px}
+  .alert{max-width:880px;margin:0 auto 14px;background:#FDECEC;border:1px solid #F1B8B8;color:#B3261E;font-size:12.5px;font-weight:600;padding:9px 12px;border-radius:8px}
+  #toasts{position:fixed;left:50%;transform:translateX(-50%);bottom:26px;z-index:99;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+  .toast{background:#B3261E;color:#fff;font-size:12.5px;font-weight:600;padding:9px 16px;border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,.28);animation:tin .18s ease-out}
+  @keyframes tin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"></div>
+  <h1>账单模板编辑器</h1>
+  <div id="tplseg" class="tplseg"></div>
+  <div id="status" class="status"><span class="dot"></span><span id="statusText">就绪</span></div>
+  <div class="spacer"></div>
+  <div class="seg">
+    <button id="zFit" class="on">适应</button>
+    <button id="zFull">100%</button>
+  </div>
+  <label class="switch"><input type="checkbox" id="watermark" checked>SAMPLE 水印</label>
+  <button class="primary" id="exportBtn">导出 PDF</button>
+</header>
+
+<div id="layout">
+  <aside>
+    <!-- ==================== Mercury 表单 ==================== -->
+    <div id="form-mercury" style="display:none">
+      <div class="card">
+        <h3>账单期间</h3>
+        <div class="field"><label>标题行</label><input data-k="period_label"></div>
+        <div class="grid2">
+          <div class="field"><label>期间开始</label><input data-k="period_start"></div>
+          <div class="field"><label>期间结束</label><input data-k="period_end"></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>天数</label><input data-k="period_days"></div>
+          <div class="field"><label>时区行</label><input data-k="timezone"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>公司信息</h3>
+        <div class="field"><label>公司名称</label><input data-k="company"></div>
+        <div class="field"><label>地址 · 第一行</label><input data-k="address.0"></div>
+        <div class="field"><label>地址 · 第二行</label><input data-k="address.1"></div>
+        <div class="field"><label>EIN</label><input data-k="ein"></div>
+      </div>
+      <div class="card">
+        <h3>账户信息</h3>
+        <div class="grid2">
+          <div class="field"><label>账户类型</label><input data-k="account_type"></div>
+          <div class="field"><label>期初余额</label><input data-k="beginning_balance" type="number" step="0.01"></div>
+        </div>
+        <div class="field"><label>账号</label><input data-k="account_number"></div>
+        <div class="field"><label>Routing Number</label><input data-k="routing_number"></div>
+      </div>
+      <div class="card">
+        <h3>交易记录 <span class="hint">正数=收入(绿) 负数=支出(黑)</span></h3>
+        <div class="txwrap"></div>
+        <p class="note">每页 44 条自动分页；同一天仅最后一行显示日终余额。</p>
+      </div>
+      <div class="card">
+        <h3>页脚文字</h3>
+        <div class="field"><label>第一行</label><input data-k="footer_line1"></div>
+        <div class="field"><label>第二行</label><input data-k="footer_line2"></div>
+      </div>
+    </div>
+
+    <!-- ==================== C1 表单 ==================== -->
+    <div id="form-c1" style="display:none">
+      <div class="card">
+        <h3>客户信息 <span class="hint">地址 2-4 行，空行自动跳过</span></h3>
+        <div class="field"><label>姓名</label><input data-k="customer_name"></div>
+        <div class="field"><label>地址 · 第一行</label><input data-k="address_lines.0"></div>
+        <div class="field"><label>地址 · 第二行</label><input data-k="address_lines.1"></div>
+        <div class="field"><label>地址 · 第三行</label><input data-k="address_lines.2"></div>
+        <div class="field"><label>地址 · 第四行</label><input data-k="address_lines.3"></div>
+      </div>
+      <div class="card">
+        <h3>账单期间与文案</h3>
+        <div class="field"><label>标语（Thanks for saving…）</label><input data-k="tagline"></div>
+        <div class="grid2">
+          <div class="field"><label>标题月份</label><input data-k="headline_month"></div>
+          <div class="field"><label>期间范围</label><input data-k="period_range"></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>摘要列头 · 起</label><input data-k="summary_start_label"></div>
+          <div class="field"><label>摘要列头 · 止</label><input data-k="summary_end_label"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>账户信息</h3>
+        <div class="grid2">
+          <div class="field"><label>账户显示名（…5614）</label><input data-k="account_name"></div>
+          <div class="field"><label>账户标题</label><input data-k="account_title"></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>账号</label><input data-k="account_number"></div>
+          <div class="field"><label>期末日期</label><input data-k="closing_date"></div>
+        </div>
+        <div class="grid3">
+          <div class="field"><label>期初余额</label><input data-k="opening_balance" type="number" step="0.01"></div>
+          <div class="field"><label>本期利息</label><input data-k="interest_earned" type="number" step="0.01"></div>
+          <div class="field"><label>YTD 利息</label><input data-k="ytd_interest" type="number" step="0.01"></div>
+        </div>
+        <div class="grid3">
+          <div class="field"><label>透支/退回费</label><input data-k="overdraft_fees" type="number" step="0.01"></div>
+          <div class="field"><label>金融费用</label><input data-k="finance_charges" type="number" step="0.01"></div>
+          <div class="field"><label>APY</label><input data-k="apy"></div>
+        </div>
+        <div class="field"><label>账单天数</label><input data-k="days_in_cycle"></div>
+      </div>
+      <div class="card">
+        <h3>交易记录 <span class="hint">正数=Credit(绿) 负数=Debit(黑)；备注=第二行</span></h3>
+        <div class="txwrap"></div>
+        <p class="note">余额自动计算；带备注的行自动增高。</p>
+      </div>
+      <div class="card">
+        <h3>费用汇总</h3>
+        <div class="grid2">
+          <div class="field"><label>透支费 · 本期</label><input data-k="fees_overdraft_period" type="number" step="0.01"></div>
+          <div class="field"><label>透支费 · 年累计</label><input data-k="fees_overdraft_ytd" type="number" step="0.01"></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>退回费 · 本期</label><input data-k="fees_return_period" type="number" step="0.01"></div>
+          <div class="field"><label>退回费 · 年累计</label><input data-k="fees_return_ytd" type="number" step="0.01"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>页脚文字</h3>
+        <div class="field"><label>网站</label><input data-k="footer_site"></div>
+        <div class="field"><label>电话</label><input data-k="footer_phone"></div>
+        <div class="field"><label>地址</label><input data-k="footer_address"></div>
+      </div>
+      <div class="card">
+        <h3>第 3 页 · 法律文本</h3>
+        <div class="field"><label>Note 正文</label><textarea data-k="note_text" rows="3"></textarea></div>
+        <div class="field"><label>标题（If anything…）</label><textarea data-k="error_heading" rows="2"></textarea></div>
+        <div class="field"><label>正文段落</label><textarea data-k="error_paragraphs.0" rows="4"></textarea></div>
+        <div class="field"><label>条目 (1)</label><textarea data-k="error_items.0" rows="2"></textarea></div>
+        <div class="field"><label>条目 (2)</label><textarea data-k="error_items.1" rows="2"></textarea></div>
+        <div class="field"><label>条目 (3)</label><textarea data-k="error_items.2" rows="2"></textarea></div>
+        <div class="field"><label>结尾段落</label><textarea data-k="final_paragraphs.0" rows="3"></textarea></div>
+      </div>
+      <div class="card">
+        <h3>XMP 元数据</h3>
+        <div class="note">标题、作者、描述、生成软件、创建时间自动与「PDF 元数据」保持一致。</div>
+        <div class="field"><label>文件类型 dc:format</label><input data-m="xmp_format" placeholder="application/pdf"></div>
+        <div class="grid2">
+          <div class="field"><label>PDF 版本 pdf:PDFVersion</label><input data-m="xmp_pdf_version" placeholder="1.7"></div>
+          <div class="field" style="justify-content:flex-end;padding-bottom:8px">
+            <label class="switch" style="font-size:11.5px"><input type="checkbox" data-m="xmp_pdfa">声明 PDF/A-3B</label>
+            <label class="switch" style="font-size:11.5px"><input type="checkbox" data-m="xmp_pdfua">声明 PDF/UA-1</label>
+          </div>
+        </div>
+        <div class="note" id="xmpTimeNote"></div>
+      </div>
+    </div>
+
+    <!-- ==================== SoFi 表单 ==================== -->
+    <div id="form-sofi" style="display:none">
+      <div class="card">
+        <h3>账户持有人</h3>
+        <div class="field"><label>姓名</label><input data-k="holder_name"></div>
+        <div class="field"><label>Member since</label><input data-k="member_since"></div>
+        <div class="field"><label>地址 · 第一行</label><input data-k="address_lines.0"></div>
+        <div class="field"><label>地址 · 第二行</label><input data-k="address_lines.1"></div>
+        <div class="field"><label>地址 · 第三行</label><input data-k="address_lines.2"></div>
+        <div class="field"><label>地址 · 第四行</label><input data-k="address_lines.3"></div>
+      </div>
+      <div class="card">
+        <h3>账户信息</h3>
+        <div class="grid2">
+          <div class="field"><label>账号</label><input data-k="account_number"></div>
+          <div class="field"><label>账户类型</label><input data-k="account_type" placeholder="Checking"></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>末四位</label><input data-k="account_last4"></div>
+          <div class="field"><label>账单期间</label><input data-k="statement_period"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>余额与利息</h3>
+        <div class="grid2">
+          <div class="field"><label>当前余额</label><input data-k="current_balance" type="number" step="0.01"></div>
+          <div class="field"><label>余额日期</label><input data-k="current_as_of" placeholder="as of Aug 31, 2026"></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>本期利息</label><input data-k="monthly_interest" type="number" step="0.01"></div>
+          <div class="field"><label>APY</label><input data-k="apy" placeholder="0.50%"></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>期初余额</label><input data-k="beginning_balance" type="number" step="0.01"></div>
+          <div class="field"><label>期初日期</label><input data-k="beginning_as_of" placeholder="as of Aug 1, 2026"></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>年初至今利息</label><input data-k="ytd_interest" type="number" step="0.01"></div>
+        </div>
+        <div class="field"><label>注释</label><input data-k="balance_note"></div>
+      </div>
+      <div class="card">
+        <h3>交易记录 <span class="hint">正数=收入(绿) 负数=支出(黑)</span></h3>
+        <div class="txwrap"></div>
+      </div>
+      <div class="card">
+        <h3>联系信息</h3>
+        <div class="field"><label>网站</label><input data-k="contact_website"></div>
+        <div class="field"><label>地址 · 第一行</label><input data-k="contact_address.0"></div>
+        <div class="field"><label>地址 · 第二行</label><input data-k="contact_address.1"></div>
+        <div class="field"><label>地址 · 第三行</label><input data-k="contact_address.2"></div>
+        <div class="field"><label>电话</label><input data-k="contact_phone"></div>
+      </div>
+      <div class="card">
+        <h3>页脚</h3>
+        <div class="field"><label>法律文本</label><input data-k="legal_footer"></div>
+        <div class="field"><label>脚注</label><textarea data-k="footnote1" rows="2"></textarea></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>PDF 元数据</h3>
+      <div class="field"><label>标题</label><input data-m="title"></div>
+      <div class="field"><label>作者</label><input data-m="author"></div>
+      <div class="field"><label>主题</label><input data-m="subject"></div>
+      <div class="field"><label>描述</label><input data-m="keywords"></div>
+      <div class="field"><label>PDF 生成器</label><input data-m="producer" placeholder="例如 react-pdf"></div>
+      <div class="field"><label>创建软件</label><input data-m="creator" placeholder="例如 Sketch"></div>
+      <div class="field">
+        <label>创建时间（UTC）</label>
+        <div style="display:flex;gap:6px">
+          <input data-m="creationDate" placeholder="D:20261020120000Z">
+          <button type="button" class="ghost nowBtn" style="margin-top:0;width:auto;white-space:nowrap">现在</button>
+        </div>
+      </div>
+      <div class="note">创建时间留空时不写入 PDF。</div>
+    </div>
+
+    <div class="card">
+      <h3>导出</h3>
+      <div class="field"><label>文件名（不含 .pdf）</label><input id="filename"></div>
+      <p class="note" id="exportNote"></p>
+    </div>
+  </aside>
+
+  <main id="pages"><div class="loading">正在载入预览…</div></main>
+</div>
+
+<div id="toasts"></div>
+
+<script>
+/* ============================ 通用 ============================ */
+let TPL = "mercury", S = null, timer = null, seq = 0, accentBan = false;
+const $ = id => document.getElementById(id);
+const esc = v => String(v ?? "").replace(/[&<>"']/g,
+  c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const dispChar = c => c.codePointAt(0) < 0x20
+  ? "U+" + c.codePointAt(0).toString(16).toUpperCase() : c;
+
+function getPath(o, p){ return p.split(".").reduce((x,k)=> x?.[k], o); }
+function setPath(o, p, v){
+  const ks = p.split(".");
+  let t = o;
+  for (let i = 0; i < ks.length - 1; i++){
+    if (t[ks[i]] == null) t[ks[i]] = isNaN(+ks[i+1]) ? {} : [];
+    t = t[ks[i]];
+  }
+  t[ks[ks.length-1]] = v;
+}
+
+function toast(msg){
+  const box = $("toasts"); if (!box) return;
+  const el = document.createElement("div");
+  el.className = "toast"; el.textContent = msg;
+  box.appendChild(el);
+  while (box.children.length > 3) box.firstChild.remove();
+  setTimeout(() => {
+    el.style.transition = "opacity .3s"; el.style.opacity = "0";
+    setTimeout(() => el.remove(), 320);
+  }, 2600);
+}
+
+function save(){ localStorage.setItem(`bill-gen-state-${TPL}-v1`, JSON.stringify(S)); }
+function touch(){ save(); schedule(); }
+function schedule(){ clearTimeout(timer); timer = setTimeout(doRender, 350); }
+// 焦点离开任一文本输入 → 立即按完整值渲染
+document.querySelector('aside').addEventListener('focusout', () => schedule());
+function setStatus(busy, text){
+  $("status").classList.toggle("busy", !!busy);
+  $("statusText").textContent = text || (busy ? "渲染中…" : "就绪");
+}
+
+/* ---- 重音字母拦截（仅字体缺重音的模板启用） ---- */
+const ACCENT_RANGES = [[0xC0,0xD6],[0xD8,0xF6],[0xF8,0x24F],[0x1E00,0x1E7F],[0x1E80,0x1E85],[0x1E8A,0x1E8B],[0x1E9E,0x1E9E],[0x1EF2,0x1EF3],[0x2C6,0x2DD]];
+const isAccent = ch => { const c = ch.codePointAt(0);
+  return ACCENT_RANGES.some(r => c >= r[0] && c <= r[1]); };
+
+function stripAccents(str){
+  let clean = "", found = "";
+  for (const ch of str){ if (isAccent(ch)) found += ch; else clean += ch; }
+  return {clean, found};
+}
+
+function guardAccentInput(el){
+  if (!accentBan) return;
+  const {clean, found} = stripAccents(el.value);
+  if (!found) return;
+  const pos = el.selectionStart ?? el.value.length;
+  let removedBefore = 0;
+  for (let i = 0; i < pos && i < el.value.length; i++)
+    if (isAccent(el.value[i])) removedBefore++;
+  el.value = clean;
+  const np = Math.max(0, pos - removedBefore);
+  try { el.setSelectionRange(np, np); } catch(e) {}
+  toast(`已拦截重音字母 ${[...new Set(found)].map(dispChar).join(" ")} — 请使用英文字母`);
+}
+
+document.addEventListener("input", e => {
+  const el = e.target;
+  if (!(el instanceof HTMLInputElement) || el.type !== "text") return;
+  if (el.id === "filename") return;
+  guardAccentInput(el);
+}, true);
+
+/* ============================ 交易表 ============================ */
+const TX_CFG = {
+  mercury: {icons: ["achIn","achOut","biArrow","card","infoCircle","mercury","shield","wire"], memo: false, sofi: false},
+  c1:      {icons: null, memo: true, sofi: false},
+  sofi:    {icons: null, memo: false, sofi: true},
+};
+
+const ICON_GLYPHS = {achIn:"\uea01", achOut:"\uea02", biArrow:"\uea03", card:"\uea04",
+                     infoCircle:"\uea05", mercury:"\uea06", shield:"\uea07", wire:"\uea08"};
+const ICON_NAMES = {achIn:"转入 ↙", achOut:"转出 ↗", biArrow:"双向 ↔", card:"银行卡 ▭",
+                    infoCircle:"信息 ℹ", mercury:"Mercury", shield:"盾牌", wire:"电线 ⌇"};
+
+function renderTx(){
+  const wrap = document.querySelector(`#form-${TPL} .txwrap`);
+  const cfg = TX_CFG[TPL];
+  let head = `<table class="tx"><thead><tr>
+    <th style="width:70px">日期</th><th>描述</th>`;
+  if (cfg.memo) head += `<th style="width:26%">备注</th>`;
+  if (cfg.icons) head += `<th style="width:60px">类型</th><th style="width:64px">图标</th><th style="width:46px">收支</th>`;
+  if (cfg.sofi) head += `<th style="width:88px">类型</th><th style="width:88px">交易ID</th>`;
+  head += `<th style="width:84px">金额</th><th style="width:20px"></th></tr></thead><tbody></tbody></table>
+    <button class="ghost addTxBtn">＋ 添加交易</button>`;
+  wrap.innerHTML = head;
+
+  const tb = wrap.querySelector("tbody");
+  (S.data.transactions || []).forEach((tx, i) => {
+    const tr = document.createElement("tr");
+    let cells = `<td><input data-i="${i}" data-f="date" value="${esc(tx.date)}" placeholder="Aug 1"></td>
+      <td><input data-i="${i}" data-f="desc" value="${esc(tx.desc)}" placeholder="交易描述"></td>`;
+    if (cfg.memo)
+      cells += `<td><input data-i="${i}" data-f="memo" value="${esc(tx.memo || "")}" placeholder="（可选第二行）"></td>`;
+    if (cfg.icons) {
+      const dir = tx.dir || (tx.amount >= 0 ? "in" : "out");
+      cells += `<td><input data-i="${i}" data-f="type" value="${esc(tx.type || "")}" placeholder="自定义类型"></td>
+        <td><select data-i="${i}" data-f="icon">${cfg.icons.map(x =>
+          `<option value="${x}"${x === (tx.icon || "achOut") ? " selected" : ""}>${ICON_NAMES[x]}</option>`).join("")}</select></td>
+        <td><select data-i="${i}" data-f="dir" class="dirSel">
+          <option value="in"${dir === "in" ? " selected" : ""}>收入</option>
+          <option value="out"${dir === "out" ? " selected" : ""}>支出</option></select></td>`;
+    }
+    if (cfg.sofi) {
+      cells += `<td><input data-i="${i}" data-f="type" value="${esc(tx.type || "")}" placeholder="Interest Earned"></td>
+        <td><input data-i="${i}" data-f="txid" value="${esc(tx.txid || "")}" placeholder="138-1"></td>`;
+    }
+    cells += `<td><input type="number" step="0.01" data-i="${i}" data-f="amount" value="${tx.amount}"></td>
+      <td><button class="del" data-i="${i}" title="删除">×</button></td>`;
+    tr.innerHTML = cells;
+    tb.appendChild(tr);
+  });
+
+  wrap.querySelector(".addTxBtn").onclick = () => {
+    const row = {date:"", desc:"", amount:0};
+    if (cfg.icons){ row.type = "ACH In"; row.icon = "achIn"; row.dir = "in"; }
+    if (cfg.memo) row.memo = "";
+    if (cfg.sofi){ row.type = "Deposit"; row.txid = ""; }
+    S.data.transactions.push(row);
+    renderTx(); touch();
+  };
+  tb.addEventListener("input", e => {
+    const el = e.target;
+    if (!el.dataset || el.dataset.i === undefined) return;
+    const i = +el.dataset.i, f = el.dataset.f;
+    let v = el.value;
+    if (f === "amount"){ v = parseFloat(v); if (isNaN(v)) v = 0; }
+    S.data.transactions[i][f] = v; touch();
+  });
+  tb.addEventListener("change", e => {
+    const el = e.target;
+    if (el.tagName === "SELECT" && el.dataset.i !== undefined){
+      S.data.transactions[+el.dataset.i][el.dataset.f] = el.value;
+      touch();
+    }
+  });
+  tb.addEventListener("click", e => {
+    const b = e.target.closest("button.del");
+    if (!b) return;
+    S.data.transactions.splice(+b.dataset.i, 1);
+    renderTx(); touch();
+  });
+}
+
+/* ============================ 渲染/导出 ============================ */
+async function doRender(){
+  // 焦点保持：文本输入进行中不渲染预览（输完整个值才算一次输入）
+  const _ae = document.activeElement;
+  if(_ae && ((_ae.tagName === 'INPUT' && (_ae.type === 'text' || !_ae.type || _ae.type === 'number'))
+      || _ae.tagName === 'TEXTAREA') && document.querySelector('aside').contains(_ae)){
+    timer = setTimeout(doRender, 500);
+    return;
+  }
+  const my = ++seq;
+  setStatus(true);
+  try{
+    const r = await fetch("/api/render", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({tpl: TPL, data: S.data, watermark: S.watermark, meta: S.meta || null})
+    });
+    if (!r.ok) throw 0;
+    const j = await r.json();
+    if (my !== seq) return;
+    const alerts = [];
+    if (j.removed_accent && j.removed_accent.length)
+      alerts.push(`<div class="alert">⚠ 已拦截重音字母（模板字体不支持）：${esc(j.removed_accent.map(dispChar).join(" "))}</div>`);
+    if (j.removed_missing && j.removed_missing.length)
+      alerts.push(`<div class="alert">⚠ 以下字符无字体支持，已从预览与导出中移除：${esc(j.removed_missing.map(dispChar).join(" "))}</div>`);
+    const notice = (j.fallback && j.fallback.length)
+      ? `<div class="notice">以下字符不在原版字体内，已用系统中文字体显示：${esc(j.fallback.join(" "))}</div>` : "";
+    // 页级增量：/pv/{内容哈希}.png + figure/img 复用——未变化页不换 src
+    // （immutable 缓存直出、无白闪），仅变化页单独重载；告警条独立容器每次重建
+    const pg = $("pages");
+    let msgs = pg.querySelector(".msgs");
+    if (!msgs) { msgs = document.createElement("div"); msgs.className = "msgs"; pg.prepend(msgs); }
+    msgs.innerHTML = alerts.join("") + notice;
+    let loading = pg.querySelector(".loading");
+    if (loading) loading.remove();
+    let figs = [...pg.querySelectorAll("figure")];
+    while (figs.length < j.pages.length) {
+      const f = document.createElement("figure");
+      f.innerHTML = "<figcaption></figcaption><img alt='page'>";
+      pg.appendChild(f);
+      figs.push(f);
+    }
+    while (figs.length > j.pages.length) figs.pop().remove();
+    figs.forEach((f, i) => {
+      const img = f.querySelector("img");
+      const src = `/pv/${j.pages[i]}.png`;
+      img.onerror = () => { img.style.opacity = .4;
+        setTimeout(() => { img.removeAttribute("src"); img.src = src; }, 800); };
+      img.onload = () => { img.style.opacity = ""; };
+      if (!img.src.endsWith(src)) img.src = src;
+      f.querySelector("figcaption").textContent = `第 ${i + 1} 页 · 共 ${j.pages.length} 页`;
+    });
+    if (!j.pages.length) pg.insertAdjacentHTML("beforeend", '<div class="loading">无页面</div>');
+  }catch(e){
+    if (my === seq) setStatus(false, "渲染失败，请检查输入");
+    return;
+  }
+  if (my === seq) setStatus(false);
+}
+
+async function exportPDF(){
+  const btn = $("exportBtn");
+  btn.disabled = true; setStatus(true, "导出中…");
+  try{
+    const r = await fetch("/api/export", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({tpl: TPL, data: S.data, watermark: S.watermark, meta: S.meta || null})
+    });
+    if (!r.ok) throw 0;
+    const blob = await r.blob();
+    let name = ($("filename").value || "statement").replace(/[\\/:*?"<>|]/g, "").trim() || "statement";
+    if ($("watermark").checked && !/sample/i.test(name)) name += "-SAMPLE";
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = name + ".pdf";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  }catch(e){ alert("导出失败，请重试"); }
+  btn.disabled = false; setStatus(false);
+}
+
+/* ============================ 表单绑定 ============================ */
+function utcNow(){
+  const d = new Date(), p = n => String(n).padStart(2, "0");
+  return `D:${d.getUTCFullYear()}${p(d.getUTCMonth()+1)}${p(d.getUTCDate())}` +
+         `${p(d.getUTCHours())}${p(d.getUTCMinutes())}${p(d.getUTCSeconds())}Z`;
+}
+
+function bindForm(){
+  const form = $(`form-${TPL}`);
+  form.querySelectorAll("[data-k]").forEach(el => {
+    const v = getPath(S.data, el.dataset.k);
+    el.value = v === undefined || v === null ? "" : v;
+    el.oninput = () => {
+      let v = el.value;
+      if (el.type === "number"){ v = parseFloat(v); if (isNaN(v)) v = 0; }
+      setPath(S.data, el.dataset.k, v);
+      // 标题月份变化时自动重算默认创建时间（未手动动过则联动）
+      if (TPL === "mercury" && el.dataset.k === "period_end" && !creationDateTouched){
+        S.meta.creationDate = deriveMercuryCreationDate(v);
+        const cd = document.querySelector('[data-m="creationDate"]');
+        if (cd) cd.value = S.meta.creationDate;
+      }
+      if (TPL === "c1" && el.dataset.k === "headline_month" && !creationDateTouched){
+        S.meta.creationDate = deriveC1CreationDate(v);
+        const cd = document.querySelector('[data-m="creationDate"]');
+        if (cd) cd.value = S.meta.creationDate;
+      }
+      if (TPL === "sofi" && el.dataset.k === "statement_period" && !creationDateTouched){
+        S.meta.creationDate = deriveSofiCreationDate(v);
+        const cd = document.querySelector('[data-m="creationDate"]');
+        if (cd) cd.value = S.meta.creationDate;
+      }
+      touch();
+    };
+  });
+  // PDF 元数据绑定（公共卡片所有模板；XMP 卡片仅 c1 表单内）
+  const mfields = document.querySelectorAll("[data-m]");
+  if (mfields.length){
+    if (!S.meta) S.meta = {};
+    mfields.forEach(el => {
+      if (el.type === "checkbox"){
+        el.checked = S.meta[el.dataset.m] === undefined ? true : !!S.meta[el.dataset.m];
+        el.onchange = () => { S.meta[el.dataset.m] = el.checked; touch(); };
+      } else {
+        const v = S.meta[el.dataset.m];
+        el.value = v === undefined || v === null ? "" : v;
+        el.oninput = () => {
+          S.meta[el.dataset.m] = el.value;
+          if (el.dataset.m === "creationDate"){ creationDateTouched = true; updateXmpTimeNote(); }
+          touch();
+        };
+      }
+    });
+    const nowBtn = document.querySelector(".nowBtn");
+    if (nowBtn) nowBtn.onclick = () => {
+      S.meta.creationDate = utcNow();
+      document.querySelector('[data-m="creationDate"]').value = S.meta.creationDate;
+      updateXmpTimeNote();
+      touch();
+    };
+  }
+  updateXmpTimeNote();
+}
+
+function pdfDateToISO(d){
+  const m = /^D:(\d{4})(\d{2})?(\d{2})?(\d{2})?(\d{2})?(\d{2})?/.exec(d || "");
+  if (!m) return d || "";
+  const [y, mo, da, h, mi, s] = [...m.slice(1).map(x => x || "00"), "00", "00", "00", "00", "00", "00"];
+  return `${y}-${mo}-${da}T${h}:${mi}:${s}+00:00`;
+}
+// Mercury：默认创建时间 = 期间结束日次日 凌晨4点档（随机分秒，UTC）
+let creationDateTouched = false;
+const _MON = {january:0,february:1,march:2,april:3,may:4,june:5,july:6,august:7,
+              september:8,october:9,november:10,december:11};
+function deriveMercuryCreationDate(periodEnd){
+  let d = null;
+  let m = /^([A-Za-z]+)\s+(\d{1,2}),?\s+(\d{4})/.exec(periodEnd || "");   // September 30, 2026
+  if (m){
+    const mo = _MON[m[1].toLowerCase()];
+    if (mo !== undefined) d = new Date(Date.UTC(+m[3], mo, +m[2]));
+  }
+  if (!d){
+    m = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(periodEnd || "");             // 2026-09-30
+    if (m) d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+  }
+  if (!d || isNaN(d)) return "";
+  d.setUTCDate(d.getUTCDate() + 1);   // 次日
+  const p = n => String(n).padStart(2, "0");
+  return `D:${d.getUTCFullYear()}${p(d.getUTCMonth()+1)}${p(d.getUTCDate())}` +
+         `04${p(Math.floor(Math.random()*60))}${p(Math.floor(Math.random()*60))}Z`;
+}
+// C1：默认创建时间 = 标题月份（headline_month）次月15日 15点档（随机分秒，UTC）
+function deriveC1CreationDate(headline){
+  const m = /^([A-Za-z]+)\s+(\d{4})/.exec(headline || "");
+  if (!m) return "";
+  const mo = _MON[m[1].toLowerCase()];
+  if (mo === undefined) return "";
+  const d = new Date(Date.UTC(+m[2], mo + 1, 15));   // 次月15日（跨年自动）
+  const p = n => String(n).padStart(2, "0");
+  return `D:${d.getUTCFullYear()}${p(d.getUTCMonth()+1)}${p(d.getUTCDate())}` +
+         `15${p(Math.floor(Math.random()*60))}${p(Math.floor(Math.random()*60))}Z`;
+}
+const _MON_ABBR = Object.assign({}, _MON, {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,
+  aug:7,sep:8,sept:8,oct:9,nov:10,dec:11});
+// SoFi：默认创建时间 = 账单期间次月2日 02点档（随机分秒，UTC）
+function deriveSofiCreationDate(period){
+  const m = /^([A-Za-z]+)\s+\d{1,2},\s*(\d{4})/.exec(period || "");   // September 1, 2026 - ...
+  if (!m) return "";
+  const mo = _MON_ABBR[m[1].toLowerCase()];
+  if (mo === undefined) return "";
+  const d = new Date(Date.UTC(+m[2], mo + 1, 2));   // 次月2日（跨年自动）
+  const p = n => String(n).padStart(2, "0");
+  return `D:${d.getUTCFullYear()}${p(d.getUTCMonth()+1)}${p(d.getUTCDate())}` +
+         `02${p(Math.floor(Math.random()*60))}${p(Math.floor(Math.random()*60))}Z`;
+}
+function updateXmpTimeNote(){
+  const note = document.getElementById("xmpTimeNote");
+  if (!note) return;
+  const d = S?.meta?.creationDate || "";
+  note.textContent = d
+    ? `xmp:CreateDate 与「PDF 元数据」创建时间保持一致：${pdfDateToISO(d)}`
+    : "创建时间留空：Info 与 XMP 均不写入时间。";
+}
+
+/* ============================ 模板切换 ============================ */
+function initTplSeg(templates){
+  const seg = $("tplseg");
+  seg.innerHTML = "";
+  for (const [id, name] of Object.entries(templates)){
+    const b = document.createElement("button");
+    b.textContent = name; b.dataset.tpl = id;
+    b.onclick = () => switchTpl(id);
+    seg.appendChild(b);
+  }
+}
+
+async function switchTpl(tpl){
+  if (tpl === TPL && S) return;
+  TPL = tpl;
+  document.querySelectorAll("#tplseg button").forEach(b =>
+    b.classList.toggle("on", b.dataset.tpl === tpl));
+  ["mercury", "c1", "sofi"].forEach(t =>
+    $(`form-${t}`).style.display = t === tpl ? "" : "none");
+  $("pages").innerHTML = '<div class="loading">正在载入…</div>';
+  await loadState();
+}
+
+async function loadState(){
+  let saved = null, freshState = false;
+  try { saved = JSON.parse(localStorage.getItem(`bill-gen-state-${TPL}-v1`) || "null"); } catch(e){}
+  if (saved && saved.data && Array.isArray(saved.data.transactions)){
+    S = saved;
+  } else {
+    const r = await fetch(`/api/state?tpl=${TPL}`);
+    S = await r.json();
+    freshState = true;
+  }
+  accentBan = !!S.accent_ban;
+  // 旧数据迁移：清除重音（仅禁用模板）
+  if (accentBan){
+    let acc = "";
+    const walk = s => { const r = stripAccents(String(s ?? "")); acc += r.found; return r.clean; };
+    const deep = v => Array.isArray(v) ? v.map(deep) : typeof v === "string" ? walk(v) : v;
+    S.data = deep(S.data);
+    if (acc) toast(`已拦截重音字母 ${[...new Set(acc)].map(dispChar).join(" ")}`);
+  }
+  // 元数据默认值合并（必须在 bindForm 之前，否则字段显示为空）；
+  // mercury：生成器/创建软件默认 react-pdf（旧存档空值也回填）
+  if (!S.meta) S.meta = {};
+  if (TPL === "mercury"){
+    if (!S.meta.producer) S.meta.producer = "react-pdf";
+    if (!S.meta.creator) S.meta.creator = "react-pdf";
+  }
+  // c1：元数据默认值 + XMP 默认值补齐；创建时间=标题月份次月15日15点档
+  if (TPL === "c1"){
+    const C1_META_DEFAULTS = {
+  "title": "Fictional Sample Statement",
+  "author": "Bill Gen",
+  "subject": "Fictional sample data",
+  "creator": "Bill Gen",
+  "xmp_format": "",
+  "xmp_pdf_version": "",
+  "xmp_pdfa": "",
+  "xmp_pdfua": ""
+};
+    for (const k in C1_META_DEFAULTS)
+      if (!S.meta[k]) S.meta[k] = C1_META_DEFAULTS[k];
+    if (S.meta.creationDate === undefined || (freshState && !S.meta.creationDate))
+      S.meta.creationDate = deriveC1CreationDate(S.data && S.data.headline_month);
+  }
+  if (TPL === "sofi"){
+    // SoFi：作者/生成软件/创建程序默认值；创建时间=账单期间次月2日02点档
+    if (!S.meta.author)   S.meta.author = "LJ Katz";
+    if (!S.meta.creator)  S.meta.creator = "Writer";
+    if (!S.meta.producer) S.meta.producer = "LibreOffice 7.0";
+    if (S.meta.creationDate === undefined || (freshState && !S.meta.creationDate))
+      S.meta.creationDate = deriveSofiCreationDate(S.data && S.data.statement_period);
+  }
+  if (TPL === "mercury"){
+    // Mercury：默认创建时间 = 期间结束日次日 凌晨4点档（随机分秒）；
+    // 全新状态或存档无值时推导；用户清空("")或已填值则尊重原值
+    if (S.meta.creationDate === undefined || (freshState && !S.meta.creationDate))
+      S.meta.creationDate = deriveMercuryCreationDate(S.data && S.data.period_end);
+  } else if (!S.meta.creationDate && freshState) {
+    S.meta.creationDate = utcNow();
+  }
+
+  bindForm(); renderTx();
+  const cd = document.querySelector('[data-m="creationDate"]');
+  if (cd && !cd.value && S.meta.creationDate) cd.value = S.meta.creationDate;
+  updateXmpTimeNote();
+  $("watermark").checked = !!S.watermark;
+  $("filename").value = S.filename || "";
+  $("exportNote").textContent = accentBan
+    ? "支持英文字母、数字、常用符号与中文；重音字母会被拦截。勾选水印时文件名追加 -SAMPLE。"
+    : "支持英文字母（含重音）、数字、常用符号与中文。勾选水印时文件名追加 -SAMPLE。";
+  doRender();
+}
+
+/* ============================ 初始化 ============================ */
+$("watermark").addEventListener("change", e => { S.watermark = e.target.checked; touch(); });
+$("filename").addEventListener("input", e => { S.filename = e.target.value; save(); });
+$("exportBtn").addEventListener("click", exportPDF);
+$("zFit").addEventListener("click", () => {
+  $("pages").classList.remove("zfull");
+  $("zFit").classList.add("on"); $("zFull").classList.remove("on");
+});
+$("zFull").addEventListener("click", () => {
+  $("pages").classList.add("zfull");
+  $("zFull").classList.add("on"); $("zFit").classList.remove("on");
+});
+
+(async () => {
+  const r = await fetch("/api/state?tpl=mercury");
+  const st = await r.json();
+  initTplSeg(st.templates || {mercury:"Mercury 商业账户"});
+  switchTpl("mercury");
+})();
+</script>
+</body>
+</html>

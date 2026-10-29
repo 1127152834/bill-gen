@@ -1,0 +1,79 @@
+{
+  "bank": {
+    "name": "Sample Bank",
+    "legal_na": "Sample Bank, N.A.",
+    "domain": "example.invalid",
+    "phone_name": "SAMPLE PHONE",
+    "phone_main": "(000-000-0000)",
+    "phone_es": "000-000-0000",
+    "po_box": "P.O. Box 0000",
+    "po_box2": "P.O. Box 0000",
+    "mac_code": "SAMPLE",
+    "zip_main": "00000-0000",
+    "des_moines": "Sample City, IA 00000",
+    "copyright_year": 2027,
+    "office_code": "000",
+    "nmlsr_id": "000000"
+  },
+  "statement_date": "January 31, 2027",
+  "total_pages": 5,
+  "customer": {
+    "name": "SAMPLE CUSTOMER",
+    "address_lines": [
+      "123 Sample Lane",
+      "Austin TX 78701"
+    ]
+  },
+  "account": {
+    "product": "Sample Checking",
+    "number": "000000000001",
+    "rtn": "000000000",
+    "primary_label": "(Primary account)"
+  },
+  "summary": {
+    "auto": true,
+    "period_start": "1/1",
+    "period_end": "1/31",
+    "begin_amount": "1000.00",
+    "deposits_amount": "500.00",
+    "withdrawals_amount": "-  120.00",
+    "ending_amount": "$1,380.00"
+  },
+  "transactions": [
+    {
+      "date": "1/4",
+      "desc": "SAMPLE SALARY",
+      "deposit": "500.00",
+      "withdrawal": "",
+      "balance": "1,500.00"
+    },
+    {
+      "date": "1/6",
+      "desc": "SAMPLE RENT",
+      "deposit": "",
+      "withdrawal": "120.00",
+      "balance": "1,380.00"
+    }
+  ],
+  "totals": {
+    "deposits": "$500.00",
+    "withdrawals": "$120.00"
+  },
+  "fees": {
+    "period": "1/1/2027 - 1/31/2027",
+    "standard": "$0.00",
+    "paid": "$0.00"
+  },
+  "metadata": {
+    "title": "SAMPLE — NOT A REAL BANK STATEMENT",
+    "author": "",
+    "producer": "BillGen Sample Editor",
+    "creator": "BillGen Sample Editor",
+    "subject": "Fictional sample statement",
+    "keywords": "sample",
+    "creation": "D:20270131000000Z",
+    "mod": "D:20270131000000Z",
+    "creation_date": "2027-01-31 00:00:00Z"
+  },
+  "watermark": true
+}

@@ -1,0 +1,1899 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>对账单模板 · 可视化编辑器</title>
+<style>
+/* ============================================================
+   字体声明 —— 与原稿一致：
+   · 嵌入式 TrueType 四款（ArialMT / Arial-BoldMT /
+     TimesNewRomanPSMT / SymbolMT），对应原稿 PDF 的内嵌字体
+   · Helvetica / Helvetica-Bold / Times-Roman 为原稿按名引用的
+     base-14 字体（原稿未嵌入）；此处 local() 优先，随附同
+     metric 字体兜底，保证跨平台渲染一致
+   ============================================================ */
+@font-face { font-family:"ArialMT";           src:url("fonts/ArialMT.ttf") format("truetype"); }
+@font-face { font-family:"Arial-BoldMT";      src:url("fonts/Arial-BoldMT.ttf") format("truetype"); }
+@font-face { font-family:"TimesNewRomanPSMT"; src:url("fonts/TimesNewRomanPSMT.ttf") format("truetype"); }
+@font-face { font-family:"SymbolMT";          src:url("fonts/SymbolMT.ttf") format("truetype"); }
+@font-face { font-family:"Helvetica"; font-weight:400;
+  src:url("fonts/Helvetica.ttf") format("truetype"), local("Helvetica"); }
+@font-face { font-family:"Helvetica"; font-weight:700;
+  src:url("fonts/Helvetica-Bold.ttf") format("truetype"), local("Helvetica-Bold"), local("Helvetica Bold"); }
+@font-face { font-family:"Times-Roman"; font-weight:400;
+  src:url("fonts/Times-Roman.ttf") format("truetype"), local("Times-Roman"), local("Times"); }
+
+* { box-sizing: border-box; }
+html, body { margin:0; padding:0; height:100%; }
+body { font:13px/1.5 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif; background:#3b3f45; color:#222; }
+#app { display:flex; flex-direction:column; height:100%; }
+#toolbar { display:flex; align-items:center; gap:10px; padding:8px 14px; background:#23262b; color:#eee;
+  flex:none; flex-wrap:wrap; }
+#toolbar h1 { font-size:14px; margin:0 12px 0 0; font-weight:600; white-space:nowrap; }
+#toolbar button, #toolbar select { background:#3a3f47; color:#eee; border:1px solid #555b64; border-radius:6px;
+  padding:5px 12px; font-size:12.5px; cursor:pointer; }
+#toolbar button:hover { background:#4a505a; }
+#toolbar button.primary { background:#2563eb; border-color:#2563eb; }
+#toolbar button.primary:hover { background:#1d4fd7; }
+#toolbar label { font-size:12.5px; display:flex; align-items:center; gap:4px; color:#ccc; cursor:pointer; }
+#body { display:flex; flex:1; min-height:0; }
+
+#panel { width:400px; flex:none; background:#f4f5f7; border-right:1px solid #23262b; overflow-y:auto;
+  padding:12px 12px 60px; }
+#panel fieldset { border:1px solid #d8dade; border-radius:8px; margin:0 0 12px; padding:8px 10px 10px; background:#fff; }
+#panel legend { font-weight:600; font-size:12.5px; padding:0 6px; color:#333; }
+.frow { display:flex; align-items:center; gap:6px; margin:4px 0; }
+.frow > label { flex:none; width:98px; font-size:12px; color:#555; }
+.frow input[type=text], .frow input[type=number], .frow select, .frow textarea {
+  flex:1; min-width:0; font:12px/1.4 ui-monospace,Menlo,monospace; padding:3px 6px;
+  border:1px solid #c9ccd2; border-radius:4px; background:#fff; }
+.frow textarea { resize:vertical; }
+.frow input:focus, .frow textarea:focus, .frow select:focus { outline:2px solid #9cc0ff; border-color:#2563eb; }
+.hint { font-size:11px; color:#888; margin:2px 0 6px; }
+.acct-card { border:1px solid #c9ccd2; border-radius:8px; margin:8px 0; background:#fbfbfc; }
+.acct-card > .acct-head { display:flex; align-items:center; gap:6px; padding:6px 8px; background:#eceef1;
+  border-radius:8px 8px 0 0; }
+.acct-card > .acct-head b { flex:1; font-size:12.5px; }
+.acct-card > .acct-body { padding:6px 8px 8px; }
+.txn { border:1px solid #d5d8dd; border-radius:6px; padding:6px 8px; margin:6px 0; background:#fff; }
+.txn .txn-tools { display:flex; gap:4px; margin-bottom:4px; align-items:center; }
+.txn .txn-tools span { flex:1; font-size:11px; color:#999; }
+.txn .txn-tools button, .acct-head button { font-size:11px; padding:2px 7px; border:1px solid #c2c6cc;
+  background:#f0f1f4; border-radius:4px; cursor:pointer; color:#333; }
+.txn .txn-tools button:hover, .acct-head button:hover { background:#e2e4e9; }
+.txn .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:0 8px; }
+.txn .grid2 > * { min-width:0; }
+.txn .grid2 .frow { flex-direction:column; align-items:stretch; gap:1px; margin:3px 0; }
+.txn .grid2 .frow > label { width:auto; font-size:11px; color:#777; }
+#panel fieldset, .acct-card, .txn, .frow { min-width:0; }
+.frow > label { overflow-wrap:break-word; }
+.computed { font-size:11.5px; color:#0a7d32; background:#eefaf0; border:1px dashed #bfe6c8; border-radius:6px;
+  padding:4px 8px; margin:6px 0; }
+button.add { width:100%; padding:5px; margin:4px 0; border:1px dashed #9aa0a8; background:#fff; border-radius:6px;
+  cursor:pointer; color:#444; }
+button.add:hover { background:#f0f4ff; border-color:#2563eb; color:#2563eb; }
+
+#preview { flex:1; overflow:auto; background:#565a61; position:relative; }
+#pdfFrame { width:100%; height:100%; border:0; display:none; background:#565a61; }
+body.pdfmode #pdfFrame { display:block; }
+body.pdfmode #pages { display:none; }
+#pages { padding:24px 0 60px; display:flex; flex-direction:column; align-items:center; gap:26px; }
+.scale-wrap { transform-origin:top center; }
+.page { width:612pt; height:792pt; position:relative; background:#fff; overflow:hidden;
+  box-shadow:0 4px 18px rgba(0,0,0,.45); }
+.page span, .page i { position:absolute; white-space:pre; line-height:normal; transform-origin:0 0;
+  font-kerning:none; font-feature-settings:"kern" 0, "liga" 0, "clig" 0, "hlig" 0; }
+.page .boxline, .page .fillbox { position:absolute; }
+.page svg.vec { position:absolute; left:0; top:0; width:612pt; height:792pt; display:block; pointer-events:none; }
+.page .pj { position:absolute; white-space:pre; line-height:normal; text-align:justify; text-align-last:justify; }
+.wm { position:absolute; inset:0; pointer-events:none; z-index:9; overflow:hidden; }
+.wm span { position:absolute; font-family:Helvetica; font-weight:700; font-size:34pt; letter-spacing:10pt;
+  color:rgba(0,0,0,.075); transform:rotate(-32deg); white-space:nowrap; }
+
+@media print {
+  @page { size:612pt 792pt; margin:0; }
+  body { background:#fff; height:auto; }
+  #app { display:block; height:auto; }
+  #toolbar, #panel { display:none !important; }
+  #preview { overflow:visible !important; background:#fff; position:static; }
+  #pages { padding:0; gap:0; display:block; }
+  .scale-wrap { zoom:1 !important; transform:none !important; }
+  .page { box-shadow:none; margin:0; page-break-after:always; }
+  .page:last-child { page-break-after:auto; }
+}
+</style>
+<script src="vendor/pdf-lib.min.js"></script>
+<script src="vendor/fontkit.umd.min.js"></script>
+<script src="fonts_b64.js"></script>
+<script src="private-assets.js"></script>
+</head>
+<body>
+<div id="app">
+  <div id="toolbar">
+    <h1>对账单模板编辑器</h1>
+    <button id="btnExportPdf" class="primary">导出 PDF（代码直出）</button>
+    <label>文件名
+      <input type="text" id="pdfNameInput" style="width:110px;padding:4px 6px;border:1px solid #555b64;border-radius:6px;background:#3a3f47;color:#eee;font-size:12.5px" title="导出的 PDF 文件名（自动加 .pdf 后缀）">
+    </label>
+    <button id="btnOpenPdf">在新标签打开 PDF</button>
+    <button id="btnPrint">浏览器打印(备用)</button>
+    <button id="btnExportHTML">导出独立 HTML</button>
+    <button id="btnExportJSON">导出数据 JSON</button>
+    <button id="btnImportJSON">导入数据 JSON</button>
+    <button id="btnReset">恢复默认数据</button>
+    <label><input type="checkbox" id="chkWM" checked> SAMPLE 水印</label>
+    <label><input type="checkbox" id="chkPdfPreview"> PDF 真实预览(可选)</label>
+    <label>缩放
+      <select id="zoomSel">
+        <option value="fit" selected>适应宽度</option>
+        <option value="0.5">50%</option><option value="0.75">75%</option>
+        <option value="1">100%</option><option value="1.25">125%</option><option value="1.5">150%</option>
+      </select>
+    </label>
+    <span id="pdfStatus" style="font-size:12px;color:#9aa0a8"></span>
+    <span id="pageCount" style="margin-left:auto;font-size:12px;color:#9aa0a8"></span>
+    <input type="file" id="fileImport" accept=".json" style="display:none">
+  </div>
+  <div id="body">
+    <aside id="panel"></aside>
+    <main id="preview"><iframe id="pdfFrame" title="PDF 预览"></iframe><div id="pages"><div class="scale-wrap"></div></div></main>
+  </div>
+</div>
+
+<!-- ==================== 模板引擎（独立可复用，无编辑器依赖） ==================== -->
+<script id="engine">
+
+(function(){
+"use strict";
+/* 版式常量（pt；页面 612×792，左上原点）——全部为原稿实测值 */
+var C = {
+  grayStroke:"#969696", grayStrokeW:1.44, hairBlack:0.12,
+  header:{
+    logo:{x:72.12,y:19.88,w:60.97,h:34.96},
+    bankNameX:72, bankNameBase:64.80, bankAddrBases:[75.36,85.92],
+    title:{base:42.72,size:11,right:574.44},
+    dateLblBase:67.80, dateLblRight:575.83,
+    dateValBase:79.20, dateValRight:576,
+    pageBase:90.48, pageRight:576,
+    careLblBase:113.28, careLblRight:575.98,
+    carePhoneBase:124.68, careRight:576.39,
+    careWebBase:135.96,
+    footerLeftBase:763.20, footerLeftX:36,
+    footerRightBase:762.00, footerRightX:504,
+    microBase:779.28, microRight:602.85,
+    edgeLeft:16.67, edgeTop:105.0,
+    titleTrackingEm:0.089   /* 逐字标题的近似字距（编辑标题时使用） */
+  },
+  p1:{
+    microBase:141.24, microX:72,
+    addrX:72, addrBases:[150.00,159.24,168.48], addrSize:8.8,
+    bigTitleBase:263.28, bigTitleCenter:306, bigTitleSize:12,
+    tableBox:[36,274.32,576,363.12], hdrBase:291.36, row0Base:313.56, rowStep:16.8,
+    sepAfterHdr:301.92, sepAfterRowsDelta:5.16, totalDeltaFromSep:16.85, boxBottomDeltaFromTotal:10.75,
+    colNameX:50.40, colAcctLeft:281.52, colAcctRight:328.52, colBeginRight:461.36, colEndRight:565.04,
+    colAcctHdrX:246.72, colBeginHdrX:370.56, colEndHdrX:489.36,
+    cdBase:384.36, cdX:43.2, paraLeading:11.28, paraWrap:531.9,
+    noticeBox:[36,586.8,576,748.8], noticeBase:606.12, noticeX:43.2
+  },
+  acct:{
+    titleBase:133.44, titleX:35.88, titleSize:10,
+    sumForLblBase:143.40, sumForLblX:35.88, sumForNameBase:143.16, sumForNameX:97.44,
+    infoBox:[36,153.6,576,209.76], infoBases:[177.48,192.48],
+    infoLblX:46.80, infoLblX2:309.60, infoValX:122.28, infoValX2:357.60, infoValXb:83.76, infoValX2b:397.80,
+    sumBoxTop:222.24, sumTitleBase:239.76, sumRowBase0:258.12, sumRowStep:10.2,
+    sumLblX:46.80, sumValRight:280.64, sumLblX2:309.48, sumValRight2:564.80,
+    sumSepGap:5.04, sumEndGap:17.04, sumBottomGap:8.88, sumSepRight:291.6,
+    odGap:12.36, odTitleBase:17.04, odHdrBase:16.08, odRowBases:[35.52,49.92], odHeight:55.68, odBoxRight:575.88,
+    odLblX:53.52, odV1Right:378.08, odV2Right:482.24, odHdr1X:338.88, odHdr2X:438.84,
+    actGap:12.36, actTitleBase:17.28, actHdrBase:36.96, actHdrSep:42.0, actBeginBase:54.24,
+    colDateX:46.80, colDescX:108, colCreditRight:385.91, colDebitRight:468.22, colBalRight:558.11,
+    colCreditHdrX:351.24, colDebitHdrX:437.40, colBalHdrX:519.60,
+    descWrap:200, descStep:11.28, firstTxDelta:18.24, txGap:14.88, endGap:14.64,
+    endSepDelta:12.24, actBottomGap:5.76, pageBottomLimit:698.4, contActTop:144.0
+  },
+  p4:{
+    corrLblBase:56.04, corrLblX:35.10, depLblX:234.30,
+    corrX:35.70, corrX3:34.86, corrBases:[67.02,78.06,88.38],
+    depX:234.41, depX3:233.52, depBases:[67.02,78.06,88.86],
+    instrBase:114.24, instrX:35.0, instrLeading:11.28, instrWrap:285,
+    regLblBase:175.50, regX:34.98, regTitleBase:185.52,
+    bulletX:52.98, bulletTxtX:70.98, bulletBase0:205.50, bulletStep:10.02, bulletWrap:519,
+    noteLines:[{x:454.62,base:203.82,t:"For recurring transactions and "},
+               {x:470.58,base:214.50,t:"other inquiries, please call "},
+               {x:470.58,base:225.18,t:"the phone number above."}],
+    legalBase0:246.84, legalLeading:10.35, legalGap:10.02, legalWrap:550, legalX:35.0,
+    wsLeftBox:[36.48,510.48,300.72,709.68], wsRightBox:[313.44,509.28,577.44,712.32],
+    whiteCells:[[49.1,521.5,121.7,533.5],[199.7,521.5,239.5,533.5],[488.5,531.0,568.3,542.1],[488.6,625.4,568.4,636.5],[321.8,520.8,461.5,542.4],[321.8,625.2,423.1,636.4]],
+    grayPanels:[[321.72,560.76,568.44,603.66],[321.72,652.44,568.5,703.98]], ruledW:0.12, entryW:0.42,
+    wsTitleBase:506.94, chkHdrBase:530.76, chkHdrX:48.60, chkAmtX:199.15,
+    ruledX1:49.5, ruledX2:288.0, ruled0:539.5, ruledStep:18, ruledN:8, totalLineY:682.3,
+    totalLblBase:678.66,
+    wsRight:[
+      {x:322.20,base:529.56,t:"1. Enter Ending balance from this  "},
+      {x:336.36,base:539.58,t:"statement:"},
+      {x:322.20,base:569.52,t:"2. Add deposits recorded in your"},
+      {x:335.58,base:580.02,t:"checkbook but not shown on this  "},
+      {x:335.58,base:590.64,t:"statement.  Enter the interest earned"},
+      {x:335.58,base:601.32,t:"deposit into your checkbook."},
+      {x:322.20,base:633.66,t:"3.  Total (1 and 2 above)"},
+      {x:322.20,base:660.84,t:"4.  Enter \"Checks Outstanding\" Total"},
+      {x:322.20,base:689.94,t:"Balance: ",bold:true},
+      {x:362.04,base:689.94,t:"(3 less 4 should equal your"},
+      {x:322.20,base:699.96,t:"checkbook balance)"}
+    ],
+    entryLines:[[489.0,540.5],[489.0,602.65],[489.0,634.95],[489.0,662.15],[489.0,701.7]],
+    entryLineX2:567.0,
+    ehBase:742.74, ehX:222.96, ehIcon:[308.22,735.72,320.76,745.68], nmlsX:325.08,
+    wsBorder:"#AEAEAE", ruleDark:"#373535"
+  }
+};
+var LOGO_DEFAULT = window.BILL_GEN_ALLY_ASSETS.LOGO_DEFAULT;
+var P4_BORDER_L = window.BILL_GEN_ALLY_ASSETS.P4_BORDER_L;
+var P4_BORDER_R = window.BILL_GEN_ALLY_ASSETS.P4_BORDER_R;
+var PANEL_PNG_SRC = window.BILL_GEN_ALLY_ASSETS.PANEL_PNG_SRC;
+var P4_STATIC = window.BILL_GEN_ALLY_ASSETS.P4_STATIC;  /* p4 静态覆盖已禁用 */
+var HOUSE_PNG = window.BILL_GEN_ALLY_ASSETS.HOUSE_PNG;
+
+/* 字体句柄（家族名与原稿声明一一对应；Helvetica 粗体=同族 weight 700，即 base-14 的 Helvetica-Bold） */
+var F = {
+  H:  {family:"Helvetica", weight:400, fam:"Helvetica"},
+  HB: {family:"Helvetica", weight:700, fam:"Helvetica-Bold"},
+  TR: {family:"Times-Roman", weight:400, fam:"Times-Roman"},
+  A:  {family:"ArialMT", weight:400, fam:"ArialMT"},
+  AB: {family:"Arial-BoldMT", weight:400, fam:"Arial-BoldMT"},
+  SYM:{family:"SymbolMT", weight:400, fam:"SymbolMT"}
+};
+
+/* ---------- 度量：字宽表（取自原稿 /Widths 与 base-14 标准度量） ---------- */
+var WT = window.BILL_GEN_ALLY_ASSETS.WT;
+var TRK = window.BILL_GEN_ALLY_ASSETS.TRK;
+
+var _mctx = document.createElement("canvas").getContext("2d");
+var _wcache = {};
+function wOf(text, fam, size){
+  var t = WT[fam]; if (!t) return 0;
+  var s = 0;
+  for (var i=0;i<text.length;i++){
+    var c = text.charCodeAt(i);
+    if (c === 32) s += t[" "] || 278;
+    else if (t[text[i]] != null) s += t[text[i]];
+    else {
+      /* 字宽表（原稿）没有的字符：用合并字体 canvas 实测（缓存） */
+      var key = fam + "|" + c;
+      if (_wcache[key] == null){
+        _mctx.font = size + "px '" + fam + "'";
+        _wcache[key] = Math.round(_mctx.measureText(text[i]).width / size * 1000);
+      }
+      s += _wcache[key];
+    }
+  }
+  return s/1000*size;
+}
+function trkKey(f, size, text){ return f.fam + "|" + (Math.round(size*100)/100) + "|" + String(text).replace(/ /g,""); }
+
+/* 布局基线探测：与浏览器实际渲染一致 */
+var _probeRoot = null, _ascCache = {};
+function ascOf(f, size){
+  var k = f.fam+"|"+f.weight+"|"+size;
+  if (_ascCache[k] != null) return _ascCache[k];
+  if (!_probeRoot){
+    _probeRoot = document.createElement("div");
+    _probeRoot.style.cssText = "position:absolute;left:-9999px;top:0;visibility:hidden;";
+    document.body.appendChild(_probeRoot);
+  }
+  var sp = document.createElement("span");
+  sp.style.cssText = "position:absolute;left:0;top:0;white-space:pre;line-height:normal;font-family:'"+f.family+
+    "','PingFang SC','Microsoft YaHei',sans-serif;font-weight:"+f.weight+";font-size:"+size+"pt;";
+  sp.innerHTML = 'M<i style="display:inline-block;width:0;height:0"></i>';
+  _probeRoot.appendChild(sp);
+  var mk = sp.querySelector("i");
+  var asc = mk ? (mk.getBoundingClientRect().bottom - sp.getBoundingClientRect().top)*0.75 : size*0.75;
+  _probeRoot.removeChild(sp);
+  _ascCache[k] = asc;
+  return asc;
+}
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function fmt(v){
+  var n = Math.round((Number(v)||0)*100), neg = n<0; n = Math.abs(n);
+  var s = Math.floor(n/100) + "." + ("0"+(n%100)).slice(-2);
+  var parts = s.split("."); parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return (neg?"-":"") + parts.join(".");
+}
+function money(v){ return "$"+fmt(v); }
+function moneyPos(v){ return Number(v)>0 ? "$"+fmt(v) : "$0.00"; }
+function moneyNeg(v){ return Number(v)>0 ? "-$"+fmt(v) : "-$0.00"; }
+
+/* 贪心断行（保留词间多空格与行首空格；宽度按字宽表，与原稿一致） */
+function wrap(text, f, size, maxW){
+  var chunks = String(text).split("\n");
+  if (chunks.length > 1){
+    var all = [];
+    chunks.forEach(function(c){ all.push(c.length ? c : " "); });
+    return all;   /* 手动断行原样保留（不二次折行） */
+  }
+  var parts = String(text).split(/(\s+)/), items = [], pending = "";
+  for (var k=0;k<parts.length;k++){
+    if (parts[k]==="") continue;
+    if (/^\s+$/.test(parts[k])) pending += parts[k];
+    else { items.push({word:parts[k], gap:pending}); pending = ""; }
+  }
+  var lines = [], cur = "";
+  for (var j=0;j<items.length;j++){
+    var it = items[j];
+    if (j === 0){ cur = it.gap + it.word; continue; }
+    var cand = cur + (it.gap || " ") + it.word;
+    if (wOf(cand, f.fam, size) <= maxW) cur = cand;
+    else if (cur && wOf(it.word, f.fam, size) > maxW && it.word.length > 1){
+      /* 整词超列宽（如无空格的 CJK 连续串）：按字符断行 */
+      var seg = it.word;
+      while (seg.length){
+        var take = seg.length;
+        while (take > 1 && wOf(seg.slice(0, take), f.fam, size) > maxW) take--;
+        var piece = seg.slice(0, take);
+        if (cur && wOf(cur + (it.gap || " ") + piece, f.fam, size) <= maxW){
+          cur = cur + (it.gap || " ") + piece;
+        } else { lines.push(cur); cur = piece; }
+        seg = seg.slice(take);
+        if (seg.length){ lines.push(cur); cur = ""; }
+      }
+    }
+    else { lines.push(cur); cur = it.word; }
+  }
+  if (cur) lines.push(cur);
+  return lines.length ? lines : [""];
+}
+
+/* ---------- 绝对定位元素 ---------- */
+function spanCss(f, size, extra){
+  return "font-family:'"+f.family+"','PingFang SC','Microsoft YaHei',sans-serif;font-weight:"+(f.weight||400)+";font-size:"+size+"pt;"+(extra||"");
+}
+function rawSpan(left, top, text, f, size, extra){
+  return '<span style="left:'+left.toFixed(2)+'pt;top:'+top.toFixed(2)+'pt;'+spanCss(f,size,extra)+'">'+esc(text)+'</span>';
+}
+/* 文本：优先使用原稿逐字步进表（精确复刻），否则整串绘制 */
+function T(x, base, text, f, size, opts){
+  opts = opts||{};
+  var rec = TRK[trkKey(f, size, text)];
+  var top = base - ascOf(f, size);
+  if (rec){
+    var x0;
+    if (opts.right != null) x0 = opts.right - rec.w;
+    else if (opts.center != null) x0 = opts.center - rec.w/2;
+    else x0 = x;
+    var s = "", idx = 0;
+    for (var i=0;i<text.length;i++){
+      if (text[i] === " ") continue;
+      s += rawSpan(x0 + rec.o[idx], top, text[i], f, size, opts.css);
+      OPS.push({k:'t', x:x0 + rec.o[idx], b:base, s:text[i], f:f.fam, w:f.weight, z:size});
+      idx++;
+    }
+    return s;
+  }
+  var w = wOf(text, f.fam, size);
+  var left = (opts.right != null) ? (opts.right - w) : (opts.center != null ? opts.center - w/2 : x);
+  var extra = opts.css || "";
+  if (opts.trackingEm){ var ls = size*opts.trackingEm; extra += "letter-spacing:"+ls.toFixed(3)+"pt;"; w += text.length*ls; }
+  var leftF = (opts.right != null) ? (opts.right - w) : (opts.center != null ? opts.center - w/2 : x);
+  if (opts.trackingEm) OPS.push({k:'tp', x:leftF, b:base, s:text, f:f.fam, w:f.weight, z:size, ls:size*opts.trackingEm});
+  else OPS.push({k:'t', x:leftF, b:base, s:text, f:f.fam, w:f.weight, z:size});
+  return rawSpan(leftF, top, text, f, size, extra);
+}
+/* 两端对齐段行（复刻原稿 SSRS 的词距展开：约 0.02em/空格） */
+function PJ(x, base, line, f, size, isLast, eps){
+  if (isLast || line.indexOf(" ") < 0 || line.trim()==="") return T(x, base, line, f, size);
+  var spaces = line.split(" ").length - 1;
+  var w = wOf(line, f.fam, size) + spaces*(eps||0)*size;
+  var top = base - ascOf(f, size);
+  OPS.push({k:'j', x:x, b:base, s:line, f:f.fam, w:f.weight, z:size, wt:w});
+  return '<div class="pj" style="left:'+x.toFixed(2)+'pt;top:'+top.toFixed(2)+'pt;width:'+w.toFixed(2)+
+    'pt;'+spanCss(f, size)+'">'+esc(line)+'</div>';
+}
+/* 矢量层：与原稿 PDF 相同的居中描边/线条（SVG，天然亚像素抗锯齿，打印仍为矢量） */
+var VEC = [], VECSTORE = [], PAGEI = 0, OPS = [], OPSSTORE = [];
+function n2(v){ return (Math.round(v*100)/100); }
+function BOX(x1,y1,x2,y2,stroke,w,fill,rx){
+  rx = (rx!=null?rx:7.2);
+  VEC.push('<rect x="'+n2(x1)+'" y="'+n2(y1)+'" width="'+n2(x2-x1)+'" height="'+n2(y2-y1)+
+    '" rx="'+rx+'" fill="'+(fill||"none")+'" stroke="'+stroke+'" stroke-width="'+w+'"/>');
+  OPS.push({k:'r', x1:x1, y1:y1, x2:x2, y2:y2, st:stroke, w:w, fl:fill||null, rx:rx});
+  return "";
+}
+function LINE(x1,y1,x2,y2,color,w){
+  VEC.push('<line x1="'+n2(x1)+'" y1="'+n2(y1)+'" x2="'+n2(x2)+'" y2="'+n2(y2)+
+    '" stroke="'+color+'" stroke-width="'+w+'"/>');
+  OPS.push({k:'l', x1:x1, y1:y1, x2:x2, y2:y2, st:color, w:w});
+  return "";
+}
+function FILL(x1,y1,x2,y2,color){
+  VEC.push('<rect x="'+n2(x1)+'" y="'+n2(y1)+'" width="'+n2(x2-x1)+'" height="'+n2(y2-y1)+
+    '" fill="'+color+'" stroke="none"/>');
+  OPS.push({k:'f', x1:x1, y1:y1, x2:x2, y2:y2, st:color});
+  return "";
+}
+function openPage(){ VEC = []; OPS = []; PAGEI++; return '<section class="page">@@V'+PAGEI+'@@'; }
+function closePage(){
+  VECSTORE[PAGEI-1] = VEC.join("");
+  OPSSTORE[PAGEI-1] = OPS;
+  return '@@/V'+PAGEI+'@@</section>';
+}
+function assembleVec(html){
+  for (var i=1;i<=PAGEI;i++){
+    html = html.split('@@V'+i+'@@').join(VECSTORE[i-1] ? '<svg class="vec" viewBox="0 0 612 792" preserveAspectRatio="none">'+VECSTORE[i-1]+'</svg>' : "")
+               .split('@@/V'+i+'@@').join("");
+  }
+  return html;
+}
+
+/* ---------- 公共页眉/页脚（银行名/地址块仅第 1 页） ---------- */
+function headerFooter(buf, d, n, total, withLogo, withBankBlock){
+  var H = C.header;
+  if (withLogo){
+    var lg = H.logo;
+    if (d.bank.logo){
+      buf.push('<div class="fillbox" style="left:'+lg.x+'pt;top:'+lg.y+'pt;width:'+lg.w+'pt;height:'+lg.h+
+        'pt;background:url('+d.bank.logo+') 0 0/100% 100% no-repeat"></div>');
+      OPS.push({k:'i', x:lg.x, y:lg.y, w:lg.w, h:lg.h, src:'logo'});
+    } else {
+      var wm = String(d.bank.wordmark||"");
+      var size = 15;
+      while (size > 7 && wOf(wm, "Helvetica-Bold", size) > lg.w - 6) size -= 0.5;
+      var w = wOf(wm, "Helvetica-Bold", size);
+      var base = lg.y + lg.h/2 + ascOf(F.HB, size)*0.36;
+      buf.push(rawSpan(lg.x + (lg.w - w)/2, base - ascOf(F.HB, size), wm, F.HB, size, "color:#262223;"));
+    }
+  }
+  if (withBankBlock){
+    buf.push(T(H.bankNameX, H.bankNameBase, d.bank.name, F.TR, 10));
+    buf.push(T(H.bankNameX, H.bankAddrBases[0], d.bank.addrLines[0], F.TR, 10));
+    buf.push(T(H.bankNameX, H.bankAddrBases[1], d.bank.addrLines[1], F.TR, 10));
+  }
+  buf.push(T(0, H.title.base, d.meta.title, F.HB, H.title.size,
+    {right:H.title.right, trackingEm: d._titleTracked ? 0 : H.titleTrackingEm}));
+  buf.push(T(0, H.dateLblBase, "Statement Date", F.HB, 10, {right:H.dateLblRight}));
+  buf.push(T(0, H.dateValBase, d.meta.statementDate, F.H, 10, {right:H.dateValRight}));
+  buf.push(T(0, H.pageBase, "Page "+n, F.H, 10, {right:H.pageRight}));
+  buf.push(T(0, H.careLblBase, "Customer Care Information", F.HB, 10, {right:H.careLblRight}));
+  buf.push(T(0, H.carePhoneBase, d.bank.phone, F.H, 10, {right:H.careRight}));
+  buf.push(T(0, H.careWebBase, d.bank.web, F.H, 10, {right:H.careRight}));
+  buf.push(T(H.footerLeftX, H.footerLeftBase, d.bank.name+" Member FDIC", F.H, 8));
+  buf.push(T(H.footerRightX, H.footerRightBase, d.bank.formCode, F.H, 7));
+  buf.push(T(0, H.microBase, d._micro[n-1], F.TR, 5, {right:H.microRight}));
+  var edge = d.meta.stmtNumber + "-" + ("0"+n).slice(-2) + "-" + ("0"+total).slice(-2);
+  buf.push('<span style="left:'+(H.edgeLeft+6.78)+'pt;top:'+H.edgeTop+'pt;'+spanCss(F.TR,6)+'transform:rotate(90deg)">'+esc(edge)+'</span>');
+  OPS.push({k:'t', x:H.edgeLeft+1.5, b:H.edgeTop, s:edge, f:'Times-Roman', w:400, z:6, rot:-90});
+}
+
+/* 对账单期间天数 = 起始日至对账单日（含首尾）；解析失败回退手填值 */
+function periodDays(beginDate, endDate, fallback){
+  function parse(s){
+    var m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(String(s||"").trim());
+    if (!m) return null;
+    return new Date(Number(m[3]), Number(m[1])-1, Number(m[2]));
+  }
+  var b = parse(beginDate), e = parse(endDate);
+  if (!b || !e || e < b) return (fallback != null ? fallback : "31");
+  return String(Math.round((e - b) / 86400000) + 1);
+}
+
+/* ---------- 账户统计（联动计算核心） ---------- */
+function acctStats(a){
+  var deposits=0, interest=0, withdrawals=0, bal = Number(a.begin)||0;
+  (a.txns||[]).forEach(function(t){
+    var c = Number(t.credit)||0, db = Number(t.debit)||0;
+    if (c>0){ if (t.interest) interest += c; else deposits += c; }
+    if (db>0) withdrawals += db;
+    bal += c - db;
+    t._bal = bal;
+  });
+  return { begin:Number(a.begin)||0, deposits:deposits, interest:interest, withdrawals:withdrawals, end:bal };
+}
+
+/* ---------- 第 1 页 ---------- */
+function page1(buf, d){
+  var P = C.p1;
+  headerFooter(buf, d, 1, d._total, true, true);
+  buf.push(T(P.microX, P.microBase, d._microP1Top, F.H, 7));
+  buf.push(T(P.addrX, P.addrBases[0], d.customer.name, F.TR, P.addrSize));
+  buf.push(T(P.addrX, P.addrBases[1], d.customer.street, F.TR, P.addrSize));
+  buf.push(T(P.addrX, P.addrBases[2], d.customer.cityLine, F.TR, P.addrSize));
+  buf.push(T(0, P.bigTitleBase, d.meta.page1Title, F.HB, P.bigTitleSize,
+    {center:P.bigTitleCenter, trackingEm: d._p1TitleTracked ? 0 : C.header.titleTrackingEm}));
+
+  var accts = d.accounts, n = accts.length;
+  var row0 = P.row0Base, lastRow = row0 + (n-1)*P.rowStep;
+  var sepAfterRows = lastRow + P.sepAfterRowsDelta;
+  var totalBase = sepAfterRows + P.totalDeltaFromSep;
+  var boxBottom = totalBase + P.boxBottomDeltaFromTotal;
+  buf.push(BOX(P.tableBox[0], P.tableBox[1], P.tableBox[2], boxBottom, C.grayStroke, C.grayStrokeW));
+  buf.push(LINE(46.8, P.sepAfterHdr, 565.2, P.sepAfterHdr, "#000", C.hairBlack));
+  buf.push(LINE(46.8, sepAfterRows, 565.2, sepAfterRows, "#000", C.hairBlack));
+  buf.push(T(P.colNameX, P.hdrBase, "Account Name", F.HB, 10));
+  buf.push(T(P.colAcctHdrX, P.hdrBase, "Account Number", F.HB, 10));
+  buf.push(T(P.colBeginHdrX, P.hdrBase, "Beginning Balance", F.HB, 10));
+  buf.push(T(P.colEndHdrX, P.hdrBase, "Ending Balance", F.HB, 10));
+  var totB=0, totE=0;
+  accts.forEach(function(a,i){
+    var st = acctStats(a); totB += st.begin; totE += st.end;
+    var b = row0 + i*P.rowStep;
+    buf.push(T(P.colNameX, b, a.name, F.H, 9));
+    buf.push(T(P.colAcctLeft, b, a.number, F.H, 9));
+    buf.push(T(0, b, money(st.begin), F.H, 9, {right:P.colBeginRight}));
+    buf.push(T(0, b, money(st.end), F.H, 9, {right:P.colEndRight}));
+  });
+  buf.push(T(P.colNameX, totalBase, "Total Account Balances:", F.H, 9));
+  buf.push(T(0, totalBase, money(totB), F.HB, 9, {right:P.colBeginRight}));
+  buf.push(T(0, totalBase, money(totE), F.HB, 9, {right:P.colEndRight}));
+
+  var cdL = wrap(d.notices.cd, F.H, 10, P.paraWrap);
+  cdL.forEach(function(ln,i){ buf.push(PJ(P.cdX, P.cdBase + i*P.paraLeading, ln, F.H, 10, i === cdL.length-1)); });
+  buf.push(BOX(P.noticeBox[0],P.noticeBox[1],P.noticeBox[2],P.noticeBox[3], C.grayStroke, C.grayStrokeW, "#fff"));
+  var upL = wrap(d.notices.update, F.H, 10, P.paraWrap);
+  upL.forEach(function(ln,i){ buf.push(PJ(P.noticeX, P.noticeBase + i*P.paraLeading, ln, F.H, 10, i === upL.length-1)); });
+}
+
+/* ---------- 账户页：规划（纯计算，渲染与估页共用） ---------- */
+function planAccount(d, a){
+  var A = C.acct, st = acctStats(a);
+  var sumRows = 3 + (a.type==="spending" ? 1 : 0) + 1;
+  var lastSumBase = A.sumRowBase0 + (sumRows-1)*A.sumRowStep;
+  var sumEndBase = lastSumBase + A.sumEndGap;
+  var sumBottom = sumEndBase + A.sumBottomGap;
+  var odTop = sumBottom + A.odGap;
+  var odBottom = odTop + A.odHeight;
+  var actTop = odBottom + A.actGap;
+
+  var rows = [];
+  rows.push({kind:"begin", date:a.beginDate, label:"Beginning Balance", lines:1, bal:money(st.begin)});
+  (a.txns||[]).forEach(function(t){
+    var lines = [String(t.title||"")];
+    String(t.detail||"").split("\n").forEach(function(x){
+      if (x.trim()!=="") wrap(x, F.H, 10, A.descWrap).forEach(function(w){ lines.push(w); });
+    });
+    rows.push({kind:"tx", date:t.date, lines:lines, n:lines.length,
+      credit:moneyPos(t.credit), debit:moneyNeg(t.debit), bal:money(t._bal)});
+  });
+  rows.push({kind:"end", date:d.meta.statementDate, label:"Ending Balance", lines:1, bal:money(st.end)});
+
+  var pages = [], cur = [], top = actTop;
+  rows.forEach(function(r, i){
+    var nb;
+    if (i === 0) nb = actTop + A.actBeginBase;
+    else {
+      var prev = rows[i-1];
+      var prevExtra = prev.kind==="tx" ? (prev.n-1)*A.descStep : 0;
+      var gap = r.kind==="end" ? A.endGap : (prev.kind==="begin" ? A.firstTxDelta : A.txGap);
+      nb = cur.length ? cur[cur.length-1].base + prevExtra + gap : A.contActTop + A.actBeginBase;
+    }
+    var extra = r.kind==="tx" ? (r.n-1)*A.descStep : 0;
+    if (cur.length && nb + extra + A.actBottomGap > A.pageBottomLimit){
+      var lastPlaced = cur[cur.length-1], lp = lastPlaced.row;
+      pages.push({top:top, rows:cur, bottom:lastPlaced.base + (lp.kind==="tx"?(lp.n-1)*A.descStep:0) + A.actBottomGap});
+      cur = []; top = A.contActTop; nb = top + A.actBeginBase;
+    }
+    cur.push({row:r, base:nb});
+  });
+  if (cur.length){
+    var lp2 = cur[cur.length-1].row;
+    pages.push({top:top, rows:cur,
+      bottom:cur[cur.length-1].base + (lp2.kind==="tx"?(lp2.n-1)*A.descStep:0) + A.actBottomGap});
+  }
+  return { pages:pages, sumBottom:sumBottom, odBottom:odBottom, actTop:actTop };
+}
+
+function acctHead(buf, d, a){
+  var A = C.acct;
+  buf.push(T(A.titleX, A.titleBase, a.name + " ", F.HB, A.titleSize));
+  buf.push(T(A.sumForLblX, A.sumForLblBase, "Summary For:", F.HB, 8));
+  buf.push(T(A.sumForNameX, A.sumForNameBase, d.customer.detailName || d.customer.name, F.H, 8));
+  buf.push(BOX(A.infoBox[0],A.infoBox[1],A.infoBox[2],A.infoBox[3], C.grayStroke, C.grayStrokeW));
+  buf.push(T(A.infoLblX, A.infoBases[0], "Account Number:", F.HB, 9));
+  buf.push(T(A.infoValX, A.infoBases[0], "  "+a.number, F.H, 9));
+  buf.push(T(A.infoLblX2, A.infoBases[0], "Open Date:", F.HB, 9));
+  buf.push(T(A.infoValX2, A.infoBases[0], "  "+a.openDate, F.H, 9));
+  buf.push(T(A.infoLblX, A.infoBases[1], "Product:", F.HB, 9));
+  buf.push(T(A.infoValXb, A.infoBases[1], "  "+a.product, F.H, 9));
+  buf.push(T(A.infoLblX2, A.infoBases[1], "Account Ownership:", F.HB, 9));
+  buf.push(T(A.infoValX2b, A.infoBases[1], "  "+a.ownership, F.H, 9));
+}
+
+function summarySection(buf, d, a, plan){
+  var A = C.acct, st = acctStats(a);
+  var rows = [
+    ["Beginning Balance, as of "+a.beginDate, money(st.begin)],
+    ["Deposits and Other Credits", money(st.deposits)],
+    ["Interest Paid This Period", money(st.interest)]
+  ];
+  if (a.type === "spending") rows.push(["ATM Fees Reimbursed", money(a.atmFees||0)]);
+  rows.push(["Withdrawals and Other Debits", "-"+money(st.withdrawals)]);
+  var lastBase = A.sumRowBase0 + (rows.length-1)*A.sumRowStep;
+  buf.push(BOX(36, A.sumBoxTop, 576, plan.sumBottom, C.grayStroke, C.grayStrokeW));
+  buf.push(T(46.80, A.sumTitleBase, "Summary", F.HB, 11));
+  rows.forEach(function(r,i){
+    buf.push(T(A.sumLblX, A.sumRowBase0+i*A.sumRowStep, r[0], F.H, 9));
+    buf.push(T(0, A.sumRowBase0+i*A.sumRowStep, r[1], F.H, 9, {right:A.sumValRight}));
+  });
+  buf.push(LINE(46.8, lastBase+A.sumSepGap, A.sumSepRight, lastBase+A.sumSepGap, "#000", C.hairBlack));
+  var endBase = lastBase + A.sumEndGap;
+  buf.push(T(A.sumLblX, endBase, "Ending Balance, as of "+d.meta.statementDate, F.HB, 9));
+  buf.push(T(0, endBase, money(st.end), F.HB, 9, {right:A.sumValRight}));
+  [["Days In Statement Period", periodDays(a.beginDate, d.meta.statementDate)],
+   ["Annual Percentage Yield Earned", String(a.apy)],
+   ["Average Daily Balance This Period", String(a.avgDaily)],
+   ["Interest Paid Year to Date", String(a.interestYTD)]].forEach(function(r,i){
+    var b = A.sumRowBase0 + i*A.sumRowStep;
+    buf.push(T(A.sumLblX2, b, r[0], F.H, 9));
+    buf.push(T(0, b, r[1], F.H, 9, {right:A.sumValRight2}));
+  });
+}
+
+function overdraftSection(buf, d, a, top){
+  var A = C.acct;
+  buf.push(BOX(36, top, A.odBoxRight, top+A.odHeight, C.grayStroke, C.grayStrokeW));
+  buf.push(T(A.odLblX, top+A.odTitleBase, "Overdraft Fee Summary", F.HB, 11));
+  buf.push(T(A.odHdr1X, top+A.odHdrBase, "This Period", F.H, 8));
+  buf.push(T(A.odHdr2X, top+A.odHdrBase, "Year-to-Date", F.H, 8));
+  [["Overdraft Items Paid", a.odPaidP||"$0.00", a.odPaidY||"$0.00"],
+   ["Overdraft Items Returned", a.odRetP||"$0.00", a.odRetY||"$0.00"]].forEach(function(r,i){
+    var b = top + A.odRowBases[i];
+    buf.push(T(A.odLblX, b, r[0], F.H, 9));
+    buf.push(T(0, b, r[1], F.H, 9, {right:A.odV1Right}));
+    buf.push(T(0, b, r[2], F.H, 9, {right:A.odV2Right}));
+  });
+}
+
+function activityHeader(buf, top){
+  var A = C.acct;
+  buf.push(T(46.80, top+A.actTitleBase, "Activity", F.HB, 11));
+  buf.push(T(A.colDateX, top+A.actHdrBase, "Date", F.HB, 10));
+  buf.push(T(A.colDescX, top+A.actHdrBase, "Description", F.HB, 10));
+  buf.push(T(A.colCreditHdrX, top+A.actHdrBase, "Credits", F.HB, 10));
+  buf.push(T(A.colDebitHdrX, top+A.actHdrBase, "Debits", F.HB, 10));
+  buf.push(T(A.colBalHdrX, top+A.actHdrBase, "Balance", F.HB, 10));
+  buf.push(LINE(46.8, top+A.actHdrSep, 565.2, top+A.actHdrSep, "#000", C.hairBlack));
+}
+
+function renderRows(buf, placed){
+  var A = C.acct;
+  placed.forEach(function(p){
+    var r = p.row, base = p.base;
+    if (r.kind === "tx"){
+      buf.push(T(A.colDateX, base, r.date, F.H, 10));
+      r.lines.forEach(function(ln,i){ buf.push(T(A.colDescX, base+i*A.descStep, ln, F.H, 10)); });
+      buf.push(T(0, base, r.credit, F.H, 10, {right:A.colCreditRight}));
+      buf.push(T(0, base, r.debit, F.H, 10, {right:A.colDebitRight}));
+      buf.push(T(0, base, r.bal, F.H, 10, {right:A.colBalRight}));
+    } else {
+      var f = r.kind==="end" ? F.HB : F.H;
+      if (r.kind === "end") buf.push(LINE(46.8, base-A.endSepDelta, 565.2, base-A.endSepDelta, "#000", C.hairBlack));
+      buf.push(T(A.colDateX, base, r.date, f, 10));
+      buf.push(T(A.colDescX, base, r.label, f, 10));
+      buf.push(T(0, base, r.bal, f, 10, {right:A.colBalRight}));
+    }
+  });
+}
+
+/* ---------- 披露页 ---------- */
+  /* p4 全部文本已静态化（P4_STATIC），动态渲染已禁用 */
+function page4(buf, d){
+  var P = C.p4;
+  headerFooter(buf, d, d._pageNo, d._total, false, false);
+  /* 静态区域：原稿精确坐标直接复刻（不可编辑，含两端对齐逐字位置） */
+  (P4_STATIC || []).forEach(function(sw){
+    var fs = {family:sw.f, weight:sw.f.indexOf("Bold")>=0?700:400, fam:sw.f};
+    buf.push(rawSpan(sw.x, sw.b - ascOf(fs, sw.z), sw.t, fs, sw.z, ""));
+    OPS.push({k:"t", x:sw.x, b:sw.b, s:sw.t, f:sw.f, w:400, z:sw.z});
+  });
+  /* 以下动态渲染保留（页眉地址区、法务标题、联系方式——像素已一致） */
+  buf.push(T(P.corrLblX, P.corrLblBase, "Send Correspondence to: ", F.AB, 9));
+  buf.push(T(P.depLblX, P.corrLblBase, "Send Deposit to:", F.AB, 9));
+  buf.push(T(P.corrX, P.corrBases[0], d.bank.corrName, F.A, 9));
+  buf.push(T(P.corrX, P.corrBases[1], d.bank.corrAddr1a != null ? d.bank.corrAddr1a : "P.O. ", F.A, 8.78));
+  buf.push(T(55.56, P.corrBases[1], d.bank.corrAddr1b != null ? d.bank.corrAddr1b : "Box 951 ", F.A, 9));
+  buf.push(T(P.corrX3, P.corrBases[2], d.bank.corrAddr2, F.A, 9));
+  buf.push(T(P.depX, P.depBases[0], d.bank.depName, F.A, 9));
+  buf.push(T(P.depX, P.depBases[1], d.bank.depAddr1, F.A, 9));
+  buf.push(T(P.depX3, P.depBases[2], d.bank.depAddr2, F.A, 9));
+  var insLines = wrap(d.disclosures.instructions, F.A, 9, P.instrWrap);
+  insLines.forEach(function(ln,i){
+    buf.push(PJ(P.instrX, P.instrBase + i*P.instrLeading, ln, F.A, 9, i === insLines.length-1, 0.012));
+  });
+  buf.push(T(P.regX, P.regLblBase, "Regulatory Requirement:", F.AB, 9));
+  buf.push(T(P.regX, P.regTitleBase, "In Case of Errors or Questions about Your Electronic Transfers:", F.AB, 9));
+
+  var b0 = P.bulletBase0;
+  buf.push(T(P.bulletX, b0, "\uf0b7", F.SYM, 11));
+  buf.push(T(P.bulletTxtX, b0, d.disclosures.phoneLine, F.A, 9));
+  buf.push(T(67.56, b0+10.02, "             Or", F.A, 9));
+  buf.push(T(P.bulletX, b0+20.04, "\uf0b7", F.SYM, 11));
+  buf.push(T(P.bulletTxtX, b0+20.04, d.disclosures.writeLine, F.A, 9));
+  P.noteLines.forEach(function(n){ buf.push(T(n.x, n.base, n.t, F.A, 9)); });
+
+  var y = P.legalBase0;
+  d.disclosures.blocks.forEach(function(bk){
+    if (bk.bullets){
+      bk.bullets.forEach(function(t){
+        var ls = wrap(t, F.A, 9, P.bulletWrap);
+        ls.forEach(function(ln,i){
+          buf.push(T(P.bulletX, y, "\uf0b7", F.SYM, 9));
+          buf.push(PJ(P.bulletTxtX, y, ln, F.A, 9, i === ls.length-1, 0.012));
+          y += P.bulletStep;
+        });
+      });
+    } else {
+      var ls2 = wrap(bk.text, F.A, 9, P.legalWrap);
+      ls2.forEach(function(ln,i){
+        buf.push(PJ(P.legalX, y, ln, F.A, 9, i === ls2.length-1, 0.012));
+        y += (bk.tight ? P.bulletStep : P.legalLeading);
+      });
+    }
+    if (!bk.tight) y += P.legalGap;
+  });
+
+  var L = P.wsLeftBox, R = P.wsRightBox;
+  buf.push('<div class="fillbox" style="left:'+L[0]+'pt;top:'+L[1]+'pt;width:'+(L[2]-L[0])+'pt;height:'+(L[3]-L[1])+'pt;background:url('+P4_BORDER_L+') 0 0/100% 100% no-repeat"></div>');
+  OPS.push({k:'i', x:L[0], y:L[1], w:L[2]-L[0], h:L[3]-L[1], src:'borderL'});
+  buf.push('<div class="fillbox" style="left:'+R[0]+'pt;top:'+R[1]+'pt;width:'+(R[2]-R[0])+'pt;height:'+(R[3]-R[1])+'pt;background:url('+P4_BORDER_R+') 0 0/100% 100% no-repeat"></div>');
+  OPS.push({k:'i', x:R[0], y:R[1], w:R[2]-R[0], h:R[3]-R[1], src:'borderR'});
+  P.whiteCells.forEach(function(g){ buf.push(FILL(g[0],g[1],g[2],g[3], "#fff")); });
+  P.grayPanels.forEach(function(g){
+    buf.push(FILL(g[0],g[1],g[2],g[3], "#fff"));
+    buf.push('<div class="fillbox" style="left:'+g[0]+'pt;top:'+g[1]+'pt;width:'+(g[2]-g[0])+'pt;height:'+(g[3]-g[1])+'pt"></div>');
+    OPS.push({k:'i', x:g[0], y:g[1], w:g[2]-g[0], h:g[3]-g[1], src: g[1] < 600 ? 'panelA' : 'panelB'});
+  });
+  buf.push(T(85.80, P.wsTitleBase, "CHECKS OUTSTANDING ", F.AB, 12));
+  buf.push(T(343.53, P.wsTitleBase, "TO BALANCE YOUR ACCOUNT", F.AB, 12));
+  buf.push(T(P.chkHdrX, P.chkHdrBase, "Check Number ", F.AB, 10));
+  buf.push(T(P.chkAmtX, P.chkHdrBase, "Amount", F.AB, 10));
+  for (var r=0;r<P.ruledN;r++)
+    buf.push(LINE(P.ruledX1, P.ruled0+r*P.ruledStep, P.ruledX2, P.ruled0+r*P.ruledStep, P.ruleDark, P.ruledW));
+  buf.push(LINE(P.ruledX1, P.totalLineY, P.ruledX2, P.totalLineY, P.ruleDark, P.ruledW));
+  buf.push(T(P.chkHdrX, P.totalLblBase, "Total", F.AB, 10));
+  P.entryLines.forEach(function(l){ buf.push(LINE(l[0], l[1], P.entryLineX2, l[1], P.ruleDark, P.entryW)); });
+  P.wsRight.forEach(function(w){ buf.push(T(w.x, w.base, w.t, w.bold ? F.AB : F.A, 9)); });
+
+  buf.push(T(P.ehX, P.ehBase, "Equal Housing Lender        ", F.AB, 8));
+  buf.push('<div class="fillbox" style="left:'+P.ehIcon[0]+'pt;top:'+P.ehIcon[1]+'pt;width:'+(P.ehIcon[2]-P.ehIcon[0])+
+    'pt;height:'+(P.ehIcon[3]-P.ehIcon[1])+'pt;background:url('+HOUSE_PNG+') center/contain no-repeat"></div>');
+  OPS.push({k:'i', x:P.ehIcon[0], y:P.ehIcon[1], w:P.ehIcon[2]-P.ehIcon[0], h:P.ehIcon[3]-P.ehIcon[1], src:'house'});
+  buf.push(T(P.nmlsX, P.ehBase, ", NMLS ID "+d.bank.nmls, F.A, 8));
+}
+
+/* ---------- 总渲染（两遍：先定页数/微影行，再渲染） ---------- */
+function computeMicro(d, total){
+  var m = d.meta, arr = [];
+  for (var i=1;i<=total;i++){
+    var tail = i===1 ? m.microTailFirst : (i===total ? m.microTailLast : m.microTailMid);
+    arr.push(m.microfilmBase + (Number(m.seqStart)+i-1) + " 000 " + ("0"+i).slice(-2) + tail);
+  }
+  return arr;
+}
+function renderPages(d){
+  VECSTORE = []; OPSSTORE = []; PAGEI = 0;
+  var plans = d.accounts.map(function(a){ return planAccount(d, a); });
+  var extraPages = plans.reduce(function(n,p){ return n + p.pages.length - 1; }, 0);
+  d._total = 1 + d.accounts.length + extraPages + 1;
+  d._micro = computeMicro(d, d._total);
+  d._microP1Top = d._micro[0].replace(/\s*STMTCMB100\s*$/,"");
+  d._titleTracked = !!TRK[trkKey(F.HB, 11, d.meta.title)];
+  d._p1TitleTracked = !!TRK[trkKey(F.HB, 12, d.meta.page1Title)];
+
+  var buf = [];
+  buf.push(openPage());
+  page1(buf, d);
+  buf.push(closePage());
+
+  d._pageNo = 2;
+  d.accounts.forEach(function(a, ai){
+    var plan = plans[ai];
+    plan.pages.forEach(function(pg, pi){
+      buf.push(openPage());
+      headerFooter(buf, d, d._pageNo, d._total, true, false);
+      d._pageNo++;
+      if (pi === 0){
+        acctHead(buf, d, a);
+        summarySection(buf, d, a, plan);
+        overdraftSection(buf, d, a, plan.sumBottom + C.acct.odGap);
+      }
+      activityHeader(buf, pg.top);
+      renderRows(buf, pg.rows);
+      buf.push(BOX(36, pg.top, 576, pg.bottom, C.grayStroke, C.grayStrokeW));
+      buf.push(closePage());
+    });
+  });
+
+  buf.push(openPage());
+  page4(buf, d);
+  buf.push(closePage());
+  var html = assembleVec(buf.join(""));
+  StatementEngine._ops = OPSSTORE;
+  return html;
+}
+
+window.StatementEngine = { LOGO_DEFAULT:LOGO_DEFAULT, _housePng:HOUSE_PNG, _borderL:P4_BORDER_L, _borderR:P4_BORDER_R, _panelPng:PANEL_PNG_SRC, renderPages:renderPages, wrap:wrap, wOf:wOf, ascOf:ascOf, F:F, C:C,
+  fmt:fmt, money:money, planAccount:planAccount, acctStats:acctStats };
+})();
+
+
+</script>
+
+
+<!-- ==================== PDF 直出（字体声明/嵌入 1:1 复刻原稿 + pdf-lib） ==================== -->
+<script id="pdfbuilder">
+(function(){
+"use strict";
+var E = null;
+var SPACE_SPEC = window.BILL_GEN_ALLY_ASSETS.SPACE_SPEC;
+var ORDER_SPEC = window.BILL_GEN_ALLY_ASSETS.ORDER_SPEC;
+var PDF_META = {
+  "title": "Fictional Sample Statement",
+  "author": "Bill Gen",
+  "subject": "Fictional sample data",
+  "keywords": "sample, fictional",
+  "creator": "Bill Gen",
+  "producer": "Bill Gen",
+  "creationDate": "D:20261001000000Z",
+  "modDate": "D:20261001000000Z"
+};
+
+/* 字宽表（原稿）与共享 Differences（原稿 obj66 逐字复刻） */
+var WIN_DIFFS = window.BILL_GEN_ALLY_ASSETS.WIN_DIFFS;
+
+/* 七款字体：资源名/家族/BaseFont/描述符字段与原稿一致 */
+var SPECS = window.BILL_GEN_ALLY_ASSETS.SPECS;
+var BASE14_FALLBACK = {"Times-Roman":"TT2", "Helvetica":"TT6", "Helvetica-Bold":"TT4"};
+var CP1252_HIGH = {0x20AC:128,0x201A:130,0x0192:131,0x201E:132,0x2026:133,0x2020:134,0x2021:135,
+  0x02C6:136,0x2030:137,0x0160:138,0x2039:139,0x0152:140,0x017D:141,0x2018:145,0x2019:146,
+  0x201C:147,0x201D:148,0x2022:149,0x2013:150,0x2014:151,0x02DC:152,0x2122:153,0x0161:154,
+  0x203A:155,0x0153:156,0x017E:158,0x0178:159};
+function winByte(ch){
+  var c = ch.codePointAt(0);
+  if ((c>=32&&c<=126)||(c>=160&&c<=255)) return c;
+  if (CP1252_HIGH[c] != null) return CP1252_HIGH[c];
+  return -1;
+}
+var lastMissing = {};
+var FONT_LIST = ["ArialMT","Arial-BoldMT","TimesNewRomanPSMT","SymbolMT","Helvetica","Helvetica-Bold","Times-Roman"];
+
+function b64ToU8(b64){
+  var bin = atob(b64), n = bin.length, u = new Uint8Array(n);
+  for (var i=0;i<n;i++) u[i] = bin.charCodeAt(i);
+  return u;
+}
+function rrectPath(w, h, rx){
+  var k = 0.5522847*rx;
+  function f(v){ return (Math.round(v*100)/100); }
+  return "M "+f(rx)+" 0 L "+f(w-rx)+" 0 C "+f(w-rx+k)+" 0 "+f(w)+" "+f(rx-k)+" "+f(w)+" "+f(rx)+
+    " L "+f(w)+" "+f(h-rx)+" C "+f(w)+" "+f(h-rx+k)+" "+f(w-rx+k)+" "+f(h)+" "+f(w-rx)+" "+f(h)+
+    " L "+f(rx)+" "+f(h)+" C "+f(rx-k)+" "+f(h)+" 0 "+f(h-rx+k)+" 0 "+f(h-rx)+
+    " L 0 "+f(rx)+" C 0 "+f(rx-k)+" "+f(rx-k)+" 0 "+f(rx)+" 0 Z";
+}
+function hexRGB(c){
+  if (!c || c.charAt(0) !== "#") return null;
+  if (c.length === 4) c = "#"+c[1]+c[1]+c[2]+c[2]+c[3]+c[3];
+  return [parseInt(c.slice(1,3),16)/255, parseInt(c.slice(3,5),16)/255, parseInt(c.slice(5,7),16)/255];
+}
+
+async function buildStatementPdf(data){
+  E = window.StatementEngine;
+  var L = window.PDFLib;
+  var doc = await L.PDFDocument.create();
+  doc.registerFontkit(window.fontkit);
+  var rgb = L.rgb, degrees = L.degrees;
+
+  /* ---------- 1) fontkit 实例与用字统计 ---------- */
+  var FK = {};
+  FONT_LIST.forEach(function(nm){ try { FK[nm] = window.fontkit.create(b64ToU8(window.FONT_B64[nm])); } catch(e){} });
+  E.renderPages(data);
+  var opsPages = E._ops;
+  var used = {};   /* fam -> Set(chars) */
+  function addUsed(fam, s){ (used[fam] || (used[fam] = {})); for (var i=0;i<s.length;i++) used[fam][s[i]] = 1; }
+  opsPages.forEach(function(ops){ ops.forEach(function(o){
+    if (o.k==="t"||o.k==="tp") addUsed(o.f, o.s);
+    else if (o.k==="j") addUsed(o.f, o.s);
+  });});
+  addUsed("Helvetica-Bold", "SAMPLE");
+
+  /* ---------- 2) 构建字体对象（声明方式 1:1 对齐原稿） ---------- */
+  var encRef = doc.context.register(doc.context.obj({Type:"Encoding", BaseEncoding:"WinAnsiEncoding",
+    Differences: WIN_DIFFS }));
+  var F = {};        /* res -> {duck, ref, fam, mode} */
+  function makeDuck(name, ref, encFn){
+    var d = Object.create(L.PDFFont.prototype);
+    d.name = name; d.ref = ref; d.loadedName = name;
+    d.encodeText = encFn;
+    return d;
+  }
+  var winEncFn = function(t){
+    var s = "";
+    for (var i=0;i<t.length;i++){
+      var b = winByte(t[i]);
+      s += String.fromCharCode(b >= 0 ? b : 63);
+    }
+    /* 字面字符串需转义 \ ( ) */
+    s = s.replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
+    return L.PDFString.of(s);
+  };
+  function descDict(spec, ffRef){
+    return doc.context.obj({ Type:"FontDescriptor", FontName: spec.base, Flags: spec.desc.Flags,
+      FontBBox: spec.desc.BBox, ItalicAngle:0, Ascent: spec.desc.Ascent, Descent: spec.desc.Descent,
+      CapHeight: spec.desc.CapHeight, StemV: spec.desc.StemV, FontFamily: spec.desc.Family,
+      FontFile2: ffRef });
+  }
+  /* Flate 压缩（浏览器原生，PDF /FlateDecode） */
+  async function flate(bytes){
+    try{
+      var st = new Blob([bytes]).stream().pipeThrough(new CompressionStream("deflate"));
+      var buf = await new Response(st).arrayBuffer();
+      return new Uint8Array(buf);
+    }catch(e){ return bytes; }
+  }
+  var _pendingEmbeds = [];
+  SPECS.forEach(function(spec){
+    if (spec.base14){
+      var ref = doc.context.register(doc.context.obj({Type:"Font", Subtype:"Type1", BaseFont: spec.base, Encoding: encRef}));
+      F[spec.res] = { duck: makeDuck(spec.res, ref, winEncFn), ref: ref, fam: spec.fam, mode:"base14" };
+      return;
+    }
+    var chars = used[spec.fam] || {};
+    /* 非 WinAnSi 字符（如中文）不在复刻范围：统计并在绘制时以 * 替代；Type0 字体（GID 编码）不受此限 */
+    if (!spec.type0){
+      for (var chx in chars){ if (winByte(chx) < 0) lastMissing[chx] = (lastMissing[chx]||0)+1; }
+    }
+    /* 原稿 FontFile2 原始字节流（嵌入子集）：内部字形表/字形ID/度量与原稿完全一致 */
+    var bytes = window.FONT_ORIG_B64 && window.FONT_ORIG_B64[spec.fam]
+      ? b64ToU8(window.FONT_ORIG_B64[spec.fam])
+      : b64ToU8(window.FONT_B64[spec.fam]);
+    var fk2 = FK[spec.fam];
+    var gidOf = function(ch){ try { return fk2.layout(ch).glyphs[0].id; } catch(e){ return 0; } };
+    function buildFont(sync){
+      var comp = sync;
+      var streamDict = doc.context.obj({Length: comp.length, Length1: bytes.length, Filter:"FlateDecode"});
+      var ffRef = doc.context.register(L.PDFRawStream.of(streamDict, comp));
+      var dRef = doc.context.register(descDict(spec, ffRef));
+      if (spec.type0){
+        var wArr = [], seen = {};
+        for (var c3 in chars){
+          var g3 = gidOf(c3);
+          if (seen[g3]) continue; seen[g3] = 1;
+          wArr.push(g3); wArr.push([Math.round(E.wOf(c3, spec.fam, 1000))]);
+        }
+        var cidObj = {Type:"Font", Subtype:"CIDFontType2", BaseFont: spec.base,
+          CIDSystemInfo:{Registry: L.PDFString.of("(Adobe)"), Ordering: L.PDFString.of("(Identity)"), Supplement:0},
+          CIDToGIDMap: "Identity",
+          DW:1000, FontDescriptor: dRef};
+        if (wArr.length) cidObj.W = doc.context.obj(wArr);
+        var cidRef = doc.context.register(doc.context.obj(cidObj));
+        var t0Ref = doc.context.register(doc.context.obj({Type:"Font", Subtype:"Type0", BaseFont: spec.base,
+          Encoding:"Identity-H", DescendantFonts:[cidRef]}));
+        var tu = "/CIDInit /ProcSet findresource begin\n12 dict begin\nbegincmap\n/CIDSystemInfo << /Registry (Adobe) /Ordering (UCS) /Supplement 0 >> def\n/CMapName /Adobe-Identity-UCS def\n/CMapType 2 def\n1 begincodespacerange\n<0000> <ffff>\nendcodespacerange\n";
+        var n2 = 0, body = "";
+        for (var c4 in chars){
+          var g4 = gidOf(c4);
+          var u4 = c4.codePointAt(0).toString(16);
+          while (u4.length < 4) u4 = "0"+u4;
+          body += "<"+("000"+g4.toString(16)).slice(-4)+"> <"+u4+">\n";
+          n2++;
+        }
+        if (n2) tu += n2+" beginbfchar\n"+body+"endbfchar\n";
+        tu += "endcmap CMapName currentdict /CMap defineresource pop end end";
+        var tuBytes = new TextEncoder().encode(tu);
+        var tuRef = doc.context.register(L.PDFRawStream.of(doc.context.obj({Length: tuBytes.length}), tuBytes));
+        doc.context.lookup(t0Ref).set(L.PDFName.of("ToUnicode"), tuRef);
+        F[spec.res] = { duck: makeDuck(spec.res, t0Ref, function(t){
+          var hex = "";
+          for (var i=0;i<t.length;i++) hex += ("000"+gidOf(t[i]).toString(16)).slice(-4);
+          return L.PDFHexString.of(hex);
+        }), ref: t0Ref, fam: spec.fam, mode:"type0" };
+      } else {
+        /* 简单 TrueType：WinAnsiEncoding + FirstChar/LastChar/Widths（与原稿 TT2/TT4/TT6 同构） */
+        var codeSet = {};
+        for (var c5 in chars){ var b5 = winByte(c5); if (b5 >= 32) codeSet[b5] = 1; }
+        var codes = Object.keys(codeSet).map(Number).sort(function(a,b){return a-b;});
+        if (!codes.length){ codes = [32]; codeSet[32] = 1; }
+        var first = codes[0], last = codes[codes.length-1];
+        var widths = [];
+        for (var cc = first; cc <= last; cc++){
+          /* 与原稿一致：仅实际使用的码位给宽度，其余为 0 */
+          widths.push(codeSet[cc] ? Math.round(E.wOf(String.fromCharCode(cc), spec.fam, 1000)) : 0);
+        }
+        var fRef = doc.context.register(doc.context.obj({Type:"Font", Subtype:"TrueType", BaseFont: spec.base,
+          Encoding: "WinAnsiEncoding", FirstChar: first, LastChar: last, Widths: widths, FontDescriptor: dRef}));
+        F[spec.res] = { duck: makeDuck(spec.res, fRef, winEncFn), ref: fRef, fam: spec.fam, mode:"simple" };
+      }
+    }
+    _pendingEmbeds.push(flate(bytes).then(buildFont));
+  });
+  await Promise.all(_pendingEmbeds);
+  /* 非 WinAnsi 字形缺失的绘制替代 */
+  function sanitizeDraw(s){
+    var out2 = "";
+    for (var i=0;i<s.length;i++) out2 += (winByte(s[i]) >= 0 || s[i]===" ") ? s[i] : "*";
+    return out2;
+  }
+  function fontByFam(fam){
+    for (var k in F){ if (F[k].fam === fam) return F[k]; }
+    return null;
+  }
+
+  /* ---------- 3) 绘制 ---------- */
+  function drawSmart(pg, s, fam, x, y, size, rot){
+    var key = Object.keys(F).filter(function(k){return F[k].fam===fam;})[0];
+    if (!key) return;
+    var e = F[key];
+    if (e.mode !== "type0") s = sanitizeDraw(s);
+    var opts = {x:x, y:y, size:size, font:e.duck, color:rgb(0,0,0)};
+    if (rot) opts.rotate = degrees(rot);
+    pg.drawText(s, opts);
+  }
+
+  function mkPanelImg(w, h){
+    var bytes = new Uint8Array(w * h);   /* 全白 */
+    var ref = doc.context.register(L.PDFRawStream.of(
+      doc.context.obj({Type:"XObject", Subtype:"Image", Width:w, Height:h,
+        ColorSpace:"DeviceGray", BitsPerComponent:8, Length: bytes.length}), bytes));
+    var im = Object.create(L.PDFImage.prototype);
+    im.ref = ref; im.width = w; im.height = h;
+    im.size = function(){ return {width:w, height:h}; };
+    return im;
+  }
+  /* 与原稿模板图像同尺寸（514×90 / 514×108） */
+  var panelImgA = mkPanelImg(514, 90), panelImgB = mkPanelImg(514, 108);
+
+  var imgCache = {};
+  async function imgFor(src){
+    if (src === "logo") src = data.bank.logo || E.LOGO_DEFAULT;
+    else if (src === "house") src = E._housePng;
+    else if (src === "borderL") src = E._borderL;
+    else if (src === "borderR") src = E._borderR;
+    else if (src === "panelA") return panelImgA;
+    else if (src === "panelB") return panelImgB;
+    if (!src) return null;
+    if (!imgCache[src]){
+      var b64 = src.split(",")[1];
+      imgCache[src] = await doc.embedPng(b64ToU8(b64));
+    }
+    return imgCache[src];
+  }
+
+  /* 依据原稿内容流顺序重排 op（仅顺序，不改坐标；匹配失败保持自然顺序） */
+  function desp(s){ return String(s).replace(/\s+/g, ""); }
+  function reorderOps(ops, pageNo){
+    var spec = ORDER_SPEC[pageNo];
+    if (!spec) return ops;
+    /* 元素级精确索引：despaced 文本 -> 出现位置列表（避免子串误配） */
+    var elIndex = {};
+    spec.forEach(function(t, i2){
+      var d = desp(t);
+      (elIndex[d] = elIndex[d] || []).push(i2);
+    });
+    var usedCount = {};
+    function anchorOf(t){
+      var arr = elIndex[t];
+      if (!arr) return null;
+      var n = usedCount[t] || 0;
+      usedCount[t] = n + 1;
+      return n < arr.length ? arr[n] : null;
+    }
+    /* 合并连续单字符 t op（逐字标题）为游程 */
+    var runs = [], cur = null;
+    ops.forEach(function(o, idx){
+      var isTxt = (o.k === "t" || o.k === "tp" || o.k === "j");
+      /* 连续性：下一字符 x 与上一字符 x 的间距 < 15pt（字距+词距）视为同一游程；列间距远大于此 */
+      var cont = cur && cur.lastX != null && o.x != null &&
+        (o.x - cur.lastX) > -1 && (o.x - cur.lastX) < 15;
+      if (cur && cur.singleChar && cont && isTxt && o.k === "t" && o.s.length === 1 &&
+          cur.f === o.f && Math.abs(cur.b - o.b) < 0.01 && Math.abs(cur.z - o.z) < 0.01){
+        cur.txt += o.s; cur.idx.push(idx); cur.lastX = o.x; cur.lastCh = o.s; return;
+      }
+      var r = { txt: isTxt ? desp(o.s) : null, idx: [idx], o: o,
+                f: o.f, b: o.b, z: o.z,
+                singleChar: isTxt && o.k === "t" && o.s.length === 1,
+                lastX: o.x, lastCh: o.s };
+      runs.push(r);
+      cur = r;
+    });
+    var prevAnchor = 0;
+    runs.forEach(function(r){
+      if (r.txt === null){ r.anchor = null; return; }
+      var a = anchorOf(r.txt);   /* 空文本(空格 span)同样可锚定 */
+      r.anchor = (a != null) ? a : prevAnchor + 0.5;
+      if (a != null) prevAnchor = r.anchor;
+    });
+    /* 非文本 op 继承前一个文本锚点 */
+    var lastA = 0, seq = 0;
+    runs.forEach(function(r){
+      if (r.anchor != null) lastA = r.anchor;
+      r.sortKey = (r.anchor != null ? r.anchor : lastA + 0.5) * 1000 + (seq++);
+    });
+    var sorted = runs.slice().sort(function(a,b){ return a.sortKey - b.sortKey; });
+    var out = [];
+    sorted.forEach(function(r){ r.idx.forEach(function(i){ out.push(ops[i]); }); });
+    return out;
+  }
+
+  var pageNoCur = 0;
+  async function drawPage(pg, ops, pno){
+    var pending = [];
+    for (var i=0;i<ops.length;i++){
+      var o = ops[i];
+      if (o.k === "t"){
+        drawSmart(pg, o.s, o.f, o.x, 792-o.b, o.z, o.rot);
+      } else if (o.k === "tp"){
+        var x = o.x;
+        for (var ci=0;ci<o.s.length;ci++){
+          var ch = o.s[ci];
+          drawSmart(pg, ch, o.f, x, 792-o.b, o.z);
+          x += E.wOf(ch, o.f, o.z) + (o.ls||0);
+        }
+      } else if (o.k === "j"){
+        var parts = o.s.split(/(\s+)/);
+        var natural = E.wOf(o.s, o.f, o.z);
+        var spaces = (o.s.match(/ /g)||[]).length;
+        var extra = spaces > 0 ? (o.wt - natural)/spaces : 0;
+        var jx = o.x, jy = 792-o.b;
+        for (var pi=0;pi<parts.length;pi++){
+          var p = parts[pi];
+          if (!p) continue;
+          if (/^\s+$/.test(p)){
+            if (pno === 1) drawSmart(pg, p, o.f, jx, jy, o.z);   /* p4 空格全量由 SPACE_SPEC 提供 */
+            jx += E.wOf(p, o.f, o.z) + extra*p.length;
+          }
+          else { drawSmart(pg, p, o.f, jx, jy, o.z); jx += E.wOf(p, o.f, o.z); }
+        }
+      } else if (o.k === "r"){
+        var c = hexRGB(o.st);
+        var fc = o.fl ? [1,1,1] : null;
+        pg.drawSvgPath(rrectPath(o.x2-o.x1, o.y2-o.y1, o.rx),
+          { x:o.x1, y:792-o.y1,
+            borderColor: rgb(c[0],c[1],c[2]), borderWidth: o.w,
+            ...(fc ? {fillColor: rgb(fc[0],fc[1],fc[2])} : {}) });
+      } else if (o.k === "f"){
+        var fc2 = hexRGB(o.st) || [1,1,1];
+        pg.drawRectangle({x:o.x1, y:792-o.y2, width:o.x2-o.x1, height:o.y2-o.y1,
+          color: rgb(fc2[0],fc2[1],fc2[2])});
+      } else if (o.k === "l"){
+        /* 原稿细线为细高填充矩形 */
+        var lc = hexRGB(o.st) || [0,0,0];
+        var horiz = Math.abs(o.y2 - o.y1) <= Math.abs(o.x2 - o.x1);
+        var h2 = o.w;
+        if (horiz){
+          pg.drawRectangle({x: Math.min(o.x1,o.x2), y: 792 - Math.max(o.y1,o.y2) - h2/2,
+            width: Math.abs(o.x2-o.x1), height: h2, color: rgb(lc[0],lc[1],lc[2])});
+        } else {
+          pg.drawRectangle({x: Math.min(o.x1,o.x2) - h2/2, y: 792 - Math.max(o.y1,o.y2),
+            width: h2, height: Math.abs(o.y2-o.y1), color: rgb(lc[0],lc[1],lc[2])});
+        }
+      } else if (o.k === "i"){
+        pending.push((async function(o){
+          var img = await imgFor(o.src);
+          if (img) pg.drawImage(img, {x:o.x, y:792-o.y-o.h, width:o.w, height:o.h});
+        })(o));
+      }
+    }
+    await Promise.all(pending);
+  }
+
+  function drawWatermark(pg){
+    var z = 34, asc = E.ascOf(E.F.HB, z), ls = 10, ang = 32*Math.PI/180;
+    var e = fontByFam("Helvetica-Bold");
+    for (var r=0;r<6;r++) for (var c=0;c<3;c++){
+      var x = -80 + c*170 + (r%2?85:0), yTop = 40 + r*135;
+      var bx = x, by = 792 - (yTop + asc);
+      for (var i=0;i<6;i++){
+        var ch = "SAMPLE"[i];
+        pg.drawText(ch, {x:bx, y:by, size:z, font: e.duck, color:rgb(0,0,0),
+          opacity:0.075, rotate:degrees(32)});
+        var adv = E.wOf(ch, "Helvetica-Bold", z) + ls;
+        bx += adv*Math.cos(ang); by += adv*Math.sin(ang);
+      }
+    }
+  }
+
+  for (var p=0;p<opsPages.length;p++){
+    var pg = doc.addPage([612, 792]);
+    (SPACE_SPEC[String(p+1)] || []).forEach(function(s2){
+      opsPages[p].push({k:"t", x:s2.x, b:s2.b, s:s2.t, f:s2.f, w:400, z:s2.z});
+    });
+    await drawPage(pg, reorderOps(opsPages[p] || [], p+1), p+1);
+    if (data.watermark) drawWatermark(pg);
+  }
+
+  /* ---------- 4) 每页声明全部七款字体（原稿逐页声明方式）+ 清理杂项键 ---------- */
+  await doc.flush();
+  /* 内容流 Tf 字体名规范化：去掉 pdf-lib uniqueKey 产生的哈希后缀（/F10-1932657749 → /F10） */
+  doc.context.enumerateIndirectObjects().forEach(function(pair){
+    var obj = pair[1];
+    if (!obj || !obj.operators) return;
+    obj.operators.forEach(function(op){
+      try{
+        if (String(op.name) === "Tf" && op.args && op.args[0]){
+          var v = op.args[0].toString().replace(/^\//, "");
+          var m = /^(F\d+|TT\d)-\d+$/.exec(v);
+          if (m) op.args[0] = L.PDFName.of(m[1]);
+        }
+      }catch(e){}
+    });
+  });
+  /* 每页资源字典：仅保留原稿的七个资源名 */
+  doc.getPages().forEach(function(pg){
+    var res = pg.node.Resources();
+    var fonts = res.lookup(L.PDFName.of("Font"), L.PDFDict);
+    if (!fonts){ fonts = doc.context.obj({}); res.set(L.PDFName.of("Font"), fonts); }
+    fonts.keys().forEach(function(k){ fonts.delete(k); });
+    SPECS.forEach(function(spec){ fonts.set(L.PDFName.of(spec.res), F[spec.res].ref); });
+  });
+
+  /* ---------- 5) 元数据（默认与原稿逐字一致，含非标准日期字面量） ---------- */
+  var M = data.pdfMeta || PDF_META;
+  var info = new L.PDFDict(new Map(), doc.context);
+  function setInfo(key, val){
+    if (val != null && String(val).length > 0) info.set(L.PDFName.of(key), L.PDFString.of(String(val)));
+  }
+  setInfo("Title", M.title); setInfo("Author", M.author); setInfo("Creator", M.creator);
+  setInfo("Producer", M.producer); setInfo("Subject", M.subject); setInfo("Keywords", M.keywords);
+  setInfo("CreationDate", String(M.creationDate || "").trim()
+          || (window.__allyDefCd ? window.__allyDefCd(data.meta.statementDate) : ""));
+  setInfo("ModDate", M.modDate);
+  doc.context.trailerInfo.Info = info;
+  return await doc.save();
+}
+
+window.PdfBuilder = { build: buildStatementPdf, META: PDF_META,
+  getMissing: function(){ return lastMissing; } };
+})();
+</script>
+
+
+<!-- ==================== 编辑器逻辑 ==================== -->
+<script id="editor-boot">
+(function(){
+"use strict";
+
+/* ============ 默认数据：元数据/版式相关默认值与原稿一致；身份信息与流水为演示样例（可全部编辑） ============ */
+var DEFAULT_DATA = {
+  "watermark": true,
+  "exportFileName": "fictional-sample-statement",
+  "pdfMeta": {
+    "title": "Fictional Sample Statement",
+    "author": "Bill Gen",
+    "subject": "Fictional sample data",
+    "keywords": "sample, fictional",
+    "creator": "Bill Gen",
+    "producer": "Bill Gen",
+    "creationDate": "D:20261001000000Z",
+    "modDate": "D:20261001000000Z"
+  },
+  "bank": {
+    "name": "Ally Bank",
+    "wordmark": "Ally",
+    "logo": "",
+    "phone": "000-000-0000",
+    "web": "example.invalid",
+    "nmls": "000000",
+    "formCode": "SAMPLE",
+    "addrLines": [
+      "100 EXAMPLE STREET",
+      "DEMO CITY CA 90000"
+    ],
+    "corrName": "SAMPLE CORRESPONDENCE",
+    "corrAddr1a": "100 EXAMPLE STREET",
+    "corrAddr1b": "",
+    "corrAddr2": "DEMO CITY CA 90000",
+    "depName": "SAMPLE DEPOSITS",
+    "depAddr1": "100 EXAMPLE STREET",
+    "depAddr2": "DEMO CITY CA 90000"
+  },
+  "meta": {
+    "title": "Sample Account Statement",
+    "page1Title": "Sample Account Summary",
+    "statementDate": "10/31/2026",
+    "stmtNumber": "000000",
+    "microfilmBase": "000000000 ",
+    "seqStart": 1,
+    "microTailFirst": " 000000",
+    "microTailMid": " 000000",
+    "microTailLast": " 000000"
+  },
+  "customer": {
+    "name": "ALEX EXAMPLE",
+    "detailName": "ALEX EXAMPLE",
+    "street": "100 EXAMPLE STREET",
+    "cityLine": "DEMO CITY CA 90000"
+  },
+  "notices": {
+    "cd": "This is a fictional example account.",
+    "update": "All names, account numbers, and transactions in this example are fictional."
+  },
+  "accounts": [
+    {
+      "name": "Savings",
+      "type": "savings",
+      "number": "000000000001",
+      "openDate": "10/01/2026",
+      "ownership": "Individual",
+      "product": "Savings",
+      "beginDate": "10/01/2026",
+      "begin": 1000,
+      "days": 31,
+      "apy": "0.00%",
+      "avgDaily": "$1,213.31",
+      "interestYTD": "$0.00",
+      "atmFees": 0,
+      "odPaidP": "$0.00",
+      "odPaidY": "$0.00",
+      "odRetP": "$0.00",
+      "odRetY": "$0.00",
+      "txns": [
+        {
+          "date": "10/02/2026",
+          "title": "Credit",
+          "detail": "Sample deposit",
+          "credit": 250,
+          "debit": 0,
+          "interest": false
+        },
+        {
+          "date": "10/07/2026",
+          "title": "Debit",
+          "detail": "Sample purchase",
+          "credit": 0,
+          "debit": 35.5,
+          "interest": false
+        }
+      ]
+    },
+    {
+      "name": "Checking",
+      "type": "spending",
+      "number": "000000000002",
+      "openDate": "10/01/2026",
+      "ownership": "Individual",
+      "product": "Checking",
+      "beginDate": "10/01/2026",
+      "begin": 1000,
+      "days": 31,
+      "apy": "0.00%",
+      "avgDaily": "$1,213.31",
+      "interestYTD": "$0.00",
+      "atmFees": 0,
+      "odPaidP": "$0.00",
+      "odPaidY": "$0.00",
+      "odRetP": "$0.00",
+      "odRetY": "$0.00",
+      "txns": [
+        {
+          "date": "10/02/2026",
+          "title": "Credit",
+          "detail": "Sample deposit",
+          "credit": 250,
+          "debit": 0,
+          "interest": false
+        },
+        {
+          "date": "10/07/2026",
+          "title": "Debit",
+          "detail": "Sample purchase",
+          "credit": 0,
+          "debit": 35.5,
+          "interest": false
+        }
+      ]
+    }
+  ],
+  "disclosures": {
+    "instructions": "This is a fictional sample statement.",
+    "phoneLine": "Sample telephone: 000-000-0000",
+    "writeLine": "Sample address: 100 EXAMPLE STREET, DEMO CITY CA 90000",
+    "blocks": [
+      {
+        "text": "This paragraph is synthetic example content. No real customer information is included."
+      },
+      {
+        "text": "This paragraph is synthetic example content. No real customer information is included."
+      },
+      {
+        "text": "This paragraph is synthetic example content. No real customer information is included."
+      },
+      {
+        "text": "This paragraph is synthetic example content. No real customer information is included."
+      },
+      {
+        "text": "This paragraph is synthetic example content. No real customer information is included."
+      },
+      {
+        "text": "This paragraph is synthetic example content. No real customer information is included."
+      },
+      {
+        "text": "This paragraph is synthetic example content. No real customer information is included."
+      }
+    ]
+  }
+};
+DEFAULT_DATA.bank.logo = StatementEngine.LOGO_DEFAULT;
+
+var data = null;
+try { data = JSON.parse(localStorage.getItem("bill-gen-ally-data-v1")); } catch(e){}
+if (!data || !data.accounts) data = JSON.parse(JSON.stringify(DEFAULT_DATA));
+
+/* 元数据时间默认：对账单日期的次日凌晨 5-7 点（UTC）随机，
+   格式与原稿非标准字面量一致（如 6/24/2026 05:36:28），不写时区。
+   默认算好填进字段（肉眼可见、导出不再变）；仅当值为空或仍属自动值
+   (_cdAuto) 时重算，手工改过即冻结尊重用户值 */
+function applyAutoCreation(){
+  if (!data.pdfMeta) data.pdfMeta = JSON.parse(JSON.stringify(DEFAULT_DATA.pdfMeta));
+  if (data.pdfMeta._cdAuto === false) return;
+  data.pdfMeta._cdAuto = true;
+  data.pdfMeta.creationDate = defaultCreationDate(data.meta.statementDate);
+  if (window.__cdEl && window.__cdEl.value !== data.pdfMeta.creationDate)
+    window.__cdEl.value = data.pdfMeta.creationDate;
+}
+function defaultCreationDate(sd){
+  var m = String(sd || "").match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (!m) return "";
+  var d = new Date(Date.UTC(+m[3], +m[1] - 1, +m[2]) + 86400000);   // 次日
+  var p = function(n){ return String(n).padStart(2, "0"); };
+  return (d.getUTCMonth() + 1) + "/" + d.getUTCDate() + "/" + d.getUTCFullYear()
+       + " " + p(5 + Math.floor(Math.random() * 2))
+       + ":" + p(Math.floor(Math.random() * 60))
+       + ":" + p(Math.floor(Math.random() * 60));
+}
+window.__allyDefCd = defaultCreationDate;   /* 暴露给 PDF 导出端兜底（跨 IIFE） */
+/* 迁移旧版保存的数据：补 logo 等新增字段 */
+if (!data.bank.logo) data.bank.logo = DEFAULT_DATA.bank.logo;
+if (!data.pdfMeta) data.pdfMeta = JSON.parse(JSON.stringify(DEFAULT_DATA.pdfMeta));
+if (!data.exportFileName) data.exportFileName = DEFAULT_DATA.exportFileName;
+if (data.bank.corrAddr1){ data.bank.corrAddr1a = data.bank.corrAddr1.slice(0, 4) + " "; data.bank.corrAddr1b = data.bank.corrAddr1.slice(4); delete data.bank.corrAddr1; }
+if (data.bank.corrAddr1 == null) data.bank.corrAddr1 = (data.bank.corrAddr1a || "") + (data.bank.corrAddr1b || "");   /* 面板单字段=两段地址合成显示 */
+if (data.customer.detailName === undefined) data.customer.detailName = DEFAULT_DATA.customer.detailName;
+if (!data.disclosures.blocks) data.disclosures = JSON.parse(JSON.stringify(DEFAULT_DATA.disclosures));
+applyAutoCreation();
+
+var pagesEl = document.getElementById("pages");
+var wrapEl = pagesEl.querySelector(".scale-wrap");
+var panelUpdaters = [];
+var zoomMode = "fit";
+
+function render(){
+  /* 焦点保持：文本输入进行中不重绘预览（输完整个值才算一次输入） */
+  var _ae = document.activeElement;
+  if(_ae && ((_ae.tagName === "INPUT" && (_ae.type === "text" || !_ae.type || _ae.type === "number"))
+      || _ae.tagName === "TEXTAREA") && document.getElementById("panel").contains(_ae)){
+    clearTimeout(timer); timer = setTimeout(render, 400);
+    return;
+  }
+  save();
+  wrapEl.innerHTML = StatementEngine.renderPages(data);
+  if (data.watermark){
+    wrapEl.querySelectorAll(".page").forEach(function(p){ p.appendChild(makeWatermark()); });
+  }
+  document.getElementById("pageCount").textContent =
+    "共 "+wrapEl.querySelectorAll(".page").length+" 页 · "+
+    data.accounts.reduce(function(n,a){ return n+(a.txns||[]).length; },0)+" 笔流水";
+  panelUpdaters.forEach(function(u){ try{ u(); }catch(e){} });
+  applyZoom();
+  schedulePdf();
+}
+/* ---------- PDF 真实预览与直出导出 ---------- */
+var pdfTimer = null, pdfUrl = null, pdfBuilding = false, pdfDirty = false;
+function pdfModeOn(){ return document.getElementById("chkPdfPreview").checked; }
+function schedulePdf(){
+  if (!pdfModeOn()) { pdfDirty = true; return; }   /* HTML 预览模式：不自动生成，导出时现生成 */
+  clearTimeout(pdfTimer);
+  pdfDirty = true;
+  document.getElementById("pdfStatus").textContent = "输入中，停顿后自动更新…";
+  pdfTimer = setTimeout(function(){ buildPdfPreview(); }, 1200);
+}
+function bytesToB64(bytes){
+  var arr = new Uint8Array(bytes), s = "";
+  var CH = 32768;
+  for (var i=0;i<arr.length;i+=CH) s += String.fromCharCode.apply(null, arr.subarray(i, i+CH));
+  return btoa(s);
+}
+async function buildPdfPreview(force){
+  if (pdfBuilding) { clearTimeout(pdfTimer); pdfTimer = setTimeout(function(){ buildPdfPreview(force); }, 300); return; }
+  if (!force && !pdfDirty && pdfUrl) return;
+  pdfBuilding = true;
+  pdfDirty = false;
+  try{
+    var bytes = await PdfBuilder.build(data);
+    var blob = new Blob([bytes], {type:"application/pdf"});
+    if (pdfUrl) URL.revokeObjectURL(pdfUrl);
+    var frame = document.getElementById("pdfFrame");
+    if (location.protocol === "file:"){
+      /* file:// 下部分环境的 PDF 查看器不接受 blob:null，改用 data: URL */
+      window.__pdfSrc = "data:application/pdf;base64," + bytesToB64(bytes);
+    } else {
+      pdfUrl = URL.createObjectURL(blob);
+      window.__pdfSrc = pdfUrl;
+    }
+    frame.src = window.__pdfSrc;
+    var miss = PdfBuilder.getMissing();
+    var mkeys = Object.keys(miss);
+    document.getElementById("pdfStatus").textContent =
+      "PDF 已更新 · " + (Math.ceil(blob.size/1024)) + " KB · " + (window.StatementEngine._ops||[]).length + " 页" +
+      (mkeys.length ? " · 字体缺字形: " + mkeys.slice(0,8).join(" ") : "");
+  }catch(e){
+    document.getElementById("pdfStatus").textContent = "PDF 生成失败：" + e;
+  }
+  pdfBuilding = false;
+}
+function makeWatermark(){
+  var wm = document.createElement("div"); wm.className = "wm";
+  for (var r=0;r<6;r++) for (var c=0;c<3;c++){
+    var s = document.createElement("span");
+    s.textContent = "SAMPLE";
+    s.style.left = (-80 + c*170 + (r%2?85:0)) + "pt";
+    s.style.top = (40 + r*135) + "pt";
+    wm.appendChild(s);
+  }
+  return wm;
+}
+function applyZoom(){
+  var avail = document.getElementById("preview").clientWidth - 24;
+  var w = 612*4/3; /* 612pt = 816px */
+  var z = zoomMode==="fit" ? Math.max(0.3, Math.min(2, avail/w)) : Number(zoomMode);
+  wrapEl.style.zoom = z;
+  var frame = document.getElementById("pdfFrame");
+  if (zoomMode === "fit"){
+    frame.style.width = "100%"; frame.style.margin = "0";
+  } else {
+    var fw = Math.round(w*z);
+    frame.style.width = fw+"px"; frame.style.margin = "0 auto"; frame.style.display = "inline-block";
+  }
+  if (document.body.classList.contains("pdfmode")) frame.style.display = "block";
+}
+var saveTimer = null;
+function save(){ clearTimeout(saveTimer); saveTimer = setTimeout(function(){
+  try{ localStorage.setItem("bill-gen-ally-data-v1", JSON.stringify(data)); }catch(e){}
+}, 300); }
+
+/* ---------------- 表单 ---------------- */
+function el(tag, attrs, kids){
+  var e = document.createElement(tag);
+  for (var k in attrs||{}){ if (k==="text") e.textContent = attrs[k]; else e.setAttribute(k, attrs[k]); }
+  (kids||[]).forEach(function(c){ e.appendChild(c); });
+  return e;
+}
+function row(lbl, input){
+  return el("div",{class:"frow"},[el("label",{text:lbl}), input]);
+}
+function inp(get,set,type){
+  var i = el("input",{type:type||"text"});
+  i.value = get();
+  i.addEventListener("input", function(){ set(type==="number"? Number(i.value)||0 : i.value); renderSoon(); });
+  return i;
+}
+function area(get,set,rows){
+  var a = el("textarea",{rows:rows||3});
+  a.value = get();
+  a.addEventListener("input", function(){ set(a.value); renderSoon(); });
+  return a;
+}
+function sel(get,set,opts){
+  var s = el("select");
+  opts.forEach(function(o){
+    var op = el("option",{value:o[0],text:o[1]});
+    if (String(get())===String(o[0])) op.selected = true;
+    s.appendChild(op);
+  });
+  s.addEventListener("change", function(){ set(s.value); refresh(); });
+  return s;
+}
+function fieldset(legend){ var f = el("fieldset"); f.appendChild(el("legend",{text:legend})); return f; }
+
+var timer = null;
+function renderSoon(){ clearTimeout(timer); timer = setTimeout(render, 100); }
+/* 焦点离开任一文本输入 → 立即按完整值渲染 */
+document.getElementById("panel").addEventListener("focusout", function(){ renderSoon(); });
+function refresh(){ clearTimeout(timer); render(); buildPanel(); }
+
+function buildPanel(){
+  var p = document.getElementById("panel");
+  p.innerHTML = ""; panelUpdaters = [];
+
+  var f1 = fieldset("银行信息");
+  var logoRow = el("div",{class:"frow"});
+  logoRow.appendChild(el("label",{text:"Logo 图片"}));
+  var fileLogo = el("input",{type:"file",accept:"image/*"});
+  fileLogo.style.display = "none";
+  var upBtn = el("button",{text:"上传更换"});
+  upBtn.style.cssText = "font-size:11px;padding:3px 8px;border:1px solid #c2c6cc;background:#f0f1f4;border-radius:4px;cursor:pointer";
+  var reBtn = el("button",{text:"恢复原版"});
+  reBtn.style.cssText = upBtn.style.cssText;
+  var clrBtn = el("button",{text:"清除(用文字)"});
+  clrBtn.style.cssText = upBtn.style.cssText;
+  upBtn.addEventListener("click", function(){ fileLogo.click(); });
+  fileLogo.addEventListener("change", function(){
+    var f = fileLogo.files[0]; if (!f) return;
+    var r = new FileReader();
+    r.onload = function(){ data.bank.logo = r.result; refresh(); };
+    r.readAsDataURL(f); fileLogo.value = "";
+  });
+  reBtn.addEventListener("click", function(){ data.bank.logo = DEFAULT_DATA.bank.logo; refresh(); });
+  clrBtn.addEventListener("click", function(){ data.bank.logo = null; refresh(); });
+  var logoBtns = el("div",{style:"flex:1;display:flex;gap:4px;align-items:center"});
+  logoBtns.appendChild(upBtn); logoBtns.appendChild(reBtn); logoBtns.appendChild(clrBtn);
+  logoBtns.appendChild(fileLogo);
+  logoRow.appendChild(logoBtns);
+  f1.appendChild(logoRow);
+  [["银行名称","name"],["文字标识(无Logo时)","wordmark"],["客服电话行","phone"],["网址","web"],
+   ["NMLS ID","nmls"],["表格编号(右下角)","formCode"]].forEach(function(kv){
+    f1.appendChild(row(kv[0], inp(function(){return data.bank[kv[1]];}, function(v){data.bank[kv[1]]=v;})));
+  });
+  [["页眉地址1",0],["页眉地址2",1]].forEach(function(kv){
+    f1.appendChild(row(kv[0], inp(function(){return data.bank.addrLines[kv[1]];}, function(v){data.bank.addrLines[kv[1]]=v;})));
+  });
+  [["信件收件名","corrName"],["信件地址1","corrAddr1"],["信件地址2","corrAddr2"],
+   ["存款收件名","depName"],["存款地址1","depAddr1"],["存款地址2","depAddr2"]].forEach(function(kv){
+    f1.appendChild(row(kv[0], inp(function(){return data.bank[kv[1]];}, function(v){
+      data.bank[kv[1]] = v;
+      if (kv[1] === "corrAddr1"){ data.bank.corrAddr1a = String(v).slice(0, 4) + " "; data.bank.corrAddr1b = String(v).slice(4); }   /* 与重载迁移同规则：前4字符拆两段实时联动 */
+    })));
+  });
+  p.appendChild(f1);
+
+  var f2 = fieldset("报表元数据");
+  [["报表标题","title"],["第1页大标题","page1Title"],["对账单日期","statementDate"],["报表编号","stmtNumber"],
+   ["微影行前缀","microfilmBase"],["微影尾(首页)","microTailFirst"],["微影尾(中间页)","microTailMid"],
+   ["微影尾(末页)","microTailLast"]].forEach(function(kv){
+    f2.appendChild(row(kv[0], inp(function(){return data.meta[kv[1]];}, function(v){
+      data.meta[kv[1]] = v;
+      if (kv[1] === "statementDate") applyAutoCreation();   // 日期变 → 自动时间跟随重算
+    })));
+  });
+  f2.appendChild(row("微影序号起点", inp(function(){return data.meta.seqStart;}, function(v){data.meta.seqStart=Number(v)||0;}, "number")));
+  f2.appendChild(el("div",{class:"hint",text:"页码、微影行、总页数随流水增删自动联动；Days In Statement Period 由起始日期与对账单日期自动计算（含首尾）"}));
+  p.appendChild(f2);
+
+  var f2b = fieldset("PDF 文件元数据（导出文件的 Info 字典）");
+  [["标题 Title","title"],["作者 Author","author"],["主题 Subject","subject"],["关键词 Keywords","keywords"],
+   ["创建器 Creator","creator"],["生产器 Producer","producer"],
+   ["创建日期(原样)","creationDate"],["修改日期(原样)","modDate"]].forEach(function(kv){
+    var _i = inp(function(){return data.pdfMeta[kv[1]]||"";}, function(v){
+      if (kv[1] === "creationDate" && String(v).trim() === "") { data.pdfMeta._cdAuto = true; applyAutoCreation(); return; }  // 清空=回到自动默认
+      data.pdfMeta[kv[1]] = v;
+      if (kv[1] === "creationDate") data.pdfMeta._cdAuto = false;   // 手工值冻结
+    });
+    f2b.appendChild(row(kv[0], _i));
+    if (kv[1] === "creationDate") window.__cdEl = _i;
+  });
+  f2b.appendChild(el("div",{class:"hint",text:"创建日期留空=对账单日期次日凌晨 5-7 点（UTC）随机（如 6/24/2026 05:36:28，不写时区）；其余留空的键不写入 PDF"}));
+  p.appendChild(f2b);
+
+  var f3 = fieldset("客户信息");
+  [["姓名","name"],["街道地址","street"],["城市/州/邮编","cityLine"]].forEach(function(kv){
+    f3.appendChild(row(kv[0], inp(function(){return data.customer[kv[1]];}, function(v){data.customer[kv[1]]=v;})));
+  });
+  p.appendChild(f3);
+
+  var f4 = fieldset("第 1 页通知段落");
+  f4.appendChild(el("div",{class:"hint",text:"CD 频率说明（自动换行）"}));
+  f4.appendChild(area(function(){return data.notices.cd;}, function(v){data.notices.cd=v;}, 4));
+  f4.appendChild(el("div",{class:"hint",text:"借记卡更新提示（自动换行）"}));
+  f4.appendChild(area(function(){return data.notices.update;}, function(v){data.notices.update=v;}, 4));
+  p.appendChild(f4);
+
+  var f5 = fieldset("账户与流水（增删联动）");
+  data.accounts.forEach(function(acct, ai){
+    var card = el("div",{class:"acct-card"});
+    var head = el("div",{class:"acct-head"});
+    var title = el("b",{});
+    head.appendChild(title);
+    var up = el("button",{text:"上移"}), dn = el("button",{text:"下移"}), del = el("button",{text:"删除账户"});
+    up.addEventListener("click", function(){ if(ai>0){ var t=data.accounts[ai-1]; data.accounts[ai-1]=data.accounts[ai]; data.accounts[ai]=t; refresh(); } });
+    dn.addEventListener("click", function(){ if(ai<data.accounts.length-1){ var t=data.accounts[ai+1]; data.accounts[ai+1]=data.accounts[ai]; data.accounts[ai]=t; refresh(); } });
+    del.addEventListener("click", function(){ if(data.accounts.length>1 && confirm("删除账户「"+acct.name+"」及其全部流水？")){ data.accounts.splice(ai,1); refresh(); } });
+    head.appendChild(up); head.appendChild(dn); head.appendChild(del);
+    card.appendChild(head);
+    var body = el("div",{class:"acct-body"});
+    [["账户名称","name"],["账号(掩码)","number"],["开户日期","openDate"],["产品","product"],
+     ["所有权","ownership"],["起始日期","beginDate"],["APY","apy"],
+     ["日均余额","avgDaily"],["年度利息","interestYTD"],["透支Paid本期","odPaidP"],["透支Paid年度","odPaidY"],
+     ["透支Ret本期","odRetP"],["透支Ret年度","odRetY"]].forEach(function(kv){
+      body.appendChild(row(kv[0], inp(function(){return acct[kv[1]];}, function(v){acct[kv[1]]=v;})));
+    });
+    body.appendChild(row("起始余额", inp(function(){return acct.begin;}, function(v){acct.begin=Number(v)||0;}, "number")));
+    body.appendChild(row("账户类型", sel(function(){return acct.type;}, function(v){acct.type=v;},
+      [["spending","Spending（含 ATM Fees 行）"],["savings","Savings（无 ATM Fees 行）"]])));
+    var stEl = el("div",{class:"computed"});
+    var upd = function(){
+      var st = StatementEngine.acctStats(acct);
+      stEl.innerHTML = "自动联动：存款入账 <b>$"+StatementEngine.fmt(st.deposits)+"</b> · 利息 <b>$"+
+        StatementEngine.fmt(st.interest)+"</b> · 出账合计 <b>$"+StatementEngine.fmt(st.withdrawals)+
+        "</b> · 期末余额 <b>$"+StatementEngine.fmt(st.end)+"</b>（同步至第 1 页汇总表）";
+      title.textContent = acct.name;
+    };
+    panelUpdaters.push(upd); upd();
+    body.appendChild(stEl);
+
+    (acct.txns||[]).forEach(function(t, ti){
+      var box = el("div",{class:"txn"});
+      var tools = el("div",{class:"txn-tools"});
+      tools.appendChild(el("span",{text:"流水 #"+(ti+1)}));
+      var balEl = el("span",{style:"font-size:11px;color:#0a7d32"});
+      ["上移","下移","复制","删除"].forEach(function(lbl){
+        var b = el("button",{text:lbl});
+        b.addEventListener("click", function(){
+          if (lbl==="上移" && ti>0){ var x=acct.txns[ti-1]; acct.txns[ti-1]=acct.txns[ti]; acct.txns[ti]=x; }
+          if (lbl==="下移" && ti<acct.txns.length-1){ var y2=acct.txns[ti+1]; acct.txns[ti+1]=acct.txns[ti]; acct.txns[ti]=y2; }
+          if (lbl==="复制") acct.txns.splice(ti+1,0,JSON.parse(JSON.stringify(t)));
+          if (lbl==="删除") acct.txns.splice(ti,1);
+          refresh();
+        });
+        tools.appendChild(b);
+      });
+      box.appendChild(tools);
+      var g = el("div",{class:"grid2"});
+      g.appendChild(row("日期", inp(function(){return t.date;}, function(v){t.date=v;})));
+      g.appendChild(row("标题", inp(function(){return t.title;}, function(v){t.title=v;})));
+      g.appendChild(row("入账 Credit", inp(function(){return t.credit;}, function(v){t.credit=Number(v)||0;}, "number")));
+      g.appendChild(row("出账 Debit", inp(function(){return t.debit;}, function(v){t.debit=Number(v)||0;}, "number")));
+      box.appendChild(g);
+      var chk = el("input",{type:"checkbox"}); chk.checked = !!t.interest;
+      chk.addEventListener("change", function(){ t.interest = chk.checked; refresh(); });
+      box.appendChild(row("计为利息（利息行）", chk));
+      box.appendChild(area(function(){return t.detail;}, function(v){t.detail=v;}, 3));
+      box.appendChild(el("div",{class:"hint",text:"明细：换行=手动断行；超列宽自动折行；余额/汇总全部联动"}));
+      var upd2 = function(){ balEl.textContent = "本笔后余额 $"+StatementEngine.fmt(t._bal||0); };
+      panelUpdaters.push(upd2); upd2();
+      box.appendChild(balEl);
+      body.appendChild(box);
+    });
+    var add = el("button",{class:"add",text:"+ 添加一笔流水"});
+    add.addEventListener("click", function(){
+      acct.txns.push({date:data.meta.statementDate, title:"New Item", detail:"", credit:0, debit:0, interest:false});
+      refresh();
+    });
+    body.appendChild(add);
+    card.appendChild(body);
+    f5.appendChild(card);
+  });
+  var addA = el("button",{class:"add",text:"+ 添加账户（自动新增明细页并联动页码/微影行）"});
+  addA.addEventListener("click", function(){
+    data.accounts.push(JSON.parse(JSON.stringify(DEFAULT_DATA.accounts[1])));
+    refresh();
+  });
+  f5.appendChild(addA);
+  p.appendChild(f5);
+
+  var f6 = fieldset("披露页（末页·固定文本区域）");
+  f6.appendChild(el("div",{class:"hint",text:"存款邮寄说明段（已静态化·编辑不影响输出）"}));
+  f6.appendChild(area(function(){return data.disclosures.instructions;}, function(v){data.disclosures.instructions=v;}, 3));
+  f6.appendChild(row("电话联系行", inp(function(){return data.disclosures.phoneLine;}, function(v){data.disclosures.phoneLine=v;})));
+  f6.appendChild(row("写信联系行", inp(function(){return data.disclosures.writeLine;}, function(v){data.disclosures.writeLine=v;})));
+  data.disclosures.blocks.forEach(function(bk, bi){
+    if (bk.bullets){
+      f6.appendChild(el("div",{class:"hint",text:"段落 "+(bi+1)+"（项目符号）"}));
+      bk.bullets.forEach(function(_, j){
+        f6.appendChild(row("• 条目"+(j+1), inp(function(){return bk.bullets[j];}, function(v){bk.bullets[j]=v;})));
+      });
+    } else {
+      f6.appendChild(el("div",{class:"hint",text:"段落 "+(bi+1)+"（已静态化·编辑不影响输出）"}));
+      f6.appendChild(area(function(){return bk.text;}, function(v){bk.text=v;}, 3));
+    }
+  });
+  p.appendChild(f6);
+}
+
+/* ---------------- 工具栏 ---------------- */
+document.getElementById("chkWM").addEventListener("change", function(e){ data.watermark = e.target.checked; refresh(); });
+document.getElementById("panel").addEventListener("keydown", function(e){
+  if (e.key === "Enter" && pdfModeOn()){ clearTimeout(pdfTimer); buildPdfPreview(); }
+});
+document.getElementById("panel").addEventListener("focusout", function(){
+  if (pdfModeOn() && pdfDirty){ clearTimeout(pdfTimer); buildPdfPreview(); }
+});
+document.getElementById("chkPdfPreview").addEventListener("change", function(e){
+  document.body.classList.toggle("pdfmode", e.target.checked);
+  applyZoom();
+  if (e.target.checked){ document.getElementById("pdfStatus").textContent = "PDF 生成中…"; buildPdfPreview(true); }
+});
+document.getElementById("btnOpenPdf").addEventListener("click", async function(){
+  var btn = this; btn.disabled = true; btn.textContent = "生成中…";
+  try{
+    if (!window.__pdfSrc || pdfDirty) await buildPdfPreview(true);
+    if (window.__pdfSrc) window.open(window.__pdfSrc, "_blank");
+  }catch(e){ alert("PDF 生成失败：" + e); }
+  btn.disabled = false; btn.textContent = "在新标签打开 PDF";
+});
+var pdfNameInput = document.getElementById("pdfNameInput");
+pdfNameInput.value = data.exportFileName || "Statement";
+pdfNameInput.addEventListener("input", function(){
+  data.exportFileName = pdfNameInput.value;
+  clearTimeout(saveTimer); saveTimer = setTimeout(save, 300);
+});
+function exportPdfName(){
+  var n = String(data.exportFileName || "Statement").trim() || "Statement";
+  n = n.replace(/[\\/:*?"<>|]/g, "_");
+  if (!/\.pdf$/i.test(n)) n += ".pdf";
+  return n;
+}
+window.__exportPdfName = exportPdfName;
+document.getElementById("btnExportPdf").addEventListener("click", async function(){
+  var btn = this;
+  btn.textContent = "生成中…"; btn.disabled = true;
+  try{
+    var bytes = await PdfBuilder.build(data);
+    var blob = new Blob([bytes], {type:"application/pdf"});
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = exportPdfName();
+    a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 4000);
+  }catch(e){ alert("PDF 生成失败：" + e); }
+  var miss = PdfBuilder.getMissing();
+  var keys = Object.keys(miss);
+  if (keys.length){
+    alert("注意：以下字符在模板字体中无对应字形，PDF 中已用 □ 或省略替代：\n" + keys.join("  ") +
+      "\n（HTML 预览可用系统中文字体显示，但导出的 PDF 使用原稿同款字体）");
+  }
+  btn.textContent = "导出 PDF（代码直出）"; btn.disabled = false;
+});
+document.getElementById("zoomSel").addEventListener("change", function(e){ zoomMode = e.target.value; applyZoom(); });
+window.addEventListener("resize", applyZoom);
+document.getElementById("btnPrint").addEventListener("click", function(){ window.print(); });
+document.getElementById("btnReset").addEventListener("click", function(){
+  if (confirm("恢复为默认样例数据？当前修改将丢失。")){
+    localStorage.removeItem("bill-gen-ally-legacy-v1");
+    localStorage.removeItem("bill-gen-ally-data-v1");
+    data = JSON.parse(JSON.stringify(DEFAULT_DATA));
+    applyAutoCreation();
+    document.getElementById("chkWM").checked = data.watermark;
+    refresh();
+  }
+});
+document.getElementById("btnExportJSON").addEventListener("click", function(){
+  var blob = new Blob([JSON.stringify(data,null,1)], {type:"application/json"});
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = "statement-data.json"; a.click();
+});
+document.getElementById("btnImportJSON").addEventListener("click", function(){ document.getElementById("fileImport").click(); });
+document.getElementById("fileImport").addEventListener("change", function(e){
+  var f = e.target.files[0]; if (!f) return;
+  var r = new FileReader();
+  r.onload = function(){
+    try { data = JSON.parse(r.result); refresh(); }
+    catch(err){ alert("JSON 解析失败"); }
+  };
+  r.readAsText(f); e.target.value = "";
+});
+document.getElementById("btnExportHTML").addEventListener("click", function(){
+  var engine = "window.BILL_GEN_ALLY_ASSETS = " + JSON.stringify(window.BILL_GEN_ALLY_ASSETS).replace(/</g, "\\u003c") + ";\n" + document.getElementById("engine").textContent;
+  var css = Array.prototype.map.call(document.querySelectorAll("style"), function(s){ return s.textContent; }).join("\n");
+  var boot = "var DATA = "+JSON.stringify(data)+";\n"+
+    "document.addEventListener('DOMContentLoaded', function(){\n"+
+    "  document.title='Statement';\n"+
+    "  var html = StatementEngine.renderPages(DATA);\n"+
+    "  var pages=document.createElement('div'); pages.id='pages';\n"+
+    "  var wrap=document.createElement('div'); wrap.className='scale-wrap'; wrap.innerHTML=html;\n"+
+    "  pages.appendChild(wrap); document.body.appendChild(pages);\n"+
+    "  if (DATA.watermark){ wrap.querySelectorAll('.page').forEach(function(p){\n"+
+    "    var wm=document.createElement('div'); wm.className='wm';\n"+
+    "    for(var r=0;r<6;r++) for(var c=0;c<3;c++){ var s=document.createElement('span'); s.textContent='SAMPLE';\n"+
+    "      s.style.left=(-80+c*170+(r%2?85:0))+'pt'; s.style.top=(40+r*135)+'pt'; wm.appendChild(s); }\n"+
+    "    p.appendChild(wm); }); }\n"+
+    "});";
+  var html = "<!DOCTYPE html>\n<html lang='en'><head><meta charset='utf-8'><title>Statement</title>\n<style>\n"+css+
+    "\nbody{background:#565a61}\n#pages{padding:24px 0;display:flex;flex-direction:column;align-items:center;gap:26px}\n</style>\n</head>\n<body>\n"+
+    "<scr"+"ipt>"+engine+"</scr"+"ipt>\n<scr"+"ipt>"+boot+"</scr"+"ipt>\n</body></html>";
+  var blob = new Blob([html], {type:"text/html"});
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = "statement.html"; a.click();
+});
+
+/* ---------------- 启动（先加载字体再度量排版） ---------------- */
+function boot(){
+  var fonts = ["10px Helvetica","bold 10px Helvetica","10px Times-Roman","10px ArialMT",
+               "10px Arial-BoldMT","10px SymbolMT","12px Arial-BoldMT"];
+  Promise.all(fonts.map(function(f){ return document.fonts.load(f).catch(function(){}); }))
+    .then(function(){ return document.fonts.ready; })
+    .then(function(){ render(); buildPanel(); })
+    .catch(function(){ render(); buildPanel(); });
+}
+if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+else boot();
+})();
+</script>
+</body>
+</html>

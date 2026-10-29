@@ -1,0 +1,61 @@
+/* ============================================================
+ * 账单模板页面样式（单位 pt，1:1 复刻原稿几何）
+ * ============================================================ */
+:root { --page-gap: 24px; }
+
+.statement-pages { background: #525659; padding: 24px; }
+
+.page {
+  position: relative;
+  width: 612pt; height: 792pt;
+  background: #fff;
+  overflow: hidden;
+  margin: 0 auto var(--page-gap);
+  box-shadow: 0 2px 10px rgba(0,0,0,.35);
+}
+.page:last-child { margin-bottom: 0; }
+
+.page .content { position: absolute; inset: 0; }
+.page .txt { position: absolute; white-space: pre; }
+.page .rect { position: absolute; }
+.page .ln   { position: absolute; }
+.page .para { position: absolute; }
+.page img.logo, .page img.promo, .page svg.logo { position: absolute; }
+.page img.logo, .page img.promo { object-fit: contain; }
+
+/* LOGO 占位（虚线框） */
+.page .logo-ph {
+  position: absolute;
+  border: 1px dashed #b6bfca;
+  border-radius: 2pt;
+  background: repeating-linear-gradient(45deg, #f6f8fa, #f6f8fa 6pt, #eef1f4 6pt, #eef1f4 12pt);
+  display: flex; align-items: center; justify-content: center;
+}
+.page .logo-ph span {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 7pt; letter-spacing: 1pt; color: #8a97a5; font-weight: 700;
+}
+
+/* SAMPLE 水印（铺满页面，打印保留） */
+.page .watermark {
+  position: absolute; inset: 0;
+  z-index: 40; pointer-events: none;
+  background-repeat: repeat;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+
+/* ================= 预览缩放 ================= */
+#stage-wrap { overflow: auto; height: 100%; }
+#stage { transform-origin: 0 0; }
+
+/* ================= 打印 ================= */
+@media print {
+  @page { size: Letter; margin: 0; }
+  html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; height: auto !important; min-height: 0 !important; }
+  #main, #preview, #stage-wrap { display: block !important; height: auto !important; overflow: visible !important; }
+  #stage { display: block !important; transform: none !important; width: auto !important; height: auto !important; }
+  .statement-pages { background: #fff; padding: 0; }
+  .page { margin: 0 !important; box-shadow: none !important; page-break-after: always; break-after: page; }
+  .page:last-child { page-break-after: auto; break-after: auto; }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}

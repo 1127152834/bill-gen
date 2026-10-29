@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>对账单模板编辑器</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font: 13px/1.5 -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+         display: flex; height: 100vh; overflow: hidden; background: #f0f2f5; }
+  #side { width: 430px; min-width: 430px; overflow-y: auto; padding: 12px; }
+  #main { flex: 1; display: flex; flex-direction: column; }
+  iframe { flex: 1; border: 0; width: 100%; background: #525659; }
+  #pvImages { flex: 1; overflow-y: auto; background: #525659; text-align: center; }
+  #pvImages img { display: block; width: min(100%, 780px); margin: 12px auto;
+                  box-shadow: 0 2px 10px rgba(0,0,0,.4); background: #fff; }
+  details { background: #fff; border-radius: 8px; margin-bottom: 8px; box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+  summary { cursor: pointer; padding: 9px 12px; font-weight: 600; color: #1f3a5f; user-select: none; }
+  details .body { padding: 4px 12px 12px; }
+  .row { display: flex; gap: 8px; margin: 6px 0; align-items: center; }
+  .row label { width: 128px; color: #555; flex-shrink: 0; }
+  .row input, .row textarea { flex: 1; border: 1px solid #d5d9e0; border-radius: 5px; padding: 5px 7px; font: inherit; }
+  .row input:focus, textarea:focus { outline: 2px solid #9cc3ff; border-color: #4a86e8; }
+  input.ro { background: #f3f5f8; color: #556; }
+  #sec_tx { overflow-x: auto; }
+  /* 描述列给足输入宽：430px 侧栏放不下整表，容器内横滚兜底（页面不溢出） */
+  table { width: 100%; min-width: 640px; border-collapse: collapse; margin-top: 6px; }
+  th { font-size: 12px; color: #666; text-align: left; padding: 2px 4px; }
+  td { padding: 2px 3px; }
+  td input { width: 100%; border: 1px solid #d5d9e0; border-radius: 4px; padding: 4px 5px; font: 12px/1.3 ui-monospace, Menlo, monospace; }
+  .btn { border: 0; border-radius: 6px; padding: 7px 14px; font: inherit; cursor: pointer; }
+  .btn.primary { background: #2f6fd6; color: #fff; }
+  .btn.ghost { background: #fff; border: 1px solid #c8ced8; color: #333; }
+  .btn.small { padding: 3px 10px; font-size: 12px; }
+  .btn.del { background: #fbe9e9; color: #b02a2a; }
+  #bar { display: flex; align-items: center; gap: 12px; padding: 8px 14px; background: #fff;
+         border-bottom: 1px solid #e2e5ea; }
+  #status { margin-left: auto; font-size: 12px; color: #666; }
+  #status.err { color: #b02a2a; font-weight: 600; }
+  .toggles { display: flex; gap: 16px; padding: 8px 12px; }
+  .toggles label { color: #333; display: flex; gap: 5px; align-items: center; cursor: pointer; }
+  .hint { font-size: 11px; color: #98a; padding: 0 12px 8px; }
+</style>
+</head>
+<body>
+<div id="side">
+  <details open>
+    <summary>生成选项</summary>
+    <div class="toggles">
+      <label><input type="checkbox" id="opt_watermark" checked> SAMPLE 水印</label>
+      <label><input type="checkbox" id="opt_mark" checked> 日期分拣方块</label>
+    </div>
+    <div class="row" style="padding:0 12px 8px">
+      <label>字体方案</label>
+      <div style="display:flex;gap:14px">
+        <label><input type="radio" name="optFonts" value="declared" checked> 声明字体（默认，与原稿同构）</label>
+        <label><input type="radio" name="optFonts" value="embedded"> 嵌入字体（视觉基准）</label>
+      </div>
+    </div>
+    <div class="hint" id="fontsHint">声明模式输出与原稿结构一致（11 个声明字体、原稿元数据默认值）；预览若显示替代字形属正常（渲染依赖系统字体）。</div>
+    <div class="hint">任何修改会在停顿后自动重新生成预览。流水尽量排在第 2 页（上限 42 行）：≤11 行时月费区块跟在流水下方，超出则月费另起一页；>42 行自动续表页（每页 55 行，上限 200 条）。</div>
+  </details>
+  <details open><summary>银行信息（模板替换文字）</summary><div class="body" id="sec_bank"></div></details>
+  <details open><summary>客户与账户</summary><div class="body" id="sec_cust"></div></details>
+  <details open><summary>期间摘要（第 2 页摘要栏）</summary>
+    <div class="body">
+      <div class="toggles" style="padding:2px 0 6px">
+        <label><input type="checkbox" id="optAuto" checked> 自动计算（逐行余额 / 存取合计 / 期末余额）</label>
+      </div>
+      <div id="sec_summary"></div>
+    </div>
+  </details>
+  <details open><summary>交易明细</summary><div class="body" id="sec_tx"></div></details>
+  <details><summary>合计与月费</summary><div class="body" id="sec_fees"></div></details>
+  <details open><summary>PDF 元数据（留空不写入；预填值为原稿默认）</summary><div class="body" id="sec_meta"></div></details>
+</div>
+<div id="main">
+  <div id="bar">
+    <button class="btn primary" onclick="location.href='/export/statement.pdf'">下载 PDF</button>
+    <button class="btn ghost" onclick="location.href='/export/data.json'">导出 JSON</button>
+    <button class="btn ghost" onclick="doReset()">恢复示例数据</button>
+    <button class="btn ghost" id="btnMode" title="切换预览方式">PDF 模式</button>
+    <span id="status">就绪</span>
+  </div>
+  <div id="pvImages"></div>
+  <iframe id="pv" src="/preview.pdf" style="display:none"></iframe>
+</div>
+<script>
+// 字段定义: [分组, 键, 中文标签]; 分组 "" 表示数据根级
+const F = {
+  sec_bank: [
+    ["bank","name","银行显示名"],["bank","legal_na","法定全称"],["bank","domain","域名"],
+    ["bank","phone_name","客服电话(名称)"],["bank","phone_main","客服电话(带括号)"],["bank","phone_es","西语热线"],
+    ["bank","po_box","PO Box 1"],["bank","po_box2","PO Box 2"],["bank","mac_code","MAC 编号"],
+    ["bank","zip_main","主邮编"],["bank","des_moines","Des Moines 地址"],["bank","copyright_year","版权年份"],
+    ["bank","office_code","机构代码"],["bank","nmlsr_id","NMLSR ID"],
+  ],
+  sec_cust: [
+    ["","statement_date","页眉日期"],["","total_pages","总页数"],
+    ["customer","name","客户姓名"],["account","product","账户产品"],["account","number","账号"],
+    ["account","rtn","Routing Number"],["account","primary_label","账号标注"],
+  ],
+  sec_summary: [
+    ["summary","period_start","期间起始"],["summary","period_end","期间结束"],
+    ["summary","begin_amount","期初余额"],["summary","deposits_amount","存款合计"],
+    ["summary","withdrawals_amount","取款合计"],["summary","ending_amount","期末余额"],
+  ],
+  sec_fees: [
+    ["fees","period","费用期间"],["fees","standard","标准月费"],["fees","paid","实付金额"],
+    ["totals","deposits","交易合计-存款"],["totals","withdrawals","交易合计-取款"],
+  ],
+  sec_meta: [
+    ["metadata","title","标题"],["metadata","author","作者"],["metadata","subject","主题"],
+    ["metadata","keywords","描述"],["metadata","producer","PDF生成器"],["metadata","creator","创建软件"],
+  ],
+};
+let data = null, state = { watermark: true, mark: true }, timer = null;
+
+function bindInputs() {
+  for (const [sec, fields] of Object.entries(F)) {
+    const ph = sec === "sec_meta" ? ' placeholder="留空则不写入"' : "";
+    document.getElementById(sec).innerHTML = fields.map(([g, k, label]) =>
+      `<div class="row"><label>${label}</label><input data-g="${g}" data-k="${k}"${ph}></div>`).join("");
+  }
+  document.getElementById("sec_cust").insertAdjacentHTML("beforeend",
+    `<div class="row"><label>地址行</label><div style="flex:1;display:flex;flex-direction:column;gap:6px">
+      <input data-g="@addr" data-k="0"><input data-g="@addr" data-k="1"></div></div>`);
+  // 创建时间：默认实时填入 PDF 原生格式 D:YYYYMMDDHHMMSS±HH'mm'（本机时区偏移）
+  document.getElementById("sec_meta").insertAdjacentHTML("beforeend",
+    `<div class="row"><label>创建时间</label>
+       <div style="flex:1;display:flex;gap:6px;align-items:center">
+         <input data-g="metadata" data-k="creation_date" data-auto="1"
+                placeholder="默认=期间结束日06-08点随机(UTC-4)，如 D:20260731064623-04'00'">
+         <button class="btn ghost small" id="btnNowUtc" style="flex-shrink:0">现在</button>
+       </div></div>`);
+  document.getElementById("btnNowUtc").addEventListener("click", () => {
+    const el = document.querySelector('input[data-g="metadata"][data-k="creation_date"]');
+    el.value = pdfNow(); el.dataset.auto = "1";
+    schedule();
+  });
+  document.querySelector('input[data-g="metadata"][data-k="creation_date"]')
+    .addEventListener("input", e => { e.target.dataset.auto = ""; });
+}
+function fill() {
+  document.querySelectorAll("input[data-g]").forEach(inp => {
+    const g = inp.dataset.g, k = inp.dataset.k;
+    inp.value = g === "@addr" ? ((data.customer.address_lines || [])[+k] || "")
+              : g === "" ? (data[k] ?? "")
+              : ((data[g] || {})[k] ?? "");
+  });
+  document.getElementById("opt_watermark").checked = state.watermark;
+  document.getElementById("opt_mark").checked = state.mark;
+  const fm = document.querySelector(`input[name='optFonts'][value='${state.fonts || "declared"}']`);
+  if (fm) fm.checked = true;
+  document.getElementById("optAuto").checked = data.summary.auto !== false;
+  renderTx();
+  applyAuto();   // 同步只读态与计算值（不触发生成）
+  // 创建时间默认：期间结束日 06-08 点随机（UTC-4），空值自动填
+  const cd = document.querySelector('input[data-g="metadata"][data-k="creation_date"]');
+  if (cd && !cd.value.trim()) { cd.value = pdfDefaultCreation(); cd.dataset.auto = "1"; }
+}
+const NUM_FIELDS = [["","total_pages"],["bank","copyright_year"]];
+function collect() {
+  document.querySelectorAll("input[data-g]").forEach(inp => {
+    const g = inp.dataset.g, k = inp.dataset.k;
+    if (g === "@addr") data.customer.address_lines[+k] = inp.value;
+    else if (g === "") data[k] = inp.value;
+    else (data[g] = data[g] || {})[k] = inp.value;
+  });
+  data.summary.auto = document.getElementById("optAuto").checked;
+  for (const [g, k] of NUM_FIELDS) {  // 数值字段转 int
+    const box = g === "" ? data : data[g];
+    const n = parseInt(box[k], 10);
+    if (!isNaN(n)) box[k] = n;
+  }
+  document.querySelectorAll("#sec_tx input[data-i]").forEach(inp => {
+    const t = data.transactions[+inp.dataset.i];
+    if (t) t[inp.dataset.f] = inp.value;
+  });
+}
+const TX_COLS = [["date","日期",76],["desc","描述",null],["deposit","存入",84],["withdrawal","取出",84],["balance","余额",84]];
+function renderTx() {
+  const el = document.getElementById("sec_tx");
+  el.innerHTML = `<table><tr>${TX_COLS.map(c=>`<th style="${c[2]?`width:${c[2]}px;`:""}">${c[1]}</th>`).join("")}<th style="width:34px"></th></tr>` +
+    data.transactions.map((t,i)=>`<tr>${TX_COLS.map(c=>`<td><input data-i="${i}" data-f="${c[0]}" value="${(t[c[0]]||"").replace(/"/g,"&quot;")}"></td>`).join("")}
+      <td><button class="btn small del" data-del="${i}" title="删除此行">✕</button></td></tr>`).join("") +
+    `</table><button class="btn ghost small" style="margin-top:8px" id="addTx">+ 添加一行</button>`;
+}
+document.addEventListener("click", e => {
+  if (e.target.id === "addTx") {
+    collect();
+    if (data.transactions.length >= 200) { setStatus("最多 200 条流水", true); return; }
+    data.transactions.push({date:"",desc:"",deposit:"",withdrawal:"",balance:""});
+    renderTx(); applyAuto(); schedule();
+  }
+  const del = e.target.closest("[data-del]");
+  if (del) { collect(); data.transactions.splice(+del.dataset.del, 1); renderTx(); applyAuto(); schedule(); }
+});
+// ---------------- 金额自动计算（与 generate.py 同逻辑：整数分运算） ----------------
+function toCents(v) {
+  const t = String(v || "").replace(/[$,\s]/g, "");
+  if (!t) return 0;
+  const x = Math.round(parseFloat(t) * 100);
+  return isFinite(x) ? x : 0;
+}
+function fmtMoney(c) {
+  const neg = c < 0, a = Math.abs(c | 0);
+  return (neg ? "-" : "") + Math.floor(a / 100).toLocaleString("en-US") + "." + String(a % 100).padStart(2, "0");
+}
+function fmtUsd(c) { return (c < 0 ? "-$" : "$") + fmtMoney(Math.abs(c)); }
+function applyAuto() {
+  const on = document.getElementById("optAuto").checked;
+  // 只读联动字段：摘要三项 + Totals 两项 + 流水余额列
+  const roFields = [
+    'input[data-g="summary"][data-k="deposits_amount"]',
+    'input[data-g="summary"][data-k="withdrawals_amount"]',
+    'input[data-g="summary"][data-k="ending_amount"]',
+    'input[data-g="totals"][data-k="deposits"]',
+    'input[data-g="totals"][data-k="withdrawals"]',
+  ];
+  document.querySelectorAll(roFields.join(",")).forEach(i => { i.readOnly = on; i.classList.toggle("ro", on); });
+  document.querySelectorAll('#sec_tx input[data-f="balance"]').forEach(i => { i.readOnly = on; i.classList.toggle("ro", on); });
+  if (!on) return;
+  collect();
+  let bal = toCents(data.summary.begin_amount), dep = 0, wd = 0;
+  data.transactions.forEach((t, i) => {
+    dep += toCents(t.deposit); wd += toCents(t.withdrawal);
+    bal += toCents(t.deposit) - toCents(t.withdrawal);
+    t.balance = fmtMoney(bal);
+    const inp = document.querySelector(`#sec_tx input[data-i="${i}"][data-f="balance"]`);
+    if (inp) inp.value = t.balance;
+  });
+  data.summary.deposits_amount = fmtMoney(dep);
+  data.summary.withdrawals_amount = (wd >= 0 ? "-  " : "") + fmtMoney(wd);
+  data.summary.ending_amount = fmtUsd(bal);
+  data.totals = data.totals || {};
+  data.totals.deposits = fmtUsd(dep);
+  data.totals.withdrawals = fmtUsd(wd);
+  const setV = (sel, v) => { const el = document.querySelector(sel); if (el) el.value = v; };
+  setV('input[data-g="summary"][data-k="deposits_amount"]', data.summary.deposits_amount);
+  setV('input[data-g="summary"][data-k="withdrawals_amount"]', data.summary.withdrawals_amount);
+  setV('input[data-g="summary"][data-k="ending_amount"]', data.summary.ending_amount);
+  setV('input[data-g="totals"][data-k="deposits"]', data.totals.deposits);
+  setV('input[data-g="totals"][data-k="withdrawals"]', data.totals.withdrawals);
+}
+document.addEventListener("input", e => {
+  if (e.target.matches('input[data-g="summary"][data-k="begin_amount"], #sec_tx input[data-f="deposit"], #sec_tx input[data-f="withdrawal"], #optAuto')) {
+    applyAuto();
+  }
+  // 期间结束日变化时，未手工改过的创建时间默认值随之重算
+  if (e.target.matches('input[data-g="summary"][data-k="period_end"]')) {
+    const cd = document.querySelector('input[data-g="metadata"][data-k="creation_date"]');
+    if (cd && cd.dataset.auto === "1") { collect(); cd.value = pdfDefaultCreation(); }
+  }
+  if (e.target.matches("#sec_tx input, input[data-g], #opt_watermark, #opt_mark, input[name='optFonts']")) schedule();
+});
+window.doReset = async () => {
+  const r = await fetch("/api/reset"); const j = await r.json();
+  data = j.data; fill(); schedule();
+};
+// 当前时间 → PDF 原生格式 D:YYYYMMDDHHMMSS±HH'mm'（本机时区偏移）
+function pdfNow() {
+  const d = new Date();
+  const p = n => String(n).padStart(2, "0");
+  const off = -d.getTimezoneOffset();
+  const tz = (off >= 0 ? "+" : "-") + p(Math.floor(Math.abs(off) / 60)) + "'" + p(Math.abs(off) % 60) + "'";
+  return "D:" + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate())
+       + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds()) + tz;
+}
+// 默认创建时间：期间结束日 凌晨6-8点随机，时区固定 UTC-4，年份默认 2026
+//（若页眉日期带年份则随之，字段可随时手工覆盖）
+function pdfDefaultCreation() {
+  const pe = String((data.summary && data.summary.period_end) || "").trim();
+  let y = 2026, mo = 1, da = 1;
+  const ds = String(data.statement_date || "");
+  const ym = ds.match(/(\d{4})/);
+  if (ym) y = +ym[1];
+  const m = pe.match(/^(\d{1,2})\/(\d{1,2})$/);
+  if (m) { mo = +m[1]; da = +m[2]; }
+  const p = n => String(n).padStart(2, "0");
+  const h = 6 + Math.floor(Math.random() * 2);          // 6 或 7 点
+  const mi = Math.floor(Math.random() * 60);
+  const se = Math.floor(Math.random() * 60);
+  return "D:" + y + p(mo) + p(da) + p(h) + p(mi) + p(se) + "-04'00'";
+}
+let pdfMode = false;
+let pvKey = "";        // 上次预览内容键（页哈希串联）：内容没变就不动 PDF iframe
+async function reloadPreview() {
+  // 图片预览：页级增量——/pv/{内容哈希}.png，内容未变的页不换 src
+  // （浏览器 immutable 缓存直出、无白闪）；变化页先离屏预解码、就绪后才换 src，
+  // 旧图保持显示直至新图可绘制（屏闪根因=换 src 前清空旧图+新图未预载）
+  try {
+    const j = await (await fetch("/api/pages")).json();
+    const key = (j.hashes || []).join("|");
+    const box = document.getElementById("pvImages");
+    let imgs = [...box.querySelectorAll("img")];
+    while (imgs.length < j.pages) {
+      const im = document.createElement("img");
+      im.loading = "lazy";
+      box.appendChild(im);
+      imgs.push(im);
+    }
+    while (imgs.length > j.pages) imgs.pop().remove();
+    imgs.forEach((im, i) => {
+      const src = `/pv/${j.hashes[i]}.png`;
+      im.alt = `第 ${i + 1} 页`;
+      im.onerror = () => imgRetry(im, src);
+      if (im.src.endsWith(src)) return;         // 未变化页：零操作（无重载无重绘）
+      im.dataset.r = 0;
+      const pre = new Image();                  // 离屏预载+解码，就绪后原子换图
+      const apply = () => { im.src = src; };
+      if (pre.decode) { pre.src = src; pre.decode().then(apply, apply); }
+      else { pre.onload = apply; pre.onerror = apply; pre.src = src; }
+    });
+    if (pdfMode) {
+      // 原生 PDF 模式：内容键没变就不重载 iframe（内嵌查看器对改 src 不敏感，
+      // 须整体替换——但仅在内容真正变化时才替换，否则每次编辑都白屏闪一次）
+      if (key !== pvKey) {
+        const old = document.getElementById("pv");
+        const fresh = old.cloneNode(false);
+        fresh.src = "/preview.pdf";
+        old.replaceWith(fresh);
+      }
+    }
+    pvKey = key;
+  } catch (e) { setStatus("预览载入失败: " + e.message, true); }
+}
+// 图片加载失败自愈：最多重试 3 次（退避），仍失败则点击可重试（重试目标=该页哈希 URL）
+function imgRetry(img, src) {
+  const r = (+img.dataset.r || 0) + 1;
+  img.dataset.r = r;
+  if (r <= 3) {
+    setTimeout(() => { img.removeAttribute("src"); img.src = src; }, 500 * r);
+  } else {
+    img.title = "加载失败，点击重试";
+    img.style.background = "#d8dce2"; img.style.minHeight = "80px";
+    img.onclick = () => { img.dataset.r = 0; imgRetry(img, src); };
+  }
+}
+// 窗口重新聚焦时，若有破损图片则自动重载预览
+window.addEventListener("focus", () => {
+  if (document.querySelector("#pvImages img")) {
+    const broken = [...document.querySelectorAll("#pvImages img")]
+      .some(i => i.complete && i.naturalWidth === 0);
+    if (broken) reloadPreview();
+  }
+});
+// 焦点离开任一文本输入 → 立即按完整值生成
+document.getElementById("side").addEventListener("focusout", () => schedule());
+document.getElementById("btnMode").addEventListener("click", () => {
+  pdfMode = !pdfMode;
+  document.getElementById("pvImages").style.display = pdfMode ? "none" : "";
+  document.getElementById("pv").style.display = pdfMode ? "" : "none";
+  document.getElementById("btnMode").textContent = pdfMode ? "图片模式" : "PDF 模式";
+  pvKey = "";          // 切换模式强制重载一次 iframe（防止显示旧文档）
+  reloadPreview();
+});
+function schedule() {
+  clearTimeout(timer);
+  setStatus("生成中…");
+  timer = setTimeout(async () => {
+    // 焦点保持：文本输入进行中不生成/不预览（输完整个值才算一次输入）
+    const ae = document.activeElement;
+    if (ae && ((ae.tagName === "INPUT" && (ae.type === "text" || !ae.type || ae.type === "number"))
+        || ae.tagName === "TEXTAREA") && document.getElementById("side").contains(ae)) {
+      timer = setTimeout(schedule, 500);
+      return;
+    }
+    collect();
+    const fontsMode = document.querySelector("input[name='optFonts']:checked");
+    state = { watermark: document.getElementById("opt_watermark").checked,
+              mark: document.getElementById("opt_mark").checked,
+              fonts: fontsMode ? fontsMode.value : "embedded" };
+    try {
+      const r = await fetch("/api/generate", { method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ data, ...state }) });
+      const j = await r.json();
+      if (!j.ok) throw new Error(j.error || "生成失败");
+      reloadPreview();
+      // 未手工改过的创建时间默认值按当前期间重新随机
+      const cd = document.querySelector('input[data-g="metadata"][data-k="creation_date"]');
+      if (cd && cd.dataset.auto === "1") cd.value = pdfDefaultCreation();
+      setStatus("已更新 " + new Date().toLocaleTimeString());
+    } catch (err) { setStatus("错误: " + err.message, true); }
+  }, 600);
+}
+function setStatus(msg, err) {
+  const s = document.getElementById("status");
+  s.textContent = msg; s.className = err ? "err" : "";
+}
+(async function init() {
+  bindInputs();
+  const r = await fetch("/api/data"); const j = await r.json();
+  data = j.data; state = { watermark: j.watermark, mark: j.mark, fonts: j.fonts };
+  fill();
+  schedule();   // 默认值（含创建时间随机默认）落盘，保证预览/下载与显示一致
+})();
+</script>
+</body>
+</html>

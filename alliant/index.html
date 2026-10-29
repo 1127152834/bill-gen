@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Statement</title>
+<link rel="stylesheet" href="assets/fonts.css">
+<link rel="stylesheet" href="assets/statement.css">
+<link rel="stylesheet" href="assets/editor.css">
+</head>
+<body>
+<header id="toolbar">
+  <div class="brand">账单模板 · 可视化编辑器 <span class="tag">SAMPLE</span></div>
+  <div class="tools">
+    <span id="pageinfo" class="pageinfo">—</span>
+    <button class="btn ghost" id="zoom-out">−</button>
+    <span id="zoomval" class="zoomval">100%</span>
+    <button class="btn ghost" id="zoom-in">＋</button>
+    <button class="btn ghost" id="zoom-fit">适应</button>
+    <label class="btn file">导入 JSON<input type="file" id="btn-import" accept=".json" hidden></label>
+    <button class="btn ghost" id="btn-export">导出 JSON</button>
+    <button class="btn ghost" id="btn-reset">重置示例</button>
+    <button class="btn primary" id="btn-pdf">导出 PDF</button>
+    <button class="btn ghost" id="btn-print">打印</button>
+  </div>
+</header>
+<div id="main">
+  <aside id="editor"><p style="padding:20px;color:#8a97a5">加载中…</p></aside>
+  <section id="preview"><div id="stage-wrap"><div id="stage"></div></div></section>
+</div>
+
+<script src="assets/vendor/embedded-assets.js"></script>
+<script src="assets/vendor/fontkit.umd.min.js"></script>
+<script src="assets/vendor/pdf-lib.min.js"></script>
+<script src="js/logo-svg.js"></script>
+<script src="js/statement-engine.js"></script>
+<script src="js/font-decls.js"></script>
+<script src="js/baked-lines.js"></script>
+<script src="js/pdf-export.js"></script>
+<script src="js/sample-data.js"></script>
+<script src="js/editor.js"></script>
+</body>
+</html>

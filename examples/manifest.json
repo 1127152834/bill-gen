@@ -1,0 +1,36 @@
+{
+  "files": [
+    {
+      "source": "examples/boa-personal.json",
+      "target": "BOA/statement_template/editor/data_personal.json"
+    },
+    {
+      "source": "examples/boa-business.json",
+      "target": "BOA/statement_template/editor/data_business.json"
+    },
+    {
+      "source": "examples/wf.json",
+      "target": "富国/statement_template/editor/data.json"
+    },
+    {
+      "source": "examples/wf.json",
+      "target": "富国/statement_template/data_sample.json"
+    },
+    {
+      "source": "examples/chase-personal.json",
+      "target": "大通/statement_template/editor_personal/data_personal.json"
+    },
+    {
+      "source": "examples/chase-business.json",
+      "target": "大通/statement_template/editor_business/data_business.json"
+    },
+    {
+      "source": "examples/us-personal.json",
+      "target": "USbank/statement_template/editor_us/data_us.json"
+    },
+    {
+      "source": "examples/us-business.json",
+      "target": "USbank/statement_template/editor_biz/data_biz.json"
+    }
+  ]
+}

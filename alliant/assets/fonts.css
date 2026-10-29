@@ -1,0 +1,69 @@
+/* ============================================================
+   字体声明 — 与原稿 PDF 的字体声明保持一致
+   ------------------------------------------------------------
+   原稿声明的字体(BaseFont)            嵌入方式          本模板对应
+   SCORPQ+Aileron-Regular (Type1/CFF 子集)  已嵌入  →  Aileron-Regular.otf (PDF 原始提取, 轮廓一致)
+   SCORPA+Aileron-Bold     (Type1/CFF 子集)  已嵌入  →  Aileron-Bold.otf    (PDF 原始提取, 轮廓一致)
+   Arial-BoldMT            (TrueType)       未嵌入  →  Arial-BoldMT.ttf    (同名字体文件嵌入)
+   EX_CFF_Helvetica        (Type1/CFF 子集)  已嵌入  →  EX_CFF_Helvetica.otf (PDF 原始提取 CFF 打包)
+   EX_CFF_Times-Roman      (Type1/CFF 子集)  已嵌入  →  EX_CFF_Times-Roman.otf (同上)
+   TimesNewRomanPS-BoldMT  (TrueType)       未嵌入  →  TimesNewRomanPS-BoldMT.ttf (声明但正文未使用, 与原稿一致)
+   SCORPN/F+MinionPro-Regular (CID Type0)     已嵌入  →  MinionPro-Regular.otf (声明但正文未使用, 与原稿一致)
+   另附公开版 Aileron-Web (CC0) 作为编辑新文字时的逐字回退。
+   所有 face 统一 ascent/descent 覆盖(75%/25%)以保证基线定位与原稿一致。
+   ============================================================ */
+
+@font-face {
+  font-family: 'EX_CFF_Helvetica';
+  src: url('fonts/EX_CFF_Helvetica.otf') format('opentype');
+  font-weight: 400; font-style: normal;
+  ascent-override: 75%; descent-override: 25%; line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'EX_CFF_Times-Roman';
+  src: url('fonts/EX_CFF_Times-Roman.otf') format('opentype');
+  font-weight: 400; font-style: normal;
+  ascent-override: 75%; descent-override: 25%; line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Aileron-Regular';
+  src: url('fonts/Aileron-Regular.otf') format('opentype');
+  font-weight: 400; font-style: normal;
+  ascent-override: 75%; descent-override: 25%; line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Aileron-Bold';
+  src: url('fonts/Aileron-Bold.otf') format('opentype');
+  font-weight: 700; font-style: normal;
+  ascent-override: 75%; descent-override: 25%; line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Aileron-Web';
+  src: url('fonts/Aileron-Web-Regular.otf') format('opentype');
+  font-weight: 400; font-style: normal;
+  ascent-override: 75%; descent-override: 25%; line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Aileron-Web';
+  src: url('fonts/Aileron-Web-Bold.otf') format('opentype');
+  font-weight: 700; font-style: normal;
+  ascent-override: 75%; descent-override: 25%; line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Arial-BoldMT';
+  src: url('fonts/Arial-BoldMT.ttf') format('truetype');
+  font-weight: 700; font-style: normal;
+  ascent-override: 75%; descent-override: 25%; line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'TimesNewRomanPS-BoldMT';
+  src: url('fonts/TimesNewRomanPS-BoldMT.ttf') format('truetype');
+  font-weight: 700; font-style: normal;
+  ascent-override: 75%; descent-override: 25%; line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'MinionPro-Regular';
+  src: url('fonts/MinionPro-Regular.otf') format('opentype');
+  font-weight: 400; font-style: normal;
+  ascent-override: 75%; descent-override: 25%; line-gap-override: 0%;
+}

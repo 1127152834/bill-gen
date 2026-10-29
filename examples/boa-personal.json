@@ -1,0 +1,99 @@
+{
+  "template": "personal",
+  "auto": true,
+  "watermark": true,
+  "encrypt": false,
+  "bank": {
+    "name": "Sample Bank",
+    "legal": "Sample Bank, N.A.",
+    "domain": "example.invalid"
+  },
+  "customer_lines": [
+    "SAMPLE CUSTOMER",
+    "123 Sample Lane",
+    "Austin TX 78701"
+  ],
+  "owner_names": [
+    "SAMPLE CUSTOMER"
+  ],
+  "owner_line": "SAMPLE CUSTOMER",
+  "strip_name": "SAMPLE CUSTOMER",
+  "account_number": "000000000001",
+  "product": "Sample Checking",
+  "period": {
+    "label": "January 1, 2027 to January 31, 2027",
+    "begin": "January 1, 2027",
+    "end": "January 31, 2027"
+  },
+  "begin_balance": "1000.00",
+  "deposits": [
+    {
+      "date": "01/04/27",
+      "desc": "SAMPLE SALARY",
+      "amount": "500.00"
+    }
+  ],
+  "withdrawals": [
+    {
+      "date": "01/06/27",
+      "desc": "SAMPLE RENT",
+      "amount": "-120.00"
+    }
+  ],
+  "fees": [],
+  "summary": {
+    "begin": "$1,000.00",
+    "deposits": "500.00",
+    "withdrawals": "-120.00",
+    "checks": "-0.00",
+    "fees": "0.00",
+    "ending": "$1,380.00"
+  },
+  "totals": {
+    "deposits": "$500.00",
+    "withdrawals": "-$120.00",
+    "checks": "-$0.00",
+    "fees": "$0.00"
+  },
+  "daily": [
+    [
+      "01/04",
+      "1,500.00"
+    ],
+    [
+      "01/06",
+      "1,380.00"
+    ]
+  ],
+  "stats": {
+    "items_prev": "0",
+    "days": "31",
+    "avg_ledger": "$1,350.97"
+  },
+  "qualifications": [
+    {
+      "text": "Sample eligibility condition A",
+      "met": false
+    },
+    {
+      "text": "Sample eligibility condition B",
+      "met": false
+    },
+    {
+      "text": "Sample eligibility condition C",
+      "met": false
+    }
+  ],
+  "show_daily": true,
+  "min_pages": 4,
+  "metadata": {
+    "title": "SAMPLE — NOT A REAL BANK STATEMENT",
+    "author": "",
+    "producer": "BillGen Sample Editor",
+    "creator": "BillGen Sample Editor",
+    "subject": "Fictional sample statement",
+    "keywords": "sample",
+    "creation": "D:20270131000000Z",
+    "mod": "D:20270131000000Z"
+  }
+}
