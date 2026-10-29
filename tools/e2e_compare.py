@@ -321,6 +321,7 @@ def main() -> int:
     ap.add_argument("--templates", default="", help="逗号分隔；默认全部可渲染模板")
     ap.add_argument("--png", action="store_true", help="同时导出并排对比图")
     ap.add_argument("--no-watermark", action="store_true", help="出片不带 SAMPLE 水印（对比用）")
+    ap.add_argument("--label", default="", help="报告文件名后缀：个人账本与 企业账本 各存一份，别互相覆盖")
     ap.add_argument(
         "--as-business",
         action="store_true",
@@ -404,8 +405,9 @@ def main() -> int:
         report.append("")
         print()
 
-    (DOCS / "report.md").write_text("\n".join(report) + "\n")
-    print(f"报告：{DOCS/'report.md'}")
+    name = f"report-{args.label}.md" if args.label else "report.md"
+    (DOCS / name).write_text("\n".join(report) + "\n")
+    print(f"报告：{DOCS/name}")
     return 0
 
 
