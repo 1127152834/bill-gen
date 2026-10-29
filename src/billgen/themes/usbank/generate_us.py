@@ -834,20 +834,19 @@ def _stamp_page_no(pg, k, total):
 def _replace_fields(pages, d, n_stmt):
     """字段替换（同文跳过保回放字节）：账号/期间/客户/页码，含克隆续页。"""
     L = LAYOUTS["us"]
-    total = len(pages)                      # 物理页数：披露页与尾页也算一页
+    # 页码只数「账单页」：参考件 `us_static_personal.pdf` 共 4 页，账单页 2 张，
+    # 印的是 `Page 1 of 2` / `Page 2 of 2`；披露页与尾空白页没有页码。
+    total = n_stmt
     dashed = str(d.get("account_display", "")).strip()
     spaced = dashed.replace("-", " ")
     account_pattern = r"\d[ -]\d{3}[ -]\d{4}[ -]\d{4}"
     for pg in pages:
         pi = pg.page.number
-        if pi == 1 or pi == len(pages) - 1 and pi > 2:
-            if pi == 1:
-                _stamp_page_no(pg, pi + 1, total)
-                continue                      # 静态披露页
+        if pi == 1:
+            continue                          # 静态披露页：原稿无页码
         lay = 2 if (pi >= 2 and pi != len(pages) - 1) else pi
         if pi == len(pages) - 1 and pi >= 2:
-            _stamp_page_no(pg, pi + 1, total)
-            continue                          # 尾空白页
+            continue                          # 尾空白页：原稿无页码
         lsp = L[lay]["spans"]
         # 账号（两种格式）+ 期间两日期 + 客户三行 + 页码
         for s in lsp:
@@ -902,8 +901,8 @@ def _replace_fields(pages, d, n_stmt):
                                                - lead - len(core)))
             except Exception as e:
                 print(f"[IMB] 生成失败保留原样: {e}", file=sys.stderr)
-        # 页码：一律用物理页码，总数用物理页数（原稿的 span 只存在于首页）
-        k = pi + 1
+        # 页码：账单页序号（首页=1，续页=物理索引）+ 账单页总数
+        k = 1 if pi == 0 else pi
         stamped = False
         for s in lsp:
             if re.fullmatch(r"Page \d of \d", s["text"].strip()):

@@ -320,6 +320,44 @@ def pdf_fingerprint_problems(template: str, pdf: bytes) -> list[dict[str, str]]:
     return problems
 
 
+import re as _re_page
+
+_PAGE_RE = _re_page.compile(r"Page\s+(\d+)\s*of\s*(\d+)")
+
+
+def page_number_problems(template: str, pdf: bytes) -> list[dict[str, str]]:
+    """页码必须自洽：`Page k of N` 里 k 按 1..N 递增，N 等于**带页码的页数**。
+
+    真实账单里披露页、尾空白页是不编号的（U.S. Bank 4 页只印 `Page 1 of 2`、
+    `Page 2 of 2`），所以 N 不等于物理页数是正常的；但 N 与「实际带页码的页数」
+    不一致、或 k 跳号/重号，就是露馅。
+    """
+    problems: list[dict[str, str]] = []
+    stamps: list[tuple[int, int, int]] = []          # (物理页, k, N)
+    with fitz.open(stream=pdf, filetype="pdf") as doc:
+        for page in doc:
+            hit = _PAGE_RE.search(page.get_text())
+            if hit:
+                stamps.append((page.number + 1, int(hit.group(1)), int(hit.group(2))))
+        pages = doc.page_count
+    if not stamps:
+        return problems
+    totals = {n for _, _, n in stamps}
+    if len(totals) > 1:
+        problems.append({"template": template, "rule": "page-number",
+                         "label": "同一份账单里页码总数不一致", "hit": str(sorted(totals))})
+    total = stamps[0][2]
+    seq = [k for _, k, _ in stamps]
+    if seq != list(range(1, len(stamps) + 1)):
+        problems.append({"template": template, "rule": "page-number",
+                         "label": "页码不连续或重号", "hit": f"{seq}（物理页 {[x for x,_,_ in stamps]}）"})
+    if total != len(stamps):
+        problems.append({"template": template, "rule": "page-number",
+                         "label": "页码总数与实际带页码页数不符",
+                         "hit": f"of {total}，实际带页码 {len(stamps)} 页 / 全件 {pages} 页"})
+    return problems
+
+
 def statement_text(template: str, ledger, *, watermark: bool = False) -> str:
     """渲染并取正文文本。
 
@@ -334,6 +372,7 @@ def check_template(template: str, ledger) -> list[dict[str, str]]:
     with fitz.open(stream=pdf, filetype="pdf") as doc:
         text = "\n".join(page.get_text() for page in doc)
     problems: list[dict[str, str]] = pdf_fingerprint_problems(template, pdf)
+    problems.extend(page_number_problems(template, pdf))
     problems.extend(url_path_problems(template, text))
     for key, label, pattern in COMMON_RULES:
         hit = pattern.search(text)

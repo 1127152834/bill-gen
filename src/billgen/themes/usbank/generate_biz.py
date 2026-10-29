@@ -1055,15 +1055,17 @@ def _stamp_page_no(pg, k, total):
 def _replace_fields(pages, d, n_stmt):
     """字段替换（同文跳过保回放字节）：账号/期间/客户/页码，含克隆续页。"""
     L = LAYOUTS["usbiz"]
-    total = len(pages)
+    # 页码只数「账单页」：参考件 `usbiz_static.pdf` 是 `Page 1 of 1`（2 页里披露页不算），
+    # 个人版是 `Page 1 of 2` / `Page 2 of 2`（4 页里披露页与尾空白页都不算）。
+    # 用物理页数当总数会印出「Page 1 of 4」却只有 2 张账单页，一眼假。
+    total = n_stmt
     dashed = str(d.get("account_display", "")).strip()
     spaced = dashed.replace("-", " ")
     account_pattern = r"\d[ -]\d{3}[ -]\d{4}[ -]\d{4}"
     for pg in pages:
         pi = pg.page.number
         if pi == 1 or pi > n_stmt:
-            _stamp_page_no(pg, pi + 1, total)
-            continue                          # 披露页(索引1)/尾空白页
+            continue                          # 披露页(索引1)/尾空白页：原稿无页码，不许补
         lay = 0                               # 账单页们同源布局（续页为 p1 克隆）
         lsp = L[lay]["spans"]
         # 账号（两种格式）+ 期间两日期 + 客户三行 + 页码
@@ -1122,8 +1124,8 @@ def _replace_fields(pages, d, n_stmt):
                                                - lead - len(core)))
             except Exception as e:
                 print(f"[IMB] 生成失败保留原样: {e}", file=sys.stderr)
-        # 页码：物理页码 + 物理总页数
-        k = pi + 1
+        # 页码：账单页序号 + 账单页总数
+        k = 1 if pi == 0 else pi
         stamped = False
         for s in lsp:
             if re.fullmatch(r"Page \d of \d", s["text"].strip()):

@@ -245,3 +245,33 @@ capitalone `DEFAULT_TEXT_SHA=d07cdc35…e0c0b0`、第三页像素 `e94c861c64e8a
 个人 7 套差异 0 项、企业 3 套全 0。
 
 回滚：`git revert <本轮提交>`。
+
+## 第十轮（U.S. Bank 页码：把「物理页数」换成「账单页总数」）
+
+自查方式：把 11 套出片的 `Page k of N` 全捞出来跟物理页数对。
+
+命中一个硬伤：`usbank-business.pdf` 物理 4 页，却印 `Page 1 of 3 / 2 of 3 / 3 of 3`
+（多出来那页是尾空白页，而且披露页也被塞了页码）。个人版更离谱：参考件明明印
+`Page 1 of 2` / `Page 2 of 2`，我们印 `of 4`。
+
+参考件口径（`usbank/assets/`）：
+- `us_static_personal.pdf`：4 页 = 账单页1 / 披露页 / 账单页2 / 尾空白页，
+  只有两张账单页有页码，且总数是 **2**；
+- `usbiz_static.pdf`：2 页 = 账单页 + 披露页，印 `Page 1 of 1`。
+
+修法（`generate_us.py::_replace_fields` 与 `generate_biz.py::_replace_fields` 同步）：
+- `total = n_stmt`（账单页数），不再用 `len(pages)`；
+- 披露页（索引 1）与尾空白页**不补页码**；
+- 账单页序号 `k = 1 if pi == 0 else pi`（首页 1，续页取物理索引）。
+
+出片复验：个人 4 页 → `Page 1 of 2` /（披露页无）/ `Page 2 of 2` /（空白页无），
+与参考件一字不差；企业 4 页 → `Page 1 of 2` / `Page 2 of 2`。
+
+新增闸门规则 `tools/realism_rules.py::page_number_problems(template, pdf)`：
+同一份账单里 `of N` 必须唯一、`k` 必须 1..N 连续、**N 必须等于实际带页码的页数**
+（允许 N 小于物理页数 —— 披露页/空白页本来就不编号）。
+
+基线：`tests/test_usbank_shared.py` 八条 GOLDENS 全部重采；`tools/render_regression.py`
+刷新 16 例。`pytest` 562 passed / 16 skipped / 33 subtests，`realism_rules.py` 全绿。
+
+回滚：`git revert <本轮提交>`。
