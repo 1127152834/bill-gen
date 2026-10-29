@@ -78,3 +78,34 @@ git checkout <prev> -- tests/test_explicit_engines.py         # 基线
   2. 正文句子被品牌替换改写成病句：参考件 `visit a Chase branch.`，我们出 `visit a JPMorgan Chase Bank branch.`
      → `branding.Brand` 新增 `short`（`_SHORT_NAMES` 表 + 去 `Bank`/`N.A.` 后缀），槽位模板改 `{short}`。
 - 回滚：`git revert <this-commit>`；单点 `git checkout <prev> -- tools/e2e_compare.py src/billgen/branding.py src/billgen/synth/adapters/chase.py`。
+
+## 第三轮（肉眼复核手绘版式 + 对比工具诚实化）
+
+肉眼看的顺序：mercury → sofi → chase-business → boa-personal → amex → wellsfargo。修的都是「一眼假」的硬伤：
+
+| 版式 | 问题 | 修法 |
+| --- | --- | --- |
+| amex | 水印 `SAMPLE` 0.60 灰 + 0.45 不透明度，白底上一块深灰砖头 | `WM_GRAY = (0.93,0.93,0.95)`、`fill_opacity=0.55` |
+| amex | 卡行印成 `… WALGREENS #5310 AUSTIN TX AUSTIN TX` | `line_styles.amex_desc` 尾部已带城市就不再补 |
+| amex | 出件日 = 期末当天（09/30 结单 09/30 寄） | `statement_date` 改期末 + 2 天 |
+| wellsfargo | 封面 `Questions?` 里号码整条消失，只剩 `Available by phone …：` | 见下 |
+| chase-business | MSF 段落 `$13081.17`（正文无千分位，和 summary 的 `$13,081.17` 打架） | `msf.lowest_daily` 走 `cents_to_grouped` |
+| chase-business | 正文病句 `visit a JPMorgan Chase Bank branch` | `Brand.short`（真件写 `visit a Chase branch`） |
+
+WF 号码消失的根因链（值得记一笔）：
+1. 请求里没给行名 → `bridge._adopt_template_bank()` 从模板默认数据取 `name`，但模板的银行字段叫
+   `phone_name`/`phone_main`/`legal_na`，不在 `_BANK_FIELDS` 里 → 拼出来的 `BankIdentity` 只有名字，
+   电话/信箱全空；
+2. `_common.bank_contact()` 又把 `phone_name` 映射成行名、`phone_main` 映射成空串；
+3. `adapters/wellsfargo.py` 无条件 `bank.update(bank_contact(...))` → 模板里真实的
+   `1-800-TO-WELLS (1-800-869-3557)` 被空串覆盖，`apply_subs` 把号码换成空 → 整行消失，
+   同时 `NMLSR ID 399801`、`N.A. (115)` 也被派生随机数换掉。
+修法：`real_traits(name)` 补齐身份；`bank_contact` 的 `phone_name` 取字母号；行名与模板同家时
+（`same_bank`）一个字段都不动；派生值只填空、不覆盖模板真数据。
+
+对比工具（原来会给出误导性的「0 项差异」）：
+- `--templates` 里带 `alliant`/`ally` 这类**浏览器端 pdf-lib 模板**时，报「Python 侧无出片路径」而不是空原因；
+- 既没有参考 PDF、也没有 layout 底稿的版式（amex）不再印「改用 layout json 做结构比对（0 段文字）」；
+- `compare_layout()` 跳过孤立单字符 span（`-`/`•`）——它们和金额负号撞车，之前让 wellsfargo 恒报 1 段漂移。
+
+回滚：`git revert fa66f48 0e2936b`；单点 `git checkout <prev> -- src/billgen/synth/bridge.py src/billgen/synth/adapters/_common.py src/billgen/synth/adapters/wellsfargo.py`。

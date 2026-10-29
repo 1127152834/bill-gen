@@ -141,6 +141,23 @@ def analyze(path: Path) -> Facts:
     )
 
 
+
+def _skip_reason(template: str) -> str:
+    """空错误串时给一句人话：`alliant`/`ally` 是浏览器端 pdf-lib 模板，Python 没有出片路径。"""
+    import sys as _sys
+
+    _sys.path.insert(0, str(ROOT / "src"))
+    try:
+        from billgen import registry
+
+        spec = registry.get_spec(template)
+    except Exception:
+        return "无法取到模板定义"
+    if getattr(spec, "kind", "") == "static-web":
+        return "浏览器端 pdf-lib 模板，Python 侧无出片路径（跳过）"
+    return f"{template} 无法在 Python 侧渲染"
+
+
 def render_template(template_id: str, result: dict[str, Any], *, watermark: bool = True) -> Path:
     out = OUT / f"{template_id}.pdf"
     renderer = registry.get_renderer(template_id)
@@ -267,6 +284,11 @@ def compare_layout(page, ref_spans: list[dict[str, Any]], tol: float = 2.5) -> t
                     ours.append((text, (span["bbox"][0], span["origin"][1])))
     bad, notes = 0, []
     for ref in ref_spans:
+        text_ref = ref["text"].strip()
+        if len(text_ref) < 2 and not text_ref.isalnum():
+            # 孤立的 `-`/`•`：出片里同字符出现在别处（金额负号、列表符号），
+            # 撞出来的「漂移」没有意义，直接不比。
+            continue
         hit = next((bbox for text, bbox in ours if text == ref["text"]), None)
         if hit is None:
             continue  # 合成数据换了文案（客户名/金额），不算版式漂移
@@ -328,13 +350,19 @@ def main() -> int:
         try:
             pdf = render_template(template, result, watermark=not args.no_watermark)
         except Exception as err:  # 账户类型不匹配等
-            print(f"   跳过：{err}")
-            report.append(f"## {template}\n\n跳过：`{err}`\n")
+            reason = str(err) or _skip_reason(template)
+            print(f"   跳过：{reason}")
+            report.append(f"## {template}\n\n跳过：`{reason}`\n")
             continue
         ours = analyze(pdf)
         print(f"   {ours.pages}p  fonts={len(ours.fonts)}  ink={ours.ink}")
 
         ref_rel = REFERENCES.get(template)
+        # 有些版式既没有参考 PDF 也没有 layout json（引擎纯代码绘制），
+        # 那就别印「0 段文字」，否则读者会以为跑过了结构比对。
+        if not ref_rel and layout_reference(template) is None:
+            report.append("无参考件（无 PDF、无 layout json）：本轮只做自检指标与区块标题检查。")
+            report.append("")
         report.append(f"## {template}")
         report.append("")
         if ref_rel:
@@ -360,7 +388,12 @@ def main() -> int:
         else:
             layout = layout_reference(template)
             ref_spans = layout_spans(template, layout) if layout else []
-            report.append(f"无参考 PDF，改用 layout json 做结构比对（{len(ref_spans)} 段文字）")
+            if ref_spans:
+                report.append(f"无参考 PDF，改用 layout json 做结构比对（{len(ref_spans)} 段文字）")
+            else:
+                # 引擎纯代码绘制、没有 layout 底稿：说清楚「没做结构比对」，
+                # 别印一个「0 段」让人误以为比对过且全过。
+                report.append("无参考件（无 PDF、无 layout 底稿）：本轮只做自检指标与区块标题检查。")
             report.append("")
             if ref_spans:
                 with fitz.open(pdf) as doc:
