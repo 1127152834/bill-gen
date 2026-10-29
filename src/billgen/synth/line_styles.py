@@ -8,6 +8,8 @@
 """
 from __future__ import annotations
 
+import re
+
 from typing import Final
 
 from .ledger import LedgerDocument, LedgerRow
@@ -196,12 +198,27 @@ def sofi_type(row: LedgerRow) -> str:
     return "Deposit" if row.direction == "credit" else "Withdrawal"
 
 
+_MERCURY_PAYMENT_TAIL: Final = re.compile(
+    r"\s+(PAYMENT|PMT|PAY|DIRECT DEP(?:OSIT)?|DEPOSIT|TRANSFER|ACH(?: CREDIT| DEBIT)?)$"
+)
+
+
 def mercury_desc(ledger: LedgerDocument, row: LedgerRow, text: str) -> str:
-    """Mercury：卡行只印商户（``AWS EMEA``/``UBER TRIP``），不塞城市与卡号。"""
+    """Mercury：卡行只印商户（``AWS EMEA``/``UBER TRIP``），不塞城市与卡号。
+
+    参考件的描述就是对方的名字：``STRIPE PAYOUT``、``ACME CLIENT WIRE``、
+    ``MONTHLY SERVICE FEE``；账本里带的 ``… PAYMENT`` 尾巴在 Type 列已经表达过
+    （ACH In/Out），印出来反而像模板拼的。
+    """
     if row.type == "ATM":
         # 真账单是 `ATM WITHDRAWAL AUSTIN TX`，不是把终端号丢在描述里
         return f"ATM WITHDRAWAL {_city_state(ledger)}".strip()
-    return text.upper()
+    body = text.upper().strip()
+    if row.type in ("ACH", "ZELLE", "TRANSFER"):
+        stripped = _MERCURY_PAYMENT_TAIL.sub("", body)
+        if len(stripped) >= 4:
+            body = stripped
+    return body
 
 
 _MERCURY_TYPES: Final[dict[str, str]] = {

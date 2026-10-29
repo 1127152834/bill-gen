@@ -185,7 +185,7 @@ def build(*, out_dir: str | None = None):  # noqa: ANN201 - 返回 FastMCP，避
                             bank_name: str = "", limit: int = 3) -> dict[str, Any]:
         try:
             ledger = synth.from_game_result(result, account=account or None, cycle=cycle,
-                                            bank_name=bank_name or None)
+                                            template=template_id, bank_name=bank_name or None)
         except (KeyError, ValueError, synth.SynthLintError) as err:
             return {"ok": False, "errors": [str(err)], "candidates": []}
         ranked = synth.recommend(ledger, limit=max(1, min(int(limit), len(synth.BINDINGS))))
@@ -264,7 +264,7 @@ def build(*, out_dir: str | None = None):  # noqa: ANN201 - 返回 FastMCP，避
                           cycle: int = -1, bank_name: str = "") -> dict[str, Any]:
         try:
             ledger = synth.from_game_result(result, account=account or None, cycle=cycle,
-                                            bank_name=bank_name or None)
+                                            template=template_id, bank_name=bank_name or None)
             data = synth.build_data(template_id, ledger)
         except (KeyError, ValueError, synth.SynthLintError) as err:
             return {"ok": False, "errors": [str(err)]}

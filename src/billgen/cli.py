@@ -108,6 +108,7 @@ def _cmd_synth_render(args: argparse.Namespace) -> int:
         cycle=args.cycle,
         bank_name=args.bank_name,
         watermark=not args.no_watermark,
+        template=args.template,
     )
     opts = replace(
         spec.default_options,

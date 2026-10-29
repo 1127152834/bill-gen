@@ -16,15 +16,17 @@ ENGINES = [
 # 2026-10-29 重采：数据仍是原稿基线（`PARITY_DATA`），但水印改成画在正文之下
 # （原稿把 0.78 灰的 SAMPLE 盖在金额上，一眼假），字符流顺序与像素因此变化。
 # 原稿基线文本见各主题模块的 `PARITY_DATA`。
+# 水印层级改回「最上层、极浅灰」后（与参考件一致，见 docs/notes/e2e-round1.md），
+# 字符流顺序与像素都变了，三套基线按新渲染重采。
 DEFAULT_TEXT_SHA = {
-    "mercury": "9cf98ee63c443a5b8b9872ad4cc9e6733765be6659285202f40bbfb15b363a4e",
-    "capitalone": "4f173462cc0ddd328d444dff79b806b455ec0825212c9f09fc8046da83e5adff",
-    "sofi": "0c2c11ea6cd19a74cbe0a9cb1225d7185346c7d9ffaa6a3eb268c853d227b2fe",
+    "mercury": "03624891786d6e2bd4dfbac2b305bdff1458b1db0304ab3d1b702bda7a6d4f2f",
+    "capitalone": "e83890f95d5cbcbb28464165bf8b187f33947f650a33cb32ae863c8a5a16c4bc",
+    "sofi": "4260995e2f8761189763277b12b3f1114e09cd2467070b4279aa688d57a70f32",
 }
 DEFAULT_PIXELS = {
-    "mercury": ['59c505f1ddcb265808f98f7ea33ab24e', '5f0f7dd150dad0ca34fabb24a89c0aaf'],
-    "capitalone": ['c3849588887b6ea0f7b53d955c6e1fd4', '0015ad79640d951fc45cf06e794bdcfc', '44be3649417d97ab40a56aa363d43a3e'],
-    "sofi": ['c2468345c528445159237952b097102d', 'ec92a65a02617d9b5498cfba5956db7a'],
+    "mercury": ['f5ba07c7d5a6a5efedfefb58b4180c4c', '4ae7e9f5265b75ff1020257b3a002c6c'],
+    "capitalone": ['03f2b8f34b718b3ca39554c2739336d8', '9149c670de197cb569d518c610e89f17', 'e407454df966612f38d9d9fd1925a588'],
+    "sofi": ['beddba3594841db54db4b629da43a055', 'af167418cb9d2a86127a55cbc24bb796'],
 }
 
 

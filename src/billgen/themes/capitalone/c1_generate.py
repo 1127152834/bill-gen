@@ -344,7 +344,8 @@ def watermark(page, *, ctx=None):
     pt = fitz.Point((612 - w * 0.707) / 2, 792 * 0.62)
     tw.append(pt, txt, font=f, fontsize=size)
     tw.write_text(page, color=(0.93, 0.93, 0.95), morph=(pt, fitz.Matrix(45)))
-    _wm_to_back(page)
+    # 参考件的水印是「最上层、极浅灰」：0.93 灰压在正文上只会淡一层，不会盖住金额；
+    # 反过来把它挪到最底层会被页面背景卡挡住 —— 实测可见面积只剩参考件的三分之一。
 
 def footer(page, page_num, total_pages, *, ctx=None):
     ctx = ctx if ctx is not None else _render_context()

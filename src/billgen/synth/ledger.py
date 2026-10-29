@@ -334,11 +334,11 @@ class AccountRef:
     def display(self) -> str:
         """账单正文里展示的账号。
 
-        真账单不会把 12 位账号完整印在正文（那是给冒领的人的礼物），只印
-        后四位，前面用掩码；MICR 行例外 —— 那行本来就是全号，由模板自己取
-        ``number``。
+        样本对过账：Mercury、SoFi、Chase、BoA、U.S. Bank 的正文都是**完整账号**
+        （Mercury ``700012345678``、SoFi ``41013344287``），只有 Capital One 的
+        页眉截成 ``...5521``。所以默认给全号，需要截断的版式自己在主题里截。
         """
-        return "x" * max(0, len(self.number) - 4) + self.number[-4:]
+        return self.number
 
     @property
     def grouped(self) -> str:
@@ -576,6 +576,11 @@ def refresh_references(ledger: "LedgerDocument") -> "LedgerDocument":
     return replace(ledger, rows=tuple(rows))
 
 
+#: 这些版式的参考件是「自然月结单」（Mercury 9 月 1 日–9 月 30 日、SoFi 同样），
+#: 平移成开户日账期会和页眉的 `September 2026` 打架。
+CALENDAR_MONTH_TEMPLATES = frozenset({"mercury", "capitalone", "sofi", "amex"})
+
+
 def _anchor_delta(period: Period, seed: str) -> int:
     """账期整体要平移的天数（让结单日落在 seed 派生的「开户日」上）。"""
     import hashlib
@@ -618,12 +623,15 @@ def from_game_result(
     bank_name: str | None = None,
     watermark: bool = True,
     realism: bool = True,
+    template: str = "",
 ) -> LedgerDocument:
     """把一个生成结果切成「一个账户 × 一个账期」的账本文档。
 
     :param account: ``checking`` / ``business_checking`` / ``credit``；缺省取第一个账户。
     :param cycle: 账期下标，``-1`` 表示最近一期。
     :param realism: 是否做「入账日 / 金额尾数 / 收单方前缀」的真实化处理。
+    :param template: 目标版式；日历月结单的版式（Mercury / Capital One / SoFi / Amex）
+        不参与「结单日按开户日平移」，否则页眉会出现「September 2026 / Aug 29 - Sep 27」这种自相矛盾的账期。
     """
     statements = payload.get("statements") or []
     if not statements:
@@ -642,8 +650,9 @@ def from_game_result(
 
     raw_period = Period(_parse_date(month["cycleStart"]), _parse_date(month["cycleEnd"]))
     book_seed = str(payload.get("seed") or payload.get("id") or "seed")
-    delta = _anchor_delta(raw_period, book_seed)
-    period = _anchored_period(raw_period, book_seed)
+    calendar_month = template in CALENDAR_MONTH_TEMPLATES
+    delta = 0 if calendar_month else _anchor_delta(raw_period, book_seed)
+    period = raw_period if calendar_month else _anchored_period(raw_period, book_seed)
     opening = int(month["openingBalanceCents"])
     closing = int(month["closingBalanceCents"])
 

@@ -333,7 +333,7 @@ def watermark(page, *, ctx=None):
     pt = fitz.Point((612 - w * 0.707) / 2, 792 * 0.62)
     tw.append(pt, txt, font=f, fontsize=sz)
     tw.write_text(page, color=(0.93, 0.93, 0.95), morph=(pt, fitz.Matrix(45)))
-    _wm_to_back(page)
+    # 参考件的水印在最上层、极浅灰；挪到底层会被背景卡吃掉。
 
 # ================================================================ logo
 _logo = None
