@@ -26,6 +26,20 @@ python3 -m venv .venv && .venv/bin/pip install -e '.[dev]'
 Alliant / Ally 保留浏览器内生成方式，并嵌入统一工作台。
 前端为本地静态 HTML / CSS / JavaScript，无外部 CDN 或额外 Node 构建步骤。
 
+## 单一入口
+
+一个进程一个端口：
+
+- `/` 渲染工作台（13 模板、结构化表单 / JSON、场景导入）
+- `/new`、`/history`、`/g/:id` 账单猎手（人设 → 流水 → MCP 出片）
+- `/api/v1/...` 渲染 API；`/api/v1/hunter/*` 猎手状态与配置
+- `/api/generations*` 作业接口（反代到本机猎手）
+
+顶栏分段控件切换两个工作区；「模型配置」里改模型端点、Key、结构化输出、调研 Key、行名、
+目标模板与是否让模型填表，保存即重启猎手子进程。细节见 [docs/m10-single-entry.md](docs/m10-single-entry.md)。
+
+启动：`billgen serve --port 8800`（默认带猎手；`--no-hunter` 只跑工作台）。
+
 ## 目录结构
 
 ```

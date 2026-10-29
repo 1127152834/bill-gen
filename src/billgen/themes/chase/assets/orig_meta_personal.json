@@ -1,12 +1,1 @@
-{
-  "personal": {
-    "producer": "BillGen Sample Editor",
-    "creator": "BillGen Sample Editor",
-    "title": "SAMPLE — NOT A REAL BANK STATEMENT",
-    "author": "",
-    "subject": "Fictional sample statement",
-    "keywords": "sample",
-    "creationDate": "D:20270131000000Z",
-    "modDate": "D:20270131000000Z"
-  }
-}
+{"personal": {"producer": "OpenText Output Transformation Engine - 23.4.26                                                     ", "creationDate": "D:20261016162205UTC00'00'", "modDate": "D:20261016162205UTC00'00'", "title": "", "author": "", "creator": "", "subject": "", "keywords": ""}}

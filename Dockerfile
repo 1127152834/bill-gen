@@ -60,7 +60,9 @@ RUN chmod +x /usr/local/bin/entrypoint.sh && mkdir -p /data/billgen /data/render
 
 WORKDIR /app
 VOLUME ["/data"]
-EXPOSE 8797 8800
-HEALTHCHECK --interval=15s --timeout=6s --start-period=20s --retries=3 \
-    CMD curl -fsS http://127.0.0.1:8800/healthz >/dev/null && curl -fsS http://127.0.0.1:8797/api/health >/dev/null
+# 对外只有 8800；猎手在本机 8797，由 billgen 监管并通过 /hunter/ 转发。
+EXPOSE 8800
+HEALTHCHECK --interval=15s --timeout=6s --start-period=40s --retries=3 \
+    CMD curl -fsS http://127.0.0.1:8800/healthz >/dev/null && \
+        curl -fsS http://127.0.0.1:8800/api/v1/hunter/status >/dev/null
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

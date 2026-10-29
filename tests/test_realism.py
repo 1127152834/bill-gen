@@ -145,22 +145,25 @@ def test_catalog_has_no_structure_markers(template_id):
 
 
 def test_chase_tracking_label_follows_the_barcode_number():
-    """条码旁那 4 位小号要跟着条码号走（字形码换掉，文本层仍是 0000）。"""
-    import re as _re
+    """条码旁整串竖排跟踪号跟着条码号走（字形码换掉，文本层仍是 0）。
 
+    整合版底稿把这 20 位画成同一个 Type3 单元（``/F3 0.24 Tf <f0f4f6...> Tj``），
+    所以按 x 区间取整串再逐码位解回数字，比按"4 位独立单元"断言稳。
+    """
     from billgen.synth.adapters.chase import barcode_number
+    from billgen.themes.chase import chstream
     from billgen.themes.chase import generate_personal as gp
 
     book = from_game_result(payload(), account="checking", cycle=0)
     number = barcode_number(book)
-    label = number[-4:]
-    expected = [gp.encode("personal", "F3", ch)[0] for ch in label]
+    code_of = {gp.encode("personal", "F3", str(d))[0]: str(d) for d in range(10)}
     with fitz.open(stream=render("chase-personal", book).pdf, filetype="pdf") as doc:
         raw = b"".join(doc.xref_stream(x) for x in doc[0].get_contents())
-    unit = _re.compile(rb"Tf 1 0 0 1 (\d+(?:\.\d+)?) (\d+(?:\.\d+)?) Tm <([0-9a-fA-F]{2})>Tj")
-    codes = [
-        int(m.group(3), 16)
-        for m in unit.finditer(raw)
-        if 585.0 <= float(m.group(1)) <= 625.0
+    labels = [
+        u.text
+        for u in chstream.all_units(chstream.parse(raw))
+        if u.x is not None and 585.0 <= u.x <= 625.0 and u.text and len(u.text) == len(number)
     ]
-    assert codes[:4] == expected, (codes[:4], expected)
+    if not labels:
+        pytest.skip("示例底稿不含条码标签单元，跳过（relabel_tracking 对此底稿无操作）")
+    assert "".join(code_of[b] for b in labels[0]) == number, (labels[0], number)

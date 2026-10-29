@@ -178,9 +178,24 @@ def test_brand_can_be_switched_off(ledger):
 def test_no_unregistered_brand_text(branded_pdf, template_id):
     pdf = branded_pdf(template_id)
     with fitz.open(stream=pdf, filetype="pdf") as doc:
-        text = "\n".join(page.get_text() for page in doc)
-    found = audit.scan_text(text)
+        found = audit.scan_pages(page.get_text() for page in doc)
     assert audit.unknown_gaps(template_id, found) == {}
+
+
+def test_brand_split_across_lines_is_still_caught():
+    """真实账单会断行：`your local U.S.` + `Bank branch.` 只扫原文本会漏掉。"""
+    pages = ["contact your local U.S.", "Bank branch or call us", "held at SoFi", "Bank, N.A."]
+    assert audit.scan_text("".join(pages)) == {}  # 直接拼起来正好把词切断
+    assert audit.scan_pages(pages) == {"U.S. Bank": 1, "SoFi": 1}
+
+
+@pytest.mark.parametrize("template_id", sorted(supported_ids()))
+def test_no_stale_text_layer_tokens(branded_pdf, template_id):
+    """sofi / usbank 曾经靠 `KNOWN_GAPS` 豁免；现在连折行拆开也不许出现。"""
+    with fitz.open(stream=branded_pdf(template_id), filetype="pdf") as doc:
+        flat = audit.normalize(" ".join(page.get_text() for page in doc))
+    for token in ("SoFi", "sofi.com", "U.S. Bank", "USbank", "USBANKS", "usbank.com"):
+        assert not audit.scan_text(flat).get(token), f"{template_id} 仍有 {token}"
 
 
 @pytest.fixture(scope="module")

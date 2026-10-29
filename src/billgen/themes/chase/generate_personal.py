@@ -556,23 +556,23 @@ def ensure_f3_digits(doc):
 
 
 def relabel_tracking(pages, digits, tag="personal"):
-    """条码旁那 4 位小号（原稿印 0000）换成条码号的末 4 位。
+    """把条码旁竖排跟踪号（原稿固定 20 位）整串换成条码号本身。
 
-    底稿把这 4 位画成独立 Type3 单元（``/F3 0.24 Tf <f0> Tj``），且 ToUnicode 把
-    它们全映射成 '0'——所以文本层永远是 0000，但**字形码**换成 1~9 之后画面就对上了。
-    这里只改单元码位，不擦不改字体，画风与原稿一致。
+    原稿把这 20 位画成**同一个** Type3 单元（``/F3 0.24 Tf <f0f4f6...> Tj``），
+    ToUnicode 把全部字形映射成 '0'——文本层永远是 0，只能靠字形码区分。
+    这里按码位逐个换成条码号的数字，不改字体不擦除，画风与原稿一致。
     """
-    base = int(digits[-4:]) if digits[-4:].isdigit() else 0
-    for pno, page in enumerate(pages):
-        codes = [encode(tag, "F3", ch) for ch in f"{(base + pno) % 10000:04d}"]
-        picked = 0
+    want = str(digits)
+    for page in pages:
         for seg in page.segs:
             for unit in getattr(seg, "units", ()):
-                if picked >= len(codes):
-                    break
-                if unit.font == "F3" and unit.x is not None and 585.0 <= unit.x <= 625.0:
-                    unit.set_text(codes[picked])
-                    picked += 1
+                if unit.font != "F3" or unit.x is None or not 585.0 <= unit.x <= 625.0:
+                    continue
+                current = unit.text or b""
+                if not current or not want:
+                    continue
+                text = (want * (len(current) // len(want) + 1))[:len(current)]
+                unit.set_text(b"".join(encode(tag, "F3", ch) for ch in text))
 
 
 def replace_barcode(doc, tracking_num):

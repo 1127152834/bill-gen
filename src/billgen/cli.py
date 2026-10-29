@@ -1,12 +1,13 @@
 """``billgen`` 命令行。
 
-    billgen list                       # 13 个模板一览
-    billgen render boa-personal -o out.pdf
-    billgen render --all --outdir _build
-    billgen synth render boa-personal --from result.json -o out.pdf
-    billgen parity record              # 记录基线
-    billgen parity verify              # 与基线比对（不一致则退出码 1）
+billgen list                       # 13 个模板一览
+billgen render boa-personal -o out.pdf
+billgen render --all --outdir _build
+billgen synth render boa-personal --from result.json -o out.pdf
+billgen parity record              # 记录基线
+billgen parity verify              # 与基线比对（不一致则退出码 1）
 """
+
 from __future__ import annotations
 
 import argparse
@@ -77,8 +78,10 @@ def _cmd_render(args: argparse.Namespace) -> int:
                 print(f"[FAIL] {spec.id}: {exc}", file=sys.stderr)
                 return 1
         for row in rows:
-            print(f"{row['template']:<18} {row['pages']}p {row['bytes']:>9}B "
-                  f"{row['elapsed_ms']:>5}ms -> {row['output']}")
+            print(
+                f"{row['template']:<18} {row['pages']}p {row['bytes']:>9}B "
+                f"{row['elapsed_ms']:>5}ms -> {row['output']}"
+            )
         return 0
     if not args.template:
         print("需要 --template 或 --all", file=sys.stderr)
@@ -110,8 +113,9 @@ def _cmd_synth_render(args: argparse.Namespace) -> int:
         encrypt=False if args.no_encrypt else spec.default_options.encrypt,
         page_dpi=args.dpi,
     )
-    result = render(args.template, ledger, opts, brand=not args.no_brand,
-                    docinfo=not args.no_docinfo)
+    result = render(
+        args.template, ledger, opts, brand=not args.no_brand, docinfo=not args.no_docinfo
+    )
     out = Path(args.output or f"{args.template}.pdf")
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_bytes(result.pdf)
@@ -151,7 +155,12 @@ def _cmd_parity(args: argparse.Namespace) -> int:
 def _cmd_serve(args: argparse.Namespace) -> int:
     from .server.http import serve
 
-    return serve(args.host, args.port)
+    return serve(
+        args.host,
+        args.port,
+        hunter=not args.no_hunter,
+        hunter_port=args.hunter_port,
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -176,19 +185,26 @@ def main(argv: list[str] | None = None) -> int:
     synth_sub = synth.add_subparsers(dest="synth_cmd", required=True)
     synth_render = synth_sub.add_parser("render", help="账本 → 指定模板 PDF")
     synth_render.add_argument("template", help="模板 id，例如 boa-personal")
-    synth_render.add_argument("--from", dest="from_file", required=True,
-                              help="flow 的 GenerationResult JSON 路径")
-    synth_render.add_argument("--account", choices=["checking", "business_checking", "credit"],
-                              help="选择账户（缺省取结果里的第一个）")
-    synth_render.add_argument("--cycle", type=int, default=-1,
-                              help="结算期下标，-1 表示最后一期")
+    synth_render.add_argument(
+        "--from", dest="from_file", required=True, help="flow 的 GenerationResult JSON 路径"
+    )
+    synth_render.add_argument(
+        "--account",
+        choices=["checking", "business_checking", "credit"],
+        help="选择账户（缺省取结果里的第一个）",
+    )
+    synth_render.add_argument("--cycle", type=int, default=-1, help="结算期下标，-1 表示最后一期")
     synth_render.add_argument("--bank-name", dest="bank_name", help="覆盖银行显示名")
     synth_render.add_argument("-o", "--output", help="输出 PDF 路径")
     synth_render.add_argument("--no-watermark", action="store_true")
-    synth_render.add_argument("--no-brand", action="store_true",
-                              help="保留模板原有的真实行标（默认替换成账本自己的行标）")
-    synth_render.add_argument("--no-docinfo", action="store_true",
-                              help="保留模板自带的 Producer/时间戳（默认改成真实账单引擎的痕迹）")
+    synth_render.add_argument(
+        "--no-brand", action="store_true", help="保留模板原有的真实行标（默认替换成账本自己的行标）"
+    )
+    synth_render.add_argument(
+        "--no-docinfo",
+        action="store_true",
+        help="保留模板自带的 Producer/时间戳（默认改成真实账单引擎的痕迹）",
+    )
     synth_render.add_argument("--no-encrypt", action="store_true")
     synth_render.add_argument("--dpi", type=int, default=110)
     synth_render.set_defaults(func=_cmd_synth_render)
@@ -208,6 +224,8 @@ def main(argv: list[str] | None = None) -> int:
     serve = sub.add_parser("serve", help="启动单进程 Web 编辑器与统一 API")
     serve.add_argument("--host", default="127.0.0.1")
     serve.add_argument("--port", type=int, default=8800)
+    serve.add_argument("--no-hunter", action="store_true", help="不拉起账单猎手（只跑渲染工作台）")
+    serve.add_argument("--hunter-port", type=int, default=8797, help="猎手子进程监听的本机端口")
     serve.set_defaults(func=_cmd_serve)
 
     args = parser.parse_args(argv)

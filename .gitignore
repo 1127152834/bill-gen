@@ -203,3 +203,7 @@ test-results.xml
 _build/
 flow/data/
 flow/apps/*/data/
+# 黄金回归的输入数据：默认规则会忽略 **/data*.json，但这两份是 P4 parity 的判据
+!src/billgen/themes/usbank/editor_us/data_us.json
+!src/billgen/themes/usbank/editor_biz/data_biz.json
+.artifacts/

@@ -4,7 +4,7 @@
 (function () {
   "use strict";
   const $ = sel => document.querySelector(sel);
-  const LS_KEY = "bill-gen-alliant-data-v1";
+  const LS_KEY = "statement-editor-data";
 
   let data = load() || JSON.parse(JSON.stringify(window.SAMPLE_DATA));
   /* 元数据创建时间默认值：算好直接填进字段（肉眼可见、导出不再变）=

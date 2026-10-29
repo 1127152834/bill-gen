@@ -19,7 +19,7 @@ sys.path.insert(0, str(ROOT / "src"))
 
 import fitz  # noqa: E402
 
-from billgen.audit import scan_text, unknown_gaps  # noqa: E402
+from billgen.audit import scan_pages, unknown_gaps  # noqa: E402
 from billgen.synth import from_game_result, render, supported_ids  # noqa: E402
 
 SAMPLE = {
@@ -103,8 +103,7 @@ def main(argv: list[str] | None = None) -> int:
             print(f"{template_id:18s} skip  {exc}")
             continue
         with fitz.open(stream=pdf, filetype="pdf") as doc:
-            text = "\n".join(page.get_text() for page in doc)
-        found = scan_text(text)
+            found = scan_pages(page.get_text() for page in doc)
         leftover = unknown_gaps(template_id, found)
         known = {token: count for token, count in found.items() if token not in leftover}
         status = "OK" if not leftover else "FAIL"

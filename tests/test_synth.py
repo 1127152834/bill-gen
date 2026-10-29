@@ -255,6 +255,9 @@ def test_render_business_pdf(template_id, business_ledger):
 
 
 def test_render_is_deterministic(ledger):
+    # 底稿字体是按需扩展的：首次渲染会把缺的字补进 prepared 文档（进程级缓存），
+    # 所以先热身一次，再比对两次「热态」渲染——这才是「同数据同字节」的真正承诺。
+    render("chase-personal", ledger)
     first = render("chase-personal", ledger).pdf
     second = render("chase-personal", ledger).pdf
     assert first == second

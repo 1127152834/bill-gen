@@ -1492,3 +1492,114 @@ kbd {
     transition: none !important;
   }
 }
+
+
+
+/* ---- 视图切换：工作台 / 账单猎手 -------------------------------------- */
+.view-switch {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
+  background: #e9ebe6;
+}
+.view-tab {
+  border: 0;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  color: #46524b;
+  cursor: pointer;
+}
+.view-tab.is-active {
+  background: #fff;
+  color: #14231b;
+  box-shadow: 0 1px 2px rgb(20 35 27 / 12%);
+}
+#main.view-hunter > :not(#hunter-pane) {
+  display: none;
+}
+.hunter-pane {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 4px;
+}
+.hunter-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+.hunter-head h1 {
+  margin: 6px 0;
+  font-size: 26px;
+  letter-spacing: -0.4px;
+}
+.hunter-head p {
+  max-width: 60ch;
+  margin: 0;
+  color: #56635b;
+  font-size: 13px;
+  line-height: 1.65;
+}
+.hunter-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 4px;
+}
+.hunter-frame {
+  flex: 1;
+  width: 100%;
+  min-height: 640px;
+  border: 1px solid #dfe2da;
+  border-radius: 14px;
+  background: #fff;
+}
+
+/* ---- 模型配置对话框 --------------------------------------------------- */
+.settings-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 16px;
+  margin: 12px 0 4px;
+}
+.settings-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 12px;
+  color: #4b5852;
+}
+.settings-grid .settings-span {
+  grid-column: 1 / -1;
+}
+.settings-grid .settings-wide {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+.settings-grid input[type="text"],
+.settings-grid input[type="password"],
+.settings-grid input[type="number"],
+.settings-grid select {
+  padding: 8px 10px;
+  border: 1px solid #d5d9d0;
+  border-radius: 9px;
+  background: #fff;
+  font: inherit;
+  font-size: 13px;
+  color: #17231b;
+}
+.cfg-status {
+  min-height: 18px;
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: #6a756d;
+}

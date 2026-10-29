@@ -1166,9 +1166,172 @@ window.addEventListener("storage", (event) => {
       "warning",
     );
 });
+
+/* ---- 视图切换与账单猎手 ------------------------------------------------ */
+const hunterState = { view: "studio", status: null, loaded: false, busy: false };
+
+function setView(view) {
+  hunterState.view = view === "hunter" ? "hunter" : "studio";
+  const hunter = hunterState.view === "hunter";
+  $("main").classList.toggle("view-hunter", hunter);
+  $("main").classList.toggle("view-studio", !hunter);
+  $("hunter-pane").hidden = !hunter;
+  $("view-studio").classList.toggle("is-active", !hunter);
+  $("view-hunter").classList.toggle("is-active", hunter);
+  $("view-studio").setAttribute("aria-selected", String(!hunter));
+  $("view-hunter").setAttribute("aria-selected", String(hunter));
+  $("synth-open").hidden = hunter || !state.synth.ready;
+  $("breadcrumb-name").textContent = hunter
+    ? "账单猎手"
+    : state.current?.display_name || "文档编辑";
+  if (hunter) openHunter();
+}
+
+async function openHunter() {
+  await loadHunterStatus();
+  const frame = $("hunter-frame");
+  if (!hunterState.loaded && hunterState.status?.running) {
+    frame.src = "/new";
+    hunterState.loaded = true;
+  }
+}
+
+function hunterStatusText(status) {
+  if (!status) return "检查中";
+  if (!status.enabled) return "未启用";
+  if (status.ready) return "运行中";
+  if (status.running) return "启动中";
+  return "已停止";
+}
+
+function applyHunterStatus(status) {
+  hunterState.status = status;
+  const label = $("hunter-status");
+  label.textContent = hunterStatusText(status);
+  label.className = "status " + (status?.ready ? "ready" : "error");
+  const notice = $("hunter-message");
+  const problem =
+    status && !status.enabled
+      ? status.environment || "猎手运行环境未就绪"
+      : status && !status.ready
+        ? status.error || "服务尚未就绪"
+        : "";
+  if (problem) {
+    notice.hidden = false;
+    notice.textContent = problem;
+  } else {
+    notice.hidden = true;
+    notice.textContent = "";
+  }
+  if (status?.settings) fillHunterSettings(status.settings);
+}
+
+async function loadHunterStatus() {
+  try {
+    applyHunterStatus(await api("/api/v1/hunter/status"));
+  } catch (error) {
+    applyHunterStatus({ enabled: false, environment: error.message });
+  }
+}
+
+function fillHunterSettings(settings) {
+  $("cfg-fake").checked = settings.llm_fake !== false;
+  $("cfg-base-url").value = settings.base_url || "";
+  $("cfg-api-key").value = "";
+  $("cfg-api-key").placeholder = settings.has_api_key ? "已配置，留空沿用" : "未配置";
+  $("cfg-model").value = settings.model || "";
+  $("cfg-structured").value = settings.structured_mode || "json_schema";
+  $("cfg-tavily").value = "";
+  $("cfg-tavily").placeholder = settings.has_tavily_key
+    ? "已配置，留空沿用"
+    : "未配置";
+  $("cfg-bank").value = settings.bank_name || "";
+  $("cfg-templates").value = settings.templates || "auto";
+  $("cfg-auto-limit").value = settings.auto_limit ?? 2;
+  $("cfg-ai-fill").checked = settings.ai_fill !== false;
+  $("cfg-status").textContent = settings.model_ready
+    ? "当前链路可用"
+    : "离线模式，或模型地址与 Key 不完整";
+}
+
+async function openHunterSettings() {
+  await loadHunterStatus();
+  $("hunter-settings-dialog").showModal();
+}
+
+async function saveHunterSettings() {
+  if (hunterState.busy) return;
+  hunterState.busy = true;
+  $("cfg-save").disabled = true;
+  $("cfg-status").textContent = "正在保存并重启服务…";
+  try {
+    const payload = {
+      llm_fake: $("cfg-fake").checked,
+      base_url: $("cfg-base-url").value.trim(),
+      model: $("cfg-model").value.trim(),
+      structured_mode: $("cfg-structured").value,
+      bank_name: $("cfg-bank").value.trim(),
+      templates: $("cfg-templates").value.trim() || "auto",
+      auto_limit: Number($("cfg-auto-limit").value) || 2,
+      ai_fill: $("cfg-ai-fill").checked,
+    };
+    const apiKey = $("cfg-api-key").value.trim();
+    const tavily = $("cfg-tavily").value.trim();
+    if (apiKey) payload.api_key = apiKey;
+    if (tavily) payload.tavily_api_key = tavily;
+    const result = await api("/api/v1/hunter/settings", {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    });
+    fillHunterSettings(result);
+    applyHunterStatus(result.status);
+    hunterState.loaded = false;
+    $("cfg-status").textContent = result.status?.ready
+      ? "已保存，服务已重启"
+      : "已保存，服务正在启动";
+    if (hunterState.view === "hunter") openHunter();
+  } catch (error) {
+    $("cfg-status").textContent = error.message;
+  } finally {
+    hunterState.busy = false;
+    $("cfg-save").disabled = false;
+  }
+}
+
+async function restartHunter() {
+  if (hunterState.busy) return;
+  hunterState.busy = true;
+  $("hunter-restart").disabled = true;
+  $("hunter-restart").textContent = "重启中…";
+  try {
+    applyHunterStatus(await api("/api/v1/hunter/restart", { method: "POST" }));
+    hunterState.loaded = false;
+    openHunter();
+  } catch (error) {
+    message(error.message);
+  } finally {
+    hunterState.busy = false;
+    $("hunter-restart").disabled = false;
+    $("hunter-restart").textContent = "重启服务";
+  }
+}
+
+$("view-studio").addEventListener("click", () => setView("studio"));
+$("view-hunter").addEventListener("click", () => setView("hunter"));
+$("hunter-settings-button").addEventListener("click", openHunterSettings);
+$("hunter-settings-close").addEventListener("click", () =>
+  $("hunter-settings-dialog").close(),
+);
+$("cfg-cancel").addEventListener("click", () =>
+  $("hunter-settings-dialog").close(),
+);
+$("cfg-save").addEventListener("click", saveHunterSettings);
+$("hunter-restart").addEventListener("click", restartHunter);
+
 async function boot() {
   updateActions();
   loadSynthCapabilities();
+  loadHunterStatus();
   try {
     const result = await api("/api/v1/templates");
     state.templates = result.templates || [];

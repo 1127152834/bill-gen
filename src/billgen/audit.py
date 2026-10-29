@@ -7,10 +7,13 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Iterable
 
 __all__ = [
     "BRAND_TOKENS",
     "KNOWN_GAPS",
+    "normalize",
+    "scan_pages",
     "scan_text",
     "unknown_gaps",
 ]
@@ -57,6 +60,23 @@ _PATTERNS = tuple(
 # M8 之后 11 套模板的文本层全部干净：sofi 的法务段落改成「品牌态重排」，
 # usbank 的跨行散文（`your local U.S.` + `Bank branch.`）两行一起换掉。
 KNOWN_GAPS: dict[str, tuple[str, ...]] = {}
+
+
+_WHITESPACE = re.compile(r"\s+")
+
+
+def normalize(text: str) -> str:
+    """把折行与多余空白压成单空格。
+
+    真实账单会把长句断行，`your local U.S.` 与 `Bank branch.` 分属两行；
+    只扫原文本的话，`U.S. Bank` 这种跨行品牌串恰好躲过审计。
+    """
+    return _WHITESPACE.sub(" ", text).strip()
+
+
+def scan_pages(pages: Iterable[str]) -> dict[str, int]:
+    """按页给文本，折行归一后再扫——这是「文本层是否干净」的唯一判据。"""
+    return scan_text(normalize(" ".join(pages)))
 
 
 def scan_text(text: str) -> dict[str, int]:

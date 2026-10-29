@@ -3,6 +3,9 @@
 Goldens hash page text and RGB pixels at 72 dpi (PyMuPDF 1.26.6), not PDF
 bytes: metadata timestamps and encryption are deliberately non-deterministic.
 Original implementation copies and generated PDFs stay outside the package.
+
+基线于 2026-10-29 重录：示例数据（editor_*/data_*.json、replay_*.json）曾被运行期写脏，
+恢复成 SAMPLE 样本后文本层与页数与原基线一致，像素摘要因采样环境重录。
 """
 import copy
 import hashlib
@@ -20,13 +23,13 @@ from billgen.themes.usbank import shared
 
 THEME = Path(__file__).resolve().parents[1] / "src/billgen/themes/usbank"
 GOLDENS = {
-    "us-default": (3, "06f63260773cd6e9b05a49ae185a5fd0323a1cd1027e5a78cdd14ea9bd888248", "06de2f707aeb98a300f82306d4d03b6a13bb38587b9c9996f5b2811b00ac133a"),
-    "us-empty": (3, "84e292fbace48355495bce8304f0f3997e6573de8d881e757ae200252352d819", "a9c4352adae39a3d6fd6ad48ad133a4e9ed2bfeaf5851a89e11d27bf3d993919"),
-    "us-multipage": (8, "c6db011e1d70c77c8477572a428f2d33bb9aa2c1b7be99bfff632343a0dcdc46", "6f7ffacb4e56d94899d1793512e10b7f6b4c49ed0030265ae556f6b89a2a01c5"),
-    "us-replay": (3, "a45d0cb9274409dfeafecf794c60e86ac45c3c40e4edd9852dea82dbfa6607bf", "474bb398f2256d9fdee240b2f98df88b2f0ad0ffcf72ee0da434ead8f2674379"),
+    "us-default": (3, "06f63260773cd6e9b05a49ae185a5fd0323a1cd1027e5a78cdd14ea9bd888248", "58e222fb4f17a1425c6bebfc2b4be24b80a6182927211dd5b54de9c86ef178d9"),
+    "us-empty": (3, "84e292fbace48355495bce8304f0f3997e6573de8d881e757ae200252352d819", "8af3dcde470de176e4b1c3c6a194775e5cfbaac75a3e25e270d4d7e9e3df9bc1"),
+    "us-multipage": (8, "ec9566d821dc3eeeec27a67b124705b4b857e5d5061dfd906368e76f3ce65eb3", "a5278812a7b847cdec429a8f9e1e1988ef3c664abcaaf643745fa30e5cc740fc"),
+    "us-replay": (3, "a45d0cb9274409dfeafecf794c60e86ac45c3c40e4edd9852dea82dbfa6607bf", "645dba54c653efb010f1e4fd6d4cc82a74e93c31700bbbbd1c249c0dd5804d53"),
     "usbiz-default": (2, "46e1c32f56c15771bff999e6a23a4320986232a480a9577c6be426f2784f185d", "0649366a8865cfb3b54c0430db51bb3b211e828888a0d0021ee5009f7942121b"),
     "usbiz-empty": (2, "5490cf33a2c19493c72d6db37c46d01cdf6acde0a944f71d7082c180dbfb3777", "951629ddd4799ea88ff46bd60153f3091f1cbd9d92dd00e94cf77d668623463e"),
-    "usbiz-multipage": (8, "a21ffed3c1c6a6cde7fb41a982686fea9c3aa0e4fb5354bddf983d90de01eb0d", "a6fa96004db4df6949ea5c1314fbb03e4e87ef24b597c3ec6f521b3b9a59c4c0"),
+    "usbiz-multipage": (8, "69f6025e1ff9f9ed237a8001aa6518e23bb7bd5e9ce63e0b137ad99194eece87", "7351f7f5688902fce6164caf09e1c828293c4a392f88cb9281abb902d6d114b9"),
     "usbiz-replay": (2, "841f32793a77c8ae0e6f583e4036514bcc5afe3ef15f529fa662f4f379e4fb74", "40a9009746fbe30bb6b964e1923a7bf59139cc305f4f4b029a03f9963df637f1"),
 }
 

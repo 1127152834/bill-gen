@@ -1,0 +1,69 @@
+{
+  "template": "us",
+  "auto": true,
+  "encrypt": false,
+  "watermark": true,
+  "begin_balance": "1000.00",
+  "customer_lines": [
+    "SAMPLE CUSTOMER",
+    "123 Sample Lane",
+    "Austin TX 78701"
+  ],
+  "account_display": "000000000001",
+  "period": {
+    "label": "January 01, 2027 through January 31, 2027",
+    "start": "Jan 1, 2027",
+    "end": "Jan 31, 2027"
+  },
+  "metadata": {
+    "title": "SAMPLE — NOT A REAL BANK STATEMENT",
+    "author": "",
+    "producer": "BillGen Sample Editor",
+    "creator": "BillGen Sample Editor",
+    "subject": "Fictional sample statement",
+    "keywords": "sample",
+    "creation": "D:20270131000000Z",
+    "mod": "D:20270131000000Z",
+    "x_producer": "BillGen Sample Editor",
+    "x_creator": "BillGen Sample Editor",
+    "x_title": "SAMPLE — NOT A REAL BANK STATEMENT",
+    "x_desc": "Fictional sample statement",
+    "xmptk": "BillGen Sample Editor"
+  },
+  "imb_serial": "000000000",
+  "deposits": [
+    {
+      "date": "Jan 4",
+      "type": "Deposit",
+      "detail": "SAMPLE SALARY",
+      "extra": [],
+      "amount": "500.00"
+    }
+  ],
+  "withdrawals": [
+    {
+      "date": "Jan 6",
+      "type": "Payment",
+      "detail": "SAMPLE RENT",
+      "extra": [],
+      "amount": "120.00"
+    }
+  ],
+  "summary": {
+    "begin": "1,000.00",
+    "deposits": "500.00",
+    "withdrawals": "-120.00",
+    "ending": "1,380.00"
+  },
+  "daily": [
+    [
+      "Jan 4",
+      "1,500.00"
+    ],
+    [
+      "Jan 6",
+      "1,380.00"
+    ]
+  ],
+  "days": "31"
+}

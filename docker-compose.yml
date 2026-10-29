@@ -3,9 +3,7 @@ services:
     image: billgen:full
     build: .
     ports:
-      # LangGraph 服务 + 前端（同一端口，前端走 WEB_DIST 静态托管）
-      - "127.0.0.1:${FLOW_PORT:-8797}:8797"
-      # billgen 工作台 + 渲染 API
+      # 单一入口：工作台 + 猎手 + 渲染 API 都在 8800
       - "127.0.0.1:${HUB_PORT:-8800}:8800"
     environment:
       BILL_GEN_DATA_DIR: /data/billgen
@@ -15,6 +13,8 @@ services:
       BILLGEN_TEMPLATES: ${BILLGEN_TEMPLATES:-auto}
       BILLGEN_AUTO_LIMIT: ${BILLGEN_AUTO_LIMIT:-2}
       BILLGEN_AI_FILL: ${BILLGEN_AI_FILL:-1}
+      BILLGEN_FLOW_ROOT: /app/flow
+      BILLGEN_HUNTER_PORT: "8797"
       DATABASE_PATH: /data/flow/app.db
       WEB_DIST: apps/web/dist
       HOST: 0.0.0.0
@@ -37,7 +37,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "curl -fsS http://127.0.0.1:8800/healthz >/dev/null && curl -fsS http://127.0.0.1:8797/api/health >/dev/null",
+          "curl -fsS http://127.0.0.1:8800/healthz >/dev/null && curl -fsS http://127.0.0.1:8800/api/v1/hunter/status >/dev/null",
         ]
       interval: 15s
       timeout: 6s

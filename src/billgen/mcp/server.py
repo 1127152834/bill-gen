@@ -126,10 +126,8 @@ def _validate(template_id: str, data: Any) -> dict[str, Any]:
         pdf = _branded(pdf, template_id, data)
 
     if pdf is not None:
-        text = ""
         with fitz.open(stream=pdf, filetype="pdf") as doc:
-            text = "".join(page.get_text() for page in doc)
-        hits = audit.scan_text(text)
+            hits = audit.scan_pages(page.get_text() for page in doc)
         unknown = audit.unknown_gaps(template_id, hits)
         if unknown:
             errors.append(f"文本层仍有真实银行标识：{unknown}")
@@ -224,8 +222,8 @@ def build(*, out_dir: str | None = None):  # noqa: ANN201 - 返回 FastMCP，避
         target = out / Path(name).name
         target.write_bytes(result.pdf)
         with fitz.open(stream=result.pdf, filetype="pdf") as doc:
-            text = "".join(page.get_text() for page in doc)
-        unknown = audit.unknown_gaps(template_id, audit.scan_text(text))
+            hits = audit.scan_pages(page.get_text() for page in doc)
+        unknown = audit.unknown_gaps(template_id, hits)
         return {
             "ok": True,
             "path": str(target),

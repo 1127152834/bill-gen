@@ -44,9 +44,17 @@
             <strong id="breadcrumb-name">文档编辑</strong>
           </div>
           <div class="topbar-actions">
+          <div class="view-switch" role="tablist" aria-label="切换工作区">
+            <button id="view-studio" class="view-tab is-active" role="tab"
+              aria-selected="true" type="button">工作台</button
+            ><button id="view-hunter" class="view-tab" role="tab"
+              aria-selected="false" type="button">账单猎手</button>
+          </div>
             <button id="synth-open" class="button small" type="button">
               场景导入
             </button>
+            <button id="hunter-settings-button" class="button small quiet" type="button"
+              title="模型与生成配置">模型配置</button>
             <span class="keyboard-hint">⌘ / Ctrl S 生成预览</span
             ><button
               id="help-button"
@@ -58,7 +66,26 @@
             </button>
           </div>
         </header>
-        <main id="main">
+        <main id="main" class="view-studio">
+        <section id="hunter-pane" class="hunter-pane" hidden>
+          <div class="hunter-head">
+            <div>
+              <div class="eyebrow">BILL HUNTER <span id="hunter-kind">流水生成</span></div>
+              <h1>人设进，账单出</h1>
+              <p>
+                填写人设后由模型生成流水，再经 MCP 调用渲染器出片。模型与渲染参数在「模型配置」里改。
+              </p>
+            </div>
+            <div class="hunter-actions">
+              <span id="hunter-status" class="status" role="status">检查中</span>
+              <button id="hunter-restart" class="button small quiet" type="button">重启服务</button>
+              <a id="hunter-open" class="button small" href="/new" target="_blank"
+                rel="noopener">新窗口 ↗</a>
+            </div>
+          </div>
+          <div id="hunter-message" class="message" role="alert" hidden></div>
+          <iframe id="hunter-frame" class="hunter-frame" title="账单猎手" src="about:blank"></iframe>
+        </section>
           <section class="document-header">
             <div>
               <div class="eyebrow">
@@ -319,6 +346,42 @@
         ><button id="synth-submit" class="button primary" type="button">
           渲染账单
         </button>
+      </div>
+    </dialog>
+    <dialog id="hunter-settings-dialog">
+      <div class="dialog-heading">
+        <h2>模型与生成配置</h2>
+        <button id="hunter-settings-close" class="icon-button" aria-label="关闭模型配置">×</button>
+      </div>
+      <p class="synth-intro">
+        保存后会重启猎手服务并在新进程里生效。密钥只写不读：留空表示沿用已存的值。
+      </p>
+      <div class="settings-grid">
+        <label class="settings-wide"><input id="cfg-fake" type="checkbox" />
+          离线夹具模式（不需要模型与调研 key）</label>
+        <label>模型接口地址<input id="cfg-base-url" type="text"
+          placeholder="https://your-proxy/v1" autocomplete="off" /></label>
+        <label>模型 API Key<input id="cfg-api-key" type="password"
+          autocomplete="new-password" placeholder="留空沿用" /></label>
+        <label>模型名称<input id="cfg-model" type="text" placeholder="gpt-6.1-sol" /></label>
+        <label>结构化输出<select id="cfg-structured">
+          <option value="json_schema">json_schema</option>
+          <option value="function_calling">function_calling</option>
+          <option value="json_mode">json_mode</option>
+        </select></label>
+        <label class="settings-span">Tavily Key<input id="cfg-tavily" type="password"
+          autocomplete="new-password" placeholder="留空沿用；真实模式下用于本地化调研" /></label>
+        <label>账单行名<input id="cfg-bank" type="text" placeholder="Harborline Bank" /></label>
+        <label>目标模板<input id="cfg-templates" type="text"
+          placeholder="auto 或 boa-personal,chase-personal" /></label>
+        <label>自动挑选个数<input id="cfg-auto-limit" type="number" min="1" max="11" step="1" /></label>
+        <label class="settings-wide"><input id="cfg-ai-fill" type="checkbox" />
+          让模型自己填模板字段（关闭则用确定性草稿）</label>
+      </div>
+      <p id="cfg-status" class="cfg-status" role="status"></p>
+      <div class="dialog-actions">
+        <button id="cfg-cancel" class="button quiet" type="button">取消</button
+        ><button id="cfg-save" class="button primary" type="button">保存并重启</button>
       </div>
     </dialog>
     <dialog id="help-dialog">

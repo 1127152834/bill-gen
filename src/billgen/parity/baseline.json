@@ -1,16 +1,16 @@
 {
   "boa-personal": {
     "id": "boa-personal",
-    "name": "BOA Personal",
+    "name": "美国银行 · 个人账单",
     "kind": "from-scratch",
-    "pages": 4,
+    "pages": 8,
     "size": [
       612.0,
       792.0
     ],
-    "bytes": 297185,
-    "text_sha256_16": "dede8ceba43c6dec",
-    "text_chars": 6794,
+    "bytes": 309444,
+    "text_sha256_16": "835993f1df5ade47",
+    "text_chars": 8379,
     "fonts": [
       "AAAAAB+ITC_Franklin_Gothic_Book_CZEX0080",
       "AAAAAD+HigherStandards_CZEX0660",
@@ -19,20 +19,20 @@
       "AAAAAJ+Connections_Medium_CZEX0A80",
       "AAAAAL+ConnectionsBold_CZEX0AA0"
     ],
-    "secs_render": 0.52
+    "secs_render": 0.42
   },
   "boa-business": {
     "id": "boa-business",
-    "name": "BOA Business",
+    "name": "美国银行 · 商业账单",
     "kind": "from-scratch",
-    "pages": 5,
+    "pages": 8,
     "size": [
       612.0,
       792.0
     ],
-    "bytes": 1023224,
-    "text_sha256_16": "7dba208fe5105aec",
-    "text_chars": 6648,
+    "bytes": 1045416,
+    "text_sha256_16": "02556a8906e4627e",
+    "text_chars": 8924,
     "fonts": [
       "AAAAAB+ITC_Franklin_Gothic_Book_CZEX0080",
       "AAAAAD+HigherStandards_CZEX0660",
@@ -45,16 +45,16 @@
   },
   "wellsfargo": {
     "id": "wellsfargo",
-    "name": "Wells Fargo",
+    "name": "富国银行",
     "kind": "from-scratch",
-    "pages": 5,
+    "pages": 6,
     "size": [
       612.0,
       792.0
     ],
-    "bytes": 95146,
-    "text_sha256_16": "74863165fbcfe116",
-    "text_chars": 9692,
+    "bytes": 105107,
+    "text_sha256_16": "44929537676235e5",
+    "text_chars": 10716,
     "fonts": [
       "Helvetica",
       "Helvetica-Bold",
@@ -66,58 +66,58 @@
       "SymbolMT,Bold",
       "ZapfDingbatsITCbyBT-Regular"
     ],
-    "secs_render": 0.32
+    "secs_render": 0.3
   },
   "amex": {
     "id": "amex",
-    "name": "American Express",
+    "name": "美国运通",
     "kind": "from-scratch",
     "pages": 2,
     "size": [
       612.0,
       792.0
     ],
-    "bytes": 81402,
-    "text_sha256_16": "1dc225d6690dec62",
-    "text_chars": 2344,
+    "bytes": 83457,
+    "text_sha256_16": "563f6cfca85f2755",
+    "text_chars": 2530,
     "fonts": [
       "EAAAAB+BentonSans-Bold",
       "EAAAAC+BentonSans-Regular"
     ],
-    "secs_render": 0.1
+    "secs_render": 0.09
   },
   "mercury": {
     "id": "mercury",
-    "name": "Mercury",
+    "name": "水星银行",
     "kind": "from-scratch",
     "pages": 2,
     "size": [
       612.0,
       792.0
     ],
-    "bytes": 212226,
-    "text_sha256_16": "9b6f247efb8b9176",
-    "text_chars": 692,
+    "bytes": 253708,
+    "text_sha256_16": "a22cd47873caf65a",
+    "text_chars": 986,
     "fonts": [
       "CULQQO+ArcadiaText-480",
       "Helvetica",
       "RVFNLP+1695149660304911865-0-Arcadia-Text-480",
       "TRGABZ+ArcadiaTextVariable-Variable"
     ],
-    "secs_render": 0.27
+    "secs_render": 0.41
   },
   "capitalone": {
     "id": "capitalone",
-    "name": "Capital One",
+    "name": "第一资本银行",
     "kind": "from-scratch",
     "pages": 3,
     "size": [
       612.0,
       792.0
     ],
-    "bytes": 10624694,
-    "text_sha256_16": "86a4a8cba5a2616b",
-    "text_chars": 1646,
+    "bytes": 10675012,
+    "text_sha256_16": "b738efb224f38ac2",
+    "text_chars": 3007,
     "fonts": [
       "AAAAZD+MyFontBold",
       "AAAAZO+.",
@@ -125,20 +125,20 @@
       "AAASVG+MyFontRegular",
       "Hiragino Sans GB W3"
     ],
-    "secs_render": 1.09
+    "secs_render": 1.01
   },
   "sofi": {
     "id": "sofi",
-    "name": "SoFi",
+    "name": "索菲银行",
     "kind": "from-scratch",
     "pages": 2,
     "size": [
       612.0,
       792.0
     ],
-    "bytes": 527935,
-    "text_sha256_16": "061916139197d514",
-    "text_chars": 5964,
+    "bytes": 541854,
+    "text_sha256_16": "86f4f5991e32c708",
+    "text_chars": 6620,
     "fonts": [
       "BAAAAA+TTNormsRegular",
       "CAAAAA+TTNormsBold",
@@ -149,16 +149,16 @@
   },
   "chase-personal": {
     "id": "chase-personal",
-    "name": "Chase Personal",
+    "name": "大通银行 · 个人账单",
     "kind": "replay",
     "pages": 2,
     "size": [
       612.0,
       792.0
     ],
-    "bytes": 210765,
-    "text_sha256_16": "07dbe4e74d7fdcc0",
-    "text_chars": 3930,
+    "bytes": 212527,
+    "text_sha256_16": "8e95e2c765e7e2e7",
+    "text_chars": 4528,
     "fonts": [
       "F10",
       "F11",
@@ -176,20 +176,20 @@
       "Symbol",
       "Times-Roman"
     ],
-    "secs_render": 0.05
+    "secs_render": 0.07
   },
   "chase-business": {
     "id": "chase-business",
-    "name": "Chase Business",
+    "name": "大通银行 · 商业账单",
     "kind": "replay",
-    "pages": 2,
+    "pages": 4,
     "size": [
       612.0,
       792.0
     ],
-    "bytes": 210011,
-    "text_sha256_16": "ca4d816b5b7dccba",
-    "text_chars": 4303,
+    "bytes": 213898,
+    "text_sha256_16": "019eae5b7af2b6bc",
+    "text_chars": 6455,
     "fonts": [
       "F10",
       "F11",
@@ -207,20 +207,20 @@
       "Symbol",
       "Times-Roman"
     ],
-    "secs_render": 0.07
+    "secs_render": 0.11
   },
   "usbank-personal": {
     "id": "usbank-personal",
-    "name": "US Bank Personal",
+    "name": "美国合众银行 · 个人账单",
     "kind": "replay",
-    "pages": 3,
+    "pages": 4,
     "size": [
       612.0,
       792.0
     ],
-    "bytes": 219290,
-    "text_sha256_16": "134e12b551c84109",
-    "text_chars": 9464,
+    "bytes": 194659,
+    "text_sha256_16": "29805eeb7db7b937",
+    "text_chars": 10107,
     "fonts": [
       "AAAAFD+Arial-BoldMT",
       "AAAAFE+Arial-BoldItalicMT",
@@ -237,20 +237,20 @@
       "FNKAFM+USPSIMBCompact",
       "Helvetica-Bold"
     ],
-    "secs_render": 0.02
+    "secs_render": 0.07
   },
   "usbank-business": {
     "id": "usbank-business",
-    "name": "US Bank Business",
+    "name": "美国合众银行 · 商业账单",
     "kind": "replay",
-    "pages": 2,
+    "pages": 4,
     "size": [
       612.0,
       792.0
     ],
-    "bytes": 218332,
-    "text_sha256_16": "998fc8e80f828679",
-    "text_chars": 9522,
+    "bytes": 208094,
+    "text_sha256_16": "985984ea420fea1a",
+    "text_chars": 10431,
     "fonts": [
       "AAAGON+Arial-BoldMT",
       "AAAGOO+Arial-BoldItalicMT",
@@ -267,24 +267,24 @@
       "DLDMPA+USPSIMBCompact",
       "Helvetica-Bold"
     ],
-    "secs_render": 0.03
+    "secs_render": 0.07
   },
   "alliant": {
     "id": "alliant",
-    "name": "Alliant",
+    "name": "联合信用合作社",
     "kind": "static-web",
     "files": 32,
-    "bytes": 2161610,
+    "bytes": 2163461,
     "entry": "index.html",
     "pdf_lib": true,
     "fontkit": true
   },
   "ally": {
     "id": "ally",
-    "name": "Ally Bank",
+    "name": "盟友银行",
     "kind": "static-web",
     "files": 13,
-    "bytes": 10644720,
+    "bytes": 10707604,
     "entry": "index.html",
     "pdf_lib": true,
     "fontkit": true
