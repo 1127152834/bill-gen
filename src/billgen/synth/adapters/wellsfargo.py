@@ -23,8 +23,12 @@ def _desc(ledger: LedgerDocument, row) -> str:
 def build(ledger: LedgerDocument, defaults: dict[str, Any]) -> dict[str, Any]:
     d = deep(defaults)
     bank = deep(d.get("bank") or {})
-    # 账本还没定行时保留模板自带的行名/联系方式，避免把空串写进封面。
-    if ledger.bank.name or ledger.bank.legal or ledger.bank.domain:
+    # 账本还没定行、或定的就是模板自带那家时，一个字都不动：模板里的
+    # `(1-800-869-3557)`、`N.A. (115)`、`NMLSR ID 399801` 都是真件数据，
+    # 用派生值盖掉等于把真号码换成看起来对但其实是编的号（实测踩过）。
+    template_name = str((d.get("bank") or {}).get("name") or "").strip()
+    same_bank = ledger.bank.name.strip().lower() == template_name.lower()
+    if (ledger.bank.name or ledger.bank.legal or ledger.bank.domain) and not same_bank:
         bank.update(
             {
                 "name": ledger.bank.name,
@@ -32,7 +36,9 @@ def build(ledger: LedgerDocument, defaults: dict[str, Any]) -> dict[str, Any]:
                 "domain": ledger.bank.domain,
             }
         )
-        bank.update(bank_contact(ledger))
+        # 空值不许覆盖模板真数据：`phone_main` 派生为空时封面就只剩「Available by
+        # phone …:」，号码那一行整条消失（实测）。
+        bank.update({k: v for k, v in bank_contact(ledger).items() if v})
     # 富国的模板字段叫 `legal_na`，契约要 `legal`；两者必须同时存在，
     # 否则「账本没定行」时封面行名会被判成空值。
     legal = bank.get("legal") or bank.get("legal_na") or "Wells Fargo Bank, N.A."

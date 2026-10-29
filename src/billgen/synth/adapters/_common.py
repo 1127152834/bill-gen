@@ -110,7 +110,9 @@ def bank_contact(ledger: LedgerDocument) -> dict[str, str]:
     seed = f"{ledger.bank.domain}|contact"
     zip5 = ledger.bank.city_state_zip.rsplit(" ", 1)[-1] or digits(seed + "|zip", 5)
     return {
-        "phone_name": ledger.bank.name,
+        # 富国封面第一行印的是「字母号」`1-800-TO-WELLS`，第二行才是数字号；
+        # 拿行名当字母号会印成「Available by phone … : Wells Fargo」（实测穿帮）。
+        "phone_name": ledger.bank.phone or ledger.bank.name,
         "phone_main": ledger.bank.phone_service or ledger.bank.phone,
         "phone_es": ledger.bank.phone_es,
         "po_box": ledger.bank.po_box,

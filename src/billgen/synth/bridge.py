@@ -107,9 +107,20 @@ def _adopt_template_bank(ledger: LedgerDocument, defaults: dict[str, Any]) -> Le
     name = bank.get("name", "").strip()
     if not name:
         return ledger
-    from .ledger import BankIdentity, refresh_references, routing_for
+    from .ledger import BankIdentity, real_traits, refresh_references, routing_for
 
-    banked = BankIdentity(**{key: bank.get(key, "") for key in _BANK_FIELDS})
+    fields = {key: bank.get(key, "") for key in _BANK_FIELDS}
+    # 模板只写自己用得到的那几个键（富国写 `phone_name`/`phone_main`/`legal_na`），
+    # 直接灌进 BankIdentity 会得到「有名无电话」的半截身份，再经 bank_contact 反写
+    # 就把封面上的真电话抹成空串（实测：Questions? 一栏整个号段消失）。
+    # 真行用真行联系方式表补齐，别让派生逻辑去猜。
+    traits = real_traits(name) or {}
+    for key, value in traits.items():
+        if not fields.get(key):
+            fields[key] = value
+    if not fields.get("name"):
+        fields["name"] = name
+    banked = BankIdentity(**fields)
     account = ledger.account
     routing = routing_for(name, ledger.seed)
     adopted = replace(ledger, bank=banked, account=replace(account, routing=routing))
