@@ -34,3 +34,15 @@ def test_rules_cover_every_supported_template():
     known = set(realism_rules.BANK_RULES)
     missing = [tid for tid in supported_ids() if tid not in known]
     assert not missing, f"这些模板还没有逐家规则：{missing}"
+
+
+def test_date_order_rule_catches_unsorted_rows() -> None:
+    """分区拼接最容易漏排：这条规则必须能抓住倒序流水，也要容忍跨年回绕。"""
+    sys.path.insert(0, str(ROOT / "tools"))
+    from realism_rules import date_order_problems
+
+    bad = {"withdrawals": [{"date": "Sep 6"}, {"date": "Aug 29"}, {"date": "Sep 4"}]}
+    assert date_order_problems("usbank-personal", bad), "倒序流水没被抓出来"
+    good = {"withdrawals": [{"date": "Aug 29"}, {"date": "Sep 4"}, {"date": "Sep 6"}]}
+    assert not date_order_problems("usbank-personal", good)
+    assert not date_order_problems("x", {"rows": [{"date": "Dec 30"}, {"date": "Jan 2"}]}), "跨年回绕被误判"

@@ -170,6 +170,82 @@ def _payload() -> dict:
     return payload
 
 
+
+#: 日期写法 → (月, 日)。各家版式各不相同（`Aug 29` / `08/29` / `August 29, 2026`）。
+_MONTHS = {
+    m: i + 1
+    for i, m in enumerate(
+        ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
+    )
+}
+_DATE_PATTERNS = (
+    re.compile(r"^([A-Z][a-z]{2})[a-z]*\s+(\d{1,2})(?:,\s*\d{4})?$"),
+    re.compile(r"^(\d{1,2})/(\d{1,2})(?:/\d{2,4})?$"),
+)
+
+
+def _to_month_day(value: str) -> tuple[int, int] | None:
+    text = str(value or "").strip()
+    for idx, pattern in enumerate(_DATE_PATTERNS):
+        hit = pattern.match(text)
+        if not hit:
+            continue
+        if idx == 0:
+            month = _MONTHS.get(hit.group(1).lower()[:3])
+            if month:
+                return (month, int(hit.group(2)))
+        else:
+            return (int(hit.group(1)), int(hit.group(2)))
+    return None
+
+
+def _row_lists(node, path=""):
+    """把所有「带 date 字段的 dict 列表」挖出来（它们就是版面上的一列流水）。"""
+    if isinstance(node, dict):
+        for key, value in node.items():
+            yield from _row_lists(value, f"{path}.{key}")
+    elif isinstance(node, list):
+        if node and all(isinstance(item, dict) and "date" in item for item in node):
+            yield path, node
+        else:
+            for i, item in enumerate(node):
+                yield from _row_lists(item, f"{path}[{i}]")
+
+
+def date_order_problems(template: str, data: dict) -> list[dict[str, str]]:
+    """流水必须按日期升序印：分区拼接最容易漏排（实测 USB 印出 Sep 6 → Aug 29 → Sep 4）。
+
+    跨年账期（12 月 → 1 月）允许一次回绕，别的一律算错序。
+    """
+    problems: list[dict[str, str]] = []
+    for path, rows in _row_lists(data):
+        if len(rows) < 2:
+            continue
+        prev = None
+        wrap_seen = False
+        for item in rows:
+            cur = _to_month_day(item.get("date", ""))
+            if cur is None:
+                prev = None
+                continue
+            if prev is not None and cur < prev:
+                wraps = prev[0] >= 11 and cur[0] <= 2
+                if wraps and not wrap_seen:
+                    wrap_seen = True
+                else:
+                    problems.append(
+                        {
+                            "template": template,
+                            "rule": "date-order",
+                            "label": "流水日期必须升序",
+                            "hit": f"{path}: {prev[0]:02d}/{prev[1]:02d} → {cur[0]:02d}/{cur[1]:02d}",
+                        }
+                    )
+                    break
+            prev = cur
+    return problems
+
+
 def statement_text(template: str, ledger, *, watermark: bool = False) -> str:
     """渲染并取正文文本。
 
@@ -189,6 +265,12 @@ def check_template(template: str, ledger) -> list[dict[str, str]]:
     for key, label, pattern in BANK_RULES.get(template, []):
         if not pattern.search(text):
             problems.append({"template": template, "rule": key, "label": label, "hit": "（缺失）"})
+    try:
+        from billgen.synth.bridge import build_data
+
+        problems.extend(date_order_problems(template, build_data(template, ledger)))
+    except Exception as exc:  # noqa: BLE001 - 拿不到装配数据就当规则不满足
+        problems.append({"template": template, "rule": "date-order", "label": "无法检查日期顺序", "hit": str(exc)[:120]})
     for key, label, pattern in FORBIDDEN_PER_BANK.get(template, []):
         hit = pattern.search(text)
         if hit:
