@@ -121,3 +121,26 @@ WF 号码消失的根因链（值得记一笔）：
 
 U.S. Bank 的「金额列 `$` 独立成列」「负数尾随减号 `1,650.00-`」经核对是 `themes/usbank/shared.py::_fmt_amt` 有意为之（该行真件的写法就是尾随 `-`），不动。
 回滚：`git checkout <prev> -- src/billgen/synth/adapters/simple.py src/billgen/synth/adapters/usbank.py src/billgen/synth/adapters/boa.py`。
+
+## 第五轮（真调 langgraph 跑企业账本 / 修两个线上 bug）
+
+1. **线上工具 NameError**：`POST /api/generations` 回包里 `warnings` 报
+   `recommend_templates … name 'template_id' is not defined` —— `src/billgen/mcp/server.py::recommend_templates`
+   把 `template=template_id` 传给 `from_game_result`，可这个函数没有这个形参。改传空模板
+   （推荐本身不属于任何一家版式），并补 `tests/test_mcp.py::test_recommend_templates_runs_and_ranks`
+   （之前 contract/validate/render 都有测试，只有推荐工具没覆盖）。提交 `1b1fa4e`。
+2. **企业请求整单失败**：`subjectType: business` 线上恒 `GENERATION_FAILED`、`llmCalls: 1`、
+   容器里连一行进度日志都没有。根因在**离线 fixture**：`persona` 节点只备了个人档案
+   （`fixtures/e2e/persona.json`），企业 persona 解析必失败。修法：新增
+   `fixtures/e2e/persona-business.json`、`fixtureLlm` 的答案队列支持函数条目（按调用 schema 挑 fixture）、
+   补 `business.e2e.test.ts`。提交 `f67e7ca`。
+   范围说明：企业**人格**已通；企业**整单**在离线 fixture 下仍受 research/lifeModel 的个人口径限制，
+   企业**版式**的对比改用线上真实企业产出或 `--as-business`。
+3. 企业账本真跑通后的对比（`subjectType: business`，41 笔流水 + 30 笔信用卡）：
+   boa-business 版式漂移 0 段、chase-business 差异 0 项、usbank-business 差异 0 项
+   （`usbank-business` 的表头 `Business Statement`、`24-Hour Business Solutions`、
+   `# Items` / `Number of Days in Statement Period` 都对得上底稿）。
+4. 报告分文件：`tools/e2e_compare.py --label personal|business`，两份报告互不覆盖，
+   `docs/e2e/README.md` 记录重跑命令与指标口径。提交 `fae7093`。
+
+回滚：`git revert 1b1fa4e f67e7ca fae7093`。
