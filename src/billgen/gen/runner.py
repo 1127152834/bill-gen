@@ -21,7 +21,8 @@ from typing import Any, Mapping
 from ..jobs import JobCancelled, JobContext
 from ..synth import monthpack
 from ..profiles import ProfileStore
-from . import postpass
+from . import envelope as envelope_mod
+from . import postpass, seasonal
 from .config import load_config
 from .llm import LlmClient
 from .pipeline import GenResult, generate
@@ -180,6 +181,29 @@ def make_runner(*, profiles: Path | str | None = None):
         city = str(address.get("city") or "")
         income_hint = payload.get("monthly_income_hint")
         rent_hint = payload.get("rent_hint")
+        # 预算信封（按月做季节缩放）：先给节日补几笔，再统一收尾、重接余额链。
+        base_env = envelope_mod.envelope(
+            payload, {"location": {"col_tier": "mid"}}, rent_hint=payload.get("rent_hint")
+        )
+        seasonal_added: dict[str, int] = {}
+        for outcome in result.months:
+            data = getattr(outcome, "data", None)
+            if not isinstance(data, dict):
+                continue
+            try:
+                year, month = (int(part) for part in str(outcome.month).split("-"))
+            except ValueError:
+                continue
+            month_env = seasonal.envelope_for_month(base_env, year, month)
+            added = seasonal.inject_event_rows(
+                data, year=year, month=month, seed=f"{job.seed or ''}|{outcome.month}",
+                envelope=month_env, city=city, state=state,
+            )
+            if added:
+                seasonal_added[outcome.month] = added
+        if seasonal_added:
+            ctx.log("收尾：按节日/季节补了本地消费（感恩节采购、黑五、礼品等）", percent=93)
+
         repaired: dict[str, dict[str, int]] = {}
         for outcome in result.months:
             data = getattr(outcome, "data", None)
@@ -218,6 +242,7 @@ def make_runner(*, profiles: Path | str | None = None):
             "usage": result.usage,
             "warnings": list(result.warnings),
             "postpass": repaired,
+            "seasonal": seasonal_added,
         }
         _write(out_dir / "job-summary.json", summary)
 

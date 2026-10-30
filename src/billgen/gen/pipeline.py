@@ -43,6 +43,7 @@ from ..synth.ledger import (
     Period,
 )
 from ..synth.money import aba_routing, account_number, digits
+from . import envelope, seasonal
 from . import prompts as P
 from .llm import LlmBadJson, LlmError
 from .tavily import TavilyError, TavilyQuotaExceeded
@@ -570,6 +571,16 @@ def node_normalize(
     except Exception:  # 模板没 binding 时 generate 已经拦过，这里只兜底
         kind = "checking"
 
+    # 预算信封：按收入档算出每月各类目该花多少，再按月做季节缩放。
+    base_env = envelope.envelope(profile, {"location": {"col_tier": col_tier}}, rent_hint=profile.get("rent_hint"))
+    month_env = {}
+    for month in month_list:
+        year_i, mon_i = _parse_month(month)
+        month_env[month] = {
+            name: [int(lo), int(hi)]
+            for name, (lo, hi) in seasonal.envelope_for_month(base_env, year_i, mon_i).items()
+        }
+
     row_range = profile.get("rowRange") if isinstance(profile.get("rowRange"), Mapping) else {}
     row_min = max(6, _int(row_range.get("min"), 16))
     row_max = max(row_min, _int(row_range.get("max"), 26))
@@ -584,6 +595,12 @@ def node_normalize(
 
     return {
         "template": template,
+        "envelope": {name: list(pair) for name, pair in base_env.items()},
+        "month_envelopes": month_env,
+        "seasonal": {
+            month: seasonal.seasonal_notes(_parse_month(month)[0], _parse_month(month)[1])
+            for month in month_list
+        },
         "subject_type": "business" if business else "personal",
         "seed": seed,
         "months": month_list,

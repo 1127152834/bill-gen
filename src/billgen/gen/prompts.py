@@ -602,6 +602,34 @@ def budget_line(profile: Mapping[str, Any], norm: Mapping[str, Any]) -> str:
     return "Budget constraints (hard): " + "; ".join(parts) + "。"
 
 
+def envelope_lines(norm: Mapping[str, Any]) -> list[str]:
+    """把基础信封与每月节日/季节提示写成提示词片段（模型据此给类目分配金额）。"""
+    lines: list[str] = []
+    env = norm.get("envelope") or {}
+    month_env = norm.get("month_envelopes") or {}
+    if env:
+        parts = [
+            f"{name} ${int(lo) / 100:,.0f}–${int(hi) / 100:,.0f}"
+            for name, (lo, hi) in sorted(env.items())
+        ]
+        lines.append(
+            "Monthly budget envelope (hard, USD; each category's monthly total must stay inside): "
+            + "; ".join(parts)
+            + "。房租一个月一笔、电费燃气各一笔，工资按固定周期入账。"
+        )
+    seasonal = norm.get("seasonal") or {}
+    for month, note in seasonal.items():
+        scaled = month_env.get(month) or {}
+        if scaled:
+            compact = "; ".join(
+                f"{name} ${int(lo) / 100:,.0f}–${int(hi) / 100:,.0f}" for name, (lo, hi) in sorted(scaled.items())
+            )
+            lines.append(f"{month} 本月信封（已按季节缩放）：{compact}")
+        if note:
+            lines.append(str(note))
+    return lines
+
+
 def life_model_messages(
     profile: Mapping[str, Any],
     norm: Mapping[str, Any],
@@ -636,6 +664,7 @@ def life_model_messages(
         subject_line(profile),
         location_line(norm),
         *([budget_line(profile, norm)] if budget_line(profile, norm) else []),
+        *envelope_lines(norm),
         "Subject and calendar:\n" + json_text(data),
         untrusted("Researched facts", json_text(compact)),
     ]
@@ -891,6 +920,7 @@ def descriptors_messages(
         subject_line(profile),
         location_line(norm),
         *([budget_line(profile, norm)] if budget_line(profile, norm) else []),
+        *envelope_lines(norm),
         untrusted("Merchants on this statement", payload),
     ]
     problems = [str(item).strip() for item in (feedback or []) if str(item).strip()]
