@@ -70,12 +70,13 @@ def test_contract_defaults_render_after_bank_swap(srv, template_id):
     assert result["pages"] >= 1
 
 
-def test_validate_rejects_formatted_money(srv):
+def test_validate_normalizes_formatted_money(srv):
+    """展示格式的金额被「还原」而不是「拒绝」：早先它会让整套账单出不了片。"""
     data = call(srv, "template_contract", {"template_id": "boa-personal"})["data"]
     data["begin_balance"] = "$1,000.00"
     result = call(srv, "validate", {"template_id": "boa-personal", "data": data})
-    assert not result["ok"]
-    assert any("begin_balance" in problem for problem in result["errors"])
+    assert result["ok"], result["errors"]
+    assert any("还原成裸数字" in w for w in result["warnings"])
 
 
 def test_validate_flags_placeholder_bank_identity(srv):
@@ -213,3 +214,24 @@ def test_contract_skeleton_carries_each_template_own_bank():
             assert "Bank of America" not in str(bank), template_id
     # Mercury 的信头是自己，页脚发卡行是 Column N.A.（参考件原文）
     assert skeleton("mercury")["bank"]["legal"] == "Column N.A."
+
+
+def test_validate_normalizes_formatted_amounts_instead_of_rejecting(srv):
+    """模型给 `$2,400.00` 这种展示格式时，别判死整份账单：先还原成裸数字再校验。
+
+    历史：`electronic_withdrawals[2].amount = '2,400.00'` 直接让 chase-business
+    整套出不了片（warning 里只剩一句「金额不能带 $ 或千分位」）。
+    """
+    data = json.loads(json.dumps(contracts.skeleton("chase-business")))
+    data["deposits"] = [{"date": "08/18", "description": "ACH Credit", "amount": "$3,035.78"}]
+    data["electronic_withdrawals"] = [
+        {"date": "08/20", "description": "ACH Debit", "amount": "2,400.00"}
+    ]
+    out = call(srv, "validate", {"template_id": "chase-business", "data": data})
+    assert out["ok"], out
+    assert not [e for e in out["errors"] if "千分位" in e]
+    assert any("还原成裸数字" in w for w in out["warnings"])
+    # 归一化过后的数据能真的出片
+    rendered = call(srv, "render", {"template_id": "chase-business", "data": data})
+    assert rendered["ok"], rendered
+    assert rendered["pages"] >= 1

@@ -40,7 +40,7 @@
 | 页面尺寸 | (612.0, 792.0) | (612.0, 792.0) | OK |
 | 页数 | 4 | 2 | INFO |
 | 字体（共有） | Arial-BoldItalicMT, Arial-BoldMT, Arial-ItalicMT, ArialMT, C0000365_T1001140_0,  | 参考共 9 种 | OK |
-| 字体（仅出片） | 无 | — | INFO |
+| 字体（仅出片） | Helvetica | — | INFO |
 | 最低图效 DPI | 240.4 | 240.4 | OK |
 | 第 1 页墨量 % | 16.1 | 18.3 | OK |
 | 区块标题 Business Statement | 有 | 有 | OK |

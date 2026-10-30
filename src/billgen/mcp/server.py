@@ -12,6 +12,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import tempfile
 from pathlib import Path
 from typing import Any
@@ -72,6 +73,45 @@ def _money_problems(data: Any, template_id: str = "") -> list[str]:
     return problems
 
 
+_MONEY_LEAVES = {"amount", "deposit", "withdrawal", "balance", "begin_balance"}
+_MONEY_TEXT = re.compile(r"^[+-]?\$?\s*\d{1,3}(?:,\d{3})*(?:\.\d+)?$")
+
+
+def _normalize_money(data: Any, template_id: str = "") -> int:
+    """把模型给的展示格式金额（``$2,400.00`` / ``2,400.00``）就地还原成裸数字。
+
+    模型偶尔把「给人看」的格式直接塞进数据（``'2,400.00'``），旧逻辑把它判成非法
+    → 整套账单不出片。这只影响排版，不该让一份账单凭空消失，所以先归一化再校验。
+    返回改动的处数，供调用方记一条说明。
+    """
+    if template_id in _FORMATTED_TEMPLATES:
+        return 0
+    fixed = 0
+
+    def walk(node: Any, path: str) -> None:
+        nonlocal fixed
+        if isinstance(node, dict):
+            for key, value in list(node.items()):
+                child = f"{path}.{key}" if path else str(key)
+                if (
+                    isinstance(value, str)
+                    and key in _MONEY_LEAVES
+                    and not any(part in child for part in _FORMATTED_SUBTREES)
+                    and ("$" in value or "," in value)
+                    and _MONEY_TEXT.match(value.strip())
+                ):
+                    node[key] = value.replace("$", "").replace(",", "").strip()
+                    fixed += 1
+                else:
+                    walk(value, child)
+        elif isinstance(node, list):
+            for index, value in enumerate(node):
+                walk(value, f"{path}[{index}]")
+
+    walk(data, "")
+    return fixed
+
+
 def _branded(pdf: bytes, template_id: str, data: Any) -> bytes:
     """把版式里烙死的真实行标/行址/电话换成数据里那家银行自己的。
 
@@ -103,6 +143,10 @@ def _validate(template_id: str, data: Any) -> dict[str, Any]:
     warnings: list[str] = []
     if not isinstance(data, dict):
         return {"ok": False, "errors": ["data 必须是对象"], "warnings": []}
+
+    normalized = _normalize_money(data, template_id)
+    if normalized:
+        warnings.append(f"已把 {normalized} 处展示格式金额（含 $ 或千分位）还原成裸数字")
 
     try:
         # 骨架里由 _scaffold 补的键（bank / product / promo）不是硬要求：适配器不写也能渲染。
@@ -232,6 +276,7 @@ def build(*, out_dir: str | None = None):  # noqa: ANN201 - 返回 FastMCP，避
         opts = RenderOptions(watermark=watermark, encrypt=encrypt,
                              font_policy=renderer.spec.default_options.font_policy)
         if isinstance(data, dict):
+            _normalize_money(data, template_id)
             # 模型常常不填行名（`bank.name` 空着）。空着就按这套版式自己的银行补上，
             # 否则信头/页脚会留一片空白，或者被品牌化那一步换成空串。
             try:

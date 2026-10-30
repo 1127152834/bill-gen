@@ -654,3 +654,27 @@ Oshkosh, WI 54903-3528.`；`pytest` 567 passed / 16 skipped / 33 subtests；
 `spans[58]`/`[59]`）。这是**参考件本身就有**的东西（提取底稿时带出来的），肉眼不可见、
 文本层可见。留着是因为它证明「真实出件也会带这种流水线残留」，删掉反而与参考件不一致；
 要删的话必须连 layout json 一起删，否则 layout 比对会报缺 span。
+
+## 第二十四轮（模型给「2,400.00」这种展示格式，不该让整份账单消失）
+
+现象：企业账本的 `warnings` 里只有一句
+
+```
+chase-business: draft failed validation (electronic_withdrawals[2].amount = '2,400.00'：金额不能带 $ 或千分位; …)
+```
+
+结果**整套 chase-business 不出片**。模型偶尔把「给人看」的格式直接塞进数据，
+`_money_problems()` 判它非法，账单就凭空少一份——排版的锅不该让文件消失。
+
+修法（`src/billgen/mcp/server.py`）：
+- 新增 `_normalize_money(data, template_id)`：只针对 `amount/deposit/withdrawal/balance/begin_balance`
+  这几个叶子、且不落在 `_FORMATTED_TEMPLATES`（wf / usb，本来就该是展示格式）和
+  `_FORMATTED_SUBTREES`（summary/totals/daily/…）里的字符串，`$` 与 `,` 就地去掉；
+- `_validate()` 与 `render()` 入口都先过一遍，`validate` 顺手回一条
+  `已把 N 处展示格式金额（含 $ 或千分位）还原成裸数字` 的 warning；
+- 原来那条「拒绝」的测试改成「还原」，另加一条 chase-business 的回归用例
+  （`$3,035.78` + `2,400.00` 必须 `ok` 且能出片）。
+
+验证：`pytest` 569 passed / 16 skipped / 33 subtests；`realism_rules.py` 全部规则通过。
+
+回滚：`git revert <本轮提交>`（只动 MCP 层校验，不涉及渲染与闸门）。
