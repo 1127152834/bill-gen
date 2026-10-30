@@ -178,3 +178,27 @@ def test_no_single_category_dominates_a_month():
     total = sum(counts.values())
     assert counts.get("grocery", 0) / total < 0.45, counts
     assert len([name for name, value in counts.items() if value >= 3]) >= 3, counts
+
+
+def test_recurring_bills_keep_the_same_amount_across_months():
+    """宽带/保险/话费三个月应当是同一个数；只有公用事业按用量浮动。"""
+    plan = sampler.plan_from_profile(
+        {"name": "HENG LI", "monthly_income_hint": "9000-14000", "rent_hint": "2600-3200"},
+        state="CA",
+    )
+    rows = sampler.sample_rows(
+        plan, months=["2026-08", "2026-09", "2026-10"], state="CA", seed="stable", row_target=(16, 26)
+    )
+    by_family: dict[str, list[int]] = {}
+    for row in rows:
+        if row["type"] == "ACH" and row["direction"] == "debit":
+            by_family.setdefault(str(row["category"]), []).append(int(row["amount_cents"]))
+    for family, amounts in by_family.items():
+        if len(amounts) < 2 or family == "rent":
+            continue
+        low, high = min(amounts), max(amounts)
+        drift = (high - low) / max(1, low)
+        if family in ("electric", "gas", "water", "utility"):
+            assert drift < 0.30, (family, amounts)  # 用量浮动，但不该翻倍
+        else:
+            assert drift < 0.02, (family, amounts)  # 宽带/保险/话费几乎不动

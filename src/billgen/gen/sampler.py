@@ -18,6 +18,7 @@ LLM 对这些形状没有稳定记忆：它会给出同月两笔电费、275 美
 """
 from __future__ import annotations
 
+import hashlib
 import math
 import random
 from dataclasses import dataclass, replace, field
@@ -137,6 +138,16 @@ DEFAULT_BRANDS: dict[str, tuple[str, ...]] = {
     "convenience": ("7-ELEVEN", "CIRCLE K"),
     "rideshare": ("UBER", "LYFT"),
     "fitness": ("PLANET FITNESS", "YMCA"),
+}
+
+# 持卡人住 Temple City，但刷卡地点不会 100% 都在 Temple City —— 邻居城市（Pasadena、
+# Alhambra、Monterey Park…）才是一张真实账单的样子。这里按州给一组「同城/邻城」候选。
+METRO_CITIES: dict[str, tuple[str, ...]] = {
+    "CA": ("PASADENA", "ALHAMBRA", "MONTEREY PARK", "SAN GABRIEL", "ARCADIA", "ROSEMEAD"),
+    "TX": ("ROUND ROCK", "CEDAR PARK", "PFLUGERVILLE", "GEORGETOWN", "KYLE"),
+    "NY": ("BROOKLYN", "QUEENS", "JERSEY CITY", "LONG ISLAND CITY", "BRONX"),
+    "WA": ("BELLEVUE", "REDMOND", "KIRKLAND", "RENTON", "LYNNWOOD"),
+    "IL": ("EVANSTON", "OAK PARK", "CICERO", "BERWYN", "SKOKIE"),
 }
 
 STORE_NUMBER_RANGE: dict[str, tuple[int, int]] = {
@@ -285,7 +296,9 @@ def sample_rows(
     rows: list[dict[str, Any]] = []
     for month in months:
         year, mon = _parse_month(month)
-        rows.extend(_sample_month(plan, year, mon, state=state, rng=rng, tax_rate=tax_rate, target=row_target))
+        rows.extend(_sample_month(
+                plan, year, mon, state=state, rng=rng, tax_rate=tax_rate, target=row_target, seed=seed
+            ))
     rows.sort(key=lambda row: (row["date"], row["posted"], row["amount_cents"]))
     return rows
 
@@ -299,13 +312,14 @@ def _sample_month(
     rng: random.Random,
     tax_rate: float,
     target: tuple[int, int],
+    seed: str = "",
 ) -> list[dict[str, Any]]:
     last = _last_day(year, mon)
     start, end = date(year, mon, 1), date(year, mon, last)
     rows: list[dict[str, Any]] = []
 
     rows.extend(_sample_income(plan, year, mon, rng=rng))
-    rows.extend(_sample_bills(plan, year, mon, state=state, rng=rng))
+    rows.extend(_sample_bills(plan, year, mon, state=state, rng=rng, seed=seed))
     subs = _sample_subscriptions(plan, year, mon, rng=rng)
     rows.extend(subs)
 
@@ -391,7 +405,9 @@ def _income_row(when: date, plan: Plan, rng: random.Random) -> dict[str, Any]:
     }
 
 
-def _sample_bills(plan: Plan, year: int, mon: int, *, state: str, rng: random.Random) -> list[dict[str, Any]]:
+def _sample_bills(
+    plan: Plan, year: int, mon: int, *, state: str, rng: random.Random, seed: str = ""
+) -> list[dict[str, Any]]:
     last = _last_day(year, mon)
     start, end = date(year, mon, 1), date(year, mon, last)
     utilities = STATE_UTILITIES.get(state.upper(), {})
@@ -407,11 +423,16 @@ def _sample_bills(plan: Plan, year: int, mon: int, *, state: str, rng: random.Ra
         brand = str(bill.get("brand") or utilities.get(family) or family.upper())
         amount = int(bill.get("amount") or 0)
         if not amount:
-            model = CATEGORIES.get("subscription" if family == "subscription" else family)
             base = _BILL_MEDIANS.get(family, 9500)
-            amount = int(round(base * math.exp(rng.gauss(0, 0.18))))
-            if model:
-                amount = model.amount(rng)
+            # 基准价按「seed + 账单族」定死：宽带/保险/话费三个月应该是同一个数，
+            # 每月都重新抽一遍会印出 66.84 / 79.82 / 75.12 这种一眼假的抖动。
+            stable = 0.94 + (int(hashlib.sha256(f"{seed}|{family}".encode()).hexdigest()[:6], 16) % 1200) / 10000
+            amount = int(round(base * stable))
+            if family in ("electric", "gas", "water", "utility"):
+                # 公用事业按用量浮动；其余账单只允许几毛钱的零头变化。
+                amount = int(round(amount * rng.uniform(0.90, 1.12)))
+            else:
+                amount = int(round(amount * rng.uniform(0.995, 1.005)))
         rows.append(_row(when, "ACH", "debit", amount, brand, family, rng, start, end, state=state))
     return rows
 

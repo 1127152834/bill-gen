@@ -1378,6 +1378,17 @@ def _fallback_model(
 
 # ---- schedule 节点 -------------------------------------------------------
 
+def _row_city(loc: Mapping[str, Any], state: str, row: Mapping[str, Any], rng: Any) -> str:
+    """给一行选个城市：六成持卡人所在城市，四成同州邻市。"""
+    if str(row.get("location") or "") == "online" or row.get("category") == "subscription":
+        return ""  # 线上订阅没有实体门店，别硬塞城市
+    home = str(loc.get("city") or "").strip()
+    pool = sampler.METRO_CITIES.get(state.upper(), ())
+    if pool and rng.random() < 0.4:
+        return str(rng.choice(list(pool))).title()
+    return home
+
+
 def node_sample_rows(
     norm: Mapping[str, Any],
     profile: Mapping[str, Any],
@@ -1397,6 +1408,7 @@ def node_sample_rows(
     plan = sampler.plan_from_profile(profile, state=state, months=norm.get("months") or [])
     weights = _category_weights(profile)
     plan.category_weights = weights
+    rng = _rng(_seed_of(norm, seed), "city")
     rows = sampler.sample_rows(
         plan,
         months=norm.get("months") or [],
@@ -1432,7 +1444,9 @@ def node_sample_rows(
                 }
             )
         row["fact_id"] = pseudo[category]
-        row["city"] = row.get("city") or str(loc.get("city") or "")
+        # 刷卡地点不会全在持卡人那条街上：按州给一组同城/邻城，六成本地、四成邻市。
+        # 全印成 TEMPLE CITY 反而假 —— 真实账单里超市/咖啡/加油散在周边城市。
+        row["city"] = row.get("city") or _row_city(loc, state, row, rng)
         row["state"] = row.get("state") or state
     opening = sampler.opening_for(rows)
     model = {

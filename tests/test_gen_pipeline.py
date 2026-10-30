@@ -759,3 +759,19 @@ def test_sampler_mode_skips_external_research(tmp_path, monkeypatch):
     assert res.usage["tavilyQueries"] == 0
     assert getattr(tavily, "searched", []) == []
     assert all(item.ok for item in res.months)
+
+
+def test_pos_rows_spread_across_neighbour_cities():
+    """刷卡地点不能全在持卡人那条街：同州邻市要占一部分（太齐整反而假）。"""
+    from billgen.gen import pipeline
+
+    loc = {"city": "Temple City", "state": "CA"}
+    seen = set()
+    rng = __import__("random").Random("city-test")
+    row = {"category": "grocery", "location": "local"}
+    for _ in range(200):
+        seen.add(pipeline._row_city(loc, "CA", row, rng))
+    assert "Temple City" in seen
+    assert len(seen - {"Temple City"}) >= 3, seen
+    # 线上订阅没有城市
+    assert pipeline._row_city(loc, "CA", {"category": "subscription", "location": "online"}, rng) == ""
