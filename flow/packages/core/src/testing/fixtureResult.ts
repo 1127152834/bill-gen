@@ -2741,6 +2741,12 @@ const RESULT: GenerationResult = {
         "passed": true,
         "violations": [],
         "target": "schedule"
+      },
+      {
+        "ruleId": "R15_no_gateway_income",
+        "passed": true,
+        "violations": [],
+        "target": "schedule"
       }
     ],
     "findings": [

@@ -4,12 +4,10 @@ import { json } from './common.js';
 
 /** Trades of self-employed-patterns.md: the code draws one so personas vary with the seed. */
 export const PERSONAL_TRADES = [
-  'Rideshare driver (Uber / Lyft)',
-  'Delivery courier (DoorDash / Instacart)',
-  'Etsy seller of handmade goods',
   'Freelance graphic designer',
   'Freelance writer',
   'Freelance web developer',
+  'Bookkeeper working for small local clients',
   'Handyman',
   'House cleaner',
   'Landscaper / lawn care',
@@ -19,8 +17,6 @@ export const PERSONAL_TRADES = [
   'Personal trainer',
   'Private tutor',
   'Owner-operator trucker',
-  'Short-term rental host',
-  'Content creator',
   'Independent IT consultant',
 ] as const;
 
@@ -29,7 +25,6 @@ export const BUSINESS_INDUSTRIES = [
   'Full-service restaurant',
   'Cafe / coffee shop',
   'Retail boutique',
-  'E-commerce store',
   'Hair salon / barbershop',
   'Auto repair shop',
   'Landscaping company',
@@ -52,10 +47,13 @@ export type PersonaPromptInput = {
   suggestion: string;
 };
 
-const PERSONAL_RULES = `- The person is self-employed (1099 / gig / sole proprietor) with no employer and no salary. "occupation" names the trade.
+const PERSONAL_RULES = `- The person is self-employed: a 1099 sole proprietor or single-member LLC owner (one-person business) with no employer and no salary. "occupation" names the trade, and the trade is one where local clients or customers pay the person directly. It is a one-person business: they may hire a helper now and then, but the business is just them.
+- No online-payment income anywhere: they do NOT accept cards online and have no payment gateway / processor account yet — that is exactly why they are applying for one. So no Stripe, Square, PayPal, Shopify, Etsy, Amazon, Upwork, Fiverr, Patreon, Substack payouts, and no app-platform deposits (Uber, Lyft, DoorDash, Instacart, Airbnb, YouTube, Twitch). Clients pay by bank transfer (ACH or wire), check, Zelle or cash.
 - Make the fields agree: age fits the trade and career stage, household (maritalStatus, children) fits the age, hobbies (2-5) fit age, household, budget and city.`;
 
-const BUSINESS_RULES = `- A small independent US business. Make the fields agree: entityType fits the size (a Sole Prop has 0-2 employees), employeeCount is typical for the industry and city, founded (YYYY-MM, before 2026) is older for an established, larger business; description is one plain sentence about what it sells and to whom.
+const BUSINESS_RULES = `- A small independent US business with 1-2 people: the owner plus at most one employee (entityType Sole Prop or single-member LLC is the norm; a two-person LLC is the ceiling). Never describe a team, a department or a staff of many.
+- No online-payment income: no online store, no website checkout, no marketplace or app-platform payouts, no processor settlements (Stripe, Square, PayPal, Shopify, Amazon, Etsy, Upwork). Money comes from customers paying by bank transfer (ACH or wire), check, Zelle, cash, or from a card terminal in a physical shop — the online gateway is what they are applying for, so it cannot already be in the business.
+- "description" is one plain sentence about what it sells and to whom, and it must not mention an online shop, a webshop, e-commerce or a marketplace.
 - "legalName" is fictional and ends with the entity suffix when one applies (e.g. "Copper Kettle Cafe LLC"); never the name of a real chain or known company, and never a placeholder word (ACME, EXAMPLE, SAMPLE, FICTIONAL, TEST, DEMO, "Your Company", XYZ, FOO).`;
 
 /** Messages for the persona node (random profile completion). */

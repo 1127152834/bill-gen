@@ -53,6 +53,7 @@ describe('runRules', () => {
       ['R12_no_placeholder_names', 'lifeModel'],
       ['R13_occupation_category_fit', 'lifeModel'],
       ['R14_variety_floor', 'schedule'],
+      ['R15_no_gateway_income', 'schedule'],
     ]);
   });
 
@@ -353,7 +354,8 @@ describe('R10_no_payroll_income_personal', () => {
   it('does not apply to a business persona or to debits', () => {
     const b = build('cafe-business', 'alpha', 'checking');
     const t = pick(rowsOf(b, 'checking-any'), b, (m) => m.source === 'income');
-    expect(failing(run(b, edit(b, t.id, (x) => ({ ...x, description: 'SQUARE PAYROLL DEPOSIT' }))))).toEqual([]);
+    // 企业账户上的工资类进账 R10 不管（那是雇员薪资）；但行文不能写收单方名字，否则会撞 R15。
+    expect(failing(run(b, edit(b, t.id, (x) => ({ ...x, description: 'GUSTO PAYROLL DEPOSIT' }))))).toEqual([]);
     const payroll = pick(rowsOf(b, 'checking-any'), b, (m) => m.merchantKey === 'fact-gusto-payroll');
     expect(payroll.description).toContain('PAYROLL');
     const p = build('freelancer', 'alpha');

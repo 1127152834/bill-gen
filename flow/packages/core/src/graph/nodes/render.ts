@@ -11,7 +11,7 @@
  * structured errors. Rendering failures never fail the job — they become warnings on the result.
  */
 import { z } from 'zod';
-import type { GenerationResult, Statement } from '../../schemas/index.js';
+import type { GenerationResult, RenderArtifact, Statement } from '../../schemas/index.js';
 import type { Emit, GraphDeps } from '../deps.js';
 import type { GraphStateUpdate, GraphStateValue } from '../state.js';
 import { sharedMcpPool, type McpStdioClient } from '../../mcp/client.js';
@@ -100,22 +100,7 @@ const DraftSchema = z.object({
 /** What the model answers for the `render` node: the complete template data object. */
 export const FilledDataSchema = z.record(z.string(), z.unknown());
 
-export type RenderArtifact = {
-  template: string;
-  account: string;
-  path: string;
-  pages: number;
-  bytes: number;
-  sha256: string;
-  /** How many fill rounds it took (1 = the draft was already good). */
-  attempts: number;
-  /** True when the model edited the draft; false when the deterministic draft was rendered as-is. */
-  modelFilled: boolean;
-  /** Why the recommender picked this template (only set for `auto`). */
-  reasons?: string[];
-  /** Recommender score for `auto` picks. */
-  score?: number;
-};
+export type { RenderArtifact };
 
 /** Only deposit-account layouts exist server-side; credit statements cannot be rendered here. */
 const RENDERABLE_ACCOUNTS = new Set(['checking', 'business_checking']);
@@ -214,6 +199,36 @@ function fillMessages(
   ];
 }
 
+/**
+ * 一个月一份账单。
+ *
+ * 美国的银行只给当期出一张对账单（这 30 份真实样本也都是「一人一月一个 PDF」），所以这里按
+ * 账期把结果拆开：3 个月的请求 = 3 个文件，而不是把它们排进同一个 PDF。每份只带自己那个月
+ * 的期初/期末与流水，模型补全也是按月做，某个月失败不影响其它月份。
+ */
+async function renderMonthly(
+  deps: GraphDeps,
+  emit: Emit,
+  client: McpStdioClient,
+  templateId: string,
+  result: GenerationResult,
+  statement: Statement,
+  recommend?: { reasons: string[]; score: number },
+  bankName = '',
+): Promise<{ artifacts: RenderArtifact[]; warnings: string[] }> {
+  const artifacts: RenderArtifact[] = [];
+  const warnings: string[] = [];
+  const cycles = statement.months.length > 0 ? statement.months.map((m) => m.cycleStart.slice(0, 7)) : [''];
+  for (const [index, period] of cycles.entries()) {
+    const one = await renderOne(
+      deps, emit, client, templateId, result, statement, recommend, bankName, index, period,
+    );
+    if (one.artifact) artifacts.push(one.artifact);
+    if (one.warning) warnings.push(one.warning);
+  }
+  return { artifacts, warnings };
+}
+
 /** One template × one statement: draft → (model fill → validate)* → render. */
 async function renderOne(
   deps: GraphDeps,
@@ -224,6 +239,8 @@ async function renderOne(
   statement: Statement,
   recommend?: { reasons: string[]; score: number },
   bankName = '',
+  cycle = -1,
+  period = '',
 ): Promise<{ artifact?: RenderArtifact; warning?: string }> {
   const contract = await client.callTool<Contract>('template_contract', { template_id: templateId });
 
@@ -231,7 +248,7 @@ async function renderOne(
     template_id: templateId,
     result,
     account: statement.accountType,
-    cycle: -1,
+    cycle,
     ...(bankName && { bank_name: bankName }),
   });
   if (!draft.ok || !draft.data) {
@@ -253,7 +270,7 @@ async function renderOne(
     const rendered = await client.callTool<z.infer<typeof RenderSchema>>('render', {
       template_id: templateId,
       data,
-      filename: `${templateId}-${statement.accountType}-${result.id.slice(0, 8)}.pdf`,
+      filename: `${templateId}-${statement.accountType}-${period || result.id.slice(0, 8)}.pdf`,
       watermark: true,
       encrypt: false,
     });
@@ -264,6 +281,7 @@ async function renderOne(
       artifact: {
         template: templateId,
         account: statement.accountType,
+        ...(period && { period }),
         path: rendered.path,
         pages: rendered.pages ?? 0,
         bytes: rendered.bytes ?? 0,
@@ -401,24 +419,25 @@ export const renderStep =
             }
           }
           // 模板之间互不依赖：并行出片，两个同时在跑（MCP 客户端是同一连接，别把并发开太大）。
-          const slots: { artifact?: RenderArtifact; warning?: string }[] = new Array(targets.length);
+          const slots: { artifacts: RenderArtifact[]; warnings: string[] }[] = new Array(targets.length);
           let cursor = 0;
           const worker = async (): Promise<void> => {
             for (let i = cursor++; i < targets.length; i = cursor++) {
               const target = targets[i]!;
               try {
-                slots[i] = await renderOne(
+                slots[i] = await renderMonthly(
                   deps, emit, client, target.templateId, result, target.statement, target.recommend, bankName,
                 );
               } catch (err) {
-                slots[i] = { warning: `${target.templateId}: ${err instanceof Error ? err.message : String(err)}` };
+                const message = err instanceof Error ? err.message : String(err);
+                slots[i] = { artifacts: [], warnings: [`${target.templateId}: ${message}`] };
               }
             }
           };
           await Promise.all(Array.from({ length: Math.min(RENDER_CONCURRENCY, targets.length) }, worker));
           for (const slot of slots) {
-            if (slot?.artifact) artifacts.push(slot.artifact);
-            if (slot?.warning) warnings.push(slot.warning);
+            artifacts.push(...(slot?.artifacts ?? []));
+            warnings.push(...(slot?.warnings ?? []));
           }
         },
       );

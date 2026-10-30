@@ -295,11 +295,11 @@ describe('lifeModelNode', () => {
 
   it('keeps an income payer that already matches its evidence fact (name or chain)', async () => {
     const m = good();
-    const extra: MerchantFact = { id: 'fact-uber', name: 'Uber Technologies', chain: 'Uber', city: 'San Francisco', state: 'US', category: 'platform', priceItems: [], sourceUrl: 'https://www.uber.com/' };
-    m.incomeStreams[0] = { ...m.incomeStreams[0]!, payerName: 'UBER USA', factId: 'fact-uber' };
+    const extra: MerchantFact = { id: 'fact-kestrel', name: 'Kestrel Property Co', chain: 'Kestrel', city: 'Austin', state: 'TX', category: 'property management', priceItems: [], sourceUrl: 'https://example.test/kestrel' };
+    m.incomeStreams[0] = { ...m.incomeStreams[0]!, payerName: 'KESTREL PROPERTY', factId: 'fact-kestrel' };
     const llm = createFakeLlm({ lifeModel: [m] });
     const model = await lifeModelNode({ ...input, facts: [...facts, extra] }, { llm, skills });
-    expect(model.incomeStreams[0]).toMatchObject({ payerName: 'UBER USA', factId: 'fact-uber' });
+    expect(model.incomeStreams[0]).toMatchObject({ payerName: 'KESTREL PROPERTY', factId: 'fact-kestrel' });
   });
 
   it('bills card-charged recurring items as POS (ACH never reaches a credit card)', async () => {

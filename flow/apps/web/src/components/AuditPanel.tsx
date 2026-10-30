@@ -11,7 +11,7 @@ function ruleNumber(r: RuleResult): number {
   return Number.parseInt(r.ruleId.slice(1), 10)
 }
 
-/** R1-R11 results, audit findings (high first), warnings and usage. */
+/** All rule results (R1 onwards), audit findings (high first), warnings and usage. */
 export default function AuditPanel({ result }: { result: GenerationResult }) {
   const rules = [...result.audit.rules].sort((a, b) => ruleNumber(a) - ruleNumber(b))
   const findings = sortFindings(result.audit.findings)

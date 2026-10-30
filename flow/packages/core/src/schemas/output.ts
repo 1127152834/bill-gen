@@ -108,6 +108,7 @@ export const RuleIdSchema = z.enum([
   'R12_no_placeholder_names',
   'R13_occupation_category_fit',
   'R14_variety_floor',
+  'R15_no_gateway_income',
 ]);
 export type RuleId = z.infer<typeof RuleIdSchema>;
 
@@ -134,6 +135,8 @@ export type AuditFinding = z.infer<typeof AuditFindingSchema>;
 export const RenderArtifactSchema = z.object({
   template: z.string().min(1),
   account: z.string().min(1),
+  /** 账单所属月份（`YYYY-MM`）：一个月一份 PDF，不是把几个月合进一个文件。 */
+  period: z.string().optional(),
   path: z.string().min(1),
   pages: z.number().int().min(0),
   bytes: z.number().int().min(0),

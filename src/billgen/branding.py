@@ -392,7 +392,9 @@ LITERALS: dict[str, tuple[tuple[str, str], ...]] = {
                         ("U.S. Bank NA, Member FDIC", "{legal}, Member FDIC"),
                         ("U.S. Bank Attn: Consumer Bureau Dispute Handling (CBDH), "
                          "P.O. Box 3447, Oshkosh, WI 54903-3447.",
-                         "{legal} Attn: Consumer Bureau Dispute Handling (CBDH), "
+                         # 底稿这里写的是短名「U.S. Bank Attn: …」，换成法务全名会把这一句
+                         # 撑长约 60pt、压住同一行的后半句，所以只换地址不换名字。
+                         "{name} Attn: Consumer Bureau Dispute Handling (CBDH), "
                          "{po_box_alt}, {city_state_zip}."),
                         # 这句话原本在底稿里断成两行：「…or by visiting your local U.S.」/「Bank branch.」
                         # 两个 span 各自换掉，跨行读作「your local bank / branch.」，不再拼出真实行名。
@@ -419,7 +421,9 @@ LITERALS: dict[str, tuple[tuple[str, str], ...]] = {
                         ("U.S. Bank NA, Member FDIC", "{legal}, Member FDIC"),
                         ("U.S. Bank Attn: Consumer Bureau Dispute Handling (CBDH), "
                          "P.O. Box 3447, Oshkosh, WI 54903-3447.",
-                         "{legal} Attn: Consumer Bureau Dispute Handling (CBDH), "
+                         # 底稿这里写的是短名「U.S. Bank Attn: …」，换成法务全名会把这一句
+                         # 撑长约 60pt、压住同一行的后半句，所以只换地址不换名字。
+                         "{name} Attn: Consumer Bureau Dispute Handling (CBDH), "
                          "{po_box_alt}, {city_state_zip}."),
                         ("your local U.S.", "your local bank"),
                         ("Bank branch.", "branch."),
@@ -528,8 +532,14 @@ def replace_literals(page: fitz.Page, template_id: str, brand: Brand) -> int:
                 continue
             baseline = float(span["origin"][1])
             size = float(span["size"])
+            tail = span["text"].split(literal, 1)[1] if literal in span["text"] else ""
             for rect in page.search_for(literal, clip=fitz.Rect(span["bbox"])):
-                hits.append((rect, size, baseline, text, _room(page, spans, rect, baseline)))
+                room = _room(page, spans, rect, baseline)
+                if tail.strip():
+                    # 同一段文字里，替换点后面还接着正文：只能占住原来那几个字的宽度，
+                    # 变长就会把后半句盖住（披露页那条「…54903-3447. In order for us…」）。
+                    room = min(room, fitz.get_text_length(literal, fontname="helv", fontsize=size))
+                hits.append((rect, size, baseline, text, room))
     if not hits:
         return 0
     for hit in hits:

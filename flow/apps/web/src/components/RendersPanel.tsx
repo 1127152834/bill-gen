@@ -55,6 +55,7 @@ export default function RendersPanel({ renders }: { renders: readonly RenderArti
                 {LABELS.get(artifact.template) ?? artifact.template}
               </button>
               <span className="text-xs text-muted">
+                {artifact.period ? `${artifact.period} · ` : ''}
                 {artifact.account} · {artifact.pages} 页 · {size(artifact.bytes)}
                 {artifact.modelFilled ? ' · 模型填字段' : ' · 确定性草稿'}
               </span>

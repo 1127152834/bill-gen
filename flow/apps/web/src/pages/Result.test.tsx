@@ -165,11 +165,11 @@ describe('Result: statement preview', () => {
 })
 
 describe('Result: audit side panel', () => {
-  it('lists R1-R14 with Chinese names and pass marks', () => {
+  it('lists R1-R15 with Chinese names and pass marks', () => {
     renderResult(makeView())
     const panel = screen.getByRole('complementary', { name: '审计报告' })
     const rules = within(panel).getAllByRole('listitem').filter((li) => /^R\d+/.test(li.textContent ?? ''))
-    expect(rules).toHaveLength(14)
+    expect(rules).toHaveLength(15)
     expect(rules[0]).toHaveTextContent('R1')
     expect(rules[0]).toHaveTextContent('✓')
     expect(rules[1]).toHaveTextContent('余额连续')

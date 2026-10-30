@@ -87,6 +87,7 @@ export const RULE_LABEL: Record<string, string> = {
   R12_no_placeholder_names: '没有占位式公司名',
   R13_occupation_category_fit: '消费类目符合职业',
   R14_variety_floor: '商户足够多样',
+  R15_no_gateway_income: '没有线上支付/平台结算收入',
 }
 
 export const STATUS_LABEL: Record<GenerationStatus, string> = {

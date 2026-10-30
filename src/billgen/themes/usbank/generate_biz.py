@@ -551,7 +551,9 @@ def flow_engine(pages, d):
         last_bl_y = None
         while remaining:
             if cur_y is None:
-                row_y = CONT_FIRST if not first_frag else CONT_TITLE
+                # 续页顶部：段头（或「(continued)」头）与列头都占在 CONT_TITLE 上方那两行，
+                # 第一行数据必须从列头下面 CONT_FIRST 起，否则段头/列头会压在数据行上。
+                row_y = CONT_FIRST
                 head_y = CONT_TITLE if first_frag else None
             else:
                 head_y = cur_y
@@ -1225,6 +1227,12 @@ def build_pdf(d, out_path, watermark=True):
         doc.fullcopy_page(0, -1)             # 追加克隆；位于披露页后索引 2..n_stmt
     for p in list(doc)[2:]:
         _detach_contents(doc, p)             # 克隆页脱离主页内容流，别互相覆盖
+        # 第 1 页的客户三行（144.5/153.5/162.5）在续页要上移到 61.5；这里是整块抹掉再重画。
+        # 逐字形删除只删得掉一部分，会留下 `t` 这种残字，所以走 redaction。
+        p.add_redact_annot(fitz.Rect(16.0, 138.0, 340.0, 170.0), fill=(1, 1, 1))
+        p.apply_redactions(images=fitz.PDF_REDACT_IMAGE_NONE,
+                           graphics=fitz.PDF_REDACT_LINE_ART_NONE,
+                           text=fitz.PDF_REDACT_TEXT_REMOVE)
     n_phys = 2 + extra + (1 if n_stmt >= 2 else 0)
     pages = []
     for p in doc:
@@ -1237,7 +1245,6 @@ def build_pdf(d, out_path, watermark=True):
     # 个户续页页头范式：完整页头（logo/右栏信息）+ 客户三行上移 61.5/70.8/80 +
     # 灰底横幅（左账户类型 + 右 (CONTINUED)，无 Member FDIC）+ 次行 U.S.Bank/Acct；
     # 页头无条码区（公户 p1 的 2D 码/EB 行/IMB 在顶部——续页清除）
-    cust_snap = _snap(pages[0], (0, 142.0, 166.0))
     for pg_i in range(2, n_stmt + 1):
         pages[pg_i].delete_units(_band_locs(pages[pg_i], 140.0, 730.0))
         pages[pg_i].delete_res(140.0, 730.0)
@@ -1257,7 +1264,6 @@ def build_pdf(d, out_path, watermark=True):
                     if lo <= pages[pg_i].segs[si].units[ui].bl < hi
                     and not (pages[pg_i].segs[si].units[ui].x or 0) > 500]
             pages[pg_i].delete_units(locs)
-        _emit(cust_snap, pages, pg_i, 61.5 - 144.5)
         # 横幅：灰底+黑线（个户 p3 实证），文字=左账户类型+右 (CONTINUED)
         # （个户 p3 无 Member FDIC——p1 横幅右端的 Member FDIC 由 (CONTINUED) 取代）
         _add_banner_bg(pages[pg_i])
@@ -1266,6 +1272,11 @@ def build_pdf(d, out_path, watermark=True):
         blob += make_units(pg_i, BOLD_FONT, "(CONTINUED)", 12.0, 516.8, 145.3)
         blob += make_units(pg_i, ROW_FONT, "U.S. Bank National Association",
                            7.0, 20.1, 154.6)
+        # 客户三行跟着续页页头上移到 61.5/70.8/80（个户续页同款）。这里直接写，
+        # 不走快照发射——快照那套在这页不落地，客户块会整块消失。
+        for i, ln in enumerate(d.get("customer_lines", [])[:3]):
+            blob += make_units(pg_i, ROW_FONT, str(ln), 8.0, 72.0,
+                               (61.5, 70.8, 80.0)[i])
         acc_ln = "Account Number " + str(d.get("account_display", ""))
         blob += make_units(pg_i, BOLD_FONT, acc_ln, 9.0, 452.0, 156.4)
         pages[pg_i].append_text(blob)

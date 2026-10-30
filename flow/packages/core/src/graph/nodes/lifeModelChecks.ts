@@ -11,6 +11,14 @@ type Account = 'checking' | 'credit';
 /** Built-in merchantKeys of the scheduler; an income stream id must not collide with them. */
 const RESERVED_KEYS = new Set(['card-payment', 'interest', 'fee-overdraft', 'fee-atm', 'atm']);
 const WAGE_WORDS = /payroll|salary|wages|direct dep/i;
+/**
+ * 这份账单是要拿去申请支付网关的：申请人此刻还没有线上收款能力，所以账单上不能出现
+ * 收单/平台结算。允许的进账方式只有「客户直接付钱」这几种。
+ */
+export const GATEWAY_FREE_CHANNELS = new Set(['ach_client', 'zelle', 'mobile_deposit', 'card_sales']);
+/** 线上支付 / 收单 / 平台结算的痕迹（payerName、label 里出现即拒）。 */
+export const ONLINE_PAY_MARKERS =
+  /\b(stripe|square|squareup|shopify|paypal|braintree|adyen|checkout\.com|gumroad|etsy|amazon|ebay|upwork|fiverr|patreon|substack|uber|lyft|doordash|instacart|grubhub|airbnb|vrbo|youtube|twitch|teespring|ko-?fi)\b/i;
 const PER_GALLON = /gallon|\bgal\b/i;
 /** ACH company-name field: an income payer is shown cut to this many characters. */
 const MAX_PAYER_LENGTH = 16;
@@ -219,6 +227,21 @@ export function checkModel(model: FinancialModel, norm: NormalizedRequest, facts
       problems.push(`income stream id "${s.id}" must be unique and must not equal a fact id or a reserved key (${[...RESERVED_KEYS].join(', ')})`);
     }
     incomeIds.add(s.id);
+    if (!GATEWAY_FREE_CHANNELS.has(s.channel)) {
+      problems.push(
+        `income stream "${s.id}" uses channel "${s.channel}"; the subject has no payment gateway yet, so online / marketplace / processor payouts are impossible - use one of ${[...GATEWAY_FREE_CHANNELS].join(', ')}`,
+      );
+    }
+    if (personal && s.channel === 'card_sales') {
+      problems.push(
+        `income stream "${s.id}" uses channel "card_sales"; a one-person service business has no card terminal - that money comes as ach_client, zelle or mobile_deposit`,
+      );
+    }
+    if (ONLINE_PAY_MARKERS.test(s.payerName) || ONLINE_PAY_MARKERS.test(s.label)) {
+      problems.push(
+        `income stream "${s.id}" ("${s.label}" from "${s.payerName}") reads like an online marketplace or card processor payout; clients must pay by bank transfer, check, Zelle or cash`,
+      );
+    }
     if (personal && (WAGE_WORDS.test(s.payerName) || WAGE_WORDS.test(s.label))) {
       problems.push(`income stream "${s.id}" ("${s.label}" from "${s.payerName}") reads like wages / salary / payroll; a self-employed person has no employer`);
     }

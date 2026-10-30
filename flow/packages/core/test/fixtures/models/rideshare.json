@@ -2,12 +2,31 @@
   "incomeStreams": [
     {
       "id": "uber-weekly",
-      "label": "Uber driver weekly payout",
-      "payerName": "Uber USA LLC",
-      "channel": "platform_payout",
-      "cadence": { "kind": "weekly", "weekday": 2 },
-      "amountCents": { "min": 48000, "max": 112000 },
-      "seasonality": [0.85, 0.85, 0.95, 1, 1, 0.95, 0.9, 0.9, 1, 1.05, 1.1, 1.2]
+      "label": "Handyman jobs billed to homeowners",
+      "payerName": "Kestrel Property Co",
+      "channel": "ach_client",
+      "cadence": {
+        "kind": "weekly",
+        "weekday": 2
+      },
+      "amountCents": {
+        "min": 48000,
+        "max": 112000
+      },
+      "seasonality": [
+        0.85,
+        0.85,
+        0.95,
+        1,
+        1,
+        0.95,
+        0.9,
+        0.9,
+        1,
+        1.05,
+        1.1,
+        1.2
+      ]
     }
   ],
   "recurring": [
@@ -15,8 +34,14 @@
       "id": "rent",
       "label": "Apartment rent",
       "kind": "rent",
-      "dayRule": { "kind": "dayOfMonth", "day": 3 },
-      "amount": { "kind": "fixed", "cents": 128500 },
+      "dayRule": {
+        "kind": "dayOfMonth",
+        "day": 3
+      },
+      "amount": {
+        "kind": "fixed",
+        "cents": 128500
+      },
       "account": "checking",
       "priority": 1,
       "factId": "fact-greystar-westchase-houston",
@@ -26,8 +51,14 @@
       "id": "car-loan",
       "label": "Auto loan",
       "kind": "loan",
-      "dayRule": { "kind": "dayOfMonth", "day": 15 },
-      "amount": { "kind": "fixed", "cents": 41237 },
+      "dayRule": {
+        "kind": "dayOfMonth",
+        "day": 15
+      },
+      "amount": {
+        "kind": "fixed",
+        "cents": 41237
+      },
       "account": "checking",
       "priority": 3,
       "factId": "fact-toyota-financial-services",
@@ -37,8 +68,21 @@
       "id": "centerpoint",
       "label": "Electricity",
       "kind": "utility",
-      "dayRule": { "kind": "dayOfMonth", "day": 24 },
-      "amount": { "kind": "seasonal", "minCents": 7800, "maxCents": 21900, "peakMonths": [6, 7, 8, 9] },
+      "dayRule": {
+        "kind": "dayOfMonth",
+        "day": 24
+      },
+      "amount": {
+        "kind": "seasonal",
+        "minCents": 7800,
+        "maxCents": 21900,
+        "peakMonths": [
+          6,
+          7,
+          8,
+          9
+        ]
+      },
       "account": "checking",
       "priority": 3,
       "factId": "fact-reliant-energy-houston",
@@ -48,8 +92,14 @@
       "id": "progressive",
       "label": "Rideshare auto insurance",
       "kind": "insurance",
-      "dayRule": { "kind": "dayOfMonth", "day": 20 },
-      "amount": { "kind": "fixed", "cents": 18900 },
+      "dayRule": {
+        "kind": "dayOfMonth",
+        "day": 20
+      },
+      "amount": {
+        "kind": "fixed",
+        "cents": 18900
+      },
       "account": "credit",
       "priority": 3,
       "factId": "fact-progressive-auto",
@@ -59,8 +109,14 @@
       "id": "tmobile",
       "label": "Phone plan",
       "kind": "subscription",
-      "dayRule": { "kind": "dayOfMonth", "day": 8 },
-      "amount": { "kind": "fixed", "cents": 7500 },
+      "dayRule": {
+        "kind": "dayOfMonth",
+        "day": 8
+      },
+      "amount": {
+        "kind": "fixed",
+        "cents": 7500
+      },
       "account": "credit",
       "priority": 4,
       "factId": "fact-t-mobile-essentials",
@@ -71,8 +127,14 @@
     {
       "factId": "fact-shell-westheimer-houston",
       "weight": 6,
-      "perMonth": { "min": 4, "max": 12 },
-      "ticketCents": { "min": 2200, "max": 4500 },
+      "perMonth": {
+        "min": 4,
+        "max": 12
+      },
+      "ticketCents": {
+        "min": 2200,
+        "max": 4500
+      },
       "pricing": "fuel",
       "unitPriceCents": 279,
       "taxable": false,
@@ -84,8 +146,14 @@
     {
       "factId": "fact-whataburger-houston",
       "weight": 4,
-      "perMonth": { "min": 2, "max": 8 },
-      "ticketCents": { "min": 899, "max": 1899 },
+      "perMonth": {
+        "min": 2,
+        "max": 8
+      },
+      "ticketCents": {
+        "min": 899,
+        "max": 1899
+      },
       "pricing": "fixed_menu",
       "taxable": true,
       "tip": false,
@@ -96,8 +164,14 @@
     {
       "factId": "fact-heb-montrose-houston",
       "weight": 3,
-      "perMonth": { "min": 2, "max": 5 },
-      "ticketCents": { "min": 2500, "max": 14000 },
+      "perMonth": {
+        "min": 2,
+        "max": 5
+      },
+      "ticketCents": {
+        "min": 2500,
+        "max": 14000
+      },
       "pricing": "basket",
       "taxable": false,
       "tip": false,
@@ -108,8 +182,14 @@
     {
       "factId": "fact-mister-car-wash-houston",
       "weight": 1,
-      "perMonth": { "min": 0, "max": 4 },
-      "ticketCents": { "min": 1000, "max": 2500 },
+      "perMonth": {
+        "min": 0,
+        "max": 4
+      },
+      "ticketCents": {
+        "min": 1000,
+        "max": 2500
+      },
       "pricing": "fixed_menu",
       "taxable": true,
       "tip": false,
@@ -120,8 +200,14 @@
     {
       "factId": "fact-autozone-houston",
       "weight": 2,
-      "perMonth": { "min": 0, "max": 2 },
-      "ticketCents": { "min": 900, "max": 18000 },
+      "perMonth": {
+        "min": 0,
+        "max": 2
+      },
+      "ticketCents": {
+        "min": 900,
+        "max": 18000
+      },
       "pricing": "basket",
       "taxable": true,
       "tip": false,
@@ -132,8 +218,14 @@
     {
       "factId": "fact-exxon-katy-fwy-houston",
       "weight": 3,
-      "perMonth": { "min": 0, "max": 6 },
-      "ticketCents": { "min": 2200, "max": 4500 },
+      "perMonth": {
+        "min": 0,
+        "max": 6
+      },
+      "ticketCents": {
+        "min": 2200,
+        "max": 4500
+      },
       "pricing": "fuel",
       "unitPriceCents": 284,
       "taxable": false,
@@ -145,8 +237,14 @@
     {
       "factId": "fact-taqueria-arandas-houston",
       "weight": 2,
-      "perMonth": { "min": 0, "max": 6 },
-      "ticketCents": { "min": 800, "max": 2200 },
+      "perMonth": {
+        "min": 0,
+        "max": 6
+      },
+      "ticketCents": {
+        "min": 800,
+        "max": 2200
+      },
       "pricing": "fixed_menu",
       "taxable": true,
       "tip": true,
@@ -156,8 +254,16 @@
     }
   ],
   "atm": {
-    "perMonth": { "min": 1, "max": 3 },
-    "amountChoicesCents": [2000, 4000, 6000, 10000],
+    "perMonth": {
+      "min": 1,
+      "max": 3
+    },
+    "amountChoicesCents": [
+      2000,
+      4000,
+      6000,
+      10000
+    ],
     "feeCents": 350
   },
   "openingBalanceCents": 215000,

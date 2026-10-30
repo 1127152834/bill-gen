@@ -509,7 +509,9 @@ def flow_engine(pages, d):
         last_bl_y = None
         while remaining:
             if cur_y is None:
-                row_y = CONT_FIRST if not first_frag else CONT_TITLE
+                # 续页顶部：段头（或「(continued)」头）与列头都占在 CONT_TITLE 上方那两行，
+                # 第一行数据必须从列头下面 CONT_FIRST 起，否则段头/列头会压在数据行上。
+                row_y = CONT_FIRST
                 head_y = CONT_TITLE if first_frag else None
             else:
                 head_y = cur_y

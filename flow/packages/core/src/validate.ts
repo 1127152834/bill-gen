@@ -358,6 +358,23 @@ const r14VarietyFloor: Check = (statements) =>
     return out;
   });
 
+/**
+ * R15: 账单上不许出现线上支付 / 收单 / 平台结算的进账。
+ *
+ * 这份账单是拿去申请支付网关的：申请人此刻收不了线上付款，否则就没必要申请。任何一笔贷方
+ * 行文里出现收单方、平台、网上商店的名字（STRIPE、SQUARE、PAYPAL、SHOPIFY、ETSY、UBER…），
+ * 这张账单自己就否掉了申请资格。只查进账方向，不碰支出（在 Amazon 买东西当然可以）。
+ */
+const ONLINE_PAY_INCOME = /\b(stripe|square|squareup|shopify|paypal|braintree|adyen|gumroad|etsy|upwork|fiverr|patreon|substack|uber|lyft|doordash|instacart|grubhub|airbnb|vrbo|youtube|twitch|teespring|ko-?fi)\b|marketplace payout|platform payout|merchant services/i;
+
+const r15NoGatewayIncome: Check = (statements) =>
+  flat(statements)
+    .filter((t) => t.direction === 'credit' && ONLINE_PAY_INCOME.test(`${t.description} ${t.memo ?? ''}`))
+    .map((t) => ({
+      transactionIds: [t.id],
+      message: `${t.id}: 进账 "${t.description}" 读起来像收单/平台结算；申请网关的人还没有线上收款能力`,
+    }));
+
 const RULES: readonly { id: RuleId; target: RuleResult['target']; check: Check }[] = [
   { id: 'R1_count_in_range', target: 'schedule', check: r1Count },
   { id: 'R2_balance_continuity', target: 'schedule', check: r2Balance },
@@ -373,9 +390,10 @@ const RULES: readonly { id: RuleId; target: RuleResult['target']; check: Check }
   { id: 'R12_no_placeholder_names', target: 'lifeModel', check: r12NoPlaceholders },
   { id: 'R13_occupation_category_fit', target: 'lifeModel', check: r13OccupationFit },
   { id: 'R14_variety_floor', target: 'schedule', check: r14VarietyFloor },
+  { id: 'R15_no_gateway_income', target: 'schedule', check: r15NoGatewayIncome },
 ];
 
-/** Runs R1-R11 in order; a rule with no violations passes. */
+/** Runs every rule in order; a rule with no violations passes. */
 export function runRules(statements: Statement[], ctx: RuleContext): RuleResult[] {
   return RULES.map(({ id, target, check }) => {
     const violations = check(statements, ctx);

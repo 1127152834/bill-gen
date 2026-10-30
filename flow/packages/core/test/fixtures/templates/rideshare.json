@@ -61,7 +61,7 @@
   },
   {
     "merchantKey": "uber-weekly",
-    "template": "UBER USA DRIVER PAYMENT",
-    "memo": "Weekly driver payout"
+    "template": "KESTREL PROPERTY PMT {REF}",
+    "memo": "Client invoice paid by ACH"
   }
 ]

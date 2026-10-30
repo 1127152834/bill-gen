@@ -59,9 +59,9 @@ const sub = (over: Partial<RecurringItem> = {}): RecurringItem => ({
 
 const stream = (over: Partial<IncomeStream> = {}): IncomeStream => ({
   id: 'inc1',
-  label: 'Platform payout',
-  payerName: 'Uber',
-  channel: 'platform_payout',
+  label: 'Client invoice',
+  payerName: 'Kestrel Property Co',
+  channel: 'ach_client',
   cadence: { kind: 'weekly', weekday: 3 },
   amountCents: { min: 30_000, max: 60_000 },
   seasonality: Array(12).fill(1),

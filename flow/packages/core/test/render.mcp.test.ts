@@ -94,6 +94,26 @@ function stateWith(value: GenerationResult): GraphStateValue {
 type RenderUpdate = { result?: GenerationResult; warnings?: string[] };
 
 describe.skipIf(!hasBillgen)('render node over MCP', () => {
+  it('splits a multi-month statement into one PDF per month', async () => {
+    // 真实银行只寄当期对账单：3 个月的请求要出 3 个文件，每个月一份，文件名带月份。
+    const base = result();
+    const statement = base.statements.find((s) => s.accountType === 'checking')!;
+    const months = [
+      { cycleStart: '2026-07-24', cycleEnd: '2026-08-23' },
+      { cycleStart: '2026-08-24', cycleEnd: '2026-09-23' },
+      { cycleStart: '2026-09-24', cycleEnd: '2026-10-23' },
+    ].map((m) => ({ ...m, openingBalanceCents: 100000, closingBalanceCents: 120000, totalCreditsCents: 0, totalDebitsCents: 0, transactionCount: 0 }));
+    const value = GenerationResultSchema.parse({
+      ...base,
+      statements: [{ ...statement, months }],
+    });
+    const deps = depsWith(stubLlm((d) => d), false);
+    const update = (await renderStep(deps, () => {})(stateWith(value))) as RenderUpdate;
+    const renders = update.result?.renders ?? [];
+    expect(renders.map((r: { period?: string }) => r.period)).toEqual(['2026-07', '2026-08', '2026-09']);
+    expect(new Set(renders.map((r: { path: string }) => r.path)).size).toBe(3);
+  }, 240_000);
+
   it('renders every checking statement and records the artifact', async () => {
     const events: unknown[] = [];
     const deps = depsWith(stubLlm((d) => d), false);
@@ -152,7 +172,11 @@ describe.skipIf(!hasBillgen)('render node over MCP', () => {
     })(stateWith(result()))) as RenderUpdate;
     const renders = update.result?.renders ?? [];
     expect(renders.length).toBeGreaterThan(0);
-    expect(renders.length).toBeLessThanOrEqual(2); // templateLimit
+    // templateLimit 限的是「几套版式」，每个月各出一份文件，所以份数 = 版式数 × 月数
+    const templates = new Set(renders.map((r: { template: string }) => r.template));
+    expect(templates.size).toBeLessThanOrEqual(2); // templateLimit
+    const months = new Set(renders.map((r: { period?: string }) => r.period));
+    expect(renders.length).toBe(templates.size * months.size);
     for (const artifact of renders) {
       expect(artifact.reasons?.length ?? 0).toBeGreaterThan(0);
       expect(artifact.score ?? 0).toBeGreaterThan(0);

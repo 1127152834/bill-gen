@@ -355,7 +355,7 @@ describe('output schemas', () => {
         ],
       }).success,
     ).toBe(true));
-  it('RuleId lists exactly R1..R14', () => expect(RuleIdSchema.options).toHaveLength(14));
+  it('RuleId lists exactly R1..R15', () => expect(RuleIdSchema.options).toHaveLength(15));
   it('accepts RuleResult and AuditFinding; rejects unknown targets', () => {
     expect(
       RuleResultSchema.safeParse({
