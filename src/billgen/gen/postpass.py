@@ -439,6 +439,22 @@ _ONLINE_TOKENS = (
     "DROPBOX",
     "GOOGLE ONE",
     "MICROSOFT",
+    "AUDIBLE",
+    "GOODRX",
+    "AMAZON.COM",
+    "AMZN Mktp",
+    "EBAY",
+    "ETSY",
+    "PATREON",
+    "SUBSTACK",
+    "DUOLINGO",
+    "NYTIMES",
+    "WASHINGTON POST",
+    "CHEGG",
+    "COURSERA",
+    "VERIZON WIRELESS",
+    "T-MOBILE",
+    "MINT MOBILE",
 )
 
 
@@ -459,6 +475,37 @@ def _drop_place_tail(desc: str) -> str:
     return " ".join(tokens)
 
 
+def _trim_to_brand(desc: str) -> str:
+    """把线上商户剪到「品牌 + 门店号」为止，后面跟的城市/州一律丢掉。
+
+    `AUDIBLE TEMPLE CITY CA` → `AUDIBLE`；`GOODRX 2548 TEMPLE CITY CA` → `GOODRX 2548`。
+    按品牌词定位而不是按尾词剥，才不会把「TEMPLE CITY」这种双词城市剥成 `TEMPLE`。
+    """
+    tokens = desc.split()
+    keys = [re.sub(r"[^A-Z0-9]", "", token.upper()) for token in tokens]
+    brand_end = None
+    for brand in _ONLINE_TOKENS:
+        words = [re.sub(r"[^A-Z0-9]", "", part.upper()) for part in brand.split() if part.strip()]
+        if not words:
+            continue
+        for index in range(len(keys) - len(words) + 1):
+            window = keys[index:index + len(words)]
+            if window[:-1] == words[:-1] and window[-1].startswith(words[-1]):
+                end = index + len(words) - 1
+                if brand_end is None or end < brand_end:
+                    brand_end = end
+                break
+    if brand_end is None:
+        return desc
+    kept = tokens[: brand_end + 1]
+    # 品牌后面紧跟的门店号（`GOODRX 2548`）或 `USA` 保留，城市/州一律不要。
+    if brand_end + 1 < len(tokens):
+        nxt = tokens[brand_end + 1]
+        if re.fullmatch(r"\d{3,5}", nxt or "") or re.sub(r"[^A-Z]", "", nxt.upper()) in {"USA", "US"}:
+            kept.append(nxt)
+    return " ".join(kept)
+
+
 def fix_online_places(data: dict[str, Any]) -> int:
     """把线上订阅行尾巴上的城市/州去掉，返回改了几行。
 
@@ -471,7 +518,7 @@ def fix_online_places(data: dict[str, Any]) -> int:
         up = _norm(desc)
         if not up or not any(token in up for token in _ONLINE_TOKENS):
             continue
-        stripped = _drop_place_tail(desc)
+        stripped = _trim_to_brand(desc)
         stripped = re.sub(r"\s{2,}", " ", stripped).strip()
         if stripped and stripped != desc:
             _set_desc(row, stripped)
