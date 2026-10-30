@@ -144,7 +144,10 @@ def _personal_desc(ledger: LedgerDocument, row: LedgerRow) -> str:
     if row.type == "ACH":
         label = "ACH Credit" if row.direction == "credit" else "ACH Debit"
         return _fit(label, f"{stamp} {text}", "")
-    return _fit("", f"{stamp} {text}", "")
+    # 其余行也要有标签：真 Chase 账单里存款印 Deposit、其余支出印 Withdrawal，
+    # 空标签会靠 SUB_PAD 顶出十个前导空格，文本层一看就是程序拼的。
+    label = "Deposit" if row.direction == "credit" else "Withdrawal"
+    return _fit(label, f"{stamp} {text}", "")
 
 
 def digits_zelle(ledger: LedgerDocument, key: str) -> str:
