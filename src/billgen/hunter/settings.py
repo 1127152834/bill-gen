@@ -230,11 +230,21 @@ class SettingsStore:
             return self.defaults()
 
     def save(self, settings: HunterSettings) -> HunterSettings:
+        """原子写 + fsync + 0600：文件里是 API Key，掉电或半截写入都不能留坑。"""
         self._path.parent.mkdir(parents=True, exist_ok=True)
         payload = json.dumps(asdict(settings), ensure_ascii=False, indent=2) + "\n"
         temporary = self._path.with_suffix(".tmp")
-        temporary.write_text(payload, encoding="utf-8")
+        with open(temporary, "w", encoding="utf-8") as handle:
+            handle.write(payload)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.chmod(temporary, 0o600)
         os.replace(temporary, self._path)
+        directory = os.open(self._path.parent, os.O_RDONLY)
+        try:
+            os.fsync(directory)
+        finally:
+            os.close(directory)
         return settings
 
     def patch(self, patch: dict[str, Any]) -> HunterSettings:

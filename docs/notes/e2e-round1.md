@@ -805,3 +805,46 @@ chase-business 差异 0 项、usbank-business 差异 0 项。
 
 回滚：`git revert <本轮提交>`；模板侧只有 `_common.py` 词表与 `realism_rules` 的变化，
 `request.ts` / `render.ts` 的字段都是**可选**，老请求照旧能跑。
+
+## 第二十八轮（2026-10-30）：模型 / Tavily 先测通再保存，配置搬出命名卷
+
+用户反馈两件事：对话框里填完凭据没有「测试」，填错了要到生成账单才炸；以及「每次重启数据就
+不见了」。后者实测**不是后端丢数据**：`/data` 是命名卷，`PUT` 落盘、`up -d --force-recreate`
+重建容器、`/api/v1/hunter/restart` 重启子进程之后 `base_url` / `api_key` / `tavily_api_key`
+都还在。真正让人以为「丢了」的是三件事：Key 输入框永远显示占位（设计上是只写不读）、
+命名卷在宿主机上看不见、`docker compose down -v` / 清理未使用卷就会静默删掉它。
+
+### 改了什么
+
+1. **连通性探测**：新增 `src/billgen/hunter/probe.py`（只用 `urllib`，容器里没有 requests），
+   两个接口 `POST /api/v1/hunter/test-llm`、`POST /api/v1/hunter/test-tavily`：
+   - 用「已保存配置 + 表单里还没保存的值」拼出要测的配置（空串表示沿用），不落盘；
+   - 模型：先按选定 `structured_mode` 带 `response_format`（json_schema / json_object /
+     tools+tool_choice），被 400/422 打回再退一次纯对话，返回 `latency_ms` + 回复片段；
+   - Tavily：`POST https://api.tavily.com/search`，`max_results: 1`；
+   - 失败把上游状态码与正文原样回给界面：401/403 →「鉴权失败」、404 →「地址不对，检查是不是
+     漏了 /v1」、连不上 →「连不上 <url>：<原因>」；缺字段也走 200 + `ok:false`（不是 5xx）。
+2. **保存闸门**：界面加「测试模型连接」「测试 Tavily」两个按钮与结果行；
+   `hunterState.tests` 记 `llm`/`tavily` 的通过状态与**被测输入签名**，任一字段改动签名变化即作废；
+   「保存并重启」默认 `disabled`，两项都通过才可点。后端已 `model_ready` 的旧配置打开对话框时
+   视为「已生效，无需重测」。
+3. **持久化落到看得见的文件**：`docker-compose.yml` 的 `billgen-data:/data` 换成 `./.data:/data`
+   绑定挂载（`.gitignore` 加 `/.data/`，迁移时把原卷内容 `cp -a` 过去）；`SettingsStore.save`
+   改成 `tmp → flush → fsync → chmod 0600 → os.replace → fsync(dir)`；
+   `GET /api/v1/hunter/settings` 增加 `storage { path, saved_at, bytes, writable, key_hint, tavily_hint }`，
+   对话框底行显示「配置文件 /data/billgen/hunter/settings.json · 318 字节 · 最后保存 … · 落在数据卷里，
+   重启/重建都不丢」，Key 显示 `sk-…3456` 掩码（证明存过，又不回显）。
+
+### 验证
+
+- `pytest` **557 passed** / 16 skipped / 33 subtests（新增 10 条：探测成功/鉴权失败/降级重试/
+  缺字段/用未保存表单值/Tavily 成功失败/两个接口接线/缺 Key 不 500/storage 与掩码/文件 0600）。
+- 线上：`POST /api/v1/hunter/test-llm` 对假地址回
+  `{"ok": false, "error": "连不上 https://persist.test/v1/chat/completions：TLS/SSL connection has been closed (EOF)"}`；
+  `test-tavily` 对假 Key 回 `鉴权失败（HTTP 401）：{"detail":{"error":"Unauthorized: missing or invalid API key."}}`
+  （说明容器出网正常，链路真的打通了才回 401）。
+- 持久化实测：`PUT` → `docker compose exec cat` 有值 → `up -d --force-recreate` → 仍在 →
+  `/api/v1/hunter/restart` → 仍在；宿主机 `./.data/billgen/hunter/settings.json` 权限 `-rw-------`。
+
+回滚：`git revert <本轮提交>`；若要从绑定挂载退回命名卷，把 `volumes` 改回 `billgen-data:/data`
+并把 `.data/` 的内容拷回卷（`docker run --rm -v billgen-data:/to -v "$PWD/.data:/from" --entrypoint sh billgen:full -c 'cp -a /from/. /to/'`）。

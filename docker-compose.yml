@@ -30,7 +30,9 @@ services:
       TAVILY_API_KEY: ${TAVILY_API_KEY:-}
     init: true
     volumes:
-      - billgen-data:/data
+      # 绑定挂载而不是命名卷：配置就是仓库旁边的 ./.data/billgen/hunter/settings.json，
+      # 看得见、能备份、`docker compose down -v` 或清理未使用卷也带不走它。
+      - ./.data:/data
     restart: unless-stopped
     # 一个容器两个进程：任一挂掉容器即退出重启（entrypoint 里互相看护）
     healthcheck:
@@ -43,6 +45,3 @@ services:
       timeout: 6s
       start_period: 25s
       retries: 3
-
-volumes:
-  billgen-data:

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import io
 import json
 import threading
 import urllib.request
@@ -13,6 +14,7 @@ import pytest
 
 from billgen.hunter import HunterProcess, HunterSettings, SettingsError, SettingsStore, apply_patch
 from billgen.hunter.settings import to_env
+from billgen.hunter import probe
 from billgen.server.http import make_server
 
 
@@ -367,3 +369,174 @@ def test_proxy_reports_upstream_down(tmp_path: Path, monkeypatch):
     finally:
         server.shutdown()
         server.server_close()
+
+
+# ---- 模型 / Tavily 连通性探测 -------------------------------------------------
+
+
+class _FakeResponse:
+    def __init__(self, status: int, body: str) -> None:
+        self.status = status
+        self._body = body.encode()
+
+    def read(self, _limit: int = -1) -> bytes:
+        return self._body
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_exc):
+        return False
+
+
+def _patch_urlopen(monkeypatch, replies):
+    """按顺序返回 (status, body)；返回 None 表示连不上。"""
+    calls: list[dict] = []
+
+    def fake(request, timeout=None):
+        calls.append({"url": request.full_url, "body": request.data, "headers": dict(request.headers)})
+        reply = replies.pop(0)
+        if reply is None:
+            raise urllib.error.URLError("nodename nor servname provided")
+        status, body = reply
+        if status >= 400:
+            raise urllib.error.HTTPError(request.full_url, status, "err", {}, None, )
+        return _FakeResponse(status, body)
+
+    monkeypatch.setattr(probe, "_urlopen", fake)
+    return calls
+
+
+def _http_error(monkeypatch, status: int, body: str):
+    def fake(request, timeout=None):
+        raise urllib.error.HTTPError(
+            request.full_url, status, "err", {}, io.BytesIO(body.encode())
+        )
+
+    monkeypatch.setattr(probe, "_urlopen", fake)
+
+
+def test_probe_llm_reports_success_with_latency(monkeypatch):
+    _patch_urlopen(
+        monkeypatch,
+        [(200, json.dumps({"choices": [{"message": {"content": '{"ok": true}'}}]}))],
+    )
+    settings = HunterSettings(base_url="https://llm.test/v1", api_key="sk-live", model="gpt-x")
+    result = probe.probe_llm(settings)
+    assert result["ok"] is True
+    assert result["endpoint"] == "https://llm.test/v1/chat/completions"
+    assert "已连通" in result["detail"] and '{"ok": true}' in result["detail"]
+    assert isinstance(result["latency_ms"], int)
+
+
+def test_probe_llm_reports_auth_failure(monkeypatch):
+    _http_error(monkeypatch, 401, json.dumps({"error": {"message": "invalid api key"}}))
+    settings = HunterSettings(base_url="https://llm.test/v1", api_key="sk-bad")
+    result = probe.probe_llm(settings)
+    assert result["ok"] is False
+    assert "鉴权失败" in result["error"] and "invalid api key" in result["error"]
+
+
+def test_probe_llm_falls_back_to_plain_payload(monkeypatch):
+    """第一次带 response_format 被 400 打回，就退一次纯对话，别把方言差异当故障。"""
+    _patch_urlopen(
+        monkeypatch,
+        [
+            (400, json.dumps({"error": {"message": "response_format unsupported"}})),
+            (400, json.dumps({"error": {"message": "response_format unsupported"}})),
+            (200, json.dumps({"choices": [{"message": {"content": "pong"}}]})),
+        ],
+    )
+    settings = HunterSettings(base_url="https://llm.test/v1", api_key="sk-live")
+    result = probe.probe_llm(settings)
+    assert result["ok"] is True and "pong" in result["detail"]
+
+
+def test_probe_llm_names_missing_field(monkeypatch):
+    with pytest.raises(probe.ProbeError, match="接口地址"):
+        probe.probe_llm(HunterSettings(api_key="sk-live"))
+    with pytest.raises(probe.ProbeError, match="API Key"):
+        probe.probe_llm(HunterSettings(base_url="https://llm.test/v1"))
+
+
+def test_probe_llm_uses_the_unsaved_form_values(monkeypatch):
+    calls = _patch_urlopen(
+        monkeypatch, [(200, json.dumps({"choices": [{"message": {"content": "ok"}}]}))]
+    )
+    stored = HunterSettings(base_url="", api_key="")
+    result = probe.probe_llm(
+        stored, {"base_url": "https://form.test/v1", "api_key": "sk-form"}
+    )
+    assert result["ok"] is True
+    assert calls[0]["url"] == "https://form.test/v1/chat/completions"
+    assert calls[0]["headers"]["Authorization"] == "Bearer sk-form"
+
+
+def test_probe_tavily_success_and_failure(monkeypatch):
+    _patch_urlopen(monkeypatch, [(200, json.dumps({"results": [{"title": "x"}]}))])
+    ok = probe.probe_tavily(HunterSettings(tavily_api_key="tvly-live"))
+    assert ok["ok"] is True and "1 条结果" in ok["detail"]
+
+    _http_error(monkeypatch, 403, json.dumps({"detail": {"error": "invalid api key"}}))
+    bad = probe.probe_tavily(HunterSettings(tavily_api_key="tvly-bad"))
+    assert bad["ok"] is False and "鉴权失败" in bad["error"]
+
+    with pytest.raises(probe.ProbeError, match="Tavily Key"):
+        probe.probe_tavily(HunterSettings())
+
+
+def test_probe_endpoints_are_wired(web, monkeypatch):
+    origin, store, _ = web
+    store.patch({"base_url": "https://llm.test/v1", "api_key": "sk-1", "tavily_api_key": "tvly-1"})
+    _patch_urlopen(
+        monkeypatch,
+        [
+            (200, json.dumps({"choices": [{"message": {"content": "ok"}}]})),
+            (200, json.dumps({"results": []})),
+        ],
+    )
+    for path in ("test-llm", "test-tavily"):
+        request = urllib.request.Request(
+            origin + f"/api/v1/hunter/{path}",
+            data=b"{}",
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urllib.request.urlopen(request, timeout=20) as response:
+            payload = json.loads(response.read())
+        assert payload.get("ok") is True, (path, payload)
+
+
+def test_probe_endpoint_reports_missing_key_without_500(web):
+    origin, _, _ = web
+    request = urllib.request.Request(
+        origin + "/api/v1/hunter/test-tavily",
+        data=b"{}",
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    with urllib.request.urlopen(request, timeout=20) as response:
+        assert response.status == 200
+        payload = json.loads(response.read())
+    assert payload["ok"] is False and "Tavily Key" in payload["error"]
+
+
+def test_settings_payload_carries_storage_and_masked_hints(web):
+    origin, store, _ = web
+    store.patch({"api_key": "sk-abcdef123456", "tavily_api_key": "tvly-zzzz9999"})
+    status, body, _ = _get(origin + "/api/v1/hunter/settings")
+    payload = json.loads(body)
+    storage = payload["storage"]
+    assert storage["path"].endswith("hunter/settings.json")
+    assert storage["saved_at"] and storage["bytes"] > 0
+    assert storage["writable"] is True
+    assert storage["key_hint"] == "sk-…3456"
+    assert storage["tavily_hint"] == "tvl…9999"
+
+
+def test_settings_file_is_not_world_readable(tmp_path: Path):
+    """文件里放的是 API Key：写完必须是 0600，不能跟着 umask 走。"""
+    store = _store(tmp_path)
+    path = Path(store.path)
+    store.patch({"api_key": "sk-secret"})
+    assert path.stat().st_mode & 0o777 == 0o600

@@ -5,13 +5,16 @@ from __future__ import annotations
 import json
 import logging
 import mimetypes
+import os
 import re
 import uuid
+from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlsplit
 
 from ..hunter import HunterProcess, SettingsError, SettingsStore
+from ..hunter.probe import ProbeError, probe_llm, probe_tavily
 from ..hunter.proxy import forward
 from ..themes.mercury import letter_web
 from .application import ApplicationError, ApplicationService
@@ -56,6 +59,16 @@ def _home() -> bytes:
         + "</ul><p>模板注册表：<a href='/api/v1/templates'>/api/v1/templates</a>"
         " · <a href='/healthz'>运行状态</a></p></html>"
     ).encode()
+
+
+def _mask_secret(value: str) -> str:
+    """密钥只回显「前 3 后 4」，够证明存过，不够被拿去用。"""
+    text = (value or "").strip()
+    if not text:
+        return ""
+    if len(text) <= 8:
+        return "•" * len(text)
+    return f"{text[:3]}…{text[-4:]}"
 
 
 class BillGenHTTPServer(ThreadingHTTPServer):
@@ -134,7 +147,40 @@ class Handler(BaseHTTPRequestHandler):
     def _hunter_settings(self, hunter):
         payload = hunter.store.load().public()
         payload["status"] = hunter.status()
+        payload["storage"] = self._settings_storage(hunter)
         return payload
+
+    def _settings_storage(self, hunter):
+        """配置到底存在哪个文件、能不能写、最后改于何时 —— 让人一眼看出「没丢」。"""
+        settings = hunter.store.load()
+        path = Path(hunter.store.path)
+        try:
+            stat = path.stat()
+            saved_at = datetime.fromtimestamp(stat.st_mtime, timezone.utc).isoformat()
+            size = stat.st_size
+        except OSError:
+            saved_at, size = "", 0
+        return {
+            "path": str(path),
+            "saved_at": saved_at,
+            "bytes": size,
+            "writable": os.access(path.parent if path.parent.exists() else path.parent.parent, os.W_OK),
+            "secrets_stored": settings.has_api_key,
+            # 只给「前 3 后 4」的掩码：证明存过，又不把 Key 回显到浏览器。
+            "key_hint": _mask_secret(settings.api_key),
+            "tavily_hint": _mask_secret(settings.tavily_api_key),
+        }
+
+    def _hunter_probe(self, hunter, kind: str):
+        allowed = ("base_url", "api_key", "model", "structured_mode", "tavily_api_key")
+        patch = self._body(allowed, required=False)
+        current = hunter.store.load()
+        try:
+            result = probe_llm(current, patch) if kind == "test-llm" else probe_tavily(current, patch)
+        except ProbeError as exc:
+            # 「没填地址」也算一次测试结果，用 200 + ok:false 回，前端一条路径处理。
+            return self._json({"ok": False, "error": str(exc)})
+        return self._json(result)
 
     def _hunter_patch(self, hunter):
         patch = self._body(
@@ -255,6 +301,8 @@ class Handler(BaseHTTPRequestHandler):
                     if self.command in ("PUT", "POST"):
                         return self._hunter_patch(hunter)
                     return self._error("method_not_allowed", "Method not allowed", 405)
+                if path in ("/api/v1/hunter/test-llm", "/api/v1/hunter/test-tavily") and self.command == "POST":
+                    return self._hunter_probe(hunter, path.rsplit("/", 1)[-1])
                 if path == "/api/v1/hunter/restart" and self.command in ("POST", "PUT"):
                     self._body((), required=False)
                     return self._json(hunter.restart())

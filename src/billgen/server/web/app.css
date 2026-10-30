@@ -1603,3 +1603,27 @@ kbd {
   font-size: 12px;
   color: #6a756d;
 }
+
+/* 模型配置对话框：连通性测试行 + 配置落盘位置提示 */
+.cfg-test-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  padding-top: 4px;
+}
+.cfg-result {
+  font-size: 12px;
+  color: #6a756d;
+  max-width: 260px;
+}
+.cfg-result.ok {
+  color: #1f7a4d;
+}
+.cfg-result.bad {
+  color: #b3261e;
+}
+.cfg-status.muted {
+  color: #8b968e;
+  font-size: 11px;
+}

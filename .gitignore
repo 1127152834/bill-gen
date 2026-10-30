@@ -213,3 +213,6 @@ flow/apps/*/data/
 !src/billgen/themes/usbank/editor_us/data_us.json
 !src/billgen/themes/usbank/editor_biz/data_biz.json
 .artifacts/
+
+# 本地数据目录（配置 / 缓存 / 出片）：docker 绑定挂载到 /data
+/.data/

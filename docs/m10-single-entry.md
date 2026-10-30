@@ -33,7 +33,10 @@ M10 把猎手折进同一个入口，并把模型配置从环境变量搬到页�
 
 ## 模型配置
 
-配置落在数据卷 `$BILL_GEN_DATA_DIR/hunter/settings.json`，界面在顶栏「模型配置」：
+配置落在 `$BILL_GEN_DATA_DIR/hunter/settings.json`，容器里就是 **`./.data/billgen/hunter/settings.json`**
+（`docker-compose.yml` 用的是 `./.data:/data` 绑定挂载，不是命名卷 —— 文件就在仓库旁边，看得见、
+能备份，`docker compose down -v` 或清理未使用卷都带不走它；写盘是 `tmp → fsync → chmod 0600 →
+os.replace`，掉电不会留半截，权限不给同机其它用户读）。界面在顶栏「模型配置」：
 
 | 字段 | 作用 | 落到的环境变量 |
 |---|---|---|
@@ -54,8 +57,18 @@ M10 把猎手折进同一个入口，并把模型配置从环境变量搬到页�
 
 规则：
 
+0. **先测通再保存**：界面里「测试模型连接」「测试 Tavily」各打一次最小请求
+   （`POST /api/v1/hunter/test-llm`、`POST /api/v1/hunter/test-tavily`，body 是还没保存的表单值，
+   缺省字段回落到已存配置），两项都通过「保存并重启」才可选；改了对应字段测试结果立刻作废。
+   探测走 `src/billgen/hunter/probe.py`，只用 `urllib`（容器里没装 requests）：
+   模型先按选定的 `structured_mode` 带 `response_format`，被 400/422 打回再退一次纯对话
+   （自建网关对 `json_schema` 的支持参差，不该把方言差异当成故障），Tavily 打一次
+   `max_results: 1` 的搜索。失败时把上游状态码和报错正文原样回给界面（401 → 「鉴权失败」，
+   404 → 「地址不对，检查是不是漏了 /v1」，连不上 → 「连不上 <url>：<原因>」）。
 1. **密钥只写不读**：`GET` 只返回 `has_api_key` / `has_tavily_key`，保存时留空表示沿用旧值；
 2. **保存即重启**：`PUT /api/v1/hunter/settings` 落盘后重启子进程，新配置在新进程里生效；
+   对话框中会显示 `storage`（配置文件路径、字节数、最后保存时间、是否可写）和 Key 掩码
+   （`sk-…3456`）——「保存过没有」不用猜；
 3. **校验在前端之外**：`SettingsError` 统一映射成 400 `invalid_settings`，非法 `base_url`、
    未知模板、越界 `auto_limit` 都会被拒；
 4. **环境变量仍是默认值**：文件不存在时按环境变量初始化，因此容器编排与旧用法都还成立。

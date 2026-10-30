@@ -382,11 +382,18 @@
           autocomplete="new-password" placeholder="留空沿用；真实模式下用于本地化调研" /></label>
         <label class="settings-wide"><input id="cfg-ai-fill" type="checkbox" />
           让模型自己填模板字段（关闭则用确定性草稿）</label>
+        <div class="settings-wide cfg-test-row">
+          <button id="cfg-test-llm" class="button quiet" type="button">测试模型连接</button>
+          <span id="cfg-llm-result" class="cfg-result" role="status">未测试</span>
+          <button id="cfg-test-tavily" class="button quiet" type="button">测试 Tavily</button>
+          <span id="cfg-tavily-result" class="cfg-result" role="status">未测试</span>
+        </div>
       </div>
       <p id="cfg-status" class="cfg-status" role="status"></p>
+      <p id="cfg-storage" class="cfg-status muted" role="note"></p>
       <div class="dialog-actions">
         <button id="cfg-cancel" class="button quiet" type="button">取消</button
-        ><button id="cfg-save" class="button primary" type="button">保存并重启</button>
+        ><button id="cfg-save" class="button primary" type="button" disabled>保存并重启</button>
       </div>
     </dialog>
     <dialog id="help-dialog">
