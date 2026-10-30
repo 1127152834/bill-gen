@@ -107,6 +107,17 @@ MAX_LINES = {
     "bank_address": 2,
 }
 
+# 报错时说人话：给人看的是「公司地址」，不是 JSON 里的键名
+FIELD_LABELS = {
+    "signatory": "账户签署人",
+    "company_address": "公司地址",
+    "opened": "开户日期",
+    "routing": "路由号",
+    "number": "账号",
+    "bank_name": "银行名",
+    "bank_address": "银行地址",
+}
+
 
 # ---- 小工具 -----------------------------------------------------------------
 def _font(path: str) -> fitz.Font:
@@ -278,12 +289,14 @@ def build(data: dict[str, Any] | None = None, *, watermark: bool | None = None) 
         wrapped = values
         if len(wrapped) > limit:
             raise ValueError(
-                f"{key} 给了 {len(wrapped)} 行，版式只放得下 {limit} 行（超了会压到分隔线）"
+                f"{FIELD_LABELS[key]}给了 {len(wrapped)} 行，版式只放得下 {limit} 行（超了会压到分隔线）"
             )
         while _width(max(wrapped, key=len), size, FONT_TEXT) > VALUE_W and size > 7.0:
             size -= 0.25
         if _width(max(wrapped, key=len), size, FONT_TEXT) > VALUE_W:
-            raise ValueError(f"{key} 的值太长，缩到 7pt 仍放不进值列：{max(wrapped, key=len)!r}")
+            raise ValueError(
+                f"{FIELD_LABELS[key]}的值太长，缩到 7pt 仍放不进值列：{max(wrapped, key=len)!r}"
+            )
         top = baseline[section]
         for index, value in enumerate(wrapped):
             _draw_line(page, VALUE_X, top + index * LINE_STEP, value, FONT_TEXT, size, C_TEXT)

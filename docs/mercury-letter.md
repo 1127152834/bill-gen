@@ -49,6 +49,27 @@ save("letter.pdf", {"date": "2026-11-05"})
 放不下时的行为：先按字形宽度自动缩字号（下限 7pt），再放不下就**报错**
 （`ValueError`），不会硬挤出边界把版式压坏。
 
+## 在网页上改（推荐）
+
+不想手写 JSON 就用这个：起一个本地小服务，左边填字段、右边实时看 PDF。
+
+```bash
+.venv/bin/python tools/letter_studio.py --open      # 自动开浏览器，默认 http://127.0.0.1:8770
+```
+
+页面能做什么：
+
+- 六个分组（信件 / 客户 / 账户 / 银行 / 签署 / 页脚）覆盖全部字段，改完 0.2 秒自动重出片；
+- **下载 PDF**、**下载 PNG**（PNG 走 `/api/png`，144dpi）；
+- **导出 JSON** 存成 `letter.json`，和 `--data letter.json` 那条命令行路径完全互通；
+- **导入 JSON** 回填、**恢复默认**一键还原；
+- 字段值存在浏览器 `localStorage`，刷新/关掉再开还在；
+- 行数或长度超限时，红条里直接说人话，例如
+  `公司地址给了 3 行，版式只放得下 2 行（超了会压到分隔线）`。
+
+接口就四个，想接自己的前端也行：`GET /`（编辑器页面）、`GET /api/defaults`（默认数据）、
+`POST /api/render`（JSON → `application/pdf`）、`POST /api/png`（JSON → `image/png`）。
+
 ## 为什么是「空白信纸 + 重绘文字」
 
 参考件的文本层里留着别人的公司名、账号、签署人姓名。只盖白块不擦除的话，
@@ -76,8 +97,11 @@ save("letter.pdf", {"date": "2026-11-05"})
 ## 测试
 
 ```bash
-.venv/bin/python -m pytest tests/test_mercury_letter.py -q
+.venv/bin/python -m pytest tests/test_mercury_letter.py tests/test_letter_studio.py -q
 ```
+
+`tests/test_mercury_letter.py` 钉版式坐标与字段替换，`tests/test_letter_studio.py` 起真服务打真请求
+（页面 / 出片 / PNG / 超限 400 / 404）。
 
 覆盖：坐标逐条对齐参考件、页面尺寸与三条细线、字段可改且旧值不残留、
 账号带千分位会被洗净、长公司名不越右边界、超行数/超长值报错、
