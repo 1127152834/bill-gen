@@ -73,6 +73,10 @@
   "card_types": [
     "Card Purchase"
   ],
+  "knowledge_refs": [
+    "knowledge/banks/wellsfargo.json",
+    "knowledge/regulations.md"
+  ],
   "why": "Wells Fargo 用动词前缀区分行类：`Card Purchase 12/11 …`、`ATM Withdrawal …`、`Check 1110 …`、`Zelle Payment To …`（大小写混排）；卡尾在表头不进行内。",
   "curated_keys": [
     "columns",

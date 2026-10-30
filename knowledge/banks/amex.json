@@ -1,0 +1,49 @@
+{
+  "theme": "amex",
+  "generated_by": "tools/build_bank_kb.py",
+  "facts": [
+    {
+      "field": "identity.legal_name",
+      "value": "American Express National Bank",
+      "source": "fdic-amex",
+      "quote": "American Express National Bank",
+      "confidence": "high"
+    },
+    {
+      "field": "identity.hq",
+      "value": "115 W Towne Ridge Pkwy, Sandy, UT 84070",
+      "source": "fdic-amex",
+      "quote": "115 W Towne Ridge Pkwy",
+      "confidence": "high"
+    },
+    {
+      "field": "identity.website",
+      "value": "www.americanexpress.com",
+      "source": "fdic-amex",
+      "quote": "www.americanexpress.com",
+      "confidence": "high"
+    },
+    {
+      "field": "statement.is_credit_card",
+      "value": "信用卡账单：没有逐行余额链，只有账户余额与还款信息",
+      "source": "amex-cma-blue-cash",
+      "quote": "Cardmember Agreement",
+      "confidence": "low"
+    },
+    {
+      "field": "statement.has_id_line",
+      "value": "每笔交易第二行印 `ID 3202458712` 形式的 10 位参照号",
+      "source": "amex-cma-blue-cash",
+      "quote": "Cardmember Agreement",
+      "confidence": "low"
+    }
+  ],
+  "sources": [
+    "amex-cma-blue-cash",
+    "fdic-amex"
+  ],
+  "gaps": [
+    "Amex 只有 Cardmember Agreement 全文，账单版式规则仍以本地参考件为准"
+  ],
+  "problems": []
+}

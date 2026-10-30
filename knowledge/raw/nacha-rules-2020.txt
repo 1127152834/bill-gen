@@ -1,0 +1,215 @@
+source: nacha-rules-2020
+topic: Nacha 账户信息改进规则修改（Company Entry Description 等）
+kind: payment_rules
+url: https://www.nacha.org/system/files/2020-05/Account-Information-Improvements-Proposed-Modifications-to-the-Rules-combined-May%202020.pdf
+fetched_at: 2026-10-30T19:13:12Z
+content_type: text/html
+sha256: 90e6f760803e85d0d6cdaa62344df3f2e6a723a631f36bb37a5a02221d9560f0
+--- 正文（外链原文摘录，只作离线检索用）---
+
+Nacha 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+
+ 
+ -->
+ 
+
+ 
+
+ 
+ 
+
+ 
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Please wait ... 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Login to your account 
+ 
+ You are now on Nacha.org. 
+ Please note your credentials for both the Risk Management Portal and/or the Nacha Operating Rules Online websites are different than the login for the Nacha website. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Email: 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Password: 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Remember Me 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Forgot your password? 
+ 
+ Click here to reset your password. 
+ 
+ 
+ 
+ 
+ Don't have an account yet? Create an account. 
+ 
+ 
+ 
+ 
+ 
+ 
+ &copy; 2026 - Nacha

@@ -1,0 +1,169 @@
+source: wf-addenda
+topic: Wells Fargo 账户附加条款（Consumer Account Addenda）
+kind: agreement
+url: https://www.wellsfargo.com/fetch-pdf?documentName=Account+Addenda&subProductCode=ANY
+fetched_at: 2026-10-30T19:14:09Z
+content_type: application/pdf
+sha256: 3e1566b6c5847f8b834b825e89c592868eff98da89e69ad043d28953df0162c2
+--- 正文（外链原文摘录，只作离线检索用）---
+
+1 of 3 
+ 
+ 
+ 
+ 
+ Consumer Account Addenda 
+Consumer Account Fee and Information Schedule Addenda 
+− Platinum Savings Rate Update, Effective October 7, 2026 
+− Everyday Checking Updates, Effective July 8, 2026 
+− Update to Monthly service fee posting time, Effective June 9, 2026 
+ 
+Deposit Account Agreement Addendum 
+There are no addenda for the Deposit Account Agreement. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 2 of 3 
+ 
+Consumer Account Fee And Information Schedule Addenda 
+ 
+These Addenda change the Consumer Account Fee and Information Schedule (“Consumer Schedule”). All terms defined in the 
+Consumer Schedule will have the same meaning when used in these Addenda. If there is a conflict between these Addenda and the 
+Consumer Schedule, these Addenda will control. Except as expressly amended by these Addenda, the Consumer Schedule remains in 
+full force and effect. 
+ 
+Platinum Savings Rate Update, Effective October 7, 2026 
+All states excluding Colorado 
+ 
+In the section of the Consumer Schedule titled “Way2Save Savings & Platinum Savings,” the following is added: 
+ 
+Platinum Savings Interest Rate 
+The Platinum Savings interest rate for new Wells Fargo savings customers is up to 3.20%, with a 3.25% Annual Percentage Yield (APY). 
+ 
+This rate is variable and subject to change at any time without notice, including setting the interest rate equal to the Standard Interest Rate or 
+Relationship Interest Rate or to zero (0.00%). To qualify for this rate: 
+ 
+• 
+The new Platinum Savings primary account owner must not be the owner, joint owner, trustee or a Trust on any existing 
+Wells Fargo consumer savings account within the past 30 days 
+• 
+The new Platinum Savings ledger account balance must be at least $25,000 within the first 30 days of account open 
+• 
+The new Platinum Savings account must be opened on or after the effective date above 
+ 
+If these qualifications are not met in the first 30 days of opening the new Platinum Savings account, the Standard Interest Rate or Relationship 
+Interest Rate disclosed on the then-current rate sheet will apply. A copy of the then-current rate sheet will be provided to you before you open your 
+account or is available at any time upon request from a banker. Upon meeting these qualifications, it may take up to 3 business days for this rate to 
+be applied to the account. Mobile deposit and certain online transactions are subject to amount limits, which may require you to deposit funds by 
+another method, including by visiting a branch or ATM, to meet the balance threshold requirement. 
+ 
+How to maintain the rate: After meeting the qualifications for this rate in the first 30 days of account opening, the Platinum Savings account is 
+eligible for the Annual Percentage Yield (APY) above when the Platinum Savings collected account balance is at least $25,000. If the account balance 
+is below $25,000, the Standard Interest Rate or Relationship Interest Rate will apply. 
+ 
+• 
+Balance of $25,000 or more: 3.20% interest rate, with a 3.25% APY 
+• 
+Balance of $0 to $24,999.99: Standard Interest Rate or Relationship Interest Rate 
+ 
+Interest Rates are subject to change without notice. Interest is compounded daily and paid monthly. Interest is calculated and accrued daily based on 
+the daily collected balances in the account. Accrued interest is considered to be earned and will be paid only when the total interest accrued reaches 
+$0.01 or more. In any month the amount of accrued interest is less than $0.01, periodic statements will show no Annual Percentage Yield Earned 
+(APYE) or interest earned though interest is accruing. Fees could reduce earnings. 
+ 
+The rate is variable, determined at the bank’s discretion, and can change at any time after the account is opened. To see your current interest rate, 
+sign on to Wells Fargo Mobile® app or Wells Fargo Online®, select your account, select Routing & Balance Info, and then scroll down to the interest 
+section. You can also contact a banker for your current rate. 
+ 
+Everyday Checking Updates, Effective July 8, 2026 
+ 
+In the section of the Consumer Schedule titled “Everyday Checking & Clear Access Banking,” footnote one “1. On the last business day of each 
+fee period, balances in eligible Wells Fargo accounts will be automatically totaled. Eligible accounts include consumer deposit account balances 
+(checking, savings, CDs, FDIC-insured IRAs), certain investment account balances, and applicable Wells Fargo bank fiduciary and custody accounts.” 
+is deleted and replaced with the following: 
+ 
+1. On the last business day of each fee period, balances in eligible Wells Fargo accounts will be automatically totaled. Eligible accounts include 
+consumer deposit account balances (checking, savings, CDs, FDIC-insured IRAs), certain investment account balances, and applicable Wells Fargo 
+bank fiduciary and custody accounts. If qualifying accounts are opened on the last business day of the fee period, the account balance may not be 
+included in the deposit and investment calculation until the next fee period. 
+ 
+Update to Monthly service fee posting time, Effective June 9, 2026 
+ 
+In the section of the Consumer Schedule titled “Overview & Key Terms,” under subsection titled “What we mean by fee period and why it 
+matters,” the first paragraph “How we track and report your account activity, including what’s provided in your account statements, doesn’t 
+always match a calendar month. Instead, we use a fee period to determine the monthly service fee and other monthly fees. A fee period can have 25 
+to 35 days. We calculate and post your monthly service fee, if any, on the last business day of your fee period. If your account allows you to avoid a 
+monthly service fee, knowing your fee period end date will help you keep track of when you need to meet one of the options available to avoid the 
+fee.” is deleted and replaced with the following: 
+ 
+How we track and report your account activity, including what’s provided in your account statements, doesn’t always match a calendar month. 
+Instead, we use a fee period to determine the monthly service fee and other monthly fees. A fee period can have 25 to 35 days. We calculate and 
+
+ 
+These addenda govern deposit accounts maintained at Wells Fargo Bank, N.A. (except in Arkansas, Colorado, Florida, Illinois, Michigan, Nevada, Texas, 
+and Wisconsin) including Hudson, WI. 
+ 
+Deposit products offered by Wells Fargo Bank, N.A. Member FDIC. 
+© 2026 Wells Fargo Bank, N.A. 
+CNS5159-A (In-use 10/7/2026) 
+ 
+3 of 3 
+post your monthly service fee, if any, on the last business day of your fee period. For Platinum Savings and Clear Access Banking, we calculate the 
+monthly service fee, if any, on the last business day of the fee period and post the fee on the first business day of the following fee period. If your 
+account allows you to avoid a monthly service fee, knowing your fee period end date will help you keep track of when you need to meet one of the 
+options available to avoid the fee. 
+ 
+Effective on or after March 16, 2026: How we track and report your account activity, including what’s provided in your account statements, doesn’t 
+always match a calendar month. Instead, we use a fee period to determine the monthly service fee and other monthly fees. A fee period can have 25 
+to 35 days. We calculate and post your monthly service fee, if any, on the last business day of your fee period. For Everyday Checking, we calculate 
+the monthly service fee, if any, on the last business day of the fee period and post the fee on the first business day of the following fee period. If your 
+account allows you to avoid a monthly service fee, knowing your fee period end date will help you keep track of when you need to meet one of the 
+options available to avoid the fee. 
+ 
+Effective on or after June 13, 2026: How we track and report your account activity, including what’s provided in your account statements, doesn’t 
+always match a calendar month. Instead, we use a fee period to determine the monthly service fee and other monthly fees. A fee period can have 25 
+to 35 days. We calculate and post your monthly service fee, if any, on the last business day of your fee period. For Way2Save Savings, we calculate 
+the monthly service fee, if any, on the last business day of the fee period and post the fee on the first business day of the following fee period. If your 
+account allows you to avoid a monthly service fee, knowing your fee period end date will help you keep track of when you need to meet one of the 
+options available to avoid the fee. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+END OF ADDENDA

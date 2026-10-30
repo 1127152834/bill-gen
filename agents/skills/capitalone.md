@@ -40,6 +40,10 @@ Aug 11 | Debit | - $191.79
 ## 为什么这样写
 - Capital One 有 CATEGORY 列（填品类词，不是 Credit/Debit）；卡行是「商户 + 城市州」，ACH 保留 NACHA 原文。
 
+## 本地依据（knowledge/）
+- [knowledge/banks/capitalone.json](../../knowledge/banks/capitalone.json)
+- [knowledge/regulations.md](../../knowledge/regulations.md)
+
 ## 字段字典
 - [capitalone.md](../../docs/templates/capitalone.md)（每个顶层键的类型与样例）
 

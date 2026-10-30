@@ -58,3 +58,13 @@ python3 kit/tools/statement_lint.py --contract kit/contracts/chase-personal.json
 - `skills/`：每套一份人读规范（类型枚举、描述符语法、字段来源、常见错法）。
 - `docs/02-statement-writing-norms.md`：这一份是你要的「流水书写规范」主体。
 - `tools/statement_lint.py`：直接能用，零依赖。
+
+## 本地知识库（knowledge/）
+
+包里带的是**结论层**，不是原文全文：`sources.json`（每家银行/每部法规的取数方式与抓取指纹）、
+`banks/<theme>.json`（法定名称、总部、费用事实、账单规则，逐条带 `source` + 原文 `quote` + `confidence`）、
+`regulations.md`（Reg DD / Reg E / Reg CC / Nacha / 卡组织 / Check 21 条款 → 约束哪条规则，含我们当前违反的项）。
+
+- 只有 `confidence: high` 的事实才能进契约；`low` 的只作提示。
+- 每条事实的 `quote` 必须能在原文里找到，否则 `tools/build_bank_kb.py --check` 直接失败。
+- 原文全文（`knowledge/raw/`）不随包分发，需要时在源仓库跑 `python tools/fetch_knowledge.py` 重新拉。

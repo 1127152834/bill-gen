@@ -43,5 +43,9 @@
     "src/billgen/synth/line_styles.py::capitalone_desc",
     "src/billgen/synth/line_styles.py::_with_place",
     "src/billgen/themes/capitalone/C1-Personal-Statement-SAMPLE.pdf"
+  ],
+  "knowledge_refs": [
+    "knowledge/banks/capitalone.json",
+    "knowledge/regulations.md"
   ]
 }

@@ -120,6 +120,10 @@
   "card_types": [
     "Card Purchase"
   ],
+  "knowledge_refs": [
+    "knowledge/banks/chase.json",
+    "knowledge/regulations.md"
+  ],
   "why": "Chase 个人/企业对账单都把卡尾印在行末（Card 4499）；企业版行标签用 Deposit/Withdrawal，不是 Card Purchase。；desc 字段带行标签与对齐空档，校验前要先切出描述符本体",
   "curated_keys": [
     "columns",

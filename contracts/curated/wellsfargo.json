@@ -53,5 +53,9 @@
   ],
   "card_types": [
     "Card Purchase"
+  ],
+  "knowledge_refs": [
+    "knowledge/banks/wellsfargo.json",
+    "knowledge/regulations.md"
   ]
 }

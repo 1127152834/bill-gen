@@ -57,6 +57,10 @@ Sep 3, 2026 | Direct Payment | CHASE CREDIT CRD EPAY | Transaction ID: 132-44576
 ## 为什么这样写
 - SoFi 有 Type 列（Card Purchase / Direct Payment / Transfer…），并且**按时间倒序**打印；内部转账写成 `To Savings - 1943`。
 
+## 本地依据（knowledge/）
+- [knowledge/banks/sofi.json](../../knowledge/banks/sofi.json)
+- [knowledge/regulations.md](../../knowledge/regulations.md)
+
 ## 字段字典
 - [sofi.md](../../docs/templates/sofi.md)（每个顶层键的类型与样例）
 

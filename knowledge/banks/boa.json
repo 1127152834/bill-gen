@@ -1,0 +1,71 @@
+{
+  "theme": "boa",
+  "generated_by": "tools/build_bank_kb.py",
+  "facts": [
+    {
+      "field": "identity.legal_name",
+      "value": "Bank of America, National Association",
+      "source": "fdic-boa",
+      "quote": "Bank of America, National Association",
+      "confidence": "high"
+    },
+    {
+      "field": "identity.hq",
+      "value": "100 N Tryon St, Charlotte, NC 28202",
+      "source": "fdic-boa",
+      "quote": "100 N Tryon St",
+      "confidence": "high"
+    },
+    {
+      "field": "identity.website",
+      "value": "www.bankofamerica.com",
+      "source": "fdic-boa",
+      "quote": "www.bankofamerica.com",
+      "confidence": "high"
+    },
+    {
+      "field": "fees.has_monthly_maintenance_fee",
+      "value": "个人支票账户有 Monthly Maintenance Fee 档",
+      "source": "boa-personal-fees",
+      "quote": "Monthly Maintenance Fee",
+      "confidence": "high"
+    },
+    {
+      "field": "fees.has_non_boa_atm_fee",
+      "value": "非 BoA ATM 取现另收费",
+      "source": "boa-personal-fees",
+      "quote": "Non-Bank of America ATM Fee",
+      "confidence": "high"
+    },
+    {
+      "field": "fees.has_overdraft_item_fee",
+      "value": "透支按笔收 Overdraft Item Fee",
+      "source": "boa-personal-fees",
+      "quote": "Overdraft Item Fee",
+      "confidence": "high"
+    },
+    {
+      "field": "fees.amounts",
+      "value": "金额档在收费表里出现 $4.95 / $8.00 / $12 / $25.00 / $30 / $35 等，需按账户类型配对",
+      "source": "boa-personal-fees",
+      "quote": "$4.95",
+      "confidence": "low"
+    },
+    {
+      "field": "statement.page_numbering",
+      "value": "每页印 Page X of N（含披露页）",
+      "source": "boa-personal-fees",
+      "quote": "Page",
+      "confidence": "low"
+    }
+  ],
+  "sources": [
+    "boa-personal-fees",
+    "fdic-boa"
+  ],
+  "gaps": [
+    "BoA 没有可用的参考账单 PDF，行格式只有适配器出处，必须拿真实账单核对",
+    "收费表是 PDF 表格，金额与账户类型的配对尚未逐项核对（low 置信度那条就是为此标的）"
+  ],
+  "problems": []
+}

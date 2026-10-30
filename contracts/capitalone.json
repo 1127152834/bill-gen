@@ -59,6 +59,10 @@
   "open_questions": [],
   "kind": "deposit",
   "type_column": false,
+  "knowledge_refs": [
+    "knowledge/banks/capitalone.json",
+    "knowledge/regulations.md"
+  ],
   "why": "Capital One 有 CATEGORY 列（填品类词，不是 Credit/Debit）；卡行是「商户 + 城市州」，ACH 保留 NACHA 原文。",
   "curated_keys": [
     "columns",

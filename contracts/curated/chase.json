@@ -74,5 +74,9 @@
     "Card Purchase"
   ],
   "type_column": false,
-  "desc_has_label": true
+  "desc_has_label": true,
+  "knowledge_refs": [
+    "knowledge/banks/chase.json",
+    "knowledge/regulations.md"
+  ]
 }

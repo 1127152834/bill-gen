@@ -51,6 +51,10 @@
 ## 为什么这样写
 - Wells Fargo 用动词前缀区分行类：`Card Purchase 12/11 …`、`ATM Withdrawal …`、`Check 1110 …`、`Zelle Payment To …`（大小写混排）；卡尾在表头不进行内。
 
+## 本地依据（knowledge/）
+- [knowledge/banks/wellsfargo.json](../../knowledge/banks/wellsfargo.json)
+- [knowledge/regulations.md](../../knowledge/regulations.md)
+
 ## 字段字典
 - [wellsfargo.md](../../docs/templates/wellsfargo.md)（每个顶层键的类型与样例）
 

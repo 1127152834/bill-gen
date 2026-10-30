@@ -1,0 +1,84 @@
+{
+  "theme": "mercury",
+  "generated_by": "tools/build_bank_kb.py",
+  "facts": [
+    {
+      "field": "identity.personal_issuer",
+      "value": "Column National Association",
+      "source": "fdic-column",
+      "quote": "Column National Association",
+      "confidence": "high"
+    },
+    {
+      "field": "identity.business_issuer",
+      "value": "Choice Financial Group",
+      "source": "fdic-choice",
+      "quote": "Choice Financial Group",
+      "confidence": "high"
+    },
+    {
+      "field": "identity.servicer",
+      "value": "Mercury Technologies Inc.",
+      "source": "mercury-column-personal",
+      "quote": "Mercury Technologies Inc.",
+      "confidence": "high"
+    },
+    {
+      "field": "identity.mailing_address",
+      "value": "2261 Market Street, Suite 86807, San Francisco, CA 94114",
+      "source": "mercury-column-personal",
+      "quote": "2261 Market Street, Suite 86807, San Francisco, CA 94114",
+      "confidence": "high"
+    },
+    {
+      "field": "identity.support_email",
+      "value": "help@mercury.com",
+      "source": "mercury-column-personal",
+      "quote": "help@mercury.com",
+      "confidence": "high"
+    },
+    {
+      "field": "identity.support_phone",
+      "value": "(415) 878-1068",
+      "source": "mercury-column-personal",
+      "quote": "(415) 878-1068",
+      "confidence": "high"
+    },
+    {
+      "field": "fees.ach_debit",
+      "value": "ACH 借记 $0/笔",
+      "source": "mercury-pricing",
+      "quote": "$0/ACH debit tra",
+      "confidence": "high"
+    },
+    {
+      "field": "fees.pro_plan",
+      "value": "Mercury Pro $299/月",
+      "source": "mercury-pricing",
+      "quote": "$299 per mo",
+      "confidence": "high"
+    },
+    {
+      "field": "statement.type_column",
+      "value": "Type 列只有 Card / ACH Out / ACH In",
+      "source": "mercury-column-personal",
+      "quote": "Card",
+      "confidence": "medium"
+    },
+    {
+      "field": "statement.fdic_line",
+      "value": "页脚必须写 `Banking services provided by Column N.A., Member FDIC`（发行主体是 Column）",
+      "source": "mercury-column-personal",
+      "quote": "FDIC at www.fdic.gov",
+      "confidence": "medium"
+    }
+  ],
+  "sources": [
+    "fdic-choice",
+    "fdic-column",
+    "mercury-column-personal",
+    "mercury-pricing"
+  ],
+  "gaps": [],
+  "problems": []
+}

@@ -1,0 +1,181 @@
+source: chase-business-checking
+topic: Chase 企业支票账户产品页（Complete/Performance 门槛）
+kind: product_page
+url: https://www.chase.com/business/banking/checking
+fetched_at: 2026-10-30T19:13:46Z
+content_type: text/html
+sha256: 63450ed8ca5c352ce41a56bf2174809d927361986f26943b5fb1ac1d3fccd975
+--- 正文（外链原文摘录，只作离线检索用）---
+
+Business Checking | Chase for Business 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Skip to main content Personal Business , Current product Commercial Customer service Get help with personal account Get help with business account Get help with payment solutions Find ATM or Branch Make payment Español Search Open side menu Chase for Business links to Chase for Business home Sign in Opens overlay Checking & more Checking Savings & CDs Banking solutions Investing with J.P. Morgan Retirement Business loans Loans overview Business line of credit Small business loans Commercial real estate financing Business credit cards View all business cards Sign in for offers Accept credit/debit cards Chase Payment Solutions Point-of-sale system Accept cards in-person Accept cards online Invoicing Pricing Business services See all business services Payroll Business Credit Journey Customer Insights Zelle Protect your business PPP Loan Forgiveness Resource center See all resources Knowledge Center Guide to starting a small business Courses & tools Podcast Coaching for Impact Small business health resource Business Checking with Chase Loading More small business owners choose Chase than any other bank 
+ Chase Business Complete Banking ® 
+ 
+ Our most popular checking account with the essentials for your business. 
+ 
+ 
+ Built-in card acceptance from your mobile device 
+ Up to 20 paper and teller transactions and $5,000 in-branch cash deposits included each statement cycle 
+ 
+ 
+ 
+ 
+ Monthly Service Fee 
+ $15 or $0 Avoid fee 
+ 
+ Open account online , Chase Business Complete Banking Account details , Chase Business Complete Banking Chase Performance Business Checking ® 
+ 
+ Designed to offer mid-sized businesses more tools and versatility. 
+ 
+ 
+ All incoming wires and your two most expensive outgoing domestic wires included per statement cycle 
+ Up to 250 account debits and $20,000 of in-branch cash deposits included per statement cycle 
+ 
+ 
+ Monthly Service Fee 
+ $40 or $0 Avoid fee 
+ 
+ Open account online , Chase Performance Business Checking Account details , Chase Performance Business Checking Chase Platinum Business Checking℠ 
+ 
+ For established businesses that need complex cash management support. 
+ 
+ 
+ All incoming wires and your four most expensive outgoing wires included per statement cycle 
+ Up to 500 account debits and $25,000 of in-branch cash deposits included per statement cycle 
+ 
+ 
+ Monthly Service Fee 
+ $95 or $0 Avoid fee 
+ 
+ Open account online , Chase Platinum Business Checking Account details , Chase Platinum Business Checking Checking features to help your business thrive 
+ 
+ Every Chase business checking account offers: 
+ 
+ Chase Business Online SM and Online Bill Pay 
+ Chase Mobile ® Banking 
+ Chase debit card with chip 
+ 
+ Associate Debit and Employee Deposit Cards available upon request 
+ Chase business savings account Monthly Service Fee waived when linked to an eligible Chase business checking account 
+ Access to more than 14,000 ATMs and 5,000 branches 
+ 
+ 
+ Loading Get ready to open an account 
+ Find out how to apply and which documents you'll need. 
+ 
+ View details , Get ready to open an account Frequently asked questions 
+ Which type of checking account is most suitable for small businesses? 
+ A business checking account might be the best option for small businesses. Business checking accounts let you manage your business funds, build your business credit score and separate business and personal assets. 
+ 
+ Personal accounts are typically used for your personal income and bills. They typically have lower deposit limits and are intended for different transaction types. Separating accounts may also make bookkeeping and tax prep easier. 
+ 
+ Learn more about how to keep your business and personal expenses separate . 
+ How do I decide what business checking account is right for me? 
+ When choosing a business checking account, consider things like: 
+ 
+ Multiple branch locations — this may be best for you if you travel or want a close-by branch. 
+ Account features — like remote deposit options and the ability to accept payments. 
+ Prerequisites — minimum balance requirements that make sense for your cash flow. 
+ Mobile and online banking — the experience should be easy and help you bank almost anywhere. 
+ Credit cards and financing — a bank that offers these options can be beneficial. 
+ Fraud protection — to help you safeguard your business by reducing your exposure to fraud 
+ 
+ How do I open a business checking account? 
+ You can open a business checking account online or at a branch near you . Learn more about opening a Chase Business checking account . 
+ What do I need to apply for a business checking account? 
+ Generally, business owners may need to provide information on their business and documentation. 
+ 
+ To apply for a Chase business checking account, what you need might depend on how you apply and what type of business you own. 
+ If you apply online, you may need to provide: 
+ 
+ Ownership info 
+ 
+ If your business has owners other than yourself, we’ll need you to provide the following info for each owner who owns 10% or more of the business: 
+ 
+ Legal name 
+ Address 
+ Date of birth 
+ Tax identification number, Social Security number, TIN or EIN 
+ Country of citizenship 
+ Ownership percentage 
+ 
+ 
+ Other documents 
+ 
+ We may ask you to upload certain documents to help us verify your business. In case we do, please have digital copies of the following on hand: 
+ 
+ Legal documents(s) establishing your business (e.g., Articles of Organization, Certificate of Formation) including legal business name, state of registration and registration date 
+ Doing Business As (DBA) Certificate, if your business operates under a name other than its legal name. 
+ 
+ 
+ Only privately held businesses with the following structures can apply for a Chase business checking account online: 
+ 
+ Sole proprietorships 
+ Corporations 
+ Limited liability companies (LLCs) managed by a single member or manager 
+ 
+ 
+ Have a different business type? Visit a branch near you and we'll help you out. Please refer to our branch locator to find availability info about Chase branches near you. 
+ To apply in a branch you might need to bring the following documents with you: 
+ 
+ Two forms of personal identification (one that’s government issued). 
+ Your tax identification number – either a Social Security number, TIN or EIN. 
+ Legal documentation establishing your business (e.g., Articles of Organization, Certificate of Formation)including legal business name, state of registration and registration date. 
+ Your Doing Business As (DBA) Certificate, if your business operates under a name other than its legal name. 
+ 
+ 
+ Please see our checklist for complete requirements by business type. Once you’re ready, you can visit a branch near you . 
+ How do I set up a new business banking account? 
+ Once your business banking account is open and funded, you can set it up. Start by downloading the mobile app and signing up or logging in to the online banking platform. 
+ 
+ Then, connect your new bank account to your business accounting software and any other relevant business tools. 
+ 
+ Lastly, add authorized users, set appropriate permissions and alerts, and establish recurring payments from your new business account. 
+ 
+ If you recently opened a Chase business banking account, learn how to set it up here . 
+ Deposit and credit card products provided by JPMorgan Chase Bank, N.A. Member FDIC 
+ Merchant services are provided by Paymentech, LLC and/or other subsidiaries of JPMorgan Chase Bank, N.A. Chase Payment Solutions ® is a registered trademark of JPMorgan Chase Bank, N.A. used by its subsidiaries in connection with the provision of merchant services. 
+ Business Checking Chase offers a variety of business checking accounts for small, mid-sized and large businesses. Compare our business checking solutions to help you find the right checking account for you. 
+ Business Loans Finance your small business with business loans from Chase. Find a variety of financing options including SBA loans , commercial financing and a business line of credit to invest in the future of your business. 
+ Business Credit Cards Find and apply for the Chase for Business credit card best suited for your business. Compare the benefits of Chase for Business credit cards . 
+ Payment Solutions Accept debit and credit cards with convenient payment solutions wherever you do business. Explore our point-of-sale systems , credit card terminals, invoicing solution and payment gateway . Read reviews from our merchants. 
+ Business Savings Chase offers a variety of business savings accounts including Total Savings, Premier Savings and a business CD . Compare savings accounts to help you find the right business savings account for you. 
+ Business Debit Cards A convenient way to pay and access ATMs – money is deducted right from your business checking account . Make deposits and withdrawals at the ATM with your business debit card . 
+ Commercial Banking Commercial Banking provides credit, financing, treasury and payment solutions tailored for large corporations , midsize businesses , startups in the innovation economy , and to domestic and international industry leaders. 
+ Business Services We’re here to help with your business banking needs . From payment processing to foreign exchange , Chase Business Banking has solutions and services that work for you. 
+ Retirement Plans Help your employees plan, save, and invest for their future with 401(k) plan solutions. J.P. Morgan’s low cost retirement plans are built for you and your employees. 
+ Facebook, Opens overlay Instagram, Opens overlay X, formerly Twitter, Opens overlay YouTube, Opens overlay LinkedIn, Opens overlay Pinterest, Opens overlay “Chase,” “JPMorgan,” “JPMorgan Chase & Co.,” the JPMorgan Chase & Co. logo and the Octagon Symbol are trademarks of JPMorgan Chase Bank, N.A. JPMorgan Chase Bank, N.A. is a wholly-owned subsidiary of JPMorgan Chase & Co. 
+ Customer Service J.P. Morgan JPMorganChase Media Center Careers Site Map Privacy Security Terms of Use Accessibility AdChoices , Opens overlay Give feedback Member FDIC Equal Housing Opportunity © 2026   JPMorgan Chase & Co.

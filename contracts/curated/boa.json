@@ -61,5 +61,9 @@
   ],
   "card_types": [
     "Purchase"
+  ],
+  "knowledge_refs": [
+    "knowledge/banks/boa.json",
+    "knowledge/regulations.md"
   ]
 }

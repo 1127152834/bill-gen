@@ -1,0 +1,74 @@
+source: ach-company-entry-description-2026
+topic: 2026 ACH 规则变更解读（Company Entry Description 字段）
+kind: payment_rules
+url: https://www.mtb.com/content/dam/mtb-web/treasury-center-learning-center/pdfs/mtb-ach-2026-rule-change-company-entry-description.pdf
+fetched_at: 2026-10-30T19:13:02Z
+content_type: application/pdf
+sha256: f985a38921fbb819179fa37c48ee9f5ff6d6dd555412c0e929509e7f989175ca
+--- 正文（外链原文摘录，只作离线检索用）---
+
+1 
+ Equal Housing Lender. ©2025 M&T Bank. Member FDIC. All rights reserved. 
+ 
+ 
+ 
+Preparing for the Company Entry Description ACH Rule Update 
+Company Entry Descriptions will require precise wording to be included for specific 
+transactions, effective March 20, 2026 
+• 
+The Company Entry Description field can be found on the Batch Header record in positions 54-63 of a Nacha formatted file, or 
+the “Batch Description” field within a Treasury Center ACH Payment. 
+• 
+PPD Credits for payment of wages, salaries and similar types of compensation must include “PAYROLL” within the Company 
+Entry Description field. 
+• 
+Debits to collect payment for an e-commerce purchase must include “PURCHASE” within the Company Entry Description field. 
+ 
+How to Prepare for the Company Entry Description Rule update: 
+Step 
+Detail 
+1 
+ 
+Determine if your company is impacted by this Rule update: 
+• 
+Do I originate ACH PPD Credits for payment of wages, salaries, or similar types of compensation? 
+• 
+Do I originate ACH WEB Debits for e-commerce purchases made on my website for goods such as books or 
+groceries? 
+2 
+If the answer to either question above is YES, adjustments must be made to the Company Entry Description field on 
+your Nacha formatted file, or Batch Description field on your treasury Center template. 
+ 
+Q and As 
+Question 
+Answer 
+Can I make this change immediately? 
+Yes, you do not have to wait until March 20th to use the “Payroll” or “Purchase” 
+Company Entry Descriptions. 
+What is considered an "e-commerce 
+purchase"? 
+Nacha defines an e-commerce purchase as “…a debit Entry authorized by a consumer 
+Receiver for the online purchase of goods, including recurring purchases first authorized 
+online. An e-commerce purchase uses the WEB debit SEC Code, except as permitted 
+by the rule on Standing Authorization to use the TEL SEC Code.” 
+The Company Entry Description field 
+has 10 characters; can I use the 
+remaining 3? 
+Yes, “PAYROLL” and “PURCHASE” must be left-justified, but 3 characters can be added 
+to the end. For example, “PAYROLL001”. 
+Would I use “PAYROLL” in the 
+Company Entry Description when 
+paying contract employees? 
+Yes, the “PAYROLL” requirement applies regardless of the status of the employment 
+relationship (i.e., employee, contract employee, other). 
+Would I use “PAYROLL” in the 
+Company Entry Description for Child 
+Support payments or Disability 
+payments? 
+No, Child Support payments and Disability payments would not be considered wages or 
+salaries. 
+ 
+We highly recommend you review additional information and FAQs on the Company Entry Description rule changes via Nacha’s Rules 
+website. 
+2026 ACH Rule Change - 
+Company Entry Description

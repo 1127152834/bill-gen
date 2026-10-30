@@ -55,6 +55,10 @@ Aug 17 Zelle Instant | On 08/16/26 | PMT To Adrian Aragon | PMT ID=USB4fh5swvPL 
 ## 为什么这样写
 - U.S. Bank 有 Type 与 Ref 两列；账号是 1-3-4-4 分组（`1 964 9173 9161`），不是掩码；卡尾不进行内。
 
+## 本地依据（knowledge/）
+- [knowledge/banks/usbank.json](../../knowledge/banks/usbank.json)
+- [knowledge/regulations.md](../../knowledge/regulations.md)
+
 ## 字段字典
 - [usbank-personal.md](../../docs/templates/usbank-personal.md)（每个顶层键的类型与样例）
 

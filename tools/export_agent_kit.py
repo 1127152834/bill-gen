@@ -10,6 +10,7 @@
 - contracts/ 每账户一份契约（从仓库 contracts/ 同步）
 - skills/   每账户一份人读规范（从 agents/skills/ 同步）
 - tools/    独立 lint（零依赖）
+- knowledge/ 本地知识库的**结论层**（每家银行的数据字典 + 法规对照 + 来源登记簿；不带 raw 原文）
 """
 from __future__ import annotations
 
@@ -27,6 +28,14 @@ SKILLS = ROOT / "agents" / "skills"
 SYNC = [
     (CONTRACTS, "contracts"),
     (SKILLS, "skills"),
+    (ROOT / "knowledge" / "banks", "knowledge/banks"),
+]
+
+#: 逐文件同步（raw 原文不随包分发，只带登记簿与结论）
+SYNC_FILES = [
+    (ROOT / "knowledge" / "sources.json", "knowledge/sources.json"),
+    (ROOT / "knowledge" / "regulations.md", "knowledge/regulations.md"),
+    (ROOT / "knowledge" / "README.md", "knowledge/README.md"),
 ]
 
 #: 这些必须存在，缺一个就不许打包
@@ -88,6 +97,13 @@ def build(out_zip: Path | None = None, *, out_dir: Path | None = None, clean: bo
             shutil.rmtree(dest)
         shutil.copytree(source, dest)
         # agents/skills 里的 README 是仓库内索引，包内也留着无妨
+
+    for source, name in SYNC_FILES:
+        if not source.is_file():
+            raise SystemExit(f"缺知识库文件：{source}")
+        dest = target / name
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, dest)
 
     zip_path = out_zip or (ROOT / "dist" / "agent-kit.zip")
     zip_path.parent.mkdir(parents=True, exist_ok=True)

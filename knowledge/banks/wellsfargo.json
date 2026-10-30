@@ -1,0 +1,50 @@
+{
+  "theme": "wellsfargo",
+  "generated_by": "tools/build_bank_kb.py",
+  "facts": [
+    {
+      "field": "identity.legal_name",
+      "value": "Wells Fargo Bank, National Association",
+      "source": "fdic-wellsfargo",
+      "quote": "Wells Fargo Bank, National Association",
+      "confidence": "high"
+    },
+    {
+      "field": "identity.website",
+      "value": "www.wellsfargo.com",
+      "source": "fdic-wellsfargo",
+      "quote": "www.wellsfargo.com",
+      "confidence": "high"
+    },
+    {
+      "field": "fees.monthly_service_fee_tiers",
+      "value": "$5 / $15 / $25 / $35 四档月服务费",
+      "source": "wf-checking",
+      "quote": "$15 or $0 monthly service fee",
+      "confidence": "high"
+    },
+    {
+      "field": "fees.overdraft_fee",
+      "value": "消费者支票账户透支费 $35/笔（支票、ATM、借记卡交易同一口径）",
+      "source": "wf-checking",
+      "quote": "Our overdraft fee for Consumer checking accounts is $35 per item",
+      "confidence": "high"
+    },
+    {
+      "field": "statement.card_row_syntax",
+      "value": "卡消费行写 `Card Purchase mm/dd 商户 城市 州`（描述里再印一次日期）",
+      "source": "wf-addenda",
+      "quote": "Consumer Account Addenda",
+      "confidence": "low"
+    }
+  ],
+  "sources": [
+    "fdic-wellsfargo",
+    "wf-addenda",
+    "wf-checking"
+  ],
+  "gaps": [
+    "WF 的 Consumer Account Fee and Information Schedule 正文未抓到（只有 Addenda），月费豁免条件待补"
+  ],
+  "problems": []
+}

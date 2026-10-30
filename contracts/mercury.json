@@ -88,6 +88,10 @@
   "card_types": [
     "Card"
   ],
+  "knowledge_refs": [
+    "knowledge/banks/mercury.json",
+    "knowledge/regulations.md"
+  ],
   "why": "Mercury 个人/企业同一个版式：卡消费只印商户名，不带城市与卡尾；ACH 只印对方名，不带 PAYMENT 尾巴。",
   "curated_keys": [
     "columns",

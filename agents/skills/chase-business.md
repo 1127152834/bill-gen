@@ -64,6 +64,10 @@
 ## 为什么这样写
 - Chase 个人/企业对账单都把卡尾印在行末（Card 4499）；企业版行标签用 Deposit/Withdrawal，不是 Card Purchase。；desc 字段带行标签与对齐空档，校验前要先切出描述符本体
 
+## 本地依据（knowledge/）
+- [knowledge/banks/chase.json](../../knowledge/banks/chase.json)
+- [knowledge/regulations.md](../../knowledge/regulations.md)
+
 ## 字段字典
 - [chase-business.md](../../docs/templates/chase-business.md)（每个顶层键的类型与样例）
 

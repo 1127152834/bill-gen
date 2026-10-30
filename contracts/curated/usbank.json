@@ -65,5 +65,9 @@
   ],
   "card_types": [
     "Purchase"
+  ],
+  "knowledge_refs": [
+    "knowledge/banks/usbank.json",
+    "knowledge/regulations.md"
   ]
 }

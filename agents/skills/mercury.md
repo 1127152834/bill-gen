@@ -52,6 +52,10 @@ Sep 25 | MONTHLY SERVICE FEE | Fee | -$15.00
 ## 为什么这样写
 - Mercury 个人/企业同一个版式：卡消费只印商户名，不带城市与卡尾；ACH 只印对方名，不带 PAYMENT 尾巴。
 
+## 本地依据（knowledge/）
+- [knowledge/banks/mercury.json](../../knowledge/banks/mercury.json)
+- [knowledge/regulations.md](../../knowledge/regulations.md)
+
 ## 字段字典
 - [mercury.md](../../docs/templates/mercury.md)（每个顶层键的类型与样例）
 

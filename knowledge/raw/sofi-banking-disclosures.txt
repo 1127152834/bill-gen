@@ -1,0 +1,441 @@
+source: sofi-banking-disclosures
+topic: SoFi 银行费率与披露（Rates & Disclosures）
+kind: disclosure
+url: https://www.sofi.com/legal/banking-rate-sheet/
+fetched_at: 2026-10-30T19:13:59Z
+content_type: application/pdf
+sha256: e0d21ccebd46d92bcb28e04ef550978ff4bd3a779564fa50e7a105954aa4f87a
+--- 正文（外链原文摘录，只作离线检索用）---
+
+​
+​
+​
+​
+​
+​
+​
+ 
+SoFi Checking and Savings 
+Rates Effective as of: October 20, 2026 
+ 
+ 
+If you are a SoFi Plus member, see Tables 1, 2 and 3. If you are NOT a SoFi Plus member see Tables 4 and 
+5. If you have Eligible Direct Deposits or $5,000 in Qualifying Deposits, see Table 4. 
+Tiered Rates for SoFi Plus members 
+Table 1. A SoFi Plus member with only an individual account or only a joint account (see conditions below) 
+Account 
+Interest Rate 
+Annual Percentage Yield (APY) 
+Individual or Joint 
+Checking Account 
+All balances 
+0.49886% 
+0.50% 
+Individual or Joint 
+Savings Account 
+Balances ≤ $20,000 
+4.60169% 
+4.70% 
+Portion of Balances > 
+$20,000 
+3.25112% 
+3.30% 
+ 
+Table 2. A SoFi Plus member with both an individual and joint account (see conditions below) 
+Account 
+Interest Rate 
+Annual Percentage Yield (APY) 
+Checking Accounts 
+All balances 
+0.49886% 
+0.50% 
+Individual Savings 
+Account 
+Balances ≤ $20,000 
+4.60169% 
+4.70% 
+Portion of Balances > 
+$20,000 
+3.25112% 
+3.30% 
+Joint Savings 
+Account 
+All balances 
+3.25112% 
+3.30% 
+ 
+Table 3. SoFi Plus members where both members only have a joint account (see conditions below) 
+Account 
+Interest Rate 
+Annual Percentage Yield (APY) 
+Joint Checking 
+Account 
+All balances 
+0.49886% 
+0.50% 
+Joint Savings 
+Account 
+Balances ≤ $40,000 
+4.60169% 
+4.70% 
+Portion of Balances > 
+$40,000 
+3.25112% 
+3.30% 
+ 
+What Savings rates do I earn as a SoFi Plus member? 
+For SoFi Plus members, SoFi Savings is a tiered-rate account. We determine rates applicable to your account(s) 
+based on all SoFi Checking and Savings accounts associated with you, including joint and individual accounts. 
+These determinations are made on an ongoing basis, and the rates applicable to your accounts may change if 
+1 
+
+accounts are opened or closed. An account holder who pays the SoFi Plus subscription Fee every month (a “SoFi 
+Plus member”) will be paid the following rates, as applicable. 
+●​
+SoFi Plus member with only an Individual Account (Table 1): 
+○​
+For SoFi Plus members with only an individual account, you will be paid the rates set forth in Table 1. 
+○​
+If the total daily balance of your Savings account is $20,000 or less, the interest rate paid on the entire 
+balance of your Savings account will be 4.60169% with an APY of 4.70%. 
+○​
+If the total daily balance of your Savings account is greater than $20,000: 
+■​
+(i) An interest rate of 4.60169% will be paid only for that portion of the daily balance of your 
+Savings account that is $20,000 or less with an APY of 4.70%; 
+■​
+(ii) An interest rate of 3.25112% will be paid only for that portion of the daily balance of your 
+Savings account that is greater than $20,000 with an APY of 3.30%; and 
+■​
+(iii) The blended APY for the entire total daily balance of your Savings account will be between 
+3.30% and 4.70%. 
+○​
+Example: Member A has $25,000 in their SoFi Savings Account. Member A will earn: (i) an interest 
+rate of 4.60169% on $20,000 in their SoFi Savings account with an APY of 4.70%; and (ii) an interest 
+rate of 3.25112% on $5,000 in their SoFi Savings account with an APY of 3.30%. Member A will earn a 
+blended APY of 4.42% on the total $25,000 in their SoFi Savings account. 
+●​
+SoFi Plus member with only a Joint Account (Table 1; Table 3 for Exception 1 below): 
+○​
+For SoFi Plus members with only a joint account, and where only one joint account holder is a SoFi 
+Plus member, you will be paid the rates set forth in Table 1, subject to Exception 1 below. 
+○​
+If the total daily balance of your Savings account is $20,000 or less, the interest rate paid on the entire 
+balance of your Savings account will be 4.60169% with an APY of 4.70%. 
+○​
+If the total daily balance of your Savings account is greater than $20,000: 
+■​
+(i) An interest rate of 4.60169% will be paid only for that portion of the daily balance of your 
+Savings account that is $20,000 or less with an APY of 4.70%; 
+■​
+(ii) An interest rate of 3.25112% will be paid only for that portion of the daily balance of your 
+Savings account that is greater than $20,000 with an APY of 3.30%; and 
+■​
+(iii) The blended APY for the entire total daily balance of your Savings account will be between 
+3.30% and 4.70%. 
+○​
+Example: Member A is a SoFi Plus member but Member B is not. Neither Member A or B have an 
+individual account. They have $45,000 in their joint SoFi Savings Account. Members A and B’s joint 
+account will earn: (i) an interest rate of 4.60169% on $20,000 in their SoFi Savings account with an 
+APY of 4.70%; and (ii) an interest rate of 3.25112% on $25,000 in their SoFi Savings account with an 
+APY of 3.30%. Their joint account will earn a blended APY of 3.92% on the total $45,000 in their joint 
+SoFi Savings account. 
+○​
+Exception 1. If your joint account holder is also a SoFi Plus member, and does not have an individual 
+account, then you will be paid the rates set forth in Table 3. 
+■​
+If the total daily balance of your Savings account is $40,000 or less, the interest rate paid on the 
+2 
+
+entire balance of your Savings account will be 4.60169% with an APY of 4.70%. 
+■​
+If the total daily balance of your Savings account is greater than $40,000: 
+●​
+(i) An interest rate of 4.60169% will be paid only for that portion of the daily balance of your 
+Savings account that is $40,000 or less with an APY of 4.70%; 
+●​
+(ii) An interest rate of 3.25112% will be paid only for that portion of the daily balance of your 
+Savings account that is greater than $40,000 with an APY of 3.30%; and 
+●​
+(iii) The blended APY for the entire total daily balance of your Savings account will be between 
+3.30% and 4.70%. 
+○​
+Example: Members A and B are both SoFi Plus members and neither have an individual account. 
+They have $45,000 in their joint SoFi Savings Account. Members A and B’s joint account will earn: (i) 
+an interest rate of 4.60169% on $40,000 in their SoFi Savings account with an APY of 4.70%; and (ii) 
+an interest rate of 3.25112% on $5,000 in their SoFi Savings account with an APY of 3.30%. Their joint 
+account will earn a blended APY of 4.54% on the total $45,000 in their joint SoFi Savings account. 
+●​
+SoFi Plus member with both an Individual Account and a Joint Account (Table 2; For Exception 2 
+below: Table 2 for Individual Account and Table 1 for Joint Account): 
+○​
+For SoFi Plus members with both an individual account and a joint account, you will be paid the rates 
+set forth in Table 2, except as set forth in Exception 2 below. 
+○​
+If the total daily balance of your individual Savings account is $20,000 or less, the interest rate paid on 
+the entire balance of your individual Savings account will be 4.60169% with an APY of 4.70%. 
+○​
+If the total daily balance of your individual Savings account is greater than $20,000: 
+■​
+(i) An interest rate of 4.60169% will be paid only for that portion of the daily balance of your 
+individual Savings account that is $20,000 or less with an APY of 4.70%; 
+■​
+(ii) An interest rate of 3.25112% will be paid only for that portion of the daily balance of your 
+individual Savings account that is greater than $20,000 with an APY of 3.30%; and 
+■​
+(iii) The blended APY for the entire total daily balance of your individual Savings account will be 
+between 3.30% and 4.70%. 
+○​
+An interest rate of 3.25112% will be paid on the entire balance of your joint Savings account with an 
+APY of 3.30%. 
+○​
+Example: Member A has $25,000 in their individual SoFi Savings Account and is a SoFi Plus member. 
+Members A and B have $25,000 in their joint Savings account. Member B is not a SoFi Plus member. 
+Member A will earn: (i) an interest rate of 4.60169% on $20,000 in their individual Savings account with 
+an APY of 4.70%; and (ii) an interest rate of 3.25112% on $5,000 in their individual Savings account 
+with an APY of 3.30%. Member A will earn a blended APY of 4.42% on the total $25,000 in their 
+individual SoFi Savings account. Members A & B will earn an interest rate of 3.25112% on the entire 
+$25,000 balance of their joint Savings account with an APY of 3.30%.​
+ 
+○​
+Exception 2 . If you are a SoFi Plus member with both an individual account and a joint account, and 
+your joint account holder is also a SoFi Plus member and does not also have an individual account, 
+you will be paid the rates set forth in Table 2 on your individual account only, and the rates set forth on 
+Table 1 on your joint Savings account only. 
+■​
+Individual account - If the total daily balance of your individual Savings account is $20,000 or less, 
+the interest rate paid on the entire balance of your Savings account will be 4.60169% with an APY 
+3 
+
+of 4.70%. 
+■​
+If the total daily balance of your individual Savings account is greater than $20,000: 
+●​
+(i) An interest rate of 4.60169% will be paid only for that portion of the daily balance of your 
+individual Savings account that is $20,000 or less with an APY of 4.70%; 
+●​
+(ii) An interest rate of 3.25112% will be paid only for that portion of the daily balance of your 
+individual Savings account that is greater than $20,000 with an APY of 3.30%; and 
+●​
+(iii) The blended APY for the entire total daily balance of your individual Savings account will 
+be between 3.30% and 4.70%. 
+■​
+Joint account - If the total daily balance of your joint Savings account is $20,000 or less, the 
+interest rate paid on the entire balance of your Savings account will be 4.60169% with an APY of 
+4.70%. 
+■​
+If the total daily balance of your joint Savings account is greater than $20,000: 
+●​
+(i) An interest rate of 4.60169% will be paid only for that portion of the daily balance of your 
+joint Savings account that is $20,000 or less with an APY of 4.70%; 
+●​
+(ii) An interest rate of 3.25112% will be paid only for that portion of the daily balance of your 
+joint Savings account that is greater than $20,000 with an APY of 3.30%; and 
+●​
+(iii) The blended APY for the entire total daily balance of your joint Savings account will be 
+between 3.30% and 4.70%. 
+■​
+Example: Member A has $25,000 in their individual SoFi Savings Account and is a SoFi Plus 
+member. Members A and B have 25,000 in their joint Savings account. Member B is a SoFi Plus 
+member and does not have an individual Savings account. Member A will earn: (i) an interest rate 
+of 4.60169% on $20,000 in their SoFi individual Savings account with an APY of 4.70%; and (ii) an 
+interest rate of 3.25112% on $5,000 in their individual SoFi Savings account with an APY of 3.30%. 
+Member A will earn a blended APY of 4.42% on the total $25,000 in their individual SoFi Savings 
+account. Members A & B will earn: (i) an interest rate of 4.60169% on $20,000 in their joint Savings 
+account with an APY of 4.70%; and (ii) an interest rate of 3.25112% on $5,000 in their joint Savings 
+account with an APY of 3.30%. Member A & B will earn a blended APY of 4.42% on the total 
+$25,000 in their joint SoFi Savings account. ​
+ 
+What Checking rates do I earn as a SoFi Plus member? 
+An interest rate of 0.49886% will be paid on the entire balance of your Checking account(s) with an APY of 0.50%. 
+What is the SoFi Plus Subscription Fee? 
+For details concerning the SoFi Plus Subscription Fee, see the SoFi Plus Terms and Conditions at 
+https://www.sofi.com/terms-of-use/#sofi-plus. 
+ 
+ 
+ 
+ 
+4 
+
+Rates for Account Holders who are not SoFi Plus members 
+ 
+Table 4. Rates for Account Holders with Eligible Direct Deposit or $5,000 in Qualifying Deposits 
+ 
+ 
+ 
+Account Holder Type 
+Checking Account 
+Savings Account 
+Interest Rate 
+Annual 
+Percentage Yield 
+(APY) 
+Interest Rate 
+Annual 
+Percentage Yield 
+(APY) 
+Account Holders with Eligible 
+Direct Deposit 
+0.49886% 
+0.50% 
+3.25112% 
+3.30% 
+Account Holders with $5,000 in 
+Qualifying Deposit 
+0.49886% 
+0.50% 
+3.25112% 
+3.30% 
+ 
+Table 5. Standard Rates for Account Holders Who Do Not Have Eligible Direct Deposit, $5,000 in Qualifying 
+Deposits, or a SoFi Plus membership 
+ 
+ 
+ 
+Account Holder Type 
+Checking Account 
+Savings Account 
+Interest Rate 
+Annual 
+Percentage Yield 
+(APY) 
+Interest Rate 
+Annual 
+Percentage Yield 
+(APY) 
+Account Holders without Eligible 
+Direct Deposit, $5,000 in 
+Qualifying Deposits, or SoFi Plus 
+membership 
+0.49886% 
+0.50% 
+0.79708% 
+0.80% 
+ 
+ 
+What is an Eligible Direct Deposit? 
+ 
+Eligible Direct Deposit means a recurring deposit of regular income to an account holder’s SoFi Checking or 
+Savings account, including payroll, pension, or government benefit payments (e.g., Social Security), made by the 
+account holder’s employer, payroll or benefits provider or government agency (“Eligible Direct Deposit”) via the 
+Automated Clearing House (“ACH”) Network every 31 calendar days. 
+ 
+Although we do our best to recognize all Eligible Direct Deposits, a small number of employers, payroll providers, 
+benefits providers, or government agencies do not designate payments as direct deposit. To ensure you're earning 
+the APY for account holders with Eligible Direct Deposit, we encourage you to check your APY Details page the 
+day after your Eligible Direct Deposit posts to your SoFi Account. If your APY is not showing as the APY for 
+account holders with Eligible Direct Deposit, contact us at 855-456-7634 with the details of your Eligible Direct 
+Deposit. As long as SoFi Bank can validate those details, you will start earning the APY for account holders with 
+Eligible Direct Deposit from the date you contact SoFi for the next 31 calendar days. You will also be eligible for the 
+APY for account holders with Eligible Direct Deposit on future Eligible Direct Deposits, as long as SoFi Bank can 
+validate them. 
+ 
+What is not an Eligible Direct Deposit? 
+ 
+Deposits that are not from an employer or government agency, including but not limited to check deposits, 
+peer-to-peer transfers (e.g., transfers from PayPal, Venmo, Wise, Zelle etc.), merchant transactions (e.g., 
+5 
+
+transactions from PayPal, Stripe, Square, etc.), and bank ACH funds transfers and wire transfers from external 
+accounts, or are non-recurring in nature (e.g. IRS tax refunds), do not constitute Eligible Direct Deposit activity. 
+There is no minimum Eligible Direct Deposit amount required to qualify for the stated interest rate. SoFi Bank, N.A. 
+(“SoFi Bank”) shall, in its sole discretion, assess each account holder's Eligible Direct Deposit activity to determine 
+the applicability of the interest rates stated herein and may request additional documentation for verification of 
+eligibility. 
+ 
+What is a Qualifying Deposit? 
+ 
+Qualifying Deposits means one or more deposits that, in the aggregate, are equal to or greater than $5,000 to an 
+account holder’s SoFi Checking and Savings accounts (“Qualifying Deposits”) every 31 calendar days. Qualifying 
+Deposits only include those deposits from the following eligible sources: (i) ACH transfers, (ii) inbound wire 
+transfers, (iii) peer-to-peer transfers (i.e., external transfers from PayPal, Venmo, Wise, Zelle etc. and internal 
+peer-to-peer transfers from a SoFi account belonging to another account holder), (iv) check deposits, (v) instant 
+funding to your SoFi Bank Debit Card, (vi) push payments to your SoFi Bank Debit Card, and (vii) cash deposits. 
+SoFi Bank shall, in its sole discretion, assess each account holder’s Qualifying Deposits to determine the 
+applicability of the interest rates stated herein and may request additional documentation for verification of 
+eligibility. 
+ 
+What is not a Qualifying Deposit? 
+ 
+Qualifying Deposits do not include: (i) transfers between an account holder’s SoFi Checking account, SoFi Savings 
+account, SoFi Invest accounts and/or SoFi Vaults; (ii) interest payments; (iii) bonuses issued by SoFi Bank or its 
+affiliates; or (iv) credits, reversals, and refunds from SoFi Bank or from a merchant. 
+ 
+What are the timing requirements? 
+Upon paying the SoFi Plus Subscription Fee, you will begin earning the interest rates and APYs for SoFi Plus 
+members by the following business day. Upon receiving an Eligible Direct Deposit or Qualifying Deposit to your 
+account, you will begin earning the interest rates and APYs for account holders with Eligible Direct Deposit or 
+$5,000 in Qualifying Deposits by the following business day. SoFi reviews your Eligible Direct Deposit and 
+Qualifying Deposits based on a rolling 31-calendar day period. A rolling 31-calendar day period means that each 
+time you receive an Eligible Direct Deposit or $5,000 in Qualifying Deposits, a new 31-day period begins, during 
+which you will earn the interest rates and APYs for account holders with Eligible Direct Deposit or $5,000 in 
+Qualifying Deposits. If you receive another Eligible Direct Deposit or $5,000 in Qualifying Deposits during the 
+current 31-day period, the period will reset, and a new 31-day period will begin from the date the criteria are met. 
+You can view the end date of your current 31-day period, based on your most recent deposit activity, by visiting the 
+APY Details page within your account. 
+SoFi Bank reserves the right to grant a grace period to account holders following a change in Eligible Direct 
+Deposit or Qualifying Deposit activity before adjusting interest rates and APYs. If SoFi Bank grants you a grace 
+period, the dates for such grace period will be reflected on the APY Details page of your account. If SoFi Bank 
+determines that you did not have Eligible Direct Deposit activity or $5,000 in Qualifying Deposits within a rolling 
+31-day period and, if applicable, the grace period, then you will begin earning the interest rates and APYs earned 
+by account holders without Eligible Direct Deposit, $5,000 in Qualifying Deposits, or SoFi Plus membership(as 
+detailed below). 
+As long as you receive an Eligible Direct Deposit or $5,000 in Qualifying Deposits every 31 calendar days, you will 
+continue earning the interest rates and APYs earned by account holders with Eligible Direct Deposit or $5,000 in 
+Qualifying Deposits. As long as you pay the SoFi Plus Subscription Fee every month, you will remain enrolled in 
+SoFi Plus and continue earning the interest rates and APYs earned by SoFi Plus members. If you open or close an 
+individual account, your rates may change by the following business day. 
+ 
+6 
+
+Important Account Terms 
+The disclosures below are required pursuant to federal law. 
+How does SoFi calculate interest on your account? 
+SoFi Bank employs the daily balance method to calculate interest on your account. This method applies a daily 
+periodic rate to the principal in the account each day. The daily periodic rate is equal to 1/365 (or, in a leap year, 
+we may use 1/366) times the interest rate for your Account. 
+●​
+The APY(s) set forth above are calculated based on the following formula: 
+APY = 100[(1+ Interest/Principal) (365/Days in Term)-1] 
+●​
+The APY(s) set forth above are calculated using the following assumptions: (i) the calculation shall be 
+based on a term of 365 days; and (ii) all principal and interest remain on deposit for the entire 365-day term 
+and (iii) no other transactions (deposits or withdrawals) occur during the 365-day term. 
+How does interest accrue on my account? 
+Amounts on deposit will accrue interest daily based on the end-of-day balance of your account. Interest earned will 
+be compounded monthly. Interest will be credited to your account monthly. Cash deposits begin accruing interest 
+the same business day a deposit is credited to your Account. If you deposit an item such as a mobile check, 
+interest begins accruing on the business day we receive credit for the item. 
+Can my interest rate change? 
+The interest rates above are variable rates established by SoFi Bank and may be changed at any time by SoFi 
+Bank, in its sole discretion without limit or advance notice to you. Interest rate(s) may also change automatically 
+based on changes in your Account activity or other criteria as described herein. Changes to interest rates may 
+change the corresponding APY(s) described above, which will be posted on this SoFi Bank Rate Sheet and to 
+your Account. Interest rate changes and fees charged may change the APY(s) earned and reduce earnings. Your 
+continued use of your SoFi Bank Account after we post changes to the interest rate(s) and corresponding APY(s) 
+shall constitute your consent to any such changes. Promotional rates are not reflected on this SoFi Bank Rate 
+Sheet. 
+What happens to interest received on deposits that do not clear? 
+If interest is credited to your Account on a deposit that does not clear, or that is subsequently returned, reversed, 
+or determined to be invalid for any reason, SoFi Bank may deduct the corresponding interest amount from your 
+Account without prior notice. Alternatively, SoFi Bank may require you to promptly repay such amounts upon 
+demand. Failure to do so may result in restrictions on, or closure of, your Account. 
+What happens to interest when my Account is closed? 
+Upon closure of your Account, SoFi Bank will credit to your Account any interest accrued but unpaid through the 
+date of closure, calculated on a prorated basis for the number of days your Account remained open during the 
+applicable interest period. Any such credit will be included in your final Account balance. 
+Does participation in the SoFi Insured Deposit Program impact the rates that I earn on my accounts? 
+If you choose to participate in the SoFi Insured Deposit Program (the "Program"), SoFi Bank will deposit an amount 
+of your cash balances (your "Program Deposits") into deposit accounts at multiple Participating Banks, as set forth 
+in the Program Terms and Conditions, which can be found at: 
+https://www.sofi.com/banking/fdic/sidpterms/. Participation in the Program will not change the interest rate paid on 
+7 
+
+your deposit balances. Additionally, participation in the Program will not impact SoFi Bank’s determination of 
+whether you have received $5,000 in Qualifying Deposits every 31 calendar days. The interest rates paid to you on 
+your Program Deposits will be consistent with the current interest rates paid on, and the allocation of, the balances 
+of deposits in your SoFi Checking and Savings accounts, respectively. The list of Participating Banks may change 
+from time to time, and the most recent list is available at: http://www.sofi.com/banking/fdic/participatingbanks. 
+SoFi Checking and Savings is offered through SoFi Bank, N.A. Member FDIC. 
+Last Updated: October 20, 2026 
+8

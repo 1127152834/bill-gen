@@ -262,7 +262,7 @@ def extract(template_id: str) -> dict[str, Any]:
             if key in curated:  # 空列表也算人工结论（例如「这一版没有 Type 列」）
                 contract[key] = curated[key]
                 kept.append(key)
-        for extra in ("kind", "type_column", "card_types"):
+        for extra in ("kind", "type_column", "card_types", "knowledge_refs"):
             if extra in curated:
                 contract[extra] = curated[extra]
         contract["why"] = curated.get("why", "")
@@ -329,6 +329,9 @@ def skill_markdown(contract: dict[str, Any], field_doc: Path | None) -> str:
         lines += ["", "## 抬头身份（必须原样）", *[f"- {key}: `{value}`" for key, value in identity.items()]]
     if contract.get("why"):
         lines += ["", "## 为什么这样写", f"- {contract['why']}"]
+    refs = contract.get("knowledge_refs") or []
+    if refs:
+        lines += ["", "## 本地依据（knowledge/）", *[f"- [{ref}](../../{ref})" for ref in refs]]
     if field_doc and field_doc.is_file():
         lines += ["", f"## 字段字典", f"- [{field_doc.name}](../../{_relative(field_doc)})（每个顶层键的类型与样例）"]
     lines += [

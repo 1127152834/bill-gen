@@ -1,0 +1,1473 @@
+source: amex-cma-blue-cash
+topic: American Express Cardmember Agreement（Blue Cash Preferred 样例）
+kind: agreement
+url: https://www.americanexpress.com/content/dam/amex/en-us/company/legal/cardmember-agreements/public-site-2024-q1-pdf-cmas/cps-lending/morgan-stanley-blue-cash-preferred-03-31-2024.pdf
+fetched_at: 2026-10-30T19:13:23Z
+content_type: application/pdf
+sha256: 636d488b8a4977518e35e9b993ae3d9f7aadcbf5c362e7633e01f42c3e23b6bb
+--- 正文（外链原文摘录，只作离线检索用）---
+
+Cardmember Agreement: Part 1 of 2 
+As of: 03/31/2024 
+®
+Morgan Stanley Blue Cash Preferred American Express Card 
+Issuer: American Express National Bank 
+Rates and Fees Table 
+Interest Rates 
+Annual Percentage Rate 
+(APR) for Purchases 
+Prime Rate + 10.74% to Prime Rate + 21.74%
+This is a variable APR. See Explanation of Variable Rates below. 
+APR for Balance Transfers 
+APR for Cash Advances 
+Penalty APR and When it 
+Applies 
+Paying Interest 
+Plan Fee (Fixed Finance 
+Charge) 
+For Credit Card Tips from 
+the Consumer Financial 
+Protection Bureau 
+Prime Rate + 10.74% to Prime Rate + 21.74% for any balance transfer requests we may
+ accept. 
+This is a variable APR. See Explanation of Variable Rates below. 
+Prime Rate + 21.99% 
+This is a variable APR. See Explanation of Variable Rates below. 
+Prime Rate + 26.74% 
+This is a variable APR. See Explanation of Variable Rates below. 
+This APR will apply to your account if you: 
+1) make one or more late payments; or
+2) make a payment that is returned by your bank.
+We may also consider your creditworthiness in determining whether or not to apply the 
+penalty APR to your Account. 
+How Long Will the Penalty APR Apply? If the penalty APR is applied, it will apply for 
+at least 6 months. We will review your Account every 6 months after the penalty APR is 
+applied. The penalty APR will continue to apply until you have made timely payments with 
+no returned payments during the 6 months being reviewed. 
+Your due date is at least 25 days after the close of each billing period. We will not 
+charge you interest on purchases if you pay each month your entire balance (or, if you 
+have a plan outstanding, your balance adjusted for plans) by the due date. We will 
+begin charging interest on cash advances and balance transfers on the transaction date. 
+A monthly fee up to 1.33% of each purchase or amount placed in a plan based on the 
+plan duration, the APR that would otherwise apply to the purchase, and other factors. 
+To learn more about factors to consider when applying for or using a credit card, visit 
+the website of the Consumer Financial Protection Bureau at 
+http://www.consumerfinance.gov/learnmore.
+ Fees 
+Annual Membership Fee 
+Transaction Fees 
+● Balance Transfer
+● Cash Advance
+● Foreign Transaction
+Penalty Fees 
+● Late Payment
+● Returned Payment
+● Overlimit
+$95 
+Either $5 or 3% of the amount of each transfer, whichever is greater. 
+Either $10 or 5% of the amount of each cash advance, whichever is greater. 
+2.7% of each transaction after conversion to US dollars. 
+Up to $40 
+Up to $40 
+None 
+How we calculate interest: We use the Average Daily Balance method (including new transactions). See the How we 
+calculate interest section in Part 2. 
+Explanation of Variable Rates: If the Prime Rate increases, variable APRs (and corresponding DPRs) will increase. 
+In that case, you may pay more interest and may have a higher Minimum Payment Due. When the Prime Rate 
+changes, the resulting changes to variable APRs take effect as of the first day of the billing period. The Daily Periodic 
+Rate (DPR) is 1/365th of the APR, rounded to the nearest one ten-thousandth of a percentage point. Variable APRs 
+will not exceed 29.99%. 
+CMAEUAOT0000004 
+Page 1 of 4 
+
+ 
+ 
+ 
+ 
+ 
+ 
+How Rates and Fees Work 
+Rates 
+Penalty APR for new 
+The penalty APR may apply to new transactions if: 
+transactions 
+● you do not pay at least the Minimum
+Payment Due by the Payment Due Date
+on one or more occasions; or
+● your payment is returned by your bank.
+We may also consider your creditworthiness in 
+determining whether or not to apply the penalty 
+APR to your Account. 
+If the penalty APR applies to a balance, it will 
+apply to charges added to that balance 15 or 
+more days after we send you notice. 
+We will review your Account every 6 months after 
+the penalty APR is applied. The penalty APR 
+will continue to apply until you have made timely 
+payments with no returned payments during the 6 
+months being reviewed. 
+Fees 
+We add fees to a purchase balance, unless we tell you otherwise. 
+Annual Membership 
+This fee is on the Rates and Fees Table on page 1 of Part 1. 
+Plan Fee 
+Monthly up to 1.33% of each purchase or amount placed in a plan based on the plan duration, the 
+APR that would otherwise apply to the purchase or amount, and other factors. This fee is a fixed 
+finance charge that will be charged each month that a plan is active. The dollar amount of your 
+plan fee will be disclosed when you set up a plan. For more information, see About the Plan It 
+Feature in Part 2 of your Cardmember Agreement. 
+Late Payment 
+Up to $40. If we do not receive the Minimum Payment Due by its Payment Due Date, the fee is $29. 
+If this happens again within the next 6 billing periods, the fee is $40. However, the late fee will not 
+exceed the Minimum Payment Due. Paying late may also result in a penalty APR. See Penalty APR 
+for new transactions above. 
+Returned Payment 
+Up to $40. If you make a payment that is returned unpaid the first time we present it to your bank, 
+the fee is $29. If you do this again within the same billing period or the next 6 billing periods, the fee 
+is $40. However, the returned payment fee will not exceed the applicable Minimum Payment Due. A 
+returned payment may also result in a penalty APR. See Penalty APR for new transactions above. 
+Returned Check 
+$38 if you use your card to cash a check at one of our approved locations and the check is returned 
+unpaid. We will also charge you the unpaid amount. 
+Overlimit 
+None. See Credit limit and cash advance limit in Part 2. 
+Account Re-opening 
+$25 if your Account is cancelled, you ask us to re-open it, and we do so. 
+Balance Transfer 
+3% of the transaction, with a minimum of $5. A different fee may apply if stated in a promotional offer 
+or at the time of a transaction. This fee is a finance charge. We will add it to the same balance as the 
+balance transfer. 
+Cash Advance 
+5% of the cash advance transaction (including fees charged by the ATM operator, if any), with a 
+minimum of $10. We will add this fee to the Cash Advance balance. 
+Foreign Transaction 
+2.7% of the converted U.S. dollar amount. This fee is a finance charge. See Part 2 for Converting 
+charges made in a foreign currency. 
+Part 1, Part 2 and any supplements or amendments make up your Cardmember Agreement. 
+CMAENFEEPAPR123 
+Page 2 of 4 
+
+CMAENPSP0000259
+Page 3 of 4
+Supplement to the Cardmember Agreement
+How Your Reward Program Works
+Morgan Stanley Blue Cash Preferred
+® American Express Card
+How you earn reward dollars
+You will earn Blue Cash
+® Reward Dollars
+(reward dollars) for eligible purchases on
+your Morgan Stanley Blue Cash Preferred
+Card Account. The number of reward
+dollars you earn is based on a percentage
+of the dollar amount of your eligible
+purchases during each billing period.
+Eligible purchases are purchases made on
+your Card for goods and services minus
+returns and other credits.
+Eligible purchases do NOT include:
+●fees or interest charges,
+●balance transfers,
+●cash advances,
+●purchases of traveler's checks,
+●purchases or reloading of prepaid cards,
+●purchases of any cash equivalents,
+including gift cards, or
+●person-to-person transactions.
+You will earn a reward of:
+●6% on the first $6,000 of eligible
+purchases in a calendar year at
+supermarkets located in the U.S.
+(Superstores, convenience stores,
+warehouse clubs, and meal-kit
+delivery services aren't considered
+supermarkets);
+●6% on eligible purchases of U.S.
+streaming subscriptions from
+select providers (the current list
+of select providers is available at
+americanexpress.com/rewards-info). If
+your subscription is bundled with another
+product or service or billed by a third
+party (such as a digital platform, a cable,
+telecommunications, or internet provider, or a car
+manufacturer), your purchase may not be eligible;
+●3% on eligible purchases of gasoline at gasoline
+stations located in the U.S. (superstores,
+supermarkets and warehouse clubs that sell
+gasoline are not considered gas stations);
+●3% on eligible purchases on transit, including
+trains, taxicabs, ride share services, ferries, tolls,
+parking, buses, and subways (airfare, car rental
+and cruises are not considered transit); and
+●1% on all other eligible purchases.
+Merchants are assigned codes based on what they
+primarily sell. We group certain merchant codes into
+categories that are eligible for additional rewards.
+A purchase with a merchant will not earn additional
+rewards if the merchant's code is not included in
+a reward category. You may not receive additional
+rewards if we receive inaccurate information or are
+otherwise unable to identify your purchase as eligible
+for a reward category. For example, you may not
+receive additional rewards when:
+●a merchant uses a third-party to sell their products
+or services; or
+●a merchant uses a third-party to process or submit
+your transaction to us (e.g., using mobile or
+wireless card readers); or
+●you choose to make a purchase using a third-party
+payment account or make a purchase using a
+mobile or digital wallet.
+For questions about additional rewards on a
+purchase, call the number on the back of your Card.
+Please visit americanexpress.com/rewards-info for
+more information about rewards.
+When you will not earn
+reward dollars
+You will not earn reward dollars for eligible
+purchases posted to your Card Account
+during a billing period if the Minimum
+Payment Due shown on the statement
+for that billing period is not paid by the Payment Due
+Date shown on that statement.
+Credits for eligible purchases will reduce the number
+of reward dollars you earn.
+How you can redeem reward
+dollars
+You can redeem reward dollars for
+statement credits with no minimum
+redemption amount. The statement credit
+will appear on your Card Account within 3
+days and will apply to the billing period in
+which it appears. Reward dollars redeemed
+for a statement credit cannot be used to
+pay your Minimum Payment Due.
+Redemption will be in the form of a
+statement credit of $1 for every reward
+dollar redeemed. Partial reward dollar
+redemptions will receive an equivalent
+statement credit amount (e.g., 32.11 reward
+dollars can be redeemed for a $32.11
+statement credit).
+From time to time we may, at our option, offer you
+other ways to redeem reward dollars, such as for gift
+cards or merchandise.
+You cannot redeem reward dollars if your Card
+Account is cancelled or past due.
+New York Card Members Only: New York Card
+Members receive 90 days to redeem reward dollars
+from notification of the cancellation of your Card
+Account. New York Card Members can also redeem
+reward dollars while their Card Account is past due.
+You must call the number on the back of your Card
+to redeem after notification of account cancellation
+or while your account is past due. You will not be
+able to redeem in your online Account or mobile
+application. You are a New York Card Member if your
+Card Account has a New York billing address.
+
+CMAENPSP0000259
+Page 4 of 4
+When you will forfeit reward
+dollars
+You will forfeit your entire reward dollar balance if your Card Account is cancelled for any reason.
+New York Card Members receive 90 days to redeem reward dollars from notification of the
+cancellation of your Card Account. You are a New York Card Member if your Card Account has a
+New York billing address.
+The Reward Dollars Summary
+The reward dollars shown on your billing
+statement under the heading Reward
+Dollars Summary is only for informational
+purposes. It does not show the actual
+reward dollars that you may be entitled to
+receive. For example, a credit for eligible
+purchases posted to your Card Account
+can lower the reward dollars shown.
+If a credit to your Card Account places your eligible
+purchases in a negative status, the Reward Dollars
+Summary on your billing statement will show a
+negative balance. It will continue to show a negative
+balance until you accumulate eligible purchases
+exceeding the negative eligible purchases.
+Program Eligibility
+The Morgan Stanley Blue Cash Preferred
+®
+Card is only available to you if you have
+an eligible account with Morgan Stanley
+Smith Barney LLC or its eligible affiliates,
+including but not limited to E*TRADE
+Securities LLC (Morgan Stanley).
+An eligible account is a brokerage account
+with Morgan Stanley (i) held in your name,
+(ii) held by a trust where you are both the
+grantor and trustee of such trust, or (iii)
+held as a beneficial owner of a personal
+holding company, a non-operating limited
+liability company, a non-operating limited
+partnership, or a similar legal entity.
+American Express will only issue the Morgan Stanley
+Blue Cash Preferred Card to (1) an eligible Morgan
+Stanley client who is an individual; and (2) an
+individual associated with an eligible Morgan Stanley
+client (if the eligible Morgan Stanley client itself is not
+an individual).
+Eligibility is subject to change. American Express
+may cancel your Card Account and participation
+in this program if you do not maintain an eligible
+account.
+How you can receive a
+$100 Statement Credit each
+calendar year
+If, in any calendar year, the total eligible
+purchases charged to your Morgan Stanley
+Blue Cash Preferred Card Account equal
+$15,000 or more (Purchase Requirement),
+you will receive a $100 statement credit
+($100 Statement Credit).
+The $100 Statement Credit will be posted
+to your account within 8-12 weeks after
+the Purchase Requirement is met. Please
+call the number on the back of your Card
+if the statement credit has not posted after
+12 weeks from the date when you met the
+Purchase Requirement.
+A calendar year is from January 1 to December
+31 regardless of when you open your Card
+Account. This means that during your first year
+as a Cardmember you may have fewer months to
+accumulate eligible purchases towards the $100
+Statement Credit Purchase Requirement.
+The benefit is only available to the Basic Card
+Member; however, eligible purchases made by
+Additional Card Members will contribute to the
+Purchase Requirement.
+Other things you should know
+about this program
+You will only receive rewards for eligible
+purchases for personal, family or household
+use.
+Reward dollars are redeemable for rewards
+as described above, they are not cash.
+We may change the terms of this program at our
+discretion. If you violate or abuse this program,
+you may forfeit some or all of your accrued reward
+dollars.
+
+Version 1176446
+Page 1 of 8
+FDR 1176446
+Cardmember Agreement: Part 2 of 2
+Doc 28549
+How Your American Express Account Works
+Introduction
+About your Cardmember
+Agreement
+This document together with Part 1 make up the
+Cardmember Agreement (Agreement) for the Account
+identified on page 1 of Part 1. Any supplements or
+amendments are also part of the Agreement.
+When you use the Account (or you sign or keep the
+card), you agree to the terms of the Agreement.
+Changing the Agreement
+We may change this Agreement, subject to applicable
+law. We may do this in response to the business, legal or
+competitive environment. This written Agreement is a final
+expression of the agreement governing the Account. The
+written Agreement may not be contradicted by any alleged
+oral agreement.
+We cannot increase the interest rate on existing balances
+except in limited circumstances.
+Changes to some terms may require 45 days
+advance notice, and we will tell you in the notice if
+you have the right to reject a change. We cannot
+change certain terms during the first year of your
+Cardmembership.
+Words we use in
+the Agreement
+We, us, and our mean the issuer shown on page 1 of
+Part 1. You and your mean the person who applied for
+this Account and for whom we opened the Account. You
+and your also mean anyone who agrees to pay for this
+Account. You are the Basic Cardmember. You may
+request a card for an Additional Cardmember (see About
+Additional Cardmembers in Part 2).
+Card means any card or other device that we issue to
+access your Account. A charge is any amount added
+to your Account, such as purchases, cash advances,
+balance transfers, fees and interest charges.
+A purchase is a charge for goods, services, or
+person-to-person transactions. A cash advance is
+a charge to get cash or cash equivalents, including
+travelers cheques, gift cheques, foreign currency,
+money orders, digital currency, casino gaming chips,
+race track wagers, and similar offline and online
+betting transactions. A balance transfer is a charge
+to pay an amount you owe on another credit card
+account. A person-to-person transaction is a
+charge for funds sent to another person or a charge
+to add funds to your Amex Send
+TM Account. A plan
+is a portion of your account balance that you have
+selected to pay over time through a set number of
+monthly payments using Plan It.
+To pay by a certain date means to send your payment
+so that we receive it and credit it to your Account by
+that date (see About your payments in Part 2).
+About using your card
+Using the card
+You may use the card to make purchases. At our
+discretion, we may permit you to create plans, make
+cash advances or balance transfers. You cannot transfer
+balances from any other account issued by us or our
+affiliates.
+You may arrange for certain merchants and third parties
+to store your card number and expiration date, so that,
+for example: the merchant may charge your account at
+regular intervals; or you may make charges using that
+stored card information.
+We may (but are not required to) tell these merchants
+and third parties if your expiration date or card
+number changes or if your account status is updated,
+including if your account is cancelled. If you do not
+want us to share your updated account information,
+please contact us using the number on the back of
+your card.
+Keep your card safe and don't let anyone else use it.
+If your card is lost or stolen or your Account is being
+used without your permission, contact us right away.
+You may not use your Account for illegal activities.
+Promise to pay
+You promise to pay all charges, including:
+●charges you make, even if you do not present your card or sign for the transaction,
+●charges that other people make if you let them use your Account, and
+●charges that Additional Cardmembers make or permit others to make.
+Credit limit and cash
+advance limit
+We assign a Credit Limit to your Account. We may make
+part of your Credit Limit available for cash advances (Cash
+Advance Limit). There may also be a limit on the amount
+you can withdraw from ATMs in a given period. The Credit
+Limit and Cash Advance Limit are shown on page 1 of
+Part 1 and on each billing statement.
+We may increase or reduce your Credit Limit and Cash
+Advance Limit. We may do so even if you pay on time and
+your Account is not in default.
+You agree to manage your Account so that:
+●your Account balance (including fees and interest)
+is not more than your Credit Limit, and
+●your cash advance balance (including fees and
+interest) is not more than your Cash Advance
+Limit.
+We may approve charges that cause your Account
+balance to go over your Credit Limit. If we do this,
+we will not charge an overlimit fee. If we ask you to
+promptly pay the amount of your Account balance
+above your Credit Limit, you agree to do so.
+
+Version 1176446
+Page 2 of 8
+Limits on person-to-person
+transactions
+Your person-to-person transactions may not exceed the
+$2,000 person-to-person transactions limit within any 30-
+day period.
+You agree to manage your Account so that the total of
+your person-to-person transactions in any 30-day period
+do not exceed the limit on person-to-person
+transactions.
+We may not approve a person-to-person transaction if
+it would cause your Account to exceed the person-to-
+person transaction limit or your Credit Limit.
+Declined transactions
+We may decline to authorize a charge. Reasons we may
+do this include suspected fraud and our assessment of
+your creditworthiness. This may occur even if the charge
+would not cause you to go over your Credit Limit
+and your Account is not in default. We are not
+responsible for any losses you incur if we do not
+authorize a charge. And we are not responsible if any
+merchant refuses to accept the card.
+About the Plan It feature
+We may offer you Plan It, which allows you to create a
+payment plan for qualifying purchases or a qualifying
+amount, subject to a plan fee. This fee is a fixed finance
+charge that will be charged each month that a plan is
+active.
+You may use this feature by selecting qualifying purchases
+or a qualifying amount and a plan duration. You will be
+able to view the monthly plan payments, including the plan
+fee, for your selection. Each plan fee will be disclosed
+before you create the applicable plan and will be based
+on the plan duration, the APR that would otherwise apply
+to the purchases or amount, and other factors. When you
+set up a plan, the purchases or amount will be added to
+a plan balance and will be subject to a plan fee instead of
+the APR for purchases.
+A qualifying purchase for Plan It is a purchase of at
+least a specified dollar amount. A qualifying amount for
+Plan It is a specified portion of your balance. Qualifying
+purchases or a qualifying amount do not include
+purchases of cash or cash equivalents, balance transfers
+(if offered), purchases subject to Foreign Transaction
+Fees, or any fee owed to us, such as Annual Membership
+fees.
+Your ability to create plans will be based on a variety
+of factors such as your creditworthiness and your
+Credit Limit. You will not be able to create plans if
+your Account is cancelled. You will also not be able to
+create plans if one or more of your American Express
+accounts is enrolled in a payment program, or has
+a payment that is returned unpaid, or is past due.
+We will tell you the number of active plans you may
+have and we may change this number at any time.
+The plan durations offered to you, and your ability to
+include multiple qualifying purchases or a qualifying
+amount in a single plan, will be at our discretion and
+will be based on a variety of factors such as your
+creditworthiness, the purchase amount(s), and your
+Account history. You agree to manage your Account
+so that the total of your plan balances (including plan
+fees) is not more than your Credit Limit.
+Plans cannot be cancelled after they have been
+created but you can choose to pay them early by
+paying the New Balance shown on your most recent
+billing statement in full. If you pay a plan off early, you
+will not incur any future plan fees on that plan.
+About your payments
+When you must pay
+You must pay at least the Minimum Payment Due by the
+Payment Due Date. The Minimum Payment Due and
+Payment Due Date are shown on each billing statement.
+Each statement also states the time and manner by which
+you must make your payment for it to be credited as
+of the same day it is received. For your payment to be
+considered on time, we must receive at least the
+Minimum Payment Due in such time and manner
+by the Payment Due Date shown on your billing
+statement.
+Each statement also shows a Closing Date. The
+Closing Date is the last day of the billing period
+covered by the statement. Each Closing Date is about
+30 days after the previous statement's Closing Date.
+How to make payments
+Make payments to us in U.S. dollars with:
+●a single check drawn on a U.S. bank, or
+●a single negotiable instrument clearable through the
+U.S. banking system, for example a money order, or
+●an electronic payment that can be cleared through the
+U.S. banking system.
+When making a payment by mail:
+●make a separate payment for each account,
+●mail your payment to the address shown on the
+payment coupon on your billing statement, and
+●write your Account number on your check or negotiable
+instrument and include the payment coupon.
+If your payment meets the above requirements, we will
+credit it to your Account as of the day we receive it, as
+long as we receive it by the time disclosed in your billing
+statement.
+If we receive it after that time, we will credit the
+payment on the day after we receive it.
+If your payment does not meet the above
+requirements, there may be a delay in crediting your
+Account. This may result in late fees and additional
+interest charges (see How Rates and Fees Work on
+page 2 of Part 1).
+We will not accept a payment made in a foreign
+currency or a payment drawn on an account at a
+bank located outside of the U.S.
+If we process a late payment, a partial payment, or a
+payment marked with any restrictive language, that
+will have no effect on our rights and will not change
+this Agreement.
+How we apply payments
+and credits
+Your Account may have balances with different interest
+rates. For example, purchases may have a lower interest
+rate than cash advances. Your Account may also have
+Plan balances which are assessed plan fees. If your
+Account has balances with different interest rates, Plan
+balances, or plan fees, here is how we generally apply
+payments in a billing period:
+We apply your payments, up to the Minimum Payment
+Due, first to any plan amounts included in your Minimum
+Payment Due, then to the balance subject to the lowest
+interest rate, and then to balances subject to higher
+interest rates.
+After the Minimum Payment Due has been paid, we apply
+your payments to the balance subject to the highest
+interest rate, then to balances subject to lower interest
+rates, and then to any Plan balances.
+In most cases, we apply a credit to the same balance
+as the related charge. For example, we apply a credit
+for a purchase to the purchase balance. We may
+apply payments and credits within balances, and
+among balances with the same interest rate, in any
+order we choose. If there is a negative balance in
+any balance on the account at the end of a billing
+period, that excess credit will be redistributed to
+other balances in accordance with how we apply
+payments described above. This means that in
+certain circumstances, Plan balances may get paid
+before they otherwise would. If you receive a credit
+for a purchase placed into a plan, you must call us
+at the number on the back of your card to have the
+credit applied to the Plan balance.
+
+Version 1176446
+Page 3 of 8
+About your Minimum Payment Due
+How we calculate your
+Minimum Payment Due
+To calculate the Minimum Payment Due for each
+billing statement, we start with the highest of:
+(1) Interest charged on the billing statement plus 1%
+of the New Balance (excluding any interest, penalty
+fees, overlimit amount, and plan balances); or
+(2) 2% of the New Balance (excluding any penalty
+fees, overlimit amount, and plan balances); or
+(3) $40.
+Then we add any penalty fees shown on the billing
+statement, up to 1/24th of any overlimit amount, any
+plan payment due, and any amount past due.
+Your Minimum Payment Due will not exceed your
+New Balance. You may pay more than the Minimum
+Payment Due, up to your New Balance, at any time.
+EXAMPLE: Assume that your New Balance is $2,900,
+interest is $29.57, and you have no active plans,
+overlimit amount, penalty fees, or amounts past due.
+(1) $29.57 + 1% multiplied by ($2,900 - $29.57) =
+$58.27
+(2) $58 (2% of $2,900)
+(3) $40
+The highest of (1), (2) or (3) is $58.27
+If your account has any active plans, overlimit
+amount, penalty fees, or amounts past due, your
+Minimum Payment Due will be higher.
+About interest charges
+When we charge interest
+●You are not charged interest on purchases when
+you are in an Interest Free Period.
+●Your account enters an Interest Free Period when
+you pay your New Balance as shown on your
+statement by the Payment Due Date or your
+account had no previous balance.
+●When your account is not in an Interest Free
+Period, we charge interest on purchases from the
+date of the transaction.
+●After you enter an Interest Free Period again,
+interest may appear on your next billing statement.
+This reflects interest charged from the beginning of
+that billing cycle through the date the payment was
+received.
+●If you have an active plan created through Plan It,
+you can enter an Interest Free Period by paying at
+least the Balance Adjusted for Plans (or Adjusted
+Balance) by the Payment Due Date.
+●Balance Transfers and Cash Advances will be
+charged interest from the date of the transaction
+and do not have an Interest Free Period.
+For more details about how we calculate your interest
+charges, see the How we calculate interest section of
+this agreement.
+How we calculate interest
+We calculate interest for a billing period by first figuring the interest on each balance. Different categories of
+transactions--such as purchases and cash advances--may have different interest rates. Balances within each
+category may also have different interest rates.
+We use the Average Daily Balance method
+(including new transactions) to figure interest
+charges for each balance. The total interest charged
+for a billing period is the sum of the interest charged
+on each balance.
+Interest
+The interest charged for a balance in a billing period,
+except for variations caused by rounding, equals:
+●Average Daily Balance (ADB) multiplied by
+●Daily Periodic Rate (DPR) multiplied by
+●number of days the DPR was in effect.
+ADB
+To get the ADB for a balance, we add up its daily
+balances. Then we divide the result by the number
+of days the DPR for that balance was in effect. If the
+daily balance is negative, we treat it as zero.
+DPR
+A DPR is 1/365th of an APR, rounded to one
+tenthousandth of a percentage point. Your DPRs are
+shown in How Rates and Fees Work on page 2 of
+Part 1.
+EXAMPLE: Calculating Interest
+Assume that you have a single interest rate of
+15.99%, your ADB is $2,250 and there are 30 days in
+the billing period.
+The DPR is 15.99% divided by 365 days = 0.0438%
+The Interest is $2,250 multiplied by 0.0438%
+multiplied by 30 days = $29.57
+Daily Balance
+For each day a DPR is in effect, we figure the daily
+balance by:
+●taking the beginning balance for the day,
+●adding any new charges,
+●subtracting any payments or credits; and
+●making any appropriate adjustments.
+We add a new charge to a daily balance as of its
+transaction date.
+Beginning balance
+For the first day of a billing period, the beginning
+balance is the ending balance for the prior billing
+period, including unpaid interest. For the rest of the
+billing period, the beginning balance is the previous
+day's daily balance plus an amount of interest equal
+to the previous day's daily balance multiplied by the
+DPR for that balance. This method of figuring the
+beginning balance results in daily compounding of
+interest.
+When an interest rate changes, the new DPR may
+come into effect during--not just at the beginning of--
+the billing period. When this happens, we will create
+a new balance and apply the new DPR to it. To get
+the beginning balance on the first day for this new
+balance, we multiply the previous day's daily balance
+by the old DPR and add the result to that day's daily
+balance.
+Other methods
+To figure the ADB and interest charges, we may use
+other formulas or methods that produce equivalent
+results. Also, we may choose not to charge interest on
+certain types of charges.
+
+Version 1176446
+Page 4 of 8
+Determining the Prime Rate
+We use the Prime Rate from the rates section of The Wall Street Journal. The Prime Rate for each billing period
+is the Prime Rate published in The Wall Street Journal on the Closing Date of the billing period.
+The Wall Street Journal may not publish the Prime Rate on that day. If it does not, we will use the Prime Rate
+from the previous day it was published. If The Wall Street Journal is no longer published, we may use the Prime
+Rate from any other newspaper of general circulation in New York, New York. Or we may choose to use a
+similar published rate.
+If the Prime Rate increases, variable APRs (and corresponding DPRs) will increase. In that case, you may pay
+more interest and may have a higher Minimum Payment Due. When the Prime Rate changes, the resulting
+changes to variable APRs take effect as of the first day of the billing period.
+Other important information
+Military Lending Act
+Federal law provides important protections to members of the Armed Forces and their dependents relating
+to extensions of consumer credit. In general, the cost of consumer credit to a member of the Armed Forces
+and his or her dependent may not exceed an annual percentage rate of 36 percent. This rate must include, as
+applicable to the credit transaction or account: the costs associated with credit insurance premiums; fees for
+ancillary products sold in connection with the credit transaction; any application fee charged (other than certain
+application fees for specified credit transactions or accounts); and any participation fee (other than certain
+participation fees for a credit card account).
+To listen to this statement, as well as a description of your payment obligation for this Account, call us at
+855-531-0379.
+If you are a covered borrower, the Claims Resolution section of this Agreement will not apply to you in
+connection with this Account. Instead, the Claims Resolution for Covered Borrowers section will apply.
+About Additional
+Cardmembers
+At your request, we may issue cards to Additional
+Cardmembers. They do not have accounts with us
+but they can use your Account subject to the terms
+of this Agreement. We may report an Additional
+Cardmember's use of your Account to credit reporting
+agencies.
+You are responsible for all use of your Account by
+Additional Cardmembers and anyone they allow to
+use your Account. You must pay for all charges they
+make.
+You authorize us to give Additional Cardmembers
+information about your Account and to discuss it with
+them.
+If you want to cancel an Additional Cardmember's
+right to use your Account (and cancel their card) you
+must tell us.
+If an Annual Membership fee applies for an Additional
+Card, please refer to the refund policy disclosed
+in the Closing your Account sub-section of your
+Cardmember Agreement. If a single Annual
+Membership fee applies for a group of Additional
+Cards on your Account, this policy will apply when
+you cancel the Additional Card on which the fee was
+assessed. If an Annual Membership fee applies to
+Additional Cards on your Account, it is shown on page
+2 of Part 1 of the Cardmember Agreement.
+Converting charges made in a
+foreign currency
+If you make a charge in a foreign currency, AE Exposure Management Ltd. ("AEEML") will convert it into U.S.
+dollars on the date we or our agents process it, so that we bill you for the charge in U.S. dollars based upon this
+conversion. Unless a particular rate is required by law, AEEML will choose a conversion rate that is acceptable
+to us for that date. The rate AEEML uses is no more than the highest official rate published by a government
+agency or the highest interbank rate AEEML identifies from customary banking sources on the conversion date
+or the prior business day. This rate may differ from rates that are in effect on the date of your charge. We will bill
+charges converted by establishments (such as airlines) at the rates they use.
+Changing your billing address
+You must notify us immediately if you change the:
+●mailing address to which we send billing
+statements; or
+●e-mail address to which we send notice that your
+billing statement is available online.
+If you have more than one account, you need to notify
+us separately for each account.
+We may update your billing address if we receive
+information that it has changed or is incorrect.
+Closing your Account
+You may close your Account by calling us or writing to us.
+If an Annual Membership fee applies, we will refund this fee if you notify us that you are voluntarily closing your
+Account within 30 days of the Closing Date of the billing statement on which that fee appears. For cancellations
+after this 30 day period, the Annual Membership fee is non-refundable. If an Annual Membership fee applies to
+your Account, it is shown on page 1 and page 2 of Part 1 of the Cardmember Agreement.
+If your billing address is in the Commonwealth of Massachusetts at the time you close your account, this policy
+will not apply to you.
+Cancelling or suspending your
+Account
+We may:
+●cancel your Account,
+●suspend the ability to make charges,
+●cancel or suspend any feature on your Account,
+and
+●notify merchants that your Account has been
+cancelled or suspended.
+If we do any of these, you must still pay us for all
+charges under the terms of this Agreement.
+We may do any of these things at our discretion, even
+if you pay on time and your Account is not in default.
+If your Account is cancelled, you must destroy your
+cards.
+We may agree to reinstate your Account after a
+cancellation. If we do this, we may:
+●reinstate any additional cards issued on your
+Account,
+●charge you any applicable annual fees, and
+●charge you a fee for reinstating the Account.
+
+Version 1176446
+Page 5 of 8
+About default
+We may consider your Account to be in default if:
+●you violate a provision of this Agreement,
+●you give us false information,
+●you file for bankruptcy,
+●you default under another agreement you have
+with us or an affiliate,
+●you become incapacitated or die, or
+●we believe you are unable or unwilling to pay your
+debts when due.
+If we consider your Account in default, we may, to the
+extent permitted by federal and applicable state law:
+●suspend your ability to make charges,
+●cancel or suspend any feature on your Account,
+●require you to pay more than your Minimum
+Payment Due immediately, and
+●require you to pay your Account balance
+immediately.
+Collection costs
+You agree to pay all reasonable costs, including attorneys' fees, that we incur to collect amounts you owe.
+Credit reports
+You agree that we will obtain credit reports about you, investigate your ability to pay, and obtain information
+about you from other sources including information to verify and re-verify your employment and income. And
+you agree that we will use such information for any purposes (for example, marketing to you or evaluating you
+for a new account), subject to applicable law.
+You agree that we will give information about the Account to credit reporting agencies. We will tell a credit
+reporting agency if you fail to comply with any term of this Agreement. This may have a negative impact on your
+credit report.
+If you believe information we have given to a credit reporting agency is incorrect, write to us at: American
+Express Credit Bureau Unit, P.O. Box 981537, El Paso, TX 79998-1537. When you write to us, tell us the
+specific information you believe is incorrect.
+Sending you notices
+We mail you notices through the U.S. mail, postage prepaid, and address them to you at the latest billing
+address on our records. Any notice that we send you this way is deemed to be given when deposited in the U.S.
+mail.
+We may contact you
+Servicing and Collections
+If we need to contact you to service your account or to collect amounts you owe, you authorize us (and our
+affiliates, agents and contractors, such as debt collection agencies and service providers) to contact you at
+any phone number or email address you provide, from which you contact us, or at which we believe we can
+reach you. We may contact you in any way, such as calling, texting, emailing, sending mobile application push
+notifications or using any other method of communication permitted by law. We may contact you using an
+automated dialer or prerecorded messages. We may contact you on a mobile, wireless or similar device, even if
+you are charged for it.
+Call monitoring
+We may monitor and record any calls between you and us.
+About insurance products
+We or our affiliates may tell you about insurance and non-insurance products, services or features that
+may have a fee. One of our affiliates may act on behalf of a provider of these products. The affiliate may be
+compensated for this. The insurance products are not offered or sold by us or on our behalf. Our affiliates may
+get additional compensation when AMEX Assurance Company or another affiliate is the insurer or reinsurer.
+Compensation may influence what products and providers we or our affiliates tell you about.
+We may share information about you with our affiliates so they can identify products that may interest you. We
+may be compensated for this information.
+How we handle electronic
+debits from your checking
+account
+When you pay us by check, you authorize us to
+electronically deduct the amount from your bank or
+other asset account.
+We may process the check electronically by
+transmitting to your financial institution:
+●the amount,
+●the routing number,
+●the account number, and
+●the check serial number.
+If we do this, your payment may be deducted from
+your bank or other asset account on the same day
+we receive your check. Also, you will not receive that
+cancelled check with your bank or asset account
+billing statement.
+If we cannot collect the funds electronically, we may
+issue a draft against your bank or other asset account
+for the amount of the check.
+Privacy Act of 1974 notice
+Some federal agencies may accept the card under authority of statute. When you make charges at these
+agencies, we collect certain charge information. That information may be put to routine uses such as
+processing, billing and collections. It may also be aggregated for reporting, analysis and marketing use. Other
+routine uses by agencies may be published in the Federal Register.
+Convenience checks
+Convenience checks (including balance transfer
+checks) are checks that we may send you to access
+your Account. The following terms will apply to use
+of those checks unless otherwise disclosed with the
+check.
+If you use a convenience check, we may decline it.
+If we decline it, you may have to pay returned check
+fees or other penalties to whomever you wrote the
+check.
+If you use a convenience check and we honor it,
+we will charge interest beginning as of the date we
+receive the check. You cannot avoid paying interest on
+convenience check transactions.
+We will charge a fee for each convenience check
+transaction. This fee is 3% of the transaction, with a
+minimum of $5. This fee is a finance charge. We will
+add the fee to the same balance that we add the
+convenience check transaction to.
+We will charge $29 each time you ask us to stop
+payment on a convenience check.
+A convenience check is not a card. You may not use
+convenience checks to pay this or any other account
+with us or our affiliates. If you use a convenience
+check, we will apply the:
+●cash advance APR if you make it payable to cash,
+to you, or to a bank, brokerage or similar asset
+account, or to a mortgage or insurance provider.
+●purchase APR if you make it payable to a
+merchant.
+●balance transfer APR if you use it to transfer a
+balance from another creditor.
+●penalty APR if it applies to your Account.
+Changing benefits
+We have the right to add, modify or delete any benefit, service, or feature of your Account at our discretion.
+Assigning the Agreement
+We may sell, transfer or assign this Agreement and your Account. We may do so at any time without notifying
+you. You may not sell, assign or transfer your Account or any of your obligations under this Agreement.
+Assigning claims
+If you dispute a charge with a merchant, we may credit the Account for all or part of the disputed charge. If
+we do so, you assign and transfer to us all rights and claims (excluding tort claims) against the merchant. You
+agree that you will not pursue any claim against the merchant for the credited amount. And you must cooperate
+with us if we decide to do so.
+
+Page 6 of 8
+We do not waive our rights
+We may choose to delay enforcing or to not exercise rights under this Agreement. If we do this, we do not waive
+our rights to exercise or enforce them on any other occasion.
+Governing law
+Utah law and federal law govern this Agreement and
+your Account. They govern without regard to internal
+principles of conflicts of law. We are located in Utah.
+We hold your Account in Utah. We entered into this
+Agreement with you in Utah.
+In addition, if your billing address is in the State
+of Maryland, to the extent, if any, that Maryland
+law applies to your account, we elect to offer your
+card account pursuant to Title 12, Subtitle 9 of the
+Maryland Commercial Law Article.
+Notice to Oregon Residents
+Service charges not in excess of those permitted by law will be charged on the outstanding balances from
+month to month. You may pay more than the Minimum Payment Due, up to your entire outstanding balance, at
+any time.
+Notice for residents of
+Washington State
+In accordance with the Revised Code of Washington Statutes, Section 63.14.167, you are not responsible for
+payment of interest charges that result solely from a merchant's failure to transmit to us within seven working
+days a credit for goods or services accepted for return or forgiven if you have notified us of the merchant's delay
+in posting such credit, or our failure to post such credit to your account within three working days of our receipt
+of the credit.
+Claims Resolution
+Most customer concerns can be resolved by
+calling our Customer Service Department at the
+number listed on the back of your card. In the
+event Customer Service is unable to resolve
+a complaint to your satisfaction, this section
+explains how claims can be resolved through
+mediation, arbitration or litigation. It includes
+an arbitration provision. You may reject the
+arbitration provision by sending us written
+notice within 45 days after your first card
+purchase. See Your Right to Reject Arbitration
+below.
+For this section, you and us includes any
+corporate parents, subsidiaries, affiliates or
+related persons or entities. Claim means any
+current or future claim, dispute or controversy
+relating to your Account(s), this Agreement, or
+any agreement or relationship you have or had
+with us, except for the validity, enforceability
+or scope of the Arbitration provision. Claim
+includes but is not limited to: (1) initial claims,
+counterclaims, crossclaims and third-party claims;
+(2) claims based upon contract, tort, fraud,
+statute, regulation, common law and equity;
+(3) claims by or against any third party using
+or providing any product, service or benefit in
+connection with any account; and (4) claims that
+arise from or relate to (a) any account created
+under any of the agreements, or any balances on
+any such account, (b) advertisements, promotions
+or statements related to any accounts, goods or
+services financed under any accounts or terms
+of financing, (c) benefits and services related
+to card membership (including fee-based or
+free benefit programs, enrollment services and
+rewards programs) and (d) your application for
+any account. You may not sell, assign or transfer
+a claim.
+Sending a Claim Notice
+Before beginning a lawsuit, mediation or 
+arbitration, you and we agree to send a written 
+notice (a claim notice) to each party against 
+whom a claim is asserted, in order to provide
+an opportunity to resolve the claim informally or 
+through mediation. Go to americanexpress.com/
+claim for a sample claim notice. The claim notice 
+must describe the claim and state the specific 
+relief demanded. Notice to you may be provided 
+by your billing statement or sent to your billing 
+address. Notice to us must include your name, 
+address and Account number and be sent to 
+American Express ADR c/o CT Corporation 
+System, 28 Liberty Street, New York, New York 
+10005. If the claim proceeds to arbitration, the 
+amount of any relief demanded in a claim notice 
+will not be disclosed to the arbitrator until after the 
+arbitrator rules.
+Version 1176446
+Mediation
+In mediation, a neutral mediator helps parties
+resolve a claim. The mediator does not decide
+the claim but helps parties reach agreement.
+Before beginning mediation, you or we must
+first send a claim notice. Within 30 days after
+sending or receiving a claim notice, you or we
+may submit the claim to JAMS (1-800-352-5267,
+jamsadr.com) or the American Arbitration
+Association ("AAA") (1-800-778-7879, adr.org)
+for mediation. We will pay the fees of the
+mediator. All mediation-related communications
+are confidential, inadmissible in court and not
+subject to discovery.
+All applicable statutes of limitation will be tolled
+from the date you or we send the claim notice
+until termination of the mediation. Either you or
+we may terminate the mediation at any time.
+The submission or failure to submit a claim to
+mediation will not affect your or our right to elect
+arbitration.
+Arbitration
+You or we may elect to resolve any claim by
+individual arbitration. Claims are decided by a
+neutral arbitrator.
+If arbitration is chosen by any party, neither
+you nor we will have the right to litigate that
+claim in court or have a jury trial on that
+claim. Further, you and we will not have
+the right to participate in a representative
+capacity or as a member of any class
+pertaining to any claim subject to arbitration.
+Arbitration procedures are generally simpler
+than the rules that apply in court, and
+discovery is more limited. The arbitrator's
+authority is limited to claims between you
+and us alone. Claims may not be joined
+or consolidated unless you and we agree
+in writing. An arbitration award and any
+judgment confirming it will apply only to
+the specific case and cannot be used in any
+other case except to enforce the award. The
+arbitrator's decisions are as enforceable
+as any court order and are subject to very
+limited review by a court. Except as set forth
+below, the arbitrator's decision will be final
+and binding. Other rights you or we would
+have in court may also not be available in
+arbitration.
+Initiating Arbitration
+Before beginning arbitration, you or we must first
+send a claim notice. Claims will be referred to
+either JAMS or AAA, as selected by the party
+electing arbitration. Claims will be resolved
+pursuant to this Arbitration provision and the
+selected organization's rules in effect when
+the claim is filed, except where those rules
+conflict with this Agreement. If we choose the
+organization, you may select the other within
+30 days after receiving notice of our selection.
+Contact JAMS or AAA to begin an arbitration
+or for other information. Claims also may be
+referred to another arbitration organization if
+you and we agree in writing or to an arbitrator
+appointed pursuant to section 5 of the Federal
+Arbitration Act, 9 U.S.C. sec. 1-16 (FAA).
+We will not elect arbitration for any claim you
+file in small claims court, so long as the claim
+is individual and pending only in that court.
+You or we may otherwise elect to arbitrate
+any claim at any time unless it has been filed
+in court and trial has begun or final judgment
+has been entered. Either you or we may delay
+enforcing or not exercise rights under this
+Arbitration provision, including the right to
+arbitrate a claim, without waiving the right to
+exercise or enforce those rights.
+Limitations on Arbitration
+If either party elects to resolve a claim by
+arbitration, that claim will be arbitrated
+on an individual basis. There will be
+no right or authority for any claims to
+be arbitrated on a class action basis or
+on bases involving claims brought in a
+purported representative capacity on behalf
+of the general public, other cardmembers
+or other persons similarly situated.
+Notwithstanding any other provision and
+without waiving the right to appeal such
+decision, if any portion of these Limitations on
+Arbitration is deemed invalid or unenforceable,
+then the entire Arbitration provision (other than
+this sentence) will not apply.
+Arbitration Procedures
+This Arbitration provision is governed by
+the FAA. The arbitrator will apply applicable
+substantive law, statutes of limitations and
+privileges. The arbitrator will not apply any
+federal or state rules of civil procedure or
+evidence in matters relating to evidence
+or discovery. Subject to the Limitations on
+Arbitration, the arbitrator may otherwise award
+any relief available in court. You and we agree
+that the arbitration will be confidential. You
+and we agree that we will not disclose the
+content of the arbitration proceeding or its
+outcome to anyone, but you or we may notify
+any government authority of the claim as
+permitted or required by law.
+If your claim is for $10,000 or less, you
+may choose whether the arbitration will be
+conducted solely on the basis of documents,
+
+Page 7 of 8
+through a telephonic hearing, or by an in-person
+hearing. At any party's request, the arbitrator will
+provide a brief written explanation of the award.
+The arbitrator's award will be final and binding,
+subject to each party's right to appeal as stated
+in this section and/or to challenge or appeal an
+arbitration award pursuant to the FAA. To initiate
+an appeal, a party must notify the arbitration
+organization and all parties in writing within 35
+days after the arbitrator's award is issued. The
+arbitration organization will appoint a three-
+arbitrator panel to decide anew, by majority vote
+based on written submissions, any aspect of the
+decision objected to. The appeal will otherwise
+proceed pursuant to the arbitration organization's
+appellate rules. Judgment upon any award may
+be entered in any court having jurisdiction. At your
+election, arbitration hearings will take place in the
+federal judicial district of your residence.
+Arbitration Fees and Costs
+You will be responsible for paying your share
+of any arbitration fees (including filing,
+administrative, hearing or other fees), but only up
+to the amount of the filing fees you would have
+incurred if you had brought a claim in court. We
+will be responsible for any additional arbitration
+fees. At your written request, we will consider in
+good faith making a temporary advance of your
+share of any arbitration fees, or paying for the
+reasonable fees of an expert appointed by the
+arbitrator for good cause.
+Additional Arbitration Awards
+If the arbitrator rules in your favor for an
+amount greater than any final offer we made
+before the final hearing in arbitration, the
+arbitrator's award will include: (1) any money to
+which you are entitled, but in no case less than
+$5,000; and (2) any reasonable attorneys' fees,
+costs and expert and other witness fees.
+Your Right to Reject Arbitration
+You may reject this Arbitration provision by
+sending a written rejection notice to us at:
+American Express, P.O. Box 981556, El Paso,
+TX 79998. Go to americanexpress.com/reject
+for a sample rejection notice. Your rejection
+notice must be mailed within 45 days after your
+first card purchase. Your rejection notice must
+state that you reject the Arbitration provision
+and include your name, address, Account
+number and personal signature. No one else
+may sign the rejection notice. If your rejection
+notice complies with these requirements, this
+Arbitration provision and any other arbitration
+provisions in the cardmember agreements for
+any other currently open American Express
+accounts you have will not apply to you, except
+for Corporate Card accounts and any claims
+subject to pending litigation or arbitration at the
+time you send your rejection notice. Rejection
+of this Arbitration provision will not affect your
+other rights or responsibilities under this Claims
+Resolution section or the Agreement. Rejecting
+this Arbitration provision will not affect your
+ability to use your card or any other benefit,
+product or service you may have with your
+Account.
+Continuation
+This section will survive termination of your
+Account, voluntary payment of your Account
+balance, any legal proceeding to collect a debt,
+any bankruptcy and any sale of your Account
+(in the case of a sale, its terms will apply to the
+buyer of your Account). If any portion of this
+Claims Resolution section, except as otherwise
+provided in the Limitations on Arbitration
+subsection, is deemed invalid or unenforceable,
+it will not invalidate the remaining portions of
+this Claims Resolution section.
+Claims Resolution for Covered Borrowers
+Most customer concerns can be resolved by 
+calling our Customer Service Department at the 
+number listed on the back of your Card. In the 
+event Customer Service is unable to resolve a 
+complaint to your satisfaction, this section explains 
+how claims can be resolved through litigation, 
+non-binding mediation or, at your election, 
+arbitration. You are not required to resolve any 
+claims by mediation and arbitration. For this 
+section, you and us includes any corporate 
+parents, subsidiaries, affiliates or related persons 
+or entities. Claim means any current or future 
+claim, dispute or controversy relating to your 
+Card account, this Agreement, or any agreement 
+or relationship you have or had with us, except 
+for the validity, enforceability or scope of the 
+Arbitration provision. Claim includes but is not 
+limited to: (1) initial claims, counterclaims, cross-
+claims and third-party claims; (2) claims based 
+upon contract, tort, fraud, statute, regulation, 
+common law and equity; (3) claims by or against 
+any third party using or providing any product, 
+service or benefit in connection with any account; 
+and (4) claims that arise from or relate to (a) any 
+account created under any of the agreements
+or any balances on any such account, (b) 
+advertisements, promotions or statements related 
+to any accounts, goods or services financed 
+under any accounts or terms of financing, (c) 
+benefits and services related to Card membership 
+(including fee-based or free benefit programs, 
+enrollment services and rewards programs) and 
+(d) your application for any account. You may not 
+sell, assign or transfer a claim.
+Sending a Claim Notice
+Before beginning a lawsuit, arbitration or
+non-binding mediation, you may send a
+written notice (a claim notice) to us. Go to 
+americanexpress.com/claim for a sample claim 
+notice. The claim notice should describe the claim 
+and state the specific relief demanded. We may 
+also request that we resolve a claim by mediation 
+or arbitration, but you are not required to accept
+Version 1176446
+our request. We may include our request with
+your billing statement or mail it to your home
+address. Notice to us must include your name,
+address and Account number and be sent to
+American Express ADR c/o CT Corporation
+System, 28 Liberty Street, New York, New
+York 10005. If the claim proceeds to litigation,
+mediation or arbitration, the amount of any
+relief demanded in a claim notice will not be
+disclosed. You are not required to resolve
+your claim through mediation or arbitration.
+You may decline our request to resolve a
+claim through mediation or arbitration. You
+may elect to resolve your claim through
+litigation.
+Mediation
+If you elect to resolve your claim through
+mediation, a neutral mediator will help
+resolve the claim. The mediator does not
+decide the claim but helps parties reach
+agreement. Before beginning mediation, you
+or we must first send a claim notice. Within
+30 days after sending or receiving a claim
+notice, you or we may submit the claim to
+JAMS (1-800-352-5267, jamsadr.com) or
+the American Arbitration Association ("AAA")
+(1-800-778-7879, adr.org) for mediation. We
+will pay the fees of the mediator. All mediation-
+related communications are confidential,
+inadmissible in court and not subject to
+discovery. All applicable statutes of limitation
+will be tolled from the date you or we send the
+claim notice until termination of the mediation.
+Either you or we may terminate the mediation
+at any time. The submission or failure to submit
+a claim to mediation will not affect your or
+our right to elect litigation or arbitration. The
+outcome of mediation proceedings is non-
+binding. You may proceed to litigation or
+arbitration regardless of the outcome of
+mediation.
+Arbitration
+You may elect, but are not required, to resolve
+any claim by individual arbitration. We may
+also request to resolve any claim by individual
+arbitration, but you are not required to accept
+our request. Claims are decided by a neutral
+arbitrator.
+If you elect or agree to resolve a claim
+through arbitration, your or our right to
+litigate that claim in court or have a jury trial
+on that claim may be limited. Further, you
+and we may not have the right to participate
+in a representative capacity or as a member
+of any class pertaining to any claim subject
+to arbitration. Arbitration procedures are
+generally simpler than the rules that apply
+in court, and discovery is more limited. The
+arbitrator's authority is limited to claims
+between you and us alone. Claims may not
+be joined or consolidated unless you and
+we agree in writing. An arbitration award
+and any judgment confirming it will apply
+only to the specific case and cannot be
+used in any other case except to enforce
+the award. The arbitrator's decisions are
+as enforceable as any court order and are
+subject to very limited review by a court.
+Except as set forth below, the arbitrator's
+decision will be final and binding. Other
+rights you or we would have in court may
+also not be available in arbitration.
+Initiating Arbitration
+If you and we agree to proceed to arbitration,
+claims will be referred to either JAMS or
+AAA, as selected by the party electing
+arbitration. Claims will be resolved pursuant
+to this Arbitration provision and the selected
+organization's rules in effect when the claim is
+filed, except where those rules conflict with this
+Agreement.
+If we choose the organization, you may select
+the other within 30 days after receiving notice
+of our selection.
+Contact JAMS or AAA to begin an arbitration
+or for other information. Claims also may be
+referred to another arbitration organization if
+
+Version 1176446
+Page 8 of 8
+you and we agree in writing or to an arbitrator
+appointed pursuant to section 5 of the Federal
+Arbitration Act, 9 U.S.C. sec. 1-16 (FAA). We
+will not request arbitration for any claim you file
+in small claims court, so long as the claim is
+individual and pending only in that court. You
+may otherwise elect to arbitrate any claim at any
+time unless it has been filed in court and trial has
+begun or final judgment has been entered.
+Limitations on Arbitration
+If the parties agree to resolve a claim by
+arbitration, that claim will be arbitrated on an
+individual basis pursuant to that agreement,
+and the agreement would not allow claims
+to be arbitrated on a class action basis or on
+bases involving claims brought in a purported
+representative capacity on behalf of the
+general public, other Cardmembers, or other
+persons similarly situated.
+Notwithstanding any other provision and without
+waiving the right to appeal such decision, if
+any portion of these Limitations on Arbitration
+provisions is deemed invalid or unenforceable,
+then the entire Arbitration provision (other than this
+sentence) will not apply.
+Arbitration Procedures
+This Arbitration provision is governed by the FAA.
+The arbitrator will apply applicable substantive
+law, statutes of limitations and privileges. The
+arbitrator will not apply any federal or state rules
+of civil procedure or evidence in matters relating to
+evidence or discovery. Subject to the Limitations
+on Arbitration provisions, the arbitrator may
+otherwise award any relief available in court.
+You and we agree that the arbitration will be
+confidential. You and we agree that we will
+not disclose the content of the arbitration
+proceeding or its outcome to anyone, but you
+or we may notify any government authority of
+the claim as permitted or required by law.
+If your claim is for $10,000 or less, you
+may choose whether the arbitration will be
+conducted solely on the basis of documents,
+through a telephonic hearing, or by an in
+person hearing. At any party's request, the
+arbitrator will provide a brief written explanation
+of the award. The arbitrator's award will be
+final and binding, subject to each party's right
+to appeal as stated in this section and/or
+to challenge or appeal an arbitration award
+pursuant to the FAA. To initiate an appeal, a
+party must notify the arbitration organization
+and all parties in writing within 35 days after
+the arbitrator's award is issued. The arbitration
+organization will appoint a three-arbitrator panel
+to decide anew, by majority vote based on
+written submissions, any aspect of the decision
+objected to. The appeal will otherwise proceed
+pursuant to the arbitration organization's
+appellate rules. Judgment upon any award
+may be entered in any court having jurisdiction.
+At your election, arbitration hearings will take
+place in the federal judicial district of your
+residence.
+Arbitration Fees and Costs
+You will be responsible for paying your share
+of any arbitration fees (including filing,
+administrative, hearing or other fees), but only
+up to the amount of the filing fees you would
+have incurred if you had brought a claim in
+court. We will be responsible for any additional
+arbitration fees. At your written request, we
+will consider in good faith making a temporary
+advance of your share of any arbitration fees,
+or paying for the reasonable fees of an expert
+appointed by the arbitrator for good cause.
+Additional Arbitration Awards
+If the arbitrator rules in your favor for an
+amount greater than any final offer we made
+before the final hearing in arbitration, the
+arbitrator's award will include: (1) any money to
+which you are entitled, but in no case less than
+$5,000; and (2) any reasonable attorneys' fees,
+costs and expert and other witness fees.
+Continuation
+This section will survive termination of your
+Account, voluntary payment of your Account
+balance, any legal proceeding to collect a debt,
+any bankruptcy and any sale of your Account
+(in the case of a sale, its terms will apply to the
+buyer of your Account). If any portion of this
+Claims Resolution section, except as otherwise
+provided in the Limitations on Arbitration
+subsection, is deemed invalid or unenforceable,
+it will not invalidate the remaining portions of
+this Claims Resolution section.

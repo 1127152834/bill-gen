@@ -1,0 +1,916 @@
+source: c1-total-control
+topic: Capital One Total Control Checking 披露（含 Category 列语义说明）
+kind: disclosure
+url: https://www.capitalone.com/bank/disclosures/checking-accounts/total-control-checking/
+fetched_at: 2026-10-30T19:13:43Z
+content_type: text/html
+sha256: 5acf42da2ba28fe1370970047a0d8147b1b87aa960d77c85a4ce7c663cf7037e
+--- 正文（外链原文摘录，只作离线检索用）---
+
+Total Control Checking Disclosures | Capital One 
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ Skip to main content
+ Sign In Credit Cards Checking & Savings Auto Business Commercial Benefits & Tools Search Help Center Locations Sign In Total Control Checking account disclosures Total Control Checking disclosure Total Control Checking agreement Account features Deposit availability disclosure Overdraft services Electronic Fund Transfer disclosure Wire Transfer Agreement Privacy policy 10/29/2026 
+
+ Overview 
+
+ When you see the words "you" and "your," they mean each person who owns an account or each trustee who is legally entitled to manage an account. The words "the bank," "our," "us," "we," and "Capital One" mean Capital One, N.A. "Overdraft Services" means your options for overdraft service, including Auto-Decline, Free Savings Transfer, and No-Fee Overdraft. 
+
+ Please understand that when you submit an application, open an account, or use our services, you agree to be bound by these terms. 
+
+ 
+
+ Total Control Checking disclosure 
+
+ Initial deposit requirement : There is no minimum deposit required. 
+
+ Fees: The following fees may be charged to your account. 
+
+ 
+ A Cashier's check purchased at a Capital One location with a Branch Teller is $10.00. 
+ A Cashier's check purchased online (expedited delivery) is $20.00. 
+ An outgoing domestic wire transfer is $30.00. 
+ If you present us with a foreign check, we will not charge a fee, but the paying bank may deduct a fee from the proceeds. 
+ These charges for checkbook orders can change at any time 
+ Withdrawing money at a non-Capital One ATM or from a network other than Allpoint and MoneyPass is $2.00 (per transaction) 
+ Withdrawing money at an international ATM (outside of the United States, Puerto Rico, and the U.S. Virgin Islands) is $2.00, plus 3% of the total transaction amount (per transaction) 
+ 
+
+ Transaction limitations: The transaction limit depends on the method of payment. 
+
+ 
+ Any one "Bill Pay" per transaction cannot exceed $100,000.00. 
+ Cashier’s Check (Online): Any one "Cashier's Check" transaction cannot exceed $250,000 for Cashier's checks purchased online. In addition, the total of all Cashier's checks cannot exceed $500,000 per customer per day. The daily limit resets at midnight every day. 
+ Cashier’s Check Kiosk (In Cafe): The total of all Cashier’s checks purchased at the kiosk cannot exceed $5,000 per customer per day. The daily limit resets at midnight every day. 
+ The "Send Money with Zelle®" (person-to-person transfers) transactions are subject to limits on the amount and frequency of transfers to and from your account. These limits are designed to be flexible in order to protect the security and integrity of the service and accounts, including protecting you and all other users of the service. These limitations may be based on confidential fraud and risk criteria that are essential to our management of risk and the protection of you and the integrity of the service and may be modified at our sole discretion without advance notice. 
+ We may limit, refuse or return all or any part of a deposit without prior notice to you. 
+ If you have a Mastercard: Total card purchases and withdrawals are limited to $2,500 per day. This includes ATM withdrawals using your debit card, cash advances, and signature and PIN-based purchases. Daily limits on withdrawals from an ATM made using your account’s ATM/debit card are set based on confidential fraud and risk criteria that are essential to your protection and the integrity of the service and may be modified at our sole discretion without advance notice. You can check your daily withdrawal limit on the Capital One Mobile App or by calling us at 1-800-655-2265 . You can also lower your limit by calling us at 1-800-655-2265 . 
+ If you have a Discover card: Total card purchases and withdrawals are limited to $5,000 per day. This includes ATM withdrawals using your debit card, cash advances, and signature and PIN-based purchases. Daily limits on withdrawals from an ATM made using your account’s ATM/debit card are set based on confidential fraud and risk criteria that are essential to your protection and the integrity of the service and may be modified at our sole discretion without advance notice. You can check your daily withdrawal limit on the Capital One Mobile App or online account, or by calling us at 1-866-630-7953 . You can also lower your limit or temporarily increase your limit by calling us at 1-866-630-7953 . 
+ You may also withdraw cash from ATMs using your mobile app. Total withdrawals may not exceed $500 per day and $2,000 per month. However, we may on occasion change these limits based on confidential fraud and risk criteria essential to your protection and the integrity of the service at our sole discretion without advance notice. 
+ Automated Clearing House (ACH) External Transfer transactions are subject to limits on the dollar amount of electronic transfers between your account and external accounts at other financial institutions. These limits are designed to be flexible in order to protect the security and integrity of the service and accounts, as well as you and all other users of the service. Based on confidential fraud and essential risk criteria, they may be modified at our discretion without advance notice. 
+ 
+
+ Total Control Checking agreement 
+
+ The Total Control Checking Agreement includes our Electronic Fund Transfer Disclosure Statement ("EFT Disclosure") (collectively, "Agreement"). You need to read this agreement and hold onto it in case you have any questions down the road. Please understand that by applying for Total Control Checking and/or using its features, you're agreeing to be bound by the terms of this Agreement, in addition to any other agreements you have entered into with us. You can have up to three separate Total Control Checking accounts. If this is your first Total Control Checking account, you're requesting that we automatically issue a debit card (the "Card") to you, and we’ll automatically link each additional Total Control Checking account to the debit card. 
+
+ Eligible customers : Total Control Checking is available to United States citizens or lawful permanent residents with a U.S. physical address or with military addresses (APO or FPO), who are at least 18 years old and have a U.S.-based mobile phone number with either a valid Social Security Number, or an Individual Taxpayer Identification Number (ITIN) and your Linked Account must be with a bank chartered in the U.S. 
+
+ You must also be a paperless Customer. That means that (i) you must provide us with your current email address, and update us of any changes; and (ii) you must agree to accept electronic delivery of all disclosures and communications (like end-of-year tax forms and electronic statements) that we send you. 
+
+ Account type/account opening : Total Control Checking is a demand deposit checking account that generally allows you to withdraw your money without advance notice to us. 
+
+ Obtaining credit reports : We may request a consumer (credit) report in connection with your account(s). Upon your request, you will be informed whether or not a consumer (credit) report was requested, and if such report was requested, informed of the name and address of the consumer (credit) reporting agency that furnished the report. We may also request subsequent consumer (credit) reports for all legitimate purposes in connection with updating, renewing, reviewing, modifying, and/or taking collection action on your account(s). 
+
+ Reporting information to consumer reporting agencies and check verifications systems : We may report information about your account to consumer reporting agencies and/or check verification systems. Defaults on your account may be reflected in your consumer report. This could affect your ability to open accounts in the future. In the event we report your account to a check verification system, you acknowledge that even if you pay us all amounts owed, we are not required to remove an accurate report of account mishandling from any such check verification system. 
+
+ Consumer account: Your account is a consumer account and must be used primarily for personal, family, or household purposes. If you fail to comply with these conditions, or use your account for business purposes, we may restrict use of, or close your account. 
+
+ Types of account ownership: 
+
+ 
+ Individual account: This type of account is owned by one person and only that person can transfer or take money out of the account. 
+ Joint account: This type of account is owned by two or more people and all deposits made into the account are owned by all registered account owners. The owners of the account are considered to be "joint tenants" with right of survivorship. Except for certain retirement benefits like Social Security, if one person dies, the money in the account then belongs only to the survivor (and not to the estate of the deceased person). Any owner of the account may: 1) tell us to pay a person or company; 2) withdraw, transfer funds, or close the account without the other owner's consent; 3) pledge the account to us as collateral for a debt owed to us; or 4) deposit checks payable to any joint owner. Each of you can enter a stop payment order on any payments or other orders of withdrawal authorized by either of you. 
+ 
+
+ If one joint owner requests that we not pay items authorized by a different joint owner, we may restrict the account and refuse to pay all items (including items authorized by the owner making the request), but we are not required to do so. If we restrict the account, we may not release the restriction unless all joint owners agree in writing to remove it. No request to restrict the account will affect items that we paid before the request. If we decide not to restrict the account, all joint owners remain responsible for items subtracted from the account. 
+
+ We may also pay all or any part of the funds in the account to a court or government agency if we receive a garnishment, levy, or similar legal process that identifies any of the joint owners. 
+
+ 
+ Revocable living trust (also known as inter-vivos trust) account: This type of account is owned by a living trust and is managed by one or more Trustee(s) (“Trustee/Co-Trustees”). If the Trust requires Co-Trustees to act jointly, all Co-Trustees acknowledge that we cannot comply with multiple-signature requirements, and that each Trustee has obtained the necessary consent before performing a transaction. For example, this means that any Co-Trustee may: (i) tell us to pay a person or company; (ii) withdraw or transfer the balance without the other Co-Trustees providing consent to Capital One; (iii) make deposits, close, or pledge the account to us as collateral for a debt owed to us; or (iv) endorse and deposit checks payable to either Co-Trustee or the living trust. Each Co-Trustee can enter a stop payment order on any payments or other orders of withdrawal authorized by either Co-Trustee. Each Co-Trustee understands and agrees that (s)he, and not Capital One, owes a fiduciary duty to the beneficiaries of the living trust and as such, shall manage the account in accordance with the terms of the trust document(s) and any applicable laws. 
+ “Payable on Death” (POD) : You may designate an individual or joint account to be payable upon your death to a designated beneficiary or beneficiaries. Only an individual may be designated as a beneficiary. POD accounts are also known as “In Trust For” (ITF)”, “As Trustee For” (ATF), “Transfer on Death” (TOD) or “Totten Trust” account, and are governed by applicable state laws and regulations. You are solely responsible for meeting the requirements for establishing your account as a POD, including any titling requirements. 
+ 
+
+ During your life, the funds in the account belong to you and, until your death, or if there are co-owners, upon the death of the last co-owner, the beneficiary(ies) have no interest in the account and cannot perform transactions on the account. You may withdraw all or part of the account balance, close the account, remove or add POD beneficiaries, or change the account type or ownership. Upon the death of all owners, we will distribute the then remaining funds to such of the beneficiaries as shall be then-living, in equal shares, subject to our right to charge the account for any amount a deceased owner, co-owner, or POD beneficiary owes us; if any beneficiary is under the age of 18 years at the time he would be entitled to receive property under the terms of the previous provision, we will pay such person’s share to any person who is the statutory or court-appointed custodian for the benefit of such person. 
+
+ Connecting accounts : If you have more than one eligible Capital One account, we will automatically "connect" your eligible accounts so they appear when you are logged into your account through the website or mobile app. 
+
+ We will display only summary information about your "connected" accounts. To get any other information or conduct any activity on these account types, you must access the specific account servicing area for that account. All connected bank accounts will be visible when you log into your account through the website or mobile app. Keep in mind that certain features, information, types of transactions, or other services may not be available for all of your connected accounts. As long as you maintain your unique log in credentials, you will have access to view all of your individual accounts and shared accounts. People with whom you share accounts will only be able to view accounts that are shared with you, not your individual accounts. 
+
+ Deposits : This account allows you to make deposits by cash, check, Automated Clearing House (ACH), domestic wire transfer or other payment network transfers, or transfer from another eligible Capital One, N.A. deposit account. 
+
+ Any transaction that you conduct on Saturday, Sunday, a federal holiday, or other days on which we are closed may be handled the following business day. 
+
+ Checks you deposit must be payable to you or to the living trust (in the case of a trust account). 
+
+ We may refuse all or part of a deposit. We also may refuse a deposit after initially accepting it. If we do that, we will reverse the amount added to your account and send it to you via check or your external linked account. We will not be liable to you for refusing a deposit, even if it causes us to decline any transactions you have already made. If you have enrolled in one of our overdraft protection services, this may result in a transfer. 
+
+ If a check from a split deposit is returned unpaid, we’ll deduct the full amount of the check from the account that received the largest portion of the check. If the deposit was split for an equal amount, we’ll deduct the full amount of the check from the first account in the transaction sequence. 
+
+ Once your account is open, funds will be available according to the Deposit Availability Disclosure section of this agreement. 
+
+ If a check or other deposit is returned to us unpaid or is otherwise charged back to us, we will deduct the amount of the check/deposit from your account. If the check was deposited into your account and multiple other Capital One accounts, we will debit your account for the full amount. 
+
+ Foreign checks are handled as collection items only and are converted at our current daily rate and credited in U.S. dollars. Foreign checks sent for collection are exchanged at the exchange rate on the day of payment. All returned foreign checks will be charged back to your account at the rate used when initially credited and may be subject to a foreign bank charge (if applicable). Please note that while the foreign check collection process typically takes anywhere from four to six weeks, we have no control over the process once a check is sent for foreign collection. Accordingly, the process may take longer, depending on the foreign bank. You hereby waive notice of dishonor, nonpayment, or protest with respect to any items credited to or charged against your account. 
+
+ At our discretion, we may make funds available for certain direct deposits (for example, most payroll payments) as soon as the payor notifies Capital One of the payment. This means we can make your money available to you up to 2 days before we receive the funds from the payor. This will be reflected on your account transaction history. If your direct deposits are already sent to your account, you do not need to take any additional action. Earlier availability of direct deposits is dependent on the timing of your payor’s payment instructions, fraud prevention overlays, and other restrictions, such as limits on the amount and frequency of direct deposits to your account. These limits are designed to be flexible in order to protect the security and integrity of the service and accounts. These limitations may be based on confidential fraud and risk criteria that are essential to our management of risk and the protection of you and the integrity of the service and may be modified at our sole discretion without advance notice. Capital One does not guarantee early availability of any direct deposits, and eligibility of a direct deposit for early availability may change between pay periods. Any direct deposit that is not posted early will otherwise be made available according to our funds availability schedule. Even after we have made funds available to you and you have withdrawn the funds, you remain responsible if any deposit to your account is returned, rejected, or otherwise uncollected by the Bank. We reserve the right to conclude the early availability of direct deposit at our sole discretion and without any further notice to you. 
+
+ Withdrawals and transfers : Generally, you can withdraw or transfer money from your account by 1) using our website or mobile app; 2) using the Card we give you to make withdrawals at ATMs and points of sale ("POS"); 3) visiting one of our branch locations; 4) using Checkbooks; or 5) calling us. You can also transfer money at a Capital One ATM terminal between any accounts that are linked to your Card. We may limit, refuse, or return any withdrawal or transfer of funds from your account that is made in a manner not permitted by us. 
+
+ Free transfers to or from your own linked account at another financial institution are processed via the automated clearing house (ACH) network, and will typically take 2-3 business days to transfer. If you want more detailed information regarding electronic transfer times, see the Electronic Fund Transfer Disclosure Statement. 
+
+ For your protection and our protection : You authorize us to follow any instructions you give to us. We reserve the right to contact you to obtain confirmation of any instruction before processing it. However, we're not required to confirm any instruction that looks like it was made by you, and we won't be liable if we don't contact you. We're also not required to confirm the actual identity or authority of anyone who uses your Password or a personal identification number ("PIN") or any account access device we gave you (like the Card) (collectively, "E-Identification"). We reserve the right, at our sole discretion and without notice, to refuse to make a withdrawal or transfer for security, credit, legal/regulatory, or other reasons, and to refuse, to honor withdrawal or transfer requests that appear to be fraudulent or erroneous. We can limit, refuse, or return any withdrawal or transfer of funds from your account that is made in a way not permitted by us. 
+
+ Statements : As required by law, we'll provide you with a statement at least 4 times a year. Your Statement will be made available to you based on your selected delivery method. Payments or transfers you make will be listed on your Statement. You agree to notify us within 60 days if you think there‘s an error or unauthorized transaction shown on your Statement. 
+
+ 
+
+ Additional disclosures 
+
+ Lien and Set-Off : We have a continuing lien on, and under the Agreement you grant us a consensual security interest in, all of your deposits as security for any and all debts or obligations you owe us as borrower or otherwise, whether due or to become due. We may at our option, at any time and without notice to you, use all or any part of the money from your account ("set-off") to pay any debt you owe to us or to any of our affiliates of whatever kind and however arising. This right of set-off doesn't apply to your accounts to the extent restricted or prohibited by law or contract. 
+
+ Change/waiver of terms : We may change the Agreement, add new provisions, and/or delete provisions at any time. Changes and new provisions will be binding upon you and your checking account as of their effective date. If we do make a change, we'll let you know about it as required by law. We may change the Agreement without notice to you when necessary to conform to federal or state law. 
+
+ We reserve the right to terminate, change, discontinue, or add products, functionality, account types, or features at any time and within our sole discretion. We have the right to waive any of our rights under the Agreement with respect to any transaction without obligating ourselves to treat future transactions in the same way. 
+
+ No fiduciary obligation : Capital One doesn't assume any fiduciary obligation on your behalf. This means that we don't act as your trustee or financial advisor, and we don't assume any responsibility for your account beyond reasonable care. 
+
+ Assignment : You can't pledge, assign, give as a gift, or otherwise transfer the ownership of all or any part of your account to a third party without our prior written consent. 
+
+ Governing law and regulations : Your account is subject to both federal law and the laws of the state of Virginia, as well as any operating circulars or clearing house rules that apply to us and the rules and regulations of our supervisory authorities (collectively, "Applicable Law"). If there's a conflict between this Agreement and Applicable Law, the Agreement will be changed to the extent necessary to comply with Applicable Law. If any provision of this Agreement is determined by a court or administrative agency having proper jurisdiction to be invalid, unenforceable, or illegal, that determination will not affect the validity and enforceability of the remaining provisions of this Agreement. 
+
+ Levies, attachments, and other court processes : If we receive a levy, attachment, or other legal process against you or any party to your account, we may refuse to permit withdrawals or transfers from your checking account until the legal process is dismissed or satisfied. Any levy, attachment, or other legal process will be subject to our right of set-off and security interest. You're responsible for any losses, costs, or expenses we incur as a result of any dispute or legal proceeding involving your account. 
+
+ Claims against your account : If we receive a claim against the funds in your account, or if we know of or believe that there's a dispute as to the ownership or control of funds in your checking account, we may, in our discretion: (i) place a hold on your account and refuse to pay out any funds until we're satisfied that the dispute is settled; (ii) close your account and send the balance to the named account holder(s); (iii) require a court order to act; or (iv) take any other action we feel is necessary to protect us. We won't be liable to you for taking any such action. 
+
+ Claim of loss : If you claim a credit or refund because of a forgery, alteration, or any other unauthorized withdrawal, you agree to cooperate with us in the investigation of the loss. Your cooperation may include, but not be limited to, providing us with an affidavit containing whatever reasonable information we require concerning your account, the transaction, and the circumstances surrounding the loss. 
+
+ Death, incapacity or termination : If you die or are declared legally incompetent, or, in the case of a living trust account, the living trust is terminated, we can continue to accept deposits and collect items deposited to your account, as well as continue to accept transaction instructions for your account until we know of your death or adjudication of incompetency and have a reasonable opportunity to act. 
+
+ Notices to you or us : We shall deem any and all notices to us effective upon receipt by us. Any notice that we give to you will be effective when mailed or electronically transmitted to you at the mailing/email address reflected in our records. Even though we may have provided you account opening disclosures in a language other than English, we may continue to provide you with notices/communications in English. Notice to any one owner of an account constitutes notice to all owners of that account. 
+
+ Captions : The captions used in the Agreement are for convenience only. They don't affect the meaning of anything in the Agreement. 
+
+ Jury trial waiver : All actions arising out of this agreement or concerning your checking account shall be heard by a judge sitting without a jury. 
+
+ Events beyond our control : We'll make all reasonable efforts to give you access to your accounts and current and complete account information. However, you agree that we won't be responsible for any interruption in service or loss caused by an event that is beyond our control, including, but not limited to, natural disasters, wars, riots, strikes, computer failure, terrorist act, or loss of power, communication, or transportation facilities. We also won't be responsible for any losses or damages, including direct damages, resulting from your use of your account, unless such losses or damages are caused by our lack of good faith or failure to exercise ordinary care. In no event will we be responsible for indirect, special, or consequential losses or damages of any kind. 
+
+ 
+
+ Total Control Checking features 
+
+ You can use your account to instruct us, subject to the terms below, to, on your behalf, (i) pay bills; (ii) mail a cashier's check to any person or business in the U.S. except military addresses or P.O. boxes; (iii) make a payment to another person using the “Send Money with Zelle®” feature; (iv) transfer money to or from your own accounts at Capital One or other financial institutions; and (v) send an outgoing domestic wire. You authorize us to follow your payment instructions, and we reserve the right, at our sole discretion and without notice, to refuse to follow your payment instructions or otherwise transfer money for security, credit, legal/regulatory, or other reasons, and to refuse to honor payment or transfer requests that appear to be fraudulent or erroneous. 
+
+ Bill Pay feature 
+
+ You can use your account’s Bill Pay feature ("Bill Pay") to pay bills as explained in this section of the Checking Agreement. You can make current, future, one-time, and recurring bill payments to Billers. You may also receive electronic bills from a Biller to help you keep organized and cut down on your mail. You use Bill Pay by providing a Payment Instruction to us for a bill payment to be made to a Biller (for example, the Biller's name, account number, and Send on Date). Keep in mind, all bill payments and any Bill Pay charges will be automatically debited from your account. 
+
+ Please remember that you can only make payments to Billers with mailing addresses in one of the 50 United States or with military addresses (APO or FPO). We reserve the right to refuse to pay any Biller. Don't worry though, we'll notify you promptly if we decide to refuse to pay a Biller. This notification is not required if you attempt to make a prohibited payment or an Exception Payment. Please understand that Billers and/or the US Postal Service may return payments to us for various reasons such as expired addresses, invalid account numbers, the inability of the Biller to locate your account; or your account being paid in full. We promise to attempt to research and correct the returned payment and return it to your Biller, or void the payment and credit your account. 
+
+ Definitions 
+
+ 
+ " Biller " is the person or entity to which you wish a bill payment to be directed or is the person or entity from which you receive electronic bills, as the case may be. 
+ " Billing Account " is the checking account from which all Service fees will be automatically debited. 
+ " Due Date " is the date on which payment to a Biller is due as reflected on the billing statement that you receive from that Biller. It is not the late payment date or the date beginning or a date during any grace period. 
+ " Exception Payments " means payments to deposit accounts or brokerage accounts, payments to settle securities transactions (including, without limitation, stocks, bonds, securities, futures (forex), options, or an investment interest in any entity or property). 
+ " Payment Account " means any transaction account designated by you from which payments will be made through the bill payment features of the Services, your Service fees, if any, will be automatically debited, or to which payments and credits to you will be credited, that is eligible for the Service. For further information, please contact your Account Officer or Online Banking Customer Service at 1-877-383-4802 . 
+ " Payment Instruction " is the information provided for a payment to be made under the Online Bill Pay Service, which includes the information provided by you to the Service for a bill payment to be made to the Biller (such as, but not limited to, Biller name, Biller account number, and Scheduled Payment Date). 
+ " Scheduled Payment Date " is the day you want your Biller to receive your bill payment, unless the Scheduled Payment Date falls on a non-Business Day in which case the Scheduled Payment Date will be considered to be the previous Business Day. 
+ " Scheduled Payment " is a payment that has been scheduled through the Services but has not been processed. 
+ " Service Provider " means companies that we have engaged (and their Affiliates) to render some or all of the Service to you on our behalf. 
+ 
+
+ General authorization 
+
+ We are offering you Online Banking through one or more Service Providers that we have engaged to render some or all of the Services to you on our behalf. However, notwithstanding that we have engaged such a Service Provider to render some or all of the Service to you, we are the sole party liable to you for any payments or transfers conducted using the Service and we are solely responsible to you and any third party for the regulatory responsibility that extends with the Service. You agree that we have the right under this Agreement to delegate to Service Providers all of the rights and performance obligations that we have under this Agreement, and that the Service Providers will be third party beneficiaries of this Agreement and will be entitled to all the rights and protections that this Agreement provides to us. 
+
+ You authorize us and our Service Providers to process the transactions permitted under this Agreement for you as requested by you from time to time, and you authorize us and our Service Providers to post transactions to your account(s) as directed. You may request a payment be delivered one time, or on an automatic recurring basis in such manner as you direct. We reserve the right to refuse payment to any Biller to which you may direct a payment. We will notify you promptly if we decide to refuse to pay a Biller designated by you. The notification is not required, however, if you attempt to make a payment under the section(s) titled "Prohibited Payments" of this Agreement. You authorize us and our Service Providers to debit your account(s) for any and all fees for the additional services (as described below) you have chosen to utilize. 
+
+ Withdrawal of funds for bill payment and payment of fees 
+
+ You have the option of selecting from which one of your deposit accounts the Service will withdraw funds for bill payments. We may assess fees, for which you shall be liable, in the event we provide to you, upon your request, any one or more of the following additional services, or other additional services for which fees are charged: 
+
+ 
+ Provision of copies of checks which have cleared your account and have been paid 
+ Manually issuing a check upon your special request 
+ 
+
+ Cancellation of the services for which fees are charged does not release you from liability for any and all fees assessed by us but not yet paid prior to your cancellation of such service. You understand the dollar amount of these fees is published in the Capital One Fee Schedule available at any Capital One banking office, via an email request, or by calling Customer Service at 1-877-383-4802 . 
+
+ Payment authorization and payment remittance 
+
+ By providing us with names and account information of Billers to whom you wish to direct payments, you authorize us to follow your Payment Instructions. In order to process payments more efficiently and effectively, we may edit or alter payment data or data formats in accordance with instructions we receive from your Billers. 
+
+ Our receipt of your bill payment instructions authorizes us to debit your Payment Account and remit funds on your behalf to the designated Biller to allow the funds to arrive at the designated Biller's location as near as reasonably possible to the Scheduled Payment Date designated by you. You also authorize us to credit your Payment Account for payments returned to us by the United States Postal Service or any Biller, or for payments remitted to you on behalf of another Authorized Person of the Service. 
+
+ We will attempt to properly and timely make all your payments. However, you agree that we shall incur no liability, and any Bill Pay Guarantee shall be void, if we are unable to complete any payments initiated by you because of the existence of any one or more of the following circumstances: 
+
+ 
+ Through no fault of ours, there are not available sufficient funds in your account plus any available Overdraft Protection amount; 
+ Bill Pay is not working properly and you know or we've told you about the problem before you try to give us Payment Instructions; 
+ You haven't given us the correct name, address, phone number, or account number for the Biller; and/or, 
+ Circumstances beyond our control (like a fire, flood, or other disaster) prevent the proper execution of the transaction and we have taken reasonable precautions to avoid those circumstances. 
+ 
+
+ Please see the section of this Agreement titled “ELECTRONIC FUND TRANSFER DISCLOSURE STATEMENT” for information regarding questions or errors about funds transfers or bill payments made through the Services. 
+
+ If a payment posts after its Scheduled Deliver By date because the Biller(s) failed to credit your payment promptly after receipt, but you scheduled the payment in accordance with this Agreement and none of the other exceptions set forth in the section titled "Our Responsibility for Payment and Funds Transfers" of this Agreement, we will assist you and your Biller(s) in attempting to resolve any delayed payment issues. 
+
+ Provided none of the foregoing exceptions are applicable, if the Service causes an incorrect amount of funds to be removed from your Payment Account or causes funds from your Payment Account to be directed to a Biller which does not comply with your Payment Instructions, we will be responsible for returning the improperly transferred funds to your Payment Account , in accordance with the electronic funds transfer disclosures provided to you at account opening, and for directing to the proper Biller any previously misdirected transactions, and, if applicable, for any late payment related charges. 
+
+ Payment scheduling 
+
+ We'll start processing a payment that you schedule through Bill Pay ("Scheduled Payment") and take the payment amount out of your account on the date that you select ("Send On Date"). The earliest possible date that your Biller will receive the payment ("Deliver By Date") is typically 4 or fewer business days after the Send On Date. Our business days include every day other than Saturday, Sunday, or one of the federal holidays, or other days we are closed ("business day"). The Deliver By Date will be displayed when you are scheduling the payment. It is critical that you select a Send On Date with a Deliver By Date no later than the due date required by your Biller for the payment ("Due Date"). If you give us Payment Instructions on a non-business day, the earliest Send On Date you can select will be the next business day. If you select a Send On Date that falls on a non-business day, the Send On Date will be the prior business day. If you close your account, any payments already processed through Bill Pay before the date your account is closed will be completed. All Scheduled Payments, including recurring payments, will not be processed once your account is closed. When you are setting up your Payment Instructions, the Service will indicate the earliest possible Scheduled Payment Date for each Biller, (typically four (4) or fewer Business Days from the current date). 
+
+ You will not be able to select a Scheduled Payment Date prior to this earliest possible date. When scheduling payments, you must select a Scheduled Payment Date that is no later than the actual Due Date reflected on your Biller statement unless the Due Date falls on a non-Business Day. If the actual Due Date falls on a non-Business Day, you must select a Scheduled Payment Date that is at least one (1) Business Day before the actual Due Date. Scheduled Payment Dates must be prior to any late date or grace period. 
+
+ Bill Pay guarantee 
+
+ We can't control everything – there are circumstances beyond our control like delays in handling and posting payments by Billers or other financial institutions. This means that some transactions may take longer than normal to be credited to your account with a Biller. Don't worry though – we will bear responsibility for any late payment related charges, which have not been waived by the Biller, up to $100.00 should a payment post after its Due Date, provided: you scheduled an Online Bill Payment with a Scheduled Deliver By date in accordance with the section under this Agreement titled "Payment Scheduling"; none of the exceptions set forth in the section titled "Our Responsibility for Payment and Funds Transfers" of this Agreement exist; the payment is not an Exception Payment; and you otherwise comply with this Agreement. 
+
+ Payment methods 
+
+ There are limits on the amount of money you can send or receive through our Service. Your limits may be adjusted from time-to-time at our sole discretion. You may log in to the Online Banking site to view your individual transaction limits. We or our Service Provider also reserve the right to select the method in which to remit funds on your behalf through the Service, and, in the event that your Payment Account is closed or otherwise unavailable to us, the method to return funds to you. These payment methods may include, but may not be limited to, an electronic debit, virtual card, a paper check drawn on the account of our Service Provider, or draft drawn against your account. If We or our Service Provider selects virtual card as the payment method, this means a payment that can be processed using a virtual card, a one-time-use card is created by the Service Provider specifically for the payment. When the transaction is completed, the virtual card can no longer be used for any other purpose. 
+
+ Payment cancellation requests 
+
+ You can cancel or edit any Scheduled Payment (including recurring payments) free of charge by following the directions on the website. Once we've begun processing a payment, though, it can't be cancelled or edited and you'll have to make a stop payment request. 
+
+ Stop payment requests 
+
+ You understand our ability to process a stop-payment request will depend on the payment method and whether or not a payment has cleared your Online Bill Payment Account. You understand we may not have a reasonable opportunity within which to act on any stop-payment request after we have already processed a payment. If you desire to stop any payment that has already been processed but has not yet cleared your account, you must contact Capital One Customer Service by calling Customer Service at 1-877-383-4802. You understand and agree that we will have no liability for failing to accommodate a stop-payment request. We may also require you to present your request in writing within fourteen (14) days. The charge for each stop-payment request will be the current charge for such service as stated in our Account Disclosure. 
+
+ Prohibited payments 
+
+ We cannot schedule Bill Payments to Billers located outside the United States or any of its territories, any single payment greater than $100,000.00, or any payments otherwise prohibited by applicable law. The following types of payments are prohibited through the Service, and we have the right but not the obligation to monitor for, block, cancel, and/or reverse such payments: 
+
+ 
+ Payments to or from persons or entities located in prohibited territories (including any territory outside of the United States); and 
+ Payments that violate any law, statute, ordinance, or regulation; and 
+ Payments that violate the Acceptable Use terms below; and 
+ Tax payments and court ordered payments. 
+ 
+
+ Except as required by applicable law, in no event shall we or our Service Providers be liable for any claims or damages resulting from your scheduling of prohibited payments. 
+
+ Acceptable use 
+
+ You agree that you are independently responsible for complying with all applicable laws in all of your activities related to your use of the Service, regardless of the purpose of the use, and for all communications you send through the Service. We and our Service Providers have the right but not the obligation to monitor and remove communications content that we find in our sole discretion to be objectionable in any way. In addition, you are prohibited from using the Service for communications or activities that: (a) violate any law, statute, ordinance, or regulation; (b) infringe or violate any copyright, trademark, right of publicity or privacy or any other proprietary right under the laws of any jurisdiction; (c) impose an unreasonable or disproportionately large load on our infrastructure; (d) facilitate any viruses, trojan horses, worms or other computer programming routines that may damage, detrimentally interfere with, surreptitiously intercept or expropriate any system, data, or information; (e) constitute use of any robot, spider, other automatic device, or manual process to monitor or copy the Service or the portion of the Site through which the Service is offered without our prior written permission; (f) constitute use of any device, software, or routine to bypass technology protecting the Site or Service, or interfere or attempt to interfere, with the Site or the Service; or (g) may cause us or our Service Providers to lose any of the services from our internet service providers, payment processors, or other vendors. 
+
+ Exception payments 
+
+ Exception Payments may be scheduled through the Service, but Exception Payments are discouraged and must be scheduled at your own risk. Except as required by applicable law, in no event shall the Service Provider be liable for any claims or damages resulting from your scheduling of Exception Payments. In no event shall we be liable for any claims or damages resulting from your requesting and scheduling these types of payments. The Bill Pay Guarantee, as it applies to any late payment related charges, is void when these types of payments are scheduled and/or processed through the use of the Service. We have no obligation to research or resolve any claim resulting from your scheduling one of these types of payments. All research and resolution for any misapplied, misposted, or misdirected payments will be your sole responsibility. 
+
+ Bill delivery and presentment (eBills) 
+
+ The Service’s eBills feature enables you to receive electronic bills from participating Billers. Electronic bills may not be available from all of your Billers. Electronic bills are provided as a convenience only, and you remain solely responsible for contacting your Billers directly if you do not receive their statements. In addition, if you elect to activate one of the Service's electronic bill options, you also agree to the following: 
+
+ 
+ Presentation of electronic bills: You will receive electronic bills from a Biller only if both: (a) you have designated it in the Service as one of your Billers, and (b) the Biller has arranged with our Service Provider to deliver electronic bills. The Service may then present you with electronic bills from that Biller if either: (1) you affirmatively elect online within the Service to receive electronic bills from the Biller, or (2) the Biller chooses to send you electronic bills on a temporary “trial basis.” In either case, you can elect online within the Service to stop receiving electronic bills from a Biller. Electing to receive electronic bills, automatically receiving trial electronic bills, and declining further elected or trial electronic bills all occur on an individual Biller basis. The Service does not include an option to prevent ever participating in the automatic trial electronic bill feature. When you elect to receive electronic bills from a Biller, you may be presented with terms from that Biller for your acceptance. We are not a party to such terms. 
+ Paper Copies of electronic bills: If you start receiving electronic bills from a Biller, the Biller may stop sending you paper or other statements. The ability to receive a paper copy of your statement(s) is at the sole discretion of the Biller. Check with the individual Biller regarding your ability to obtain paper copies of electronic bills on a regular or as-requested basis. 
+ Sharing Information with Billers: You authorize us to share identifying personal information about you (such as name, address, telephone number, Biller account number) with companies that you have identified as your Billers and which we have identified as offering electronic bills for purposes of matching your identity on the Service’s records and the Biller’s records to (a) activate your affirmative request for electronic bills, and/or (b) confirm your eligibility for “trial basis” electronic bills. 
+ Information provided to the biller: We can't update or change your personal information such as your name, address, phone numbers, and email addresses with your Biller. You'll need to make any changes by contacting the Biller directly. Additionally, it is your responsibility to maintain all usernames and passwords for all electronic Biller sites. You also agree not to use someone else’s information to gain unauthorized access to another person’s bill. We may, at the request of the Biller, provide the Biller with your email address, service address, or other information requested by the Biller for purposes of the Biller matching your identity against its records or so the Biller can contact you about Bill Pay and/or bill information. 
+ Activation: When the electronic bill feature is activated we may notify the Biller of your request to receive electronic billing information. Your Biller may accept or deny your request to receive electronic bills. The presentment of your first electronic bill may vary from Biller to Biller and may take up to sixty (60) days, depending on the billing cycle of each Biller. While your electronic bill feature is being activated it's your responsibility to keep your account current. Each electronic Biller reserves the right to accept or deny your request to receive electronic bills. 
+ Authorization to obtain bill data: You authorize us to obtain bill data from your Billers that you have requested to send you electronic bills, and from your Billers that wish to send you trial electronic bills. For some Billers, you will be asked to provide us with your user name and password for that Biller. By providing us with such information, you authorize us to use the information to obtain your bill data. 
+ Notification: We'll attempt to present all of your electronic bills promptly. In addition to notification on the website, we may send an email notification to your email address on file with us. It's your sole responsibility to ensure that your email address on file is correct. If you don't receive notification, it's your responsibility to periodically logon to Bill Pay and check for the delivery of new electronic bills. You have the right to receive 10 days’ advance notice when a recurring payment varies from the prior payment, but by enrolling in the Bill Pay program you agree to receive notice only when the payment amount falls outside the range of $0 and your available balance or the transaction limit you may have set, if any. The time for notification may vary from Biller to Biller. You're responsible for ensuring timely payment of all bills. 
+ Cancellation of electronic bill notification: You and Your Biller can each cancel the presentment of electronic bills at any time. The time that it takes to cancel an electronic bill may vary from Biller to Biller and can take up to sixty (60) days, depending on the billing cycle of each Biller. We'll notify your electronic Biller about the cancellation but it's your sole responsibility to make arrangements for an alternative form of bill delivery. We're not responsible for presenting any electronic bills that are already in process at the time of cancellation. 
+ Non-delivery of electronic bills: You agree to hold us harmless if the Biller fails to deliver your electronic bills. You're responsible for ensuring timely payment of all bills. Copies of previously delivered bills must be requested from the Biller directly. 
+ Accuracy and dispute of electronic bill: Keep in mind, we're not responsible for the accuracy of your electronic bills. We're only responsible for presenting the information we receive from the Biller. You must discuss and resolve any discrepancies or disputes regarding the accuracy of your electronic bill summary or detail directly with your Biller. 
+ 
+
+ This Agreement does not alter your liability or obligations that currently exist between you and your Billers. 
+
+ Information authorization 
+
+ You understand that you are not completely enrolled in the Service until the Servicer verifies your identity and obtains other necessary information. By enrolling in the Service, you agree that the Servicer may request a review of your credit file and/or credit report, through the use of a consumer reporting agency. You shall not incur a cost for this credit review. In order to resolve payment-posting issues, you authorize the Servicer to gather any and all reasonably necessary financial information from your Biller(s) or financial institution(s) regarding your payment(s). 
+
+ Biller limitation 
+
+ We reserve the right to refuse to pay any Biller to whom you may direct a payment. As required by applicable law, we will notify you promptly if it decides to refuse to pay a Biller designated by you as set forth in Prohibited Payments section or Exceptions Payments section of this Agreement. 
+
+ Returned payments 
+
+ In using the Service, you understand that Billers and/or the United States Postal Service may return payments to the Service for various reasons such as, but not limited to, Biller's forwarding address expired; Biller account number is not valid; Biller is unable to locate account; or Biller account is paid in full. The Service will attempt to research and correct the returned payment and return it to your Biller, or void the payment and credit your Payment Account. You may receive notification from the Service. 
+
+ Failed or returned payment instructions 
+
+ In using the Service, you are requesting us to attempt to make payments for you from your Payment Account. If we are unable to complete the Payment Instruction for any reason associated with your Payment Account (for example, there are insufficient funds in your Payment Account, or the Payment Instruction would exceed the credit or overdraft protection limit of your Payment Account, to cover the payment), the Payment Instruction may or may not be completed. In certain circumstances, we will attempt to debit the Payment Account a second time to complete the Payment Instruction. In some instances, you will receive a return notice from us. In each such case, you agree that: 
+
+ 
+ You will reimburse us or our Service Provider immediately upon demand the amount of the Payment Instruction if we have delivered the payment but there are insufficient funds in, or insufficient overdraft credits associated with, your Payment Account to allow us to complete the debit processing; 
+ You may be assessed a fee by our Service Provider if the Payment Instruction cannot be debited because you have insufficient funds in your Payment Account, or the transaction would exceed the credit or overdraft protection limit of your Payment Account, to cover the payment, or if we cannot otherwise collect the funds from you. You hereby authorize us to deduct these amounts from your designated Payment Account, including by ACH debit; 
+ You will reimburse us and our Service Provider for any costs we incur in attempting to collect any amounts from you; and 
+ We and our Service Provider are authorized to report the facts concerning the return to any credit reporting agency. 
+ 
+
+ Text messages, calls, and/or emails to you 
+
+ By providing us with a telephone number (including a wireless/cellular, mobile telephone number and/or email address), you consent to receiving calls from us and our Service Providers at that number INCLUDING THOSE MADE BY USE OF AN AUTOMATIC TELEPHONE DIALING SYSTEM ("ATDS"), and/or emails from us for our everyday business purposes (including identify verification). You acknowledge and agree that such telephone calls include, but are not limited to, live telephone calls, prerecorded or artificial voice message calls, text messages, and calls made by an ATDS from us or our affiliates and agents. Please review our Privacy Policy for more information. 
+
+ "Send Money with Zelle®" feature 
+
+ You can use your account’s "Send Money with Zelle®" feature to authorize a person-to-person payment to other people (like your friends, babysitter, or neighbor), including folks who have accounts at Capital One. The transfer limitations are described in the "Electronic Fund Transfer Disclosure Statement" section of this disclosure. 
+
+ Checkbooks 
+
+ Our "Checkbooks" Feature allows you to order a checkbook so you can write physical checks. Fees vary on checkbook orders including checkbooks for additional accounts. We may change the amount of the charge at any time. If you write a check in an amount that exceeds your available balance plus any available overdraft protection amount at the time the check is presented to us for payment, we'll return the check. Customers cannot receive checkbooks at U.S. Territory or International addresses. 
+
+ Send an Outgoing Domestic Wire feature 
+
+ We may offer a “Wire Money” feature and allow you to make a wire transfer from your account. We will charge you a fee for using this feature, and the charge will be deducted from the checking account you use for the wire at the same time we deduct the amount of the wire. We may also limit the amount you can send and where we will allow you to send the wire. 
+
+ Overdrafts : An overdraft is when withdrawals are made against your account for an amount in excess of your available balance. Please see the Overdraft Services section of this agreement for additional information about overdrafts and our programs. 
+
+ If your available balance isn't enough to cover any payment or withdrawal you've authorized (including any applicable charges), you agree that we can either overdraw your checking account, initiate a transfer from your linked Free Savings Transfer account, or we can refuse to process the payment/withdrawal. If for some reason we allow your checking account to be overdrawn, you must immediately make a deposit to cover the negative balance. This can happen if a transaction takes your checking balance negative or (if applicable) a transaction exceeds your available overdraft protection amount. 
+
+ If we sue you to collect any overdraft, you agree that we're entitled to collect all costs and expenses of suit from you (including the reasonable cost of an attorney), in accordance with applicable law. You agree that we aren't liable for any damages or expenses you incur due to any delay or failure of the (i) courier (or the U.S. Postal Service) in delivering any check; and (ii) any Payee or third party in crediting or processing a payment or withdrawal. 
+
+ Stopping/changing/cancelling payments : You may not stop, change, or cancel a cashier’s check after your request for a cashier’s check has been submitted to us. After a cashier’s check has been issued, you may not stop, change, or cancel it unless it has been lost, undelivered, destroyed, or was unauthorized. In this instance, you must notify Capital One immediately and, after presenting an Affidavit, the funds will be replenished on day 95 after the cashier’s check was ordered. If you return a cashier’s check to Capital One, it will be replenished upon receipt. 
+
+ For stop payment requests made on checks written from your checkbook, we can’t guarantee that the check won’t be paid (for example, if the check is cashed before we’ve had an opportunity to act on your stop payment request). 
+
+ Refer to the Electronic Fund Transfer Disclosure Statement for information regarding electronic fund transfer stop payment requests. 
+
+ Cancellation or amendment of funds transfer for outgoing wires : Once we receive a Funds Transfer Request, it may not be able to be canceled or amended. However, at our discretion, we may use reasonable efforts to act on any request for cancellation or amendment, provided that the method by which we are notified of a request for cancellation or amendment complies with our security procedures. However, we shall have no liability if such cancellation or amendment is not effected. You agree to indemnify and hold us harmless from any and all liabilities, claims, damages, costs, and expenses we may incur in attempting to cancel or amend the Funds Transfer. Any cancellation or amendment of a Funds Transfer by us shall relieve us of any obligation to act on the original Funds Transfer Request. 
+
+ Total Control Checking card and multiple accounts : We will not issue additional debit cards for the additional Total Control Checking accounts you open. If you open additional Total Control Checking accounts, your debit card will still be attached to the account that it was attached to. If you would like, you can change your default spending account online or over the phone. The Total Control Checking account that you choose as your default account will be the account for all ATM withdrawals and deposits as well as point of sale (POS) transactions. 
+
+ What gets processed when : "Outgoing Domestic Wires," "Send Money with Zelle®" transactions, and cashier's check will be processed as soon as possible after you request them (and the funds will be removed from your account immediately unless scheduled for a future date). At midnight of each business day, we'll first process electronic fund transfers (other than "Bill Pay" instructions) that are scheduled for that business day. After all of those instructions have been processed, we'll then process all "Bill Pay" instructions scheduled for that business day. 
+
+ If there aren't enough funds in your account to allow all of the scheduled transactions for a business day to be completed, we'll process your scheduled electronic fund transfers (other than "Bill Pay" instructions) for that day first. We'll then process all scheduled "Bill Pay" instructions for that day from highest dollar amount to lowest dollar amount. We'll attempt every scheduled payment until we exhaust your available balance (including your Free Savings Transfer account). For example, if you schedule three Bill Pay transfers of $1,000, $500, and $250 for the same business day, but you only have $1,250 available (including your Free Savings Transfer account), we'll first pay the $1,000 transfer. Next, we'll attempt the $500 transfer. You won't have enough funds, so we'll refuse it. Finally, we'll attempt the $250 transfer. You do have funds to cover this payment, so we'll process it. 
+
+ Your responsibility : You're responsible for all transactions you authorize, including any transactions or payments you unintentionally or inadvertently authorize, and any losses, charges, or penalties incurred as a result. You must follow all of our instructions when you request and authorize any account features. You must have sufficient available funds in your account (which may include any available credit from one of our overdraft services that you have previously enrolled in) to cover any payment or transfer you request. If you authorize someone else to use your account or card, you're responsible for everything that person does with your account, including any losses, charges, or penalties incurred as a result. 
+
+ You're also responsible for giving us accurate Payee information. If any Payee information changes after you initiate a transfer or payment, you're responsible for notifying us of these changes. If you tell us to make a payment to a particular Payee and you fail to give us the correct information, we're not responsible or liable for the payment. 
+
+ You agree to indemnify, defend, and hold harmless the bank and any of our third party providers who perform account related services for you on our behalf from any and all claims and liability arising from (i) your use or inability to use bill pay; and (ii) any payments initiated by you that aren't completed due to lack of funds in your account(s). 
+
+ Under no circumstances will we or our third party providers be liable for any indirect, consequential, incidental, special, punitive, or exemplary damages arising out of your use of the account features, regardless of the nature of the claim, including negligence, even if we or our third party providers know that such damages may occur. Bill Pay and other account features are provided "as is" without warranty of any kind, either expressed or implied, including, but not limited to, the implied warranties of merchantability and fitness for a particular purpose. 
+
+ Our responsibility : If we don’t complete a payment or transfer on time, according to your properly transmitted instructions, we may be liable for your losses or damages. However, there are some exceptions. For instance, we won’t be liable for losses and damages if: 
+
+ 
+ you don’t have enough available funds in your Total Control Checking account (including any available amounts from one of our overdraft services that you have previously enrolled in) to complete a payment or transfer, if your checking account has been closed, frozen, or isn’t in good standing, or if we reverse a payment or transfer because of insufficient funds; 
+ you haven’t properly followed our instructions; 
+ Payee or account information you give us is incorrect; 
+ you don’t authorize a payment or transfer soon enough for it to reach the Payee by its due date; 
+ you receive notice from a Payee that any payment or transfer you made remains unpaid or hasn’t been completed, and you don’t notify us promptly; 
+ withdrawals from any of your accounts have been prohibited by a court order or other legal process; 
+ your computer, software, any Internet service provider, or our interactive website or mobile app wasn’t working properly and this problem should have been apparent to you when you tried to authorize a transfer or payment; 
+ you, or anyone you allow to use your Total Control Checking account, commits fraud or violates any law or regulation; 
+ circumstances beyond our control prevent a transfer or payment from being made. 
+ 
+
+ Your Total Control Checking Agreement and other agreements you may have with us contain other exceptions to the Bank’s liability. You agree that we don‘t have any responsibility or liability for any act or omission beyond that which is imposed on us by law. 
+
+ Collection of items : If we elect to receive checks and other items for collection, we act as your collection agent and don't assume any responsibility beyond the exercise of due care. We won't be liable for any default or negligence by any other banks we use to collect the check or item or for any loss in transit. 
+
+ Things you tell us to do : We may refuse to follow any of your instructions that in our sole judgment are illegal or would expose us to potential liability. Alternatively, we may require adequate security or invoke other security measures to protect us from all losses and expenses incurred if we follow your instructions. You agree to reimburse us for any damages, losses, liabilities, and expenses (including, but not limited to, the reasonable costs of an attorney) that we incur in connection with your account if we take an action in accordance with your or what purports to be your oral, written, or electronic instructions. 
+
+ If your address changes : You must notify us of any change of address by calling us by using our secure website, or by visiting one of our locations. Any notice we mail to you (or email to you if you've told us to communicate with you electronically) will be binding and sent to the last (postal or electronic) address in our records. We may change your address if we receive an address change notice from the U.S. Postal Service ("USPS") or if a company in the business of providing correct addresses informs us that the address in our records no longer matches your address. Even if you elected to receive electronic communications from us, there may still be some legal information that we need to send you via the USPS. 
+
+ Communication : You agree that we may communicate with you by mail, telephone, email, fax, prerecorded message, automated voice, text message, or other means allowed by law regarding your account. You agree that we may contact you at any telephone number (including a mobile telephone number that you provide us) and use an automated telephone dialing system or similar device to do so. You agree that we may monitor or record any conversation or other communication with you. 
+
+ While we may be able to provide some customer assistance in languages other than English, we cannot guarantee that customer service will always be available in languages other than English. As a courtesy, we may translate some of our forms, letters, and disclosures, including this agreement, into another language. However, many important bank documents, and some products and services related to this account, are provided only in English. 
+
+ Monitoring and closing your account : We reserve the right to monitor all account activity for inappropriate use. We may close your checking account at any time and for any reason. If we close your account, all collected funds (less any amounts due to us) will be transferred to your external Linked Account, mailed as a check to the address we have in our records, or credited to another account you have with us. 
+
+ You may close your account at any time. 
+
+ State laws (called "escheat" or unclaimed property laws) require us to close all your deposit accounts and transfer your money to the state if your accounts are dormant for a period of time as defined by your state of residence. Your account can become dormant if, for 24 months, there is no transactional activity. Your account will remain dormant until funds are transferred to or from the dormant account. If all of your accounts become dormant, you may no longer receive paper statements, but you can still view your accounts online. 
+
+ State abandoned property law establishes guidelines under which unclaimed property must be surrendered to the applicable state. Generally, the funds in your account are considered unclaimed if you have not had any activity or communication with us regarding your account over a period of years, defined by your state of residence. All products are subject to abandoned property laws, including IRAs and CDs. If your funds are surrendered to the state, you may be able to reclaim them, but your claim may need to be presented to the state. We want you to keep your money, not the state! You can avoid the transfer of your money to the state simply by signing into your account, transacting periodically, contacting us, or replying to any abandoned property correspondence. 
+
+ Deposit availability disclosure 
+
+ Your ability to withdraw funds 
+
+ When a deposit is made to your account, the funds may not be available immediately. For example, if you deposit a check on Monday, you may not be able to withdraw the funds from that check, and we may not pay another check with those funds, until Tuesday or even later. Our general policy is to make funds from your check deposits available to you on the first business day after we receive the deposits. Cash and electronic direct deposits will be available on the day we receive the deposit. Longer delays may apply (as described below), and different rules apply for checks deposited from customers with accounts open fewer than 30 calendar days. Your account won't be considered "opened" until you have made a deposit to the account. 
+
+ Even after we have made funds available to you and you have withdrawn the funds, you remain responsible if any deposit to your account is returned, rejected, or otherwise uncollected by the Bank. 
+
+ Determining business day & deposit cut-off times 
+
+ The length of the delay is counted in business days from the day of your deposit. A business day is any day of the week except Saturday, Sunday, and federal holidays. The business day ends at different times, depending on the channel used. The end of the business day is referred to as the "deposit cutoff time". If you make a deposit before our cutoff time on a business day that we are open, we will consider that day to be the day of your deposit. However, if you make a deposit after our cutoff time or on a day we are not open, we will consider the deposit to be made on the next business day that we are open. Here are our cutoff times: 
+ 
+ 
+ If you make a deposit via... 
+ The cutoff time is... 
+ 
+ 
+ 
+ 
+ Capital One ATM 
+ 9:00 PM Eastern Time 
+ 
+ 
+ Capital One Branch 
+ Branch closing 
+ 
+ 
+ Mail 
+ 5:00 PM Eastern Time (when we receive it) 
+ 
+ 
+ Online Banking and Phone 
+ 
+ No Cut-Off time for Internal Transfers 
+ 5:00 PM Eastern Time for External Transfers 
+ 9:00 PM Eastern Time for Mobile Deposits 
+ 
+ 
+ 
+ 
+
+ Availability timeline for deposits to established accounts 
+
+ (Customers with checking accounts open for 30 days or longer) 
+ 
+ 
+ When a deposit is made by... 
+ Those funds are available on... 
+ 
+ 
+ 
+ 
+ 
+ 
+ Electronic direct deposits 
+ Cash deposits at a Capital One ATM 
+ Cash deposits made to a teller 
+ Wire Transfers 
+ 
+ 
+ The same business day 
+ 
+ 
+ 
+ 
+ U.S Treasury Checks 
+ 
+ 
+ If deposited through an ATM, Teller, or received by Mail, the next business day 
+ 
+ 
+ 
+ 
+ U.S. Government Checks 
+ Capital One Bank check (written by a Capital One customer) or check from a Capital One Bank affiliate 
+ U.S. Postal Service Money Orders 
+ Federal Reserve Bank Checks 
+ Federal Home Loan Bank checks 
+ 
+ 
+ If deposited through an ATM, Teller, or received by Mail, generally the next business day. See below for exceptions. 
+ 
+ 
+ 
+ 
+ State and local government checks 
+ Cashier's, certified, and teller's checks 
+ Traveler's Checks 
+ 
+ 
+ If deposited at a teller, the next business day if you request it 
+ 
+ If deposited through an ATM or received by Mail, generally the next business day. See below for exceptions. 
+ 
+ 
+ Other check deposits (for example, a check written to you by a customer of another bank) 
+ Generally, the next business day. See below for exceptions. 
+ 
+ 
+ 
+
+ Note: Check types listed above must be made payable to you Longer delays may apply 
+
+ In some cases, we will not make all of the funds that you deposit by check available to you on the first business day after the day of your deposit. Depending on the type of check you deposit, funds may not be available until the second business day after the day of your deposit. The first $275 of your deposits, however, may be available on the first business day after the day of your deposit. 
+
+ If we are not going to make all of the funds from your deposit available to you as described above, we will notify you. We will also tell you when the funds will be available. If your deposit is not made directly to one of our employees, or if we decide to take this action after you have left our Capital One location, we will send you a notice. 
+
+ In addition, funds you deposit by check may be delayed for a longer period under the following circumstances: 
+
+ Funds from check deposits may be delayed for up to four business days if: 
+
+ 
+ You deposit checks totaling more than $6,725 on any one day. 
+ You redeposit a check that has been returned unpaid. 
+ You have overdrawn your account repeatedly in the past six months. 
+ There is an emergency, such as failure of computer or communications equipment. 
+ 
+
+ Funds from check deposits may be delayed for up to five business days if: 
+
+ 
+ We believe a check you deposit will not be paid 
+ 
+
+ We will notify you if we delay your ability to withdraw funds for any of these reasons, and we will tell you when the funds will be available. Special rules for new customers 
+
+ If you are a new customer, the following timeline will apply during the first thirty (30) days your account is open. For purposes of this deposit availability policy, you will be considered a new customer if you have not had a checking account open for at least 30 days. An account is opened when the first deposit is made to the account. 
+ 
+ 
+ When a deposit is made by... 
+ Those funds are available on... 
+ 
+ 
+ 
+ 
+ 
+ 
+ Electronic direct deposits 
+ Cash deposits at a Capital One ATM 
+ Cash deposits made to a teller 
+ Wire Transfers 
+ 
+ 
+ The same business day 
+ 
+ 
+ 
+ 
+ U.S. Treasury Checks 
+ 
+ 
+ If deposited through an ATM, Teller or received by Mail, the next business day 
+ 
+ 
+ 
+ 
+ U.S. Government Checks 
+ Capital One Bank check (written by a Capital One customer) or check from a Capital One Bank affiliate 
+ U.S. Postal Service Money Orders 
+ Federal Reserve Bank Checks 
+ Federal Home Loan Bank Checks 
+ 
+ 
+ If deposited through an ATM, Teller or received by Mail, generally the next business day. See below for exceptions. 
+ 
+ 
+ 
+ 
+ State and local government checks 
+ Cashier's, certified, and teller's checks 
+ Traveler's Checks 
+ 
+ 
+ If deposited at a teller, the next business day if you request it 
+ 
+ If deposited through an ATM or received by Mail, generally the next business day. See below for exceptions. 
+ 
+ 
+ Other check deposits (for example, a check written to you by a customer of another bank) 
+ The fourth business day 
+ 
+ 
+ 
+
+ Note: Check types listed above must be made payable to you Holds on other funds (check cashing) 
+
+ If we cash a check for you that is drawn on another bank, we may withhold the availability of a corresponding amount of funds that are already in your account. If we do, we will hold those funds according to the deposit timelines above. 
+
+ Availability of other deposits 
+
+ Automated Clearing House ("ACH") transfers 
+
+ Electronic fund ACH deposits that we originate on your behalf (including all future dated transfers) will generally be made available on the second business day after the date of your transfer. We will notify you if we delay the availability of your funds, and we will tell you when you can expect your funds to be available. 
+
+ Mobile Deposit 
+
+ Checks deposited using our Mobile Deposit application are not subject to the funds availability requirements of Regulation CC. This will be true even if we follow our Availability Timelines provided above and provide you with Regulation CC disclosures or notices. 
+
+ Checks deposited using this service will generally be available on the first business day after the deposited date, but we can place an extended hold on your deposited funds as described in our Availability Timelines. We will notify you if we delay the availability of your funds, and we will tell you when you can expect your funds to be available. 
+
+ 
+
+ Overdraft services 
+
+ An overdraft occurs when you do not have enough money in your account to cover a debit transaction, but we pay it anyway. Debit transactions include your checks, Automated Clearing House (ACH) payments, bill payments, regularly scheduled repeating payments (like your mortgage or car payment), card transactions, and other withdrawals you make. 
+
+ You have several options to choose from. Your options are Auto-Decline, Free Savings Transfer, and No-Fee Overdraft. You can change your overdraft preference at any time. Keep in mind, if you have a negative balance on your checking account, you are unable to enroll in Free Savings Transfer or No-Fee Overdraft. 
+
+ Regardless of the overdraft preference you select, sometimes we are required to pay a transaction that may create an overdraft in your account. Here are two examples of when this could happen: 
+
+ 
+ For example, some merchants, like restaurants, hotels, or gas stations—won’t know the exact amount of your purchase when they request the authorization. That transaction could come in for more money and we would need to pay it even if you don't have enough money in your account. 
+ Or sometimes we authorize a debit card purchase when you have funds in your account, but if the merchant does not submit it for payment right away, another transaction could come in first (while the original debit card purchase transaction is still pending). Then when that debit card transaction comes in for payment there are no longer enough funds in your account to cover it and the payment makes your balance negative. 
+ 
+
+ In either case, you still won’t be charged a fee. 
+
+ You can avoid overdrafts on your account by always making sure that you have sufficient funds in your account to cover all the transactions presented for payment. 
+
+ Auto-decline: 
+
+ 
+ This is the default option that comes with your account. 
+ Under this option, we'll generally decline all transactions that would take your account into overdraft. Please keep in mind that even though you are enrolled in Auto Decline, there are situations, as stated above, that may overdraw your account. If that happens, you will need to make a deposit into your account to cover the negative balance. 
+ 
+
+ Free savings transfer: 
+
+ There's no cost to enroll in this service, and we don't charge you when you use it. Choosing this option authorizes us to automatically transfer available funds from the savings account you select to cover transactions that would otherwise take your checking account available balance below $0.00. 
+
+ 
+ You can link only one savings account as overdraft protection for your checking account, and the account ownership of that account must match the account ownership of the checking account in order to be linked for overdraft protection. 
+ If a transaction is approved that brings your checking account balance below $0, we’ll automatically transfer money from your linked savings or money market account to help cover it. We’ll generally decline a transaction that can’t be covered by the balance in your savings or money market account. 
+ In certain instances, transactions may post to your checking account that your savings or money market account balance can’t fully cover. When this happens, we’ll transfer what’s available to partially cover the negative balance in your checking account. Keep in mind, your checking accounts and/or savings or money market accounts may be negative, and you'll still be responsible for paying back the remaining negative amount in your checking account. 
+ If you make multiple transactions that would bring your checking account balance below $0, we’ll transfer over the amount needed from your savings or money market account at the end of the day those transactions post. It generally takes 1-3 days for transactions to post to your account, but it depends on when the merchant finalizes the amount. 
+ You cannot use your Free Savings Transfer to cover a future-dated transfer between internal accounts. If the funds are not available in your account on the date the transfer is scheduled to go through, the transfer will be declined. 
+ If you have signed up for email communications and provided us with your email address, an email alert will be sent when a transaction is authorized that will take the checking account available balance below $0 and will be covered by funds in the linked savings or money market account. This funds transfer will occur automatically at the end of the day. 
+ There are no limits to the withdrawals from your linked savings or money market account within a given month. 
+ You are unable to change your Free Savings Transfer option if there is a pending transaction that may take your account negative that has not been posted to your account yet and/or there is a pending Free Savings Transfer. 
+ 
+
+ This service will automatically terminate if the savings or money market account or the checking account is closed, and your overdraft option will default to Auto-Decline. We can also terminate this service at any time without notice. We may continue to follow these instructions until they are withdrawn by you and we have had a sufficient period of time after receipt of your notification to act upon it. 
+
+ No-Fee Overdraft : 
+
+ Enrolling in No-Fee Overdraft authorizes us to consider paying transactions that would overdraw your account. 
+
+ Transactions that are considered: Check payments, Electronic payments, like bill pay and Recurring debit card charges, like subscriptions. 
+
+ 
+ You can also choose to include ATM withdrawals and one-time debit card purchases. 
+ 
+
+ How we handle overdrafts : You have no right to overdraw your account at any time, for any reason, and our decision to pay overdraft transactions is solely within our discretion. We may refuse to pay an overdraft transaction at any time, even though we may have previously paid overdrafts. If we choose to pay a transaction into overdraft, you must make a deposit into your account to cover the overdrawn amount. We will send you a notice to let you know that your account is overdrawn. You will receive the notice via mail if you have not agreed to receive electronic communications or if you have not provided us with a valid email address. 
+
+ When deciding to pay transactions that cause an overdraft, we consider a variety of factors, including the amount of the transaction and/or your history with us, including whether you’ve previously had too many overdrafts on your account(s). 
+
+ Enrollment : Enrollment into No-Fee Overdraft must be completed online. If you would like to unenroll from No-Fee Overdraft, you may do so via the website or the mobile app. 
+
+ Consistent deposit requirement: To qualify for No-Fee Overdraft, you must deposit at least $250 during two of the previous three calendar months. This means a new account is not eligible right away. 
+
+ New accounts will not have access to No-Fee Overdraft until the consistent deposit requirement has been met. At the earliest, new accounts will be able to access the service in the third calendar month after the account was opened. 
+
+ Those who have met the consistent deposit requirement (deposit at least $250 into your checking account in 2 out of the 3 previous calendar months) will have access to the No-Fee Overdraft service. Going forward, access depends on regularly depositing money into this account. You'll need to add at least $250 in 2 out of every 3 previous calendar months. Accounts that haven't met this will no longer have access to No-Fee Overdraft until the next month when you've met this requirement. These eligibility changes will go into effect on the 5th day of the next month. 
+
+ Generally, deposits originating from external sources outside Capital One will count toward the consistent deposit requirement. Eligible deposits include, but are not limited to, ACH deposits such as a direct deposit from your employer or a transfer from your external linked account, branch/ATM cash and check deposits, mobile deposits, and person to person payments like a Zelle® transfer. Ineligible transfers include, but are not limited to, internal transfers from another Capital One account, a provisional credit for a pending claim, a merchant refund, and credits for fees charged to your account (e.g. a refund of a cashier’s check fee) do not qualify as an eligible deposit. Keep in mind your eligibility for No-Fee Overdraft may be impacted by timing changes to early paycheck. 
+
+ Here's an example of how we count deposits: If you open your checking account in February and want us to consider covering overdrafts in April, then you would need to deposit at least $250 or more in February AND in March. Account Posting Times 
+ 
+ 
+ 
+ Feb 
+ Mar 
+ April 
+ May 
+ June 
+ 
+ 
+ 
+ 
+ Total Deposits 
+ $250 
+ $305 
+ $200 
+ $350 
+ $225 
+ 
+ 
+ Eligible 
+ – 
+ – 
+ ✓ 
+ ✓ 
+ ✓ 
+ 
+ 
+ What happens if you missed the deposit requirement in April? Your account will still satisfy the deposit requirement through the month of May based on your February and March deposits. You would, however, need to deposit at least $250 in May for us to consider paying overdrafts in June. 
+
+ If you fail to meet the deposit requirement, we will generally decline any transaction that will overdraw your account. We still won’t charge you any fees, even if your transaction is declined. You will automatically regain access once you’ve met the consistent deposit requirement, effective the 5th calendar day of the following month. 
+
+ Extended Negative Balance : If you have multiple instances of extended overdrafts, we may temporarily suspend your use of the service. We will let you know if your access is suspended. 
+
+ Maintaining a negative balance in your account for 56 consecutive calendar days will result in account closure and this could affect your ability to open new accounts with us or other banks in the future. Also, we may report the account closure to a consumer reporting agency. 
+ 
+
+ Electronic Fund Transfer disclosure statement 
+
+ The purpose of this disclosure statement is to inform you of your rights under the Electronic Fund Transfer Act. The electronic fund transfers (EFT) we are capable of handling are indicated below. Additional services may be provided in the future as they are developed. Please read this disclosure statement carefully and keep it for future reference. In this disclosure statement, the words "you" or "your" refer to the depositor and any authorized user(s) of the account. The words "we," "us," "our," "bank," and "Capital One" refer to Capital One, N.A. 
+
+ 
+ Electronic Fund Transfer services: The EFT services that are available to you when you open certain accounts with us are as follows:
+
+ 
+ Cash withdrawals: You can use your ATM/debit card and PIN at ATMs, and you can also use your mobile app at qualifying Capital One ATMs, to obtain cash withdrawals from the account selected at the ATM. Cash withdrawals may be made from appropriately linked and eligible checking and savings at ATMs. Each time you use your ATM/debit card, we may place a hold on a corresponding amount of funds in your account. 
+ Direct deposit of federal government payroll, disability, veteran's benefits, Social Security, and such other federal government payments that you may receive and that may be deposited to your account, when available. 
+ Direct deposit of your paycheck to your account, provided that your employer offers direct deposit and you complete any forms required by your employer. 
+ Any other deposit to your account which is handled electronically, such as using a Capital One ATM, or as an automated clearing house transaction. 
+ Transfer funds between your eligible Capital One, N.A., accounts and between your external linked accounts and your Capital One accounts electronically or by calling our call center. 
+ Transfer funds from your Capital One accounts to make payments to your Capital One loan electronically or by calling our call center. 
+ Pay or otherwise transfer funds to a third party by instructing us, via the Internet, to send funds to them electronically. 
+ Transfer funds or deposit cash or checks by using your ATM/debit card that may be issued to you. 
+ You may authorize a merchant or other payee to make a one-time electronic payment from your Total Control Checking account using information from your check to pay for purchases or to pay bills. 
+ 
+ 
+ 
+
+ See your Total Control Checking Agreement for a more complete description of some of these services. 
+
+ 
+ Charges for electronic transactions: We don't charge you for using your card at our ATMs, but if you use it at a non-Capital One ATM, there's a $2.00 per transaction fee, except for balance inquiries, which are free. When withdrawing money from an international ATM (Outside of the United States, U.S. Virgin Islands, and Puerto Rico) a $2 fee in addition to a 3% conversion fee, based on the total transaction amount, will be assessed. 
+ 
+ The owners of a non-Capital One branded ATM may charge you for using their ATM. If there is such a charge, you should be told how much it is before you complete the withdrawal. If you then decide to withdraw the money, the amount of the withdrawal, plus the charge, will be deducted from your Total Control Checking account at the time of the transaction. 
+ 
+ Account transfer limitations: Below are the limits on transactions.
+ 
+ Any one "Bill Pay" transaction cannot exceed $100,000. 
+ Cashier’s Check (Online): Any one "Cashier's Check" transaction cannot exceed $250,000 for Cashier's checks purchased online. In addition, the total of all Cashier's checks cannot exceed $500,000 per customer per day. The daily limit resets at midnight every day. 
+ Cashier’s Check Kiosk (In Cafe): The total of all Cashier’s checks purchased at the kiosk cannot exceed $5,000 per customer per day. The daily limit resets at midnight every day. 
+ The total daily limit when depositing checks at an ATM is $999,999.99. There is no limit on the amount of an individual check up to this amount. When depositing cash at an ATM there is no daily cash deposit limit up to our $5 million total deposit limit. The one-time cash deposit maximum is generally $5,000. 
+ If you have a Mastercard: Total card purchases and withdrawals are limited to $2,500 per day. This includes ATM withdrawals using your debit card, cash advances, and signature and PIN-based purchases. Daily limits on withdrawals from an ATM made using your account’s ATM/debit card are set based on confidential fraud and risk criteria that are essential to your protection and the integrity of the service and may be modified at our sole discretion without advance notice. You can check your daily withdrawal limit on the Capital One Mobile App or online account, or by calling us at 1-800-655-2265 . You can also lower your limit or temporarily increase your limit by calling us at 1-800-655-2265 . 
+ If you have a Discover card: Total card purchases and withdrawals are limited to $5,000 per day. This includes ATM withdrawals using your debit card, cash advances, and signature and PIN-based purchases. Daily limits on withdrawals from an ATM made using your account’s ATM/debit card are set based on confidential fraud and risk criteria that are essential to your protection and the integrity of the service and may be modified at our sole discretion without advance notice. You can check your daily withdrawal limit on the Capital One Mobile App or online account, or by calling us at 1-866-630-7953 . You can also lower your limit or temporarily increase your limit by calling us at 1-866-630-7953 . 
+ You may also withdraw cash from ATMs using your mobile app. Total withdrawals may not exceed $500 per day and $2,000 per month. However, we may on occasion change these limits based on confidential fraud and risk criteria essential to your protection and the integrity of the service at our sole discretion without advance notice. 
+ Automated Clearing House (ACH) External Transfer transactions are subject to limits on the dollar amount of electronic transfers between your account and external accounts at other financial institutions, to include whether certain external accounts at other financial institutions can be linked to your Capital One account. These limits are designed to be flexible in order to protect the security and integrity of the service and accounts, as well as you and all other users of the service. Based on confidential fraud and essential risk criteria, they may be modified at our discretion without advance notice. 
+ The "Send Money with Zelle®" (person-to-person transfers) transactions are subject to limits on the amount and frequency of transfers to and from your account. These limits are designed to be flexible in order to protect the security and integrity of the service and accounts, including protecting you and all other users of the service. These limitations may be based on confidential fraud and risk criteria that are essential to our management of risk and the protection of you and the integrity of the service and may be modified at our sole discretion without advance notice. 
+ 
+ 
+ Record of transactions: 
+ 
+ Pre-authorized credits: If you have arranged to have direct deposits made to your account at least once every sixty (60) days from the same person, entity, or company, for example, your employer, you can call us at 1-800-655-2265 or acces our website ( www.capitalone.com/bank ) through the Internet to find out whether or not the deposit has been made. 
+ Periodic statements for all electronic fund transfers described in this disclosure: You will get a monthly account statement unless there are no transfers in a particular month. In any case, you will get the statement at least quarterly. Your statement will be made available to you based on your selected delivery method. 
+ Receipts: You can get a receipt at the time you make any transfer from your account using an ATM or a point of sale terminal. 
+ 
+ 
+ How to contact us: If you believe your E-Identification is no longer secure or confidential, or that someone has conducted or may conduct an EFT without your permission, please contact us immediately by calling or writing us at: Capital One Bank, PO Box 85123, Richmond, VA 23285, 1-800-655-2265 . 
+ Liability for unauthorized transfers: CONTACT US IMMEDIATELY if you believe that an unauthorized transfer has occurred or may occur concerning your account(s) or that your E-Identification is no longer secure or confidential or may have been used without your permission. Telephoning us at 1-800-655-2265 is the best way of keeping your losses to a minimum. 
+ 
+
+ You could lose all the money in your account (including any accounts linked to this account) if you take no action to notify us of the unauthorized transfer or the loss of security or confidentiality of your E-Identification. If you notify us of the loss, your liability for unauthorized transfers will be as follows: 
+
+ 
+ We have decided not to impose any liability on you, even though the law says we could (up to $50) if someone used your E-Identification without your permission and you contact us within two (2) business days after you learn of the loss or unauthorized use. 
+ If you do NOT tell us within two (2) business days, and we can prove that we could have prevented the loss had you contacted us, you could lose as much as $500.00. 
+ If your statement shows transfers that you did not make and you do NOT contact us within sixty (60) days after the statement was made available to you, you may not get back any money lost after the sixty (60) days if we can prove that your contacting us would have prevented those losses. 
+ 
+
+ We can extend these time periods if extenuating circumstances (such as a long trip or hospital stay) kept you from notifying us. 
+
+ 
+ In case of errors or questions about your electronic transfers: Telephone us at 1-800-655-2265 , or write to us at Capital One Bank, PO Box 85123, Richmond, VA 23285, or log into your account at capitalone.com and click on the transaction as soon as you can if you think your statement or receipt is wrong or if you need more information about a transfer listed on a statement or receipt. We must hear from you no later than sixty (60) days after we sent the FIRST statement on which the problem or error appeared. 
+ 
+
+ You must provide us with the following information: 
+
+ 
+ Your name and account number. 
+ A description of the error or the transaction you are unsure about, and explain as clearly as you can why you believe it is an error or why you need more information; and 
+ The dollar amount of the suspected error. 
+ 
+
+ If you tell us orally, we may require that you send us your complaint or question in writing within ten (10) business days to the above address. We will tell you the results of our investigation within ten (10) business days after we hear from you and will correct any error promptly. 
+
+ If we need more time, we may take up to forty-five (45) days, or ninety (90) days for foreign-initiated transactions, or point of sale transactions, or new accounts to investigate your complaint or question. If we decide to do this, we will credit your account within ten (10) business days for the amount you think is in error, so that you will have use of the money during the time it takes us to complete our investigation. 
+
+ If we require your written confirmation and we do not receive your complaint or question in writing within ten (10) business days, we may not credit your account. For new accounts, we may take up to 20 business days to credit your account for the amount you think is in error. 
+
+ If we decide that there is no error, we will send you a written explanation within three (3) business days after we finish our investigation. We may provide you with the results of our investigation electronically if you have agreed to receive electronic communications from us. You may ask for copies of the documents we use in our investigation. 
+
+ If we credit your account with funds while investigating an error, you must repay those funds to us if we conclude that no error has occurred. 
+
+ 
+ Pre-authorized payments: 
+
+ 
+ Stop payment procedure . If you have authorized one or more payments out of your account, you can stop any of these payments by calling us at 1-800-655-2265 or by writing us at Capital One Bank, PO Box 85123, Richmond, VA 23285. We must receive your stop payment request at least three (3) business days before the transfer is scheduled to be made. For Bill Pay ACH payments, we cannot cancel or change it once we have begun processing it. When you make the request, you must tell us your name and account number, and the account to which the transfer is scheduled to be made. If you call us, we may require you to put your request in writing at the above address and to get it to us within fourteen (14) days after you call. If you do not, then your verbal request may expire after fourteen (14) days. For Zelle Scheduled Payments, you must cancel the transaction by 11:59 PM ET the day before the scheduled transfer date. Once the Zelle has been initiated, it is not eligible to be cancelled. 
+ Varying amounts . If these regular payments vary in amount, the person you are paying must tell you ten (10) days before each payment when it will be made and how much it will be. If you do not know this information, you may be unable to have the payment stopped without closing your account. (If we are required to provide this notice, you may choose instead to get this notice only when the payment would differ by more than a certain amount from the previous payment, or when the amount would fall outside certain limits that you set.) 
+ Liability . If you ordered us to stop one of these transfers three (3) business days or more before the transfer is scheduled and we do not do so, we will be liable for your losses or damages, unless you failed to give us proper instructions that would enable us to stop the transfer. We will not be responsible if our computer system does not act on your order because you did not give us precise and correct information. Our liability for losses or damages may be limited to actual damages that you have sustained if the failure to stop payment was due to a bona fide error, despite our procedures to avoid such errors. 
+ 
+ 
+ Business days: Our business days include every day other than Saturday, Sunday, or one of the federal holidays or other days we are closed. 
+ Disclosure of account information to third parties: We will disclose information to third parties about your account or the transfers you make:
+ 
+ Where it is necessary to complete transactions; 
+ To verify the existence and standing of your account with us upon the request of a third party, such as a credit bureau; 
+ In accordance with your written permission; 
+ To comply with court orders or government or administrative agency summonses, subpoenas, orders, examinations, and escheat reports; and/or 
+ On receipt of certification from a federal agency or department that a request for information is in compliance with the Right to Financial Privacy Act of 1978. 
+ 
+ 
+ Our liability for failure to complete an electronic fund transfer: If we fail to complete a transaction on time or in the correct amount, when properly instructed by you in accordance with the terms and conditions of the Total Control Checking Agreement, we will be liable for damages proximately caused by our failure unless:
+ 
+ There are insufficient funds in your account to complete the transaction through no fault of ours; 
+ The funds in your account are not yet available for withdrawal; 
+ The funds in your account are subject to legal process; 
+ We did not receive a direct deposit instruction; 
+ The failure is due to an equipment breakdown that you knew about before you began a transaction; 
+ The failure was caused by an Act of God, fire or other catastrophe, or any other cause beyond our control despite reasonable precautions that we have taken; 
+ Your Password/PIN has been reported lost or stolen and you are using the reported/suspended Password/PIN; 
+ We have reason to believe that the transaction requested is unauthorized; 
+ You attempt to complete a transaction which is not a permissible transaction listed above; 
+ You did not provide us with the correct account information for those accounts to which you wished to direct a transfer; 
+ The transfer would exceed your established credit limit, if applicable; or 
+ An electronic terminal has insufficient cash to complete the transaction. 
+ 
+ 
+ 
+
+ In any case, we shall only be liable for actual proven damages if the failure to make the transaction resulted from a bona fide error despite our procedures to avoid such errors. 
+
+ 
+ Your Capital One Debit Card – Capital One is changing its debit network from Mastercard to Discover. By activating the debit card, you acknowledge you have reviewed and agree to these terms applicable to your debit card. 
+ 
+
+ Once you activate your debit card, you can use it to (i) withdraw money at automated teller machines ("ATMs"); (ii) deposit cash or checks at a Capital One ATM that accepts Capital One deposits; and (iii) make POS purchases (including "cash-back" transactions where a merchant gives you cash from your checking account). 
+
+ By using your card, you authorize us and/or our agents to debit your Total Control Checking (including transfers from your linked Free Savings Transfer account). We reserve the right to refuse to make any transfer for security, credit, legal/regulatory, or other reasons, as we determine in our sole discretion. You're responsible for all transactions you authorize using the card, including any losses, charges, or penalties incurred as a result. 
+
+ We don't charge you for using your card at our ATMs, but if you use it at a non-Capital One ATM, there's a $2.00 per transaction fee, except for balance inquiries, which are free. Additionally, you may be charged a 3% fee on the amount of cash withdrawal from machines located outside the US and territories. The owners of a non-Capital One branded ATM may charge you for using their ATM. If there is such a charge, you should be told how much it is before you complete the withdrawal. If you then decide to withdraw the money, the amount of the withdrawal, plus the charge, will be deducted from your default Total Control Checking account at the time of the transaction. The card is the property of Capital One, and if your account is closed or your card privileges are cancelled, you agree to stop using the card and destroy it. 
+
+ If you have a Mastercard: Transactions made with your card in foreign currencies and transactions that are classified by MasterCard® as "cross-border transactions" (generally, transactions that are processed outside the United States) are called "foreign transactions." If a foreign transaction is in a foreign currency, it will be posted to your account in U.S. dollars. The exchange rate between the foreign currency and U.S. dollars is a rate selected by MasterCard®. Basically, here's how MasterCard® calculates the exchange rate: They usually start with either a government-mandated currency rate or a wholesale rate as of the day your foreign transaction is processed (i.e., not the date you made your purchase and not the date your purchase is posted on your statement). 
+ 
+ If you have a Discover card: Transactions made with your card in foreign currencies and transactions that are classified by Discover as "cross-border transactions" (generally, transactions that are processed outside the United States) are called "foreign transactions." If a foreign transaction is in a foreign currency, we will convert it to U.S. dollars using a rate we choose. This rate will either be a government mandated rate, a government-published rate or the interbank exchange rate, depending on the country and currency in which the transaction is made. For most foreign transactions we will use the rate in effect on the conversion date to place a pending temporary hold on your account. This rate may be different than the rate in effect on the date the transaction is finalized if the merchant settles the transaction on a later day. 
+
+ 
+ Our responsibility: If we don’t complete a payment or transfer on time, according to your properly transmitted instructions, we may be liable for your losses or damages. However, there are some exceptions. For instance, we won’t be liable for losses and damages if:
+
+ 
+ you don’t have enough available funds in your Total Control Checking account (including any available amounts from one of our overdraft services that you have previously enrolled in) to complete a payment or transfer, if your checking account has been closed, frozen, or isn’t in good standing, or if we reverse a payment or transfer because of insufficient funds; 
+ you haven’t properly followed our instructions; 
+ Payee or account information you give us is incorrect; 
+ you don’t authorize a payment or transfer soon enough for it to reach the Payee by its due date; 
+ you receive notice from a Payee that any payment or transfer you made remains unpaid or hasn’t been completed, and you don’t notify us promptly; 
+ withdrawals from any of your accounts have been prohibited by a court order or other legal process; 
+ your computer, software, any Internet service provider, or our interactive website or mobile app wasn’t working properly and this problem should have been apparent to you when you tried to authorize a transfer or payment; 
+ you, or anyone you allow to use your Total Control Checking account, commits fraud or violates any law or regulation; 
+ circumstances beyond our control prevent a transfer or payment from being made. 
+ 
+ 
+ 
+
+ Your Total Control Checking Agreement and other agreements you may have with us contain other exceptions to the Bank’s liability. You agree that we don‘t have any responsibility or liability for any act or omission beyond that which is imposed on us by law. 
+
+ Wire Transfer Disclosure Statement 
+
+ In this Wire Transfer Disclosure Statement and Agreement (this "Agreement"), the words "you" and "your" mean the account owner, and the words "us," "we," and "our" mean Capital One, N.A. This Agreement defines your responsibilities and our responsibilities with respect to domestic transfers of funds from your account(s) with us for credit to an account at another financial institution or another account with us (“Wire Transfer”). You understand that, except as specifically modified by this Agreement, your account(s) will continue to be governed by the terms and conditions contained in other agreements and/or disclosures that you have been provided with in connection with your account(s), which are incorporated herein by reference. Unless otherwise defined herein, the terms used in this Agreement shall have the same meaning as set forth in Article 4A of the Uniform Commercial Code and, to the extent applicable, the Electronic Fund Transfer Act (EFTA) and its implementing regulations. 
+
+ How to request a wire transfer: To send a wire transfer, log in to initiate a wire request (“Wire Money”) using our online wire form. The beneficiary and dollar amount for a Wire Transfer under this agreement may be limited. These limits are designed to be flexible in order to protect the security and integrity of the service and accounts, as well as you and all other users of the service. Based on confidential fraud and essential risk criteria, they may be modified at our discretion without advance notice. The types of wire transfers that can be initiated, the eligible recipients, and applicable limits will be identified to you when you set up a Wire Transfer online. We reserve the right to reject any Wire Transfer Request. We may restrict the use of wire transfers for new accounts and newly added joint account holders. 
+
+ Method used to execute the wire transfer: We may select any means for the transmission of funds that we consider suitable, including but not limited to Fedwire. We may make use of correspondents, agents, subagents, and funds transfer and communication systems. Such third parties shall be deemed your agents, and we shall not be liable for any errors, delay, misdelivery, or failure of delivery by any of them unless applicable law says otherwise. 
+
+ Cut-off times: We have cut-off hours for processing Wire Transfers. If a wire request is received by 2:00pm ET and verified through our security procedures outlined in the section below titled “Security Procedures,” funds will be processed the same business day. If it is received after 2:00pm ET and verified through our security procedures, funds may be processed the next business day. We may treat any Wire Transfer Request received at or after our cut-off time as if it was received that business day, or we may treat it as if it were received at the opening of the next business day. 
+
+ Security procedures: You agree and consent to the use of certain security procedures by us to confirm the validity of the Wire Transfer Request made pursuant to this Agreement. You understand the security procedures are not designed to detect errors in the content of the Wire Transfer Request or to prevent duplicate transfers. Some elements of the procedures will vary, depending upon the method used to initiate a Wire Transfer. You hereby agree that your utilization of any security procedure established hereunder shall constitute your agreement to its use and affirmative acknowledgment of its commercial reasonableness. You further agree that any Wire Transfer Request that is acted upon in good faith by us in compliance with these security procedures, whether or not in fact authorized by you, shall constitute an authorized Wire Transfer. The following security procedures shall apply to this Agreement: Before accepting any such Wire Transfer Requests, we will: (1) perform verification on the individuals initiating the Wire Transfer Request that is designed to ensure they are the individuals previously authorized to initiate a Wire Transfer for the account in question; (2) apply fraud-related screens to the wire instructions; (3) contact you using information from your account records to verify the Wire Transfer for wires that are not initiated in person (this contact may be through a method different than the one you used to request the Wire Transfer (e.g., phone versus e-mail) or it may be through the same channel to obtain a password or other information that only you should have); (4) request and receive any other proof of identification or any other documentation from you or your authorized representative, which we may, in our sole discretion, require under the circumstances; and (5) you expressly agree to receive security alerts from us by prerecorded voice message and/or text message, including with the use of an automatic dialer (autodialer), at any mobile device number you provide to us. 
+
+ Force majeure: We will not be liable for our inability to perform our obligations under this Agreement when such inability arises out of causes beyond our control, including but not limited to, any act of God, accident, labor disputes, power failures, system failure, equipment malfunction, suspension of payment by another bank, refusal or delay by another bank to accept the wire transfer, war, emergency conditions, fire, earthquake, or the failure of any third party to provide any electronic or telecommunication service used in connection with the execution or cancellation of a Wire Transfer. 
+
+ Inconsistency of name and account number: You acknowledge and agree that when you (or your authorized representative) provide us with a name and account number in order for us to process a Wire Transfer, payment may be made by the beneficiary's/designated recipient's bank solely on the basis of the account number, even if the account number identifies a person different from the beneficiary so named. We or an intermediary bank may send a Wire Transfer to an intermediary bank or beneficiary's/designated recipient's bank based solely on the bank identifying number, even if the payment order indicates a different name. We may rely on all information contained in the Wire Transfer Request, regardless of who may have provided the information. You further agree that your obligation to pay the amount of a Wire Transfer to us is not excused in such circumstances. Except as provided by applicable law, any losses resulting from an incorrect account number or your misidentification of the beneficiary/designated recipient is your responsibility and not ours. 
+
+ Acceptance and execution of request by Capital One: A Wire Transfer Request is considered accepted by us when we execute it. Please refer to the “Cut-Off Times” section for more details. You can verify whether your Wire Transfer Request has been executed by calling us at 1-800-655-2265 . 
+
+ Payment to Capital One: You must pay us the amount of the Wire Transfer, plus any applicable fees, before we will execute the Wire Transfer Request. Please contact the Call Center for fees applicable to Wire Transfers and any other related pre-payment disclosures. 
+
+ Rejection of a wire transfer: We have no responsibility to accept any incoming Wire Transfer(s) for your benefit. Likewise, we have a right to reject any Wire Transfer Request(s) for an outgoing Wire Transfer for reasons including, but not limited to, insufficient or uncollected funds in the account specified in the Wire Transfer Request, a request that fails the security procedures outlined in the section on Security Procedures, our inability to execute the Wire Transfer for the reasons set out in the section of this agreement entitled Method Used to Make the Wire Transfer above, or if we are unable to verify the authenticity of the Wire Transfer Request. If we stop a domestic outgoing Wire Transfer, we will refund the fee. 
+
+ Notice of a wire transfer not executed: If we determine, in our sole discretion, not to honor, execute, or accept a Wire Transfer Request, we will endeavor to notify you, but we shall have no liability for delay or failure to do so. We will also endeavor to notify you promptly if a Wire Transfer is returned to us after its execution but shall have no liability by reason of our delay or failure to do so. We shall have no obligation to resend a Wire Transfer if we complied with the original Wire Transfer Request and such Wire Transfer was returned to us. 
+
+ Cancellation or amendment of wire transfer: Once we receive a Wire Transfer Request, it may not be able to be canceled or amended. However, at our discretion, we may use reasonable efforts to act on any request for cancellation or amendment, provided that the method by which we are notified of a request for cancellation or amendment complies with our security procedures. However, we shall have no liability if such cancellation or amendment is not affected. You agree to indemnify and hold us harmless from any and all liabilities, claims, damages, costs, and expenses we may incur in attempting to cancel or amend the Wire Transfer. Any cancellation or amendment of a Wire Transfer by us shall relieve us of any obligation to act on the original Wire Transfer Request. 
+
+ Account statements: Except as provided by applicable law, you agree that we are not required to provide you with a separate notice of incoming or outgoing Wire Transfer. All Wire Transfers will be reflected on your periodic bank statement. You should review your statement for any discrepancies, unauthorized transactions, or errors in connection with any Wire Transfers. Except as otherwise provided herein, if you think a Wire Transfer is wrong or if you need more information about a Wire Transfer, you must contact us in writing upon discovery of the error or within fourteen (14) days from the date your statement is postmarked or otherwise made available to you, whichever is earlier. Failure to do so will relieve us of any obligation to pay interest on the amount of an unauthorized or erroneous Wire Transfer for which we are liable. Furthermore, you will also be liable to us for any damages or losses we may incur as a result of your failure to notify us within the time period stated in this section. 
+
+ Change in authorized representative: Any changes in the authority of persons authorized to make a Wire Transfer on your behalf shall not be binding upon us until we have received written notice from you. The notice must be in a form acceptable to us and be given within a reasonable period of time for us to act upon the change. 
+
+ Duty of reasonable care: We shall exercise good faith and reasonable care in processing Wire Transfer Requests. You shall similarly exercise good faith and reasonable care in observing and maintaining security procedures, in communicating Wire Transfer Requests to us, and in reviewing periodic bank statements for any discrepancies. 
+
+ Liability of Capital One: We shall be responsible only for performing

@@ -1,0 +1,742 @@
+source: reg-cc-229
+topic: 12 CFR 229（Regulation CC，可用资金与支票托收，eCFR 官方 XML）
+kind: regulation
+url: https://www.ecfr.gov/api/versioner/v1/full/2026-01-01/title-12.xml?part=229
+fetched_at: 2026-10-30T19:14:58Z
+content_type: application/xml
+sha256: 5d6a05d0baa404aea6d072900d50f6937ef4f7b9b1d118822c736a71a3604854
+--- 正文（外链原文摘录，只作离线检索用）---
+
+PART 229—AVAILABILITY OF FUNDS AND COLLECTION OF CHECKS (REGULATION CC)
+ 
+ 
+ Authority: 12 U.S.C. 4001-4010, 12 U.S.C. 5001-5018.
+ 
+ 
+ Source: 53 FR 19433, May 27, 1988, unless otherwise noted.
+ 
+ 
+ Subpart A—General 
+ 
+ § 229.1 Authority and purpose; organization. 
+ (a) Authority and purpose —(1) In general. This part is issued by the Board of Governors of the Federal Reserve System (Board) to implement the Expedited Funds Availability Act (12 U.S.C. 4001-4010) (EFA Act) and the Check Clearing for the 21st Century Act (12 U.S.C. 5001-5018) (Check 21 Act). 
+ (2) Joint authority of the Bureau. The Board issues regulations under Sections 603(d)(1), 604, 605, and 609(a) of the EFA Act (12 U.S.C. 4002(d)(1), 4003, 4004, 4008(a)) jointly with the Director of the Bureau of Consumer Financial Protection (Bureau). 
+ (b) Organization. This part is divided into subparts and appendices as follows— 
+ (1) Subpart A contains general information. It sets forth— 
+ (i) The authority, purpose, and organization; 
+ (ii) Definition of terms; and 
+ (iii) Authority for administrative enforcement of this part's provisions. 
+ (2) Subpart B of this part contains rules regarding the duty of banks to make funds deposited into accounts available for withdrawal, including availability schedules. Subpart B of this part also contains rules regarding exceptions to the schedules, disclosure of funds availability policies, payment of interest, liability of banks for failure to comply with subpart B of this part, and other matters. 
+ (3) Subpart C of this part contains rules to expedite the collection and return of checks and electronic checks by banks. These rules cover the direct return of checks and electronic checks, the manner in which the paying bank and returning banks must return checks and electronic checks to the depositary bank, notification of nonpayment by the paying bank, indorsement and presentment of checks and electronic checks, same-day settlement for certain checks, the liability of banks for failure to comply with subpart C of this part, and other matters. 
+ (4) Subpart D of this part contains rules relating to substitute checks. These rules address the creation and legal status of substitute checks; the substitute check warranties and indemnity; expedited recredit procedures for resolving improper charges and warranty claims associated with substitute checks provided to consumers; and the disclosure and notices that banks must provide. 
+ (5) Appendix A of this part contains a routing number guide to next day-availability checks. The guide lists the routing numbers of checks drawn on Federal Reserve Banks and Federal Home Loan Banks, and U.S. Treasury checks and Postal money orders that are subject to next-day availability. 
+ (6) Appendix B of this part is reserved. 
+ (7) Appendix C of this part contains model funds-availability policy disclosures, clauses, and notices and a model disclosure and notices related to substitute-check policies. 
+ (8) Appendix D of this part is reserved. 
+ (9) Appendix E of this part contains Board interpretations, which are labeled
+“Commentary,” of the provisions of this part. The Commentary provides background material to explain the Board's intent in adopting a particular part of the regulation and provides examples to aid in understanding how a particular requirement is to work. The Commentary is an official Board interpretation under section 611(e) of the EFA Act (12 U.S.C. 4010(e)). 
+ (10) Appendix F of this part contains the Board's determinations of the EFA Act and Regulation CC's preemption of state laws that were in effect on September 1, 1989. 
+ [53 FR 19433, May 27, 1988, as amended at 57 FR 36598, Aug. 14, 1992; 57 FR 46972, Oct. 14, 1992; Reg. CC, 60 FR 51670, Oct. 3, 1995; 69 FR 47309, Aug. 4, 2004; 82 FR 27578, June 15, 2017; 84 FR 31695, July 3, 2019]
+ 
+ 
+
+ 
+ § 229.2 Definitions. 
+ As used in this part, and unless the context requires otherwise, the following terms have the meanings set forth in this section, and the terms not defined in this section have the meanings set forth in the Uniform Commercial Code: 
+ (a) Account. (1) Except as provided in paragraphs (a)(2) and (a)(3) of this section, account means a deposit as defined in 12 CFR 204.2(a)(1)(i) that is a transaction account as described in 12 CFR 204.2(e). As defined in these sections, account generally includes accounts at a bank from which the account holder is permitted to make transfers or withdrawals by negotiable or transferable instrument, payment order of withdrawal, telephone transfer, electronic payment, or other similar means for the purpose of making payments or transfers to third persons or others. Account also includes accounts at a bank from which the account holder may make third party payments at an ATM, remote service unit, or other electronic device, including by debit card, but the term does not include savings deposits or accounts described in 12 CFR 204.2(d)(2) even though such accounts permit third party transfers. An account may be in the form of— 
+ (i) A demand deposit account, 
+ (ii) A negotiable order of withdrawal account, 
+ (iii) A share draft account, 
+ (iv) An automatic transfer account, or 
+ (v) Any other transaction account described in 12 CFR 204.2(e). 
+ (2) For purposes of subpart B of this part and, in connection therewith, this subpart A, account does not include an account where the account holder is a bank, where the account holder is an office of an institution described in paragraphs (e)(1) through (e)(6) of this section or an office of a “foreign bank” as defined in section 1(b) of the International Banking Act (12 U.S.C. 3101) that is located outside the United States, or where the direct or indirect account holder is the Treasury of the United States. 
+ (3) For purposes of subpart D of this part and, in connection therewith, this subpart A, account means any deposit, as defined in 12 CFR 204.2(a)(1)(i), at a bank, including a demand deposit or other transaction account and a savings deposit or other time deposit, as those terms are defined in 12 CFR 204.2. 
+ (b) Automated clearinghouse or ACH means a facility that processes debit and credit transfers under rules established by a Federal Reserve Bank operating circular on automated clearinghouse items or under rules of an automated clearinghouse association. 
+ (c) Automated teller machine or ATM means an electronic device located in the United States at which a natural person may make deposits to an account by cash or check and perform other account transactions. 
+ (d) Available for withdrawal with respect to funds deposited means available for all uses generally permitted to the customer for actually and finally collected funds under the bank's account agreement or policies, such as for payment of checks drawn on the account, certification of checks drawn on the account, electronic payments, withdrawals by cash, and transfers between accounts. 
+ (e) Bank means— 
+ (1) An insured bank as defined in section 3 of the Federal Deposit Insurance Act (12 U.S.C. 18I3) or a bank that is eligible to apply to become an insured bank under section 5 of that Act (12 U.S.C. 1815); 
+ (2) A mutual savings bank as defined in section 3 of the Federal Deposit Insurance Act (12 U.S.C. 1813); 
+ (3) A savings bank as defined in section 3 of the Federal Deposit Insurance Act (12 U.S.C. 1813); 
+ (4) An insured credit union as defined in section 101 of the Federal Credit Union Act (12 U.S.C. 1752) or a credit union that is eligible to make application to become an insured credit union under section 201 of that Act (12 U.S.C. 1781); 
+ (5) A member as defined in section 2 of the Federal Home Loan Bank Act (12 U.S.C. 1422); 
+ (6) A savings association as defined in section 3 of the Federal Deposit Insurance Act (12 U.S.C. 1813) that is an insured depository institution as defined in section 3 of that Act (12 U.S.C. 1813(c)(2)) or that is eligible to apply to become an insured depository institution under section 5 of that Act (12 U.S.C. 1815); or 
+ (7) An agency or a branch of a foreign bank as defined in section l(b) of the International Banking Act (12 U.S.C. 3101). 
+ For purposes of subparts C and D of this part and, in connection therewith, this subpart A, the term bank also includes any person engaged in the business of banking, as well as a Federal Reserve Bank, a Federal Home Loan Bank, and a state or unit of general local government to the extent that the state or unit of general local government acts as a paying bank. Unless otherwise specified, the term bank includes all of a bank's offices in the United States, but not offices located outside the United States.
+ 
+ 
+ Note: 
+ For purposes of subpart D of this part and, in connection therewith, this subpart A, bank also includes the Treasury of the United States or the United States Postal Service to the extent that the Treasury or the Postal Service acts as a paying bank. 
+ (f) Banking day means that part of any business day on which an office of a bank is open to the public for carrying on substantially all of its banking functions. 
+ (g) Business day means a calendar day other than a Saturday or a Sunday, January 1, the third Monday in January, the third Monday in February, the last Monday in May, July 4, the first Monday in September, the second Monday in October, November 11, the fourth Thursday in November, or December 25. If January 1, July 4, November 11, or December 25 fall on a Sunday, the next Monday is not a business day. 
+ (h) Cash means United States coins and currency. 
+ (i) Cashier's check means a check that is— 
+ (1) Drawn on a bank; 
+ (2) Signed by an officer or employee of the bank on behalf of the bank as drawer; 
+ (3) A direct obligation of the bank; and 
+ (4) Provided to a customer of the bank or acquired from the bank for remittance purposes. 
+ (j) Certified check means a check with respect to which the drawee bank certifies by signature on the check of an officer or other authorized employee of the bank that— 
+ (1) (i) The signature of the drawer on the check is genuine; and 
+ (ii) The bank has set aside funds that— 
+ (A) Are equal to the amount of the check, and 
+ (B) Will be used to pay the check; or 
+ (2) The bank will pay the check upon presentment. 
+ (k) Check means— 
+ (1) A negotiable demand draft drawn on or payable through or at an office of a bank; 
+ (2) A negotiable demand draft drawn on a Federal Reserve Bank or a Federal Home Loan Bank; 
+ (3) A negotiable demand draft drawn on the Treasury of the United States; 
+ (4) A demand draft drawn on a state government or unit of general local government that is not payable through or at a bank; 
+ (5) A United States Postal Service money order; or 
+ (6) A traveler's check drawn on or payable through or at a bank. 
+ (7) The term check includes an original check and a substitute check. 
+ 
+ Note: 
+ The term check does not include a noncash item or an item payable in a medium other than United States money. A draft may be a check even though it is described on its face by another term, such as money order. For purposes of subparts C and D, and in connection therewith, subpart A, of this part, the term check also includes a demand draft of the type described above that is nonnegotiable. 
+ (l) [Reserved] 
+ (m) Check processing region means the geographical area served by an office of a Federal Reserve Bank for purposes of its check processing activities. 
+ (n) Consumer account means any account used primarily for personal, family, or household purposes. 
+ (o) Depositary bank means the first bank to which a check is transferred even though it is also the paying bank or the payee. A check deposited in an account is deemed to be transferred to the bank holding the account into which the check is deposited, even though the check is physically received and indorsed first by another bank. 
+ (p) Electronic payment means a wire transfer or an ACH credit transfer. 
+ (q) Forward collection means the process by which a bank sends a check on a cash basis to a collecting bank for settlement or to the paying bank for payment. 
+ (r) Local check means a check payable by or at a local paying bank, or a check payable by a nonbank payor and payable through a local paying bank. 
+ (s) Local paying bank means a paying bank that is located in the same check-processing region as the physical location of the branch, contractual branch, or proprietary ATM of the depositary bank in which that check was deposited. 
+ (t) Merger transaction means— 
+ (1) A merger or consolidation of two or more banks; or 
+ (2) The transfer of substantially all of the assets of one or more banks or branches to another bank in consideration of the assumption by the acquiring bank of substantially all of the liabilities of the transferring banks, including the deposit liabilities. 
+ (u) Noncash item means an item that would otherwise be a check, except that— 
+ (1) A passbook, certificate, or other document is attached; 
+ (2) It is accompanied by special instructions, such as a request for special advice of payment or dishonor; 
+ (3) It consists of more than a single thickness of paper, except a check that qualifies for handling by automated check processing equipment; or 
+ (4) It has not been preprinted or post-encoded in magnetic ink with the routing number of the paying bank. 
+ (v) Nonlocal check means a check payable by, through, or at a nonlocal paying bank. 
+ (w) Nonlocal paying bank means a paying bank that is not a local paying bank with respect to the depositary bank. 
+ (x) Nonproprietary ATM means an ATM that is not a proprietary ATM. 
+ (y) [Reserved] 
+ (z) Paying bank means— 
+ (1) The bank by which a check is payable, unless the check is payable at another bank and is sent to the other bank for payment or collection; 
+ (2) The bank at which a check is payable and to which it is sent for payment or collection; 
+ (3) The Federal Reserve Bank or Federal Home Loan Bank by which a check is payable; 
+ (4) The bank through which a check is payable and to which it is sent for payment or collection, if the check is not payable by a bank; or 
+ (5) The state or unit of general local government on which a check is drawn and to which it is sent for payment or collection. 
+ For purposes of subparts C and D, and in connection therewith, subpart A, paying bank includes the bank through which a check is payable and to which the check is sent for payment or collection, regardless of whether the check is payable by another bank, and the bank whose routing number appears on a check in fractional or magnetic form and to which the check is sent for payment or collection.
+ 
+ 
+ Note: 
+ For purposes of subpart D of this part and, in connection therewith, this subpart A, paying bank also includes the Treasury of the United States or the United States Postal Service for a check that is payable by that entity and that is sent to that entity for payment or collection. 
+ (aa) Proprietary ATM means an ATM that is— 
+ (1) Owned or operated by, or operated exclusively for, the depositary bank; 
+ (2) Located on the premises (including the outside wall) of the depositary bank; or 
+ (3) Located within 50 feet of the premises of the depositary bank, and not identified as being owned or operated by another entity. 
+ If more than one bank meets the owned or operated criterion of paragraph (aa)(1) of this section, the ATM is considered proprietary to the bank that operates it. 
+ (bb) Qualified returned check means a returned check that is prepared for automated return to the depositary bank by placing the check in a carrier envelope or placing a strip on the check and encoding the strip or envelope in magnetic ink. A qualified returned check need not contain other elements of a check drawn on the depositary bank, such as the name of the depositary bank. 
+ (cc) Returning bank means a bank (other than the paying or depositary bank) handling a returned check or notice in lieu of return. A returning bank is also a collecting bank for purposes of UCC 4-202(b). 
+ (dd) Routing number means— 
+ (1) The number printed on the face of a check in fractional form on in nine-digit form; 
+ (2) The number in a bank's indorsement in fractional or nine-digit form; or 
+ (3) For purposes of subpart C and subpart D, the bank-identification number contained in an electronic check or electronic returned check. 
+ (ee) Similarly situated bank means a bank of similar size, located in the same community, and with similar check handling activities as the paying bank or returning bank. 
+ (ff) State means a state, the District of Columbia, Puerto Rico, American Samoa, the Commonwealth of the Northern Mariana Islands, Guam, or the U.S. Virgin Islands. For purposes of subpart D of this part and, in connection therewith, this subpart A, state also means the Trust Territory of the Pacific Islands and any other territory of the United States. 
+ (gg) Teller's check means a check provided to a customer of a bank or acquired from a bank for remittance purposes, that is drawn by the bank, and drawn on another bank or payable through or at a bank. 
+ (hh) Traveler's check means an instrument for the payment of money that— 
+ (1) Is drawn on or payable through or at a bank; 
+ (2) Is designated on its face by the term traveler's check or by any substantially similar term or is commonly known and marketed as a traveler's check by a corporation or bank that is an issuer of traveler's checks; 
+ (3) Provides for a specimen signature of the purchaser to be completed at the time of purchase; and 
+ (4) Provides for a countersignature of the purchaser to be completed at the time of negotiation. 
+ (ii) Uniform Commercial Code, Code, or U.C.C. means the Uniform Commercial Code as adopted in a state. 
+ (jj) United States means the states, including the District of Columbia, the U.S. Virgin Islands, American Samoa, the Commonwealth of the Northern Mariana Islands, Guam, and Puerto Rico. 
+ (kk) Unit of general local government means any city, county, parish, town, township, village, or other general purpose political subdivision of a state. The term does not include special purpose units of government, such as school districts or water districts. 
+ (ll) Wire transfer means an unconditional order to a bank to pay a fixed or determinable amount of money to a beneficiary upon receipt or on a day stated in the order, that is transmitted by electronic or other means through Fedwire, the Clearing House Interbank Payments System, other similar network, between banks, or on the books of a bank. Wire transfer does not include an electronic fund transfer as defined in section 903(6) of the Electronic Fund Transfer Act (15 U.S.C. 1693a(6)). 
+ (mm) Fedwire has the same meaning as that set forth in § 210.26(e) of this chapter. 
+ (nn) Good faith means honesty in fact and observance of reasonable commercial standards of fair dealing. 
+ (oo) Interest compensation means an amount of money calculated at the average of the Federal Funds rates published by the Federal Reserve Bank of New York for each of the days for which interest compensation is payable, divided by 360. The Federal Funds rate for any day on which a published rate is not available is the same as the published rate for the last preceding day for which there is a published rate. 
+ (pp) Contractual branch, with respect to a bank, means a branch of another bank that accepts a deposit on behalf of the first bank. 
+ (qq) Claimant bank means a bank that submits a claim for a recredit for a substitute check to an indemnifying bank under § 229.55. 
+ (rr) Collecting bank means any bank handling a check for forward collection, except the paying bank. 
+ (ss) Consumer means a natural person who— 
+ (1) With respect to a check handled for forward collection, draws the check on a consumer account; or 
+ (2) With respect to a check handled for return, deposits the check into or cashes the check against a consumer account. 
+ (tt) Customer means a person having an account with a bank. 
+ (uu) Indemnifying bank. Indemnifying bank means— 
+ (1) For the purposes of § 229.34, a bank that provides an indemnity under § 229.34 with respect to remote deposit capture or an electronically-created item, or 
+ (2) For the purposes of § 229.53, a bank that provides an indemnity under § 229.53 with respect to a substitute check. 
+ (vv) Magnetic ink character recognition line and MICR line mean the numbers, which may include the routing number, account number, check number, check amount, and other information, that are (unless the Board by rule or order determines that different standards apply)— 
+ (1) Printed near the bottom of a check in magnetic ink in accordance with American National Standard Specifications for Placement and Location of MICR Printing, X9.13 (hereinafter ANS X9.13) for an original check and American National Standard Specifications for an Image Replacement Document— IRD, X9.100-140 (hereinafter ANS X9.100-140) for a substitute check, or 
+ (2) For purposes of subpart C and subpart D, contained in a record specified for MICR line data in an electronic check or electronic returned check in accordance with American National Standard Specifications for Electronic Exchange of Check Image Data—Domestic, X9.100-187 (hereinafter ANS X9.100—187). 
+ (ww) Original check means the first paper check issued with respect to a particular payment transaction. 
+ (xx) Paper or electronic representation of a substitute check means any copy of or information related to a substitute check that a bank handles for forward collection or return, charges to a customer's account, or provides to a person as a record of a check payment made by the person. 
+ (yy) Person means a natural person, corporation, unincorporated company, partnership, government unit or instrumentality, trust, or any other entity or organization. 
+ (zz) Reconverting bank means— 
+ (1) The bank that creates a substitute check; or 
+ (2) With respect to a substitute check that was created by a person that is not a bank, the first bank that transfers, presents, or returns that substitute check or, in lieu thereof, the first paper or electronic representation of that substitute check. 
+ (aaa) Substitute check means a paper reproduction of an original check that— 
+ (1) Contains an image of the front and back of the original check; 
+ (2) Bears a MICR line that, except as provided under ANS X9.100-140 (unless the Board by rule or order determines that a different standard applies), contains all the information appearing on the MICR line of the original check at the time that the original check was issued and any additional information that was encoded on the original check's MICR line before an image of the original check was captured; 
+ (3) Conforms in paper stock, dimension, and otherwise with ANS X9.100-140 (unless the Board by rule or order determines that a different standard applies); and 
+ (4) Is suitable for automated processing in the same manner as the original check. 
+ (bbb) Copy and sufficient copy. (1) A copy of an original check means— 
+ (i) Any paper reproduction of an original check, including a paper printout of an electronic image of the check, a photocopy of the original check, or a substitute check; or 
+ (ii) Any electronic reproduction of a check that a recipient has agreed to receive from the sender instead of a paper reproduction. 
+ (2) A sufficient copy is a copy of an original check that accurately represents all of the information on the front and back of the original check as of the time the original check was truncated or is otherwise sufficient to determine whether or not a claim is valid. 
+ (ccc) Transfer and consideration. The terms transfer and consideration have the meanings set forth in the Uniform Commercial Code and in addition, for purposes of subpart D— 
+ (1) The term transfer with respect to a substitute check or a paper or electronic representation of a substitute check means delivery of the substitute check or other representation of the substitute check by a bank to a person other than a bank; and 
+ (2) A bank that transfers a substitute check or a paper or electronic representation of a substitute check directly to a person other than a bank has received consideration for the substitute check or other paper or electronic representation of the substitute check if it has charged, or has the right to charge, the person's account or otherwise has received value for the original check, a substitute check, or a representation of the original check or substitute check. 
+ (ddd) Truncate means to remove an original check from the forward collection or return process and send to a recipient, in lieu of such original check, a substitute check or, by agreement, information relating to the original check (including data taken from the MICR line of the original check or an electronic image of the original check), whether with or without the subsequent delivery of the original check. 
+ (eee) Truncating bank means— 
+ (1) The bank that truncates the original check; or 
+ (2) If a person other than a bank truncates the original check, the first bank that transfers, presents, or returns, in lieu of such original check, a substitute check or, by agreement with the recipient, information relating to the original check (including data taken from the MICR line of the original check or an electronic image of the original check), whether with or without the subsequent delivery of the original check. 
+ (fff) Remotely created check means a check that is not created by the paying bank and that does not bear a signature applied, or purported to be applied, by the person on whose account the check is drawn. For purposes of this definition, “account” means an account as defined in paragraph (a) of this section as well as a credit or other arrangement that allows a person to draw checks that are payable by, through, or at a bank. 
+ (ggg) Electronic check and electronic returned check mean an electronic image of, and electronic information derived from, a paper check or paper returned check, respectively,
+that— 
+ (1) Is sent to a receiving bank pursuant to an agreement between the sender and the receiving bank; and 
+ (2) Conforms with ANS X9.100-187, unless the Board by rule or order determines that a different standard applies or the parties otherwise agree. 
+ (hhh) Electronically-created item means an electronic image that has all the attributes of an electronic check or electronic returned check but was created electronically and not derived from a paper check. 
+ [53 FR 19433, May 27, 1988, as amended at 53 FR 31292, Aug. 18, 1988; 53 FR 44324, Nov. 2, 1988; Reg. CC, 54 FR 13850, Apr. 6, 1989; 57 FR 46972, Oct. 14, 1992; 58 FR 2, Jan. 4, 1993; 60 FR 51670, Oct. 3, 1995; 62 FR 13809, Mar. 24, 1997; 69 FR 47309, 47310, Aug. 4, 2004; 70 FR 71225, Nov. 28, 2005; 82 FR 27578, June 15, 2017; 84 FR 31696, July 3, 2019]
+ 
+ 
+
+ 
+ § 229.3 Administrative enforcement. 
+ (a) Enforcement agencies. Compliance with this part is enforced under— 
+ (1) Section 8 of the Federal Deposit Insurance Act (12 U.S.C. 1818 et seq. ) in the case of— 
+ (i) National banks, and Federal branches and Federal agencies of foreign banks, by the Office of the Comptroller of the Currency; 
+ (ii) Member banks of the Federal Reserve System (other than national banks), and offices, branches, and agencies of foreign banks located in the United States (other than Federal branches, Federal agencies, and insured State branches of foreign banks), by the Board; and 
+ (iii) Banks insured by the Federal Deposit Insurance Corporation (other than members of the Federal Reserve System) and insured State branches of foreign banks, by the Board of Directors of the Federal Deposit Insurance Corporation; 
+ (2) Section 8 of the Federal Deposit Insurance Act, by the Director of the Office of Thrift Supervision in the case of savings associations the deposits of which are insured by the Federal Deposit Insurance Corporation; and 
+ (3) The Federal Credit Union Act (12 U.S.C. 1751 et seq. ) by the National Credit Union Administration Board with respect to any federal credit union or credit union insured by the National Credit Union Share Insurance Fund. 
+ The terms used in paragraph (a)(1) of this section that are not defined in this part or otherwise defined in section 3(s) of the Federal Deposit Insurance Act (12 U.S.C. 1813(s)) shall have the meaning given to them in section 1(b) of the International Banking Act of 1978 (12 U.S.C. 3101).
+ 
+ (b) Additional powers. (1) For the purposes of the exercise by any agency referred to in paragraph (a) of this section of its powers under any statute referred to in that paragraph, a violation of any requirement imposed under the EFA Act is deemed to be a violation of a requirement imposed under that statute. 
+ (2) In addition to its powers under any provision of law specifically referred to in paragraph (a) of this section, each of the agencies referred to in that paragraph may exercise, for purposes of enforcing compliance with any requirement imposed under this part, any other authority conferred on it by law. 
+ (c) Enforcement by the Board. (1) Except to the extent that enforcement of the requirements imposed under this part is specifically committed to some other government agency, the Board shall enforce such requirements. 
+ (2) If the Board determines that— 
+ (i) Any bank that is not a bank described in paragraph (a) of this section; or 
+ (ii) Any other person subject to the authority of the Board under the EFA Act and this part, 
+ has failed to comply with any requirement imposed by this part, the Board may issue an order prohibiting any bank, any Federal Reserve Bank, or any other person subject to the authority of the Board from engaging in any activity or transaction that directly or indirectly involves such noncomplying bank or person (including any activity or transaction involving the receipt, payment, collection, and clearing of checks, and any related function of the payment system with respect to checks).
+ 
+ [53 FR 19433, May 27, 1988, as amended by Reg. CC, 55 FR 21855, May 30, 1990; 57 FR 36600, Aug. 14, 1992; 69 FR 47310, Aug. 4, 2004]
+ 
+ 
+
+ 
+ 
+ Subpart B—Availability of Funds and Disclosure of Funds Availability Policies 
+ 
+ § 229.10 Next-day availability. 
+ (a) Cash deposits. (1) A bank shall make funds deposited in an account by cash available for withdrawal not later than the business day after the banking day on which the cash is deposited, if the deposit is made in person to an employee of the depositary bank. 
+ (2) A bank shall make funds deposited in an account by cash available for withdrawal not later than the second business day after the banking day on which the cash is deposited, if the deposit is not made in person to an employee of the depositary bank. 
+ (b) Electronic payments —(1) In general. A bank shall make funds received for deposit in an account by an electronic payment available for withdrawal not later than the business day after the banking day on which the bank received the electronic payment. 
+ (2) When an electronic payment is received. An electronic payment is received when the bank receiving the payment has received both— 
+ (i) Payment in actually and finally collected funds; and 
+ (ii) Information on the account and amount to be credited. 
+ A bank receives an electronic payment only to the extent that the bank has received payment in actually and finally collected funds. 
+ (c) Certain check deposits —(1) General rule. A depositary bank shall make funds deposited in an account by check available for withdrawal not later than the business day after the banking day on which the funds are deposited, in the case of— 
+ (i) A check drawn on the Treasury of the United States and deposited in an account held by a payee of the check; 
+ (ii) A U.S. Postal Service money order deposited— 
+ (A) In an account held by a payee of the money order; and 
+ (B) In person to an employee of the depositary bank. 
+ (iii) A check drawn on a Federal Reserve Bank or Federal Home Loan Bank and deposited— 
+ (A) In an account held by a payee of the check; and 
+ (B) In person to an employee of the depositary bank; 
+ (iv) A check drawn by a state or a unit of general local government and deposited— 
+ (A) In an account held by a payee of the check; 
+ (B) In a depositary bank located in the state that issued the check, or the same state as the unit of general local government that issued the check; 
+ (C) In person to an employee of the depositary bank; and 
+ (D) With a special deposit slip or deposit envelope, if such slip or envelope is required by the depositary bank under paragraph (c)(3) of this section. 
+ (v) A cashier's, certified, or teller's check deposited— 
+ (A) In an account held by a payee of the check; 
+ (B) In person to an employee of the depositary bank; and 
+ (C) With a special deposit slip or deposit envelope, if such slip or envelope is required by the depositary bank under paragraph (c)(3) of this section. 
+ (vi) A check deposited in a branch of the depositary bank and drawn on the same or another branch of the same bank if both branches are located in the same state or the same check processing region; and, 
+ (vii) The lesser of— 
+ (A) $275, or 
+ (B) The aggregate amount deposited on any one banking day to all accounts of the customer by check or checks not subject to next-day availability under paragraphs (c)(1) (i) through (vi) of this section. 
+ (2) Checks not deposited in person. A depositary bank shall make funds deposited in an account by check or checks available for withdrawal not later than the second business day after the banking day on which funds are deposited, in the case of a check deposit described in and that meets the requirements of paragraphs (c)(1) (ii), (iii), (iv), and (v), of this section, except that it is not deposited in person to an employee of the depositary bank. 
+ (3) Special deposit slip. (i) As a condition to making the funds available for withdrawal in accordance with this section, a depositary bank may require that a state or local government check or a cashier's, certified, or teller's check be deposited with a special deposit slip or deposit envelope that identifies the type of check. 
+ (ii) If a depositary bank requires the use of a special deposit slip or deposit envelope, the bank must either provide the special deposit slip or deposit envelope to its customers or inform its customers how the slip or envelope may be prepared or obtained and make the slip or envelope reasonably available. 
+ [53 FR 19433, May 27, 1988, as amended at 84 FR 31696, July 3, 2019; 89 FR 43738, May 20, 2024]
+ 
+ 
+
+ 
+ § 229.11 Adjustment of dollar amounts. 
+ (a) Dollar amounts indexed. The dollar amounts specified in §§ 229.10(c)(1)(vii), 229.12(d), 229.13(a), 229.13(b), 229.13(d), and 229.21(a) shall be adjusted effective on July 1, 2020, on July 1, 2025, and on July 1 of every fifth year after 2025, in accordance with the procedure set forth in paragraph (b) of this section using the Consumer Price Index for Urban Wage Earners and Clerical Workers (CPI-W), as published by the Bureau of Labor Statistics. 
+ (b) Indexing procedure —(1) Inflation measurement periods. For dollar amount adjustments that are effective on July 1, 2020, the inflation measurement period begins in July 2011 and ends in July 2018. For dollar amount adjustments that are effective on July 1, 2025, the inflation measurement period begins in July 2018 and ends in July 2023. For dollar amount adjustments that are effective on July 1 of every fifth year after 2025, the inflation measurement period begins in July of every fifth year after 2018 and ends in July of every fifth year after 2023. Following each inflation measurement period, the dollar amount adjustments will be published in the Federal Register . 
+ (2) Percentage change. Any dollar amount adjustment under this section shall be calculated across an inflation measurement period by the aggregate percentage change in the CPI-W, including both positive and negative percentage changes. The aggregate percentage change over the inflation measurement period will be rounded to one decimal place, using the CPI-W value for July (which is generally released by the Bureau of Labor Statistics in August). 
+ (3) Adjustment amount. The adjustment amount for each dollar amount listed in paragraph (a) of this section shall be equal to the aggregate percentage change multiplied by the existing dollar amount listed in paragraph (c) of this section and rounded to the nearest multiple of $25. The adjusted dollar amount will be equal to the sum of the existing dollar amount and the adjustment amount. No dollar adjustment will be made when the aggregate percentage change is zero or a negative percentage change, or when the aggregate percentage change multiplied by the existing dollar amount listed in paragraph (c) and rounded to the nearest multiple of $25 results in no change. 
+ (4) Carry-forward. When there is an aggregate negative percentage change over an inflation measurement period, or when an aggregate positive percentage change over an inflation measurement period multiplied by the existing dollar amount listed in paragraph (c) of this section and rounded to the nearest multiple of $25 results in no change, the aggregate percentage change over the inflation measurement period will be included in the calculation to determine the percentage change at the end of the subsequent inflation measurement period. That is, the cumulative change in the CPI-W over the two (or more) inflation measurement periods will be used in the calculation until the cumulative change results in publication of an adjusted dollar amount in the regulation. 
+ (c) Amounts. (1) For purposes of § 229.10(c)(1)(vii), the dollar amount in effect during a particular period is the amount stated in this paragraph (c)(1) for that period. 
+ (i) Prior to July 21, 2011, the amount is $100. 
+ (ii) From July 21, 2011, through June 30, 2020, by operation of section 603(a)(2)(D) of the EFA Act (12 U.S.C. 4002(a)(2)(D)) the amount is $200. 
+ (iii) From July 1, 2020, through June 30, 2025, the amount is $225. 
+ (iv) Effective July 1, 2025, the amount is $275. 
+ (2) For purposes of § 229.12(d), the dollar amount in effect during a particular period is the amount stated in this paragraph (c)(2) for that period. 
+ (i) Prior to July 1, 2020, the amount is $400. 
+ (ii) From July 1, 2020, through June 30, 2025, the amount is $450. 
+ (iii) Effective July 1, 2025, the amount is $550. 
+ (3) For purposes of §§ 229.13(a), (b), and (d), the dollar amount in effect during a particular period is the amount stated in this paragraph (c)(3) for that period. 
+ (i) Prior to July 1, 2020, the amount is $5,000. 
+ (ii) From July 1, 2020, through June 30, 2025, the amount is $5,525. 
+ (iii) Effective July 1, 2025, the amount is $6,725. 
+ (4) For purposes of § 229.21(a), the dollar amounts in effect during a particular period are the amounts stated in this paragraph (c)(4) for the period. 
+ (i) Prior to July 1, 2020, the amounts are $100, $1,000, and $500,000 respectively. 
+ (ii) From July 1, 2020, through June 30, 2025, the amounts are $100, $1,100, and $552,500 respectively. 
+ (iii) Effective July 1, 2025, the amounts are $125, $1,350, and $672,950 respectively. 
+ [84 FR 31696, July 3, 2019, as amended at 89 FR 43738, May 20, 2024]
+ 
+ 
+
+ 
+ § 229.12 Availability schedule. 
+ (a) Effective date. The availability schedule contained in this section is effective September 1, 1990. 
+ (b) Local checks and certain other checks. Except as provided in paragraphs (d), (e), and (f) of this section, a depository bank shall make funds deposited in an account by a check available for withdrawal not later than the second business day following the banking day on which funds are deposited, in the case of— 
+ (1) A local check; 
+ (2) A check drawn on the Treasury of the United States that is not governed by the availability requirements of § 229.10(c); 
+ (3) A U.S. Postal Service money order that is not governed by the availability requirements of § 229.10(c); and 
+ (4) A check drawn on a Federal Reserve Bank or Federal Home Loan Bank; a check drawn by a state or unit of general local government; or a cashier's, certified, or teller's check; if any check referred to in this paragraph (b)(4) is a local check that is not governed by the availability requirements of § 229.10(c). 
+ (c) Nonlocal checks —(1) In general. Except as provided in paragraphs (d), (e), and (f) of this section, a depositary bank shall make funds deposited in an account by a check available for withdrawal not later than the fifth business day following the banking day on which funds are deposited, in the case of— 
+ (i) A nonlocal check; and 
+ (ii) A check drawn on a Federal Reserve Bank or Federal Home Loan Bank; a check drawn by a state or unit of general local government; a cashier's, certified, or teller's check; or a check deposited in a branch of the depositary bank and drawn on the same or another branch of the same bank, if any check referred to in this paragraph (c)(1)(ii) is a nonlocal check that is not governed by the availability requirements of § 229.10(c). 
+ (2) Nonlocal checks specified in appendix B-2 to this part must be made available for withdrawal not later than the times prescribed in that appendix. 
+ (d) Time period adjustment for withdrawal by cash or similar means. A depositary bank may extend by one business day the time that funds deposited in an account by one or more checks subject to paragraphs (b), (c), or (f) of this section are available for withdrawal by cash or similar means. Similar means include electronic payment, issuance of a cashier's or teller's check, or certification of a check, or other irrevocable commitment to pay, but do not include the granting of credit to a bank, a Federal Reserve Bank, or a Federal Home Loan Bank that presents a check to the depositary bank for payment. A depositary bank shall, however, make $550 of these funds available for withdrawal by cash or similar means not later than 5:00 p.m. on the business day on which the funds are available under paragraphs (b), (c), or (f) of this section. This $550 is in addition to the $275 available under § 229.10(c)(1)(vii). 
+ (e) Extension of schedule for certain deposits in Alaska, Hawaii, Puerto Rico, American Samoa, the Commonwealth of the Northern Mariana Islands, Guam, and the U.S. Virgin Islands. The depositary bank may extend the time periods set forth in this section by one business day in the case of any deposit, other than a deposit described in § 229.10, that is— 
+ (1) Deposited in an account at a branch of a depositary bank if the branch is located in Alaska, Hawaii, Puerto Rico, American Samoa, the Commonwealth of the Northern Mariana Islands, Guam, or the U.S. Virgin Islands; and 
+ (2) Deposited by a check drawn on or payable at or through a paying bank not located in the same state as the depositary bank. 
+ (f) Deposits at nonproprietary ATMs. A depositary bank shall make funds deposited in an account at a nonproprietary ATM by cash or check available for withdrawal not later than the fifth business day following the banking day on which the funds are deposited. 
+ [53 FR 19433, May 27, 1988, as amended by Reg. CC, 55 FR 50818, Dec. 11, 1990; 56 FR 7801, Feb. 26, 1991; 56 FR 66343, Dec. 23, 1991; 57 FR 36601, Aug. 14, 1992; 60 FR 51670, Oct. 3, 1995; 84 FR 31696, July 3, 2019; 84 FR 45403, Aug. 29, 2019; 89 FR 43739, May 20, 2024]
+ 
+ 
+
+ 
+ § 229.13 Exceptions. 
+ (a) New accounts. For purposes of this paragraph, checks subject to § 229.10(c)(1)(v) include traveler's checks. 
+ (1) A deposit in a new account— 
+ (i) Is subject to the requirements of § 229.10 (a) and (b) to make funds from deposits by cash and electronic payments available for withdrawal on the business day following the banking day of deposit or receipt; 
+ (ii) Is subject to the requirements of § 229.10(c)(1)(i) through (v) and § 229.10(c)(2) only with respect to the first $6,725 of funds deposited on any one banking day; but the amount of the deposit in excess of $6,725 shall be available for withdrawal not later than the ninth business day following the banking day on which funds are deposited; and 
+ (iii) Is not subject to the availability requirements of §§ 229.10(c)(1)(vi) and (vii) and 229.12. 
+ (2) An account is considered a new account during the first 30 calendar days after the account is established. An account is not considered a new account if each customer on the account has had, within 30 calendar days before the account is established, another account at the depositary bank for at least 30 calendar days. 
+ (b) Large deposits. Sections 229.10(c) and 229.12 do not apply to the aggregate amount of deposits by one or more checks to the extent that the aggregate amount is in excess of $6,725 on any one banking. day. For customers that have multiple accounts at a depositary bank, the bank may apply this exception to the aggregate deposits to all accounts held by the customer, even if the customer is not the sole holder of the accounts and not all of the holders of the accounts are the same. 
+ (c) Redeposited checks. Sections 229.10(c) and 229.12 do not apply to a check that has been returned unpaid and redeposited by the customer or the depositary bank. This exception does not apply— 
+ (1) To a check that has been returned due to a missing indorsement and redeposited after the missing indorsement has been obtained, if the reason for return indication on the check states that it was returned due to a missing indorsement; or 
+ (2) To a check that has been returned because it was post dated, if the reason for return indicated on the check states that it was returned because it was post dated, and if the check is no longer postdated when redeposited. 
+ (d) Repeated overdrafts. If any account or combination of accounts of a depositary bank's customer has been repeatedly overdrawn, then for a period of six months after the last such overdraft, §§ 229.10(c) and 229.12 do not apply to any of the accounts. A depositary bank may consider a customer's account to be repeatedly overdrawn if— 
+ (1) On six or more banking days within the preceding six months, the account balance is negative, or the account balance would have become negative if checks or other charges to the account had been paid; or 
+ (2) On two or more banking days within the preceding six months, the account balance is negative, or the account balance would have become negative, in the amount of $6,725 or more, if checks or other charges to the account had been paid. 
+ (e) Reasonable cause to doubt collectibility —(1) In general. Sections 229.10(c) and 229.12 do not apply to a check deposited in an account at a depositary bank if the depositary bank has reasonable cause to believe that the check is uncollectible from the paying bank. Reasonable cause to believe a check is uncollectible requires the existence of facts that would cause a well-grounded belief in the mind of a reasonable person. Such belief shall not be based on the fact that the check is of a particular class or is deposited by a particular class of persons. The reason for the bank's belief that the check is uncollectible shall be included in the notice required under paragraph (g) of this section. 
+ (2) Overdraft and returned check fees. A depositary bank that extends the time when funds will be available for withdrawal as described in paragraph (e)(1) of this section, and does not furnish the depositor with written notice at the time of deposit shall not assess any fees for any subsequent overdrafts (including use of a line of credit) or return of checks of other debits to the account, if— 
+ (i) The overdraft or return of the check would not have occurred except for the fact that the deposited funds were delayed under paragraph (e)(1) of this section; and 
+ (ii) The deposited check was paid by the paying bank. 
+ Notwithstanding the foregoing, the depositary bank may assess an overdraft or returned check fee if it includes a notice concerning overdraft and returned check fees with the notice of exception required in paragraph (g) of this section and, when required, refunds any such fees upon the request of the customer. The notice must state that the customer may be entitled to a refund of overdraft or returned check fees that are assessed if the check subject to the exception is paid and how to obtain a refund.
+ 
+ (f) Emergency conditions. Sections 229.10(c) and 229.12 do not apply to funds deposited by check in a depositary bank in the case of— 
+ (1) An interruption of communications or computer or other equipment facilities; 
+ (2) A suspension of payments by another bank; 
+ (3) A war; or 
+ (4) An emergency condition beyond the control of the depositary bank, 
+ if the depositary bank exercises such diligence as the circumstances require.
+ 
+ (g) Notice of exception —(1) In general. Subject to paragraphs (g)(2) and (g)(3) of this section, when a depositary bank extends the time when funds will be available for withdrawal based on the application of an exception contained in paragraphs (b) through (e) of this section, it must provide the depositor with a written notice. 
+ (i) The notice shall include the following information— 
+ (A) A number or code, which need not exceed four digits, that identifies the customer's account; 
+ (B) The date of the deposit; 
+ (C) The amount of the deposit that is being delayed; 
+ (D) The reason the exception was invoked; and 
+ (E) The time period within which the funds will be available for withdrawal. 
+ (ii) Timing of notice. The notice shall be provided to the depositor at the time of the deposit, unless the deposit is not made in person to an employee of the depositary bank, or, if the facts upon which a determination to invoke one of the exceptions in paragraphs (b) through (e) of this section to delay a deposit only become known to the depositary bank after the time of the deposit. If the notice is not given at the time of the deposit, the depositary bank shall mail or deliver the notice to the customer as soon as practicable, but no later than the first business day following the day the facts become known to the depositary bank, or the deposit is made, whichever is later. 
+ (2) One-time exception notice. In lieu of providing notice pursuant to paragraph (g)(1) of this section, a depositary bank that extends the time when the funds deposited in a nonconsumer account will be available for withdrawal based on an exception contained in paragraph (b) or (c) of this section may provide a single notice to the customer that includes the following information— 
+ (i) The reason(s) the exception may be invoked; and 
+ (ii) The time period within which deposits subject to the exception generally will be available for withdrawal. 
+ This one-time notice shall be provided only if each type of exception cited in the notice will be invoked for most check deposits in the account to which the exception could apply. This notice shall be provided at or prior to the time notice must be provided under paragraph (g)(1)(ii) of this section.
+ 
+ (3) Notice of repeated overdrafts exception. In lieu of providing notice pursuant to paragraph (g)(1) of this section, a depositary bank that extends the time when funds deposited in an account will be available for withdrawal based on the exception contained in paragraph (d) of this section may provide a notice to the customer for each time period during which the exception will be in effect. The notice shall include the following information— 
+ (i) The account number of the customer; 
+ (ii) The fact that the availability of funds deposited in the customer's account will be delayed because the repeated overdrafts exception will be invoked; 
+ (iii) The time period within which deposits subject to the exception generally will be available for withdrawal; and 
+ (iv) The time period during which the exception will apply. 
+ This notice shall be provided at or prior to the time notice must be provided under paragraph (g)(1)(ii) of this section and only if the exception cited in the notice will be invoked for most check deposits in the account.
+ 
+ (4) Emergency conditions exception notice. When a depositary bank extends the time when funds will be available for withdrawal based on the application of the emergency conditions exception contained in paragraph (f) of this section, it must provide the depositor with notice in a reasonable form and within a reasonable time given the circumstances. The notice shall include the reason the exception was invoked and the time period within which funds shall be made available for withdrawal, unless the depositary bank, in good faith, does not know at the time the notice is given the duration of the emergency and, consequently, when the funds must be made available. The depositary bank is not required to provide a notice if the funds subject to the exception become available before the notice must be sent. 
+ (5) Record retention. A depositary bank shall retain a record, in accordance with § 229.21(g), of each notice provided pursuant to its application of the reasonable cause exception under paragraph (e) of this section, together with a brief statement of the facts giving rise to the bank's reason to doubt the collectibility of the check. 
+ (h) Availability of deposits subject to exceptions. (1) If an exception contained in paragraphs (b) through (f) of this section applies, the depositary bank may extend the time periods established under §§ 229.10(c) and 229.12 by a reasonable period of time. 
+ (2) If a depositary bank invokes an exception contained in paragraphs (b) through (e) of this section with respect to a check described in § 229.10(c)(1) (i) through (v) or § 229.10(c)(2), it shall make the funds available for withdrawal not later than a reasonable period after the day the funds would have been required to be made available had the check been subject to 229.12. 
+ (3) If a depositary bank invokes an exception under paragraph (f) of this section based on an emergency condition, the depositary bank shall make the funds available for withdrawal not later than a reasonable period after the emergency has ceased or the period established in §§ 229.10(c) and 229.12, whichever is later. 
+ (4) For the purposes of this section, a “reasonable period” is an extension of up to one business day for checks described in § 229.10(c)(1)(vi), five business days for checks described in § 229.12(b) (1) through (4), and six business days for checks described in § 229.12(c) (1) and (2) or § 229.12(f). A longer extension may be reasonable, but the bank has the burden of so establishing. 
+ [53 FR 19433, May 27, 1988, as amended by Reg. CC, 54 FR 13850, Apr. 6, 1989; Reg. CC, 55 FR 21855, May 30, 1990; 57 FR 3279, Jan. 29, 1992; 57 FR 36598, Aug. 14, 1992; 60 FR 51671, Oct. 3, 1995; Reg. CC, 62 FR 13809, Mar. 24, 1997; 69 FR 47310, Aug. 4, 2004; 84 FR 45403, Aug. 29, 2019; 89 FR 43739, May 20, 2024]
+ 
+ 
+
+ 
+ § 229.14 Payment of interest. 
+ (a) In general. A depositary bank shall begin to accrue interest or dividends on funds deposited in an interest-bearing account not later than the business day on which the depositary bank receives credit for the funds. For the purposes of this section, the depositary bank may— 
+ (1) Rely on the availability schedule of its Federal Reserve Bank, Federal Home Loan Bank, or correspondent bank to determine the time credit is actually received; and 
+ (2) Accrue interest or dividends on funds deposited in interest-bearing accounts by checks that the depositary bank sends to paying banks or subsequent collecting banks for payment or collection based on the availability of funds the depositary bank receives from the paying or collecting banks. 
+ (b) Special rule for credit unions. Paragraph (a) of this section does not apply to any account at a bank described in § 229.2(e)(4), if the bank— 
+ (1) Begins the accrual of interest or dividends at a later date than the date described in paragraph (a) of this section with respect to all funds, including cash, deposited in the account; and 
+ (2) Provides notice of its interest or dividend payment policy in the manner required under § 229.16(d). 
+ (c) Exception for checks returned unpaid. This subpart does not require a bank to pay interest or dividends on funds deposited by a check that is returned unpaid. 
+ 
+
+ 
+ § 229.15 General disclosure requirements. 
+ (a) Form of disclosures. A bank shall make the disclosures required by this subpart clearly and conspicuously in writing. Disclosures, other than those posted at locations where employees accept consumer deposits and ATMs and the notice on preprinted deposit slips, must be in a form that the customer may keep. The disclosures shall be grouped together and shall not contain any information not related to the disclosures required by this subpart. If contained in a document that sets forth other account terms, the disclosures shall be highlighted within the document by, for example, use of a separate heading. 
+ (b) Uniform reference to day of availability. In its disclosure, a bank shall describe funds as being available for withdrawal on “the __________ business day after” the day of deposit. In this calculation, the first business day is the business day following the banking day the deposit was received, and the last business day is the day on which the funds are made available. 
+ (c) Multiple accounts and multiple account holders. A bank need not give multiple disclosures to a customer that holds multiple accounts if the accounts are subject to the same availability policies. Similarly, a bank need not give separate disclosures to each customer on a jointly held account. 
+ (d) Dormant or inactive accounts. A bank need not give availability disclosures to a customer that holds a dormant or inactive account. 
+ 
+
+ 
+ § 229.16 Specific availability policy disclosure. 
+ (a) General. To meet the requirements of a specific availability policy disclosure under §§ 229.17 and 229.18(d), a bank shall provide a disclosure describing the bank's policy as to when funds deposited in an account are available for withdrawal. The disclosure must reflect the policy followed by the bank in most cases. A bank may impose longer delays on a case-by-case basis or by invoking one of the exceptions in § 229.l3, provided this is reflected in the disclosure. 
+ (b) Content of specific availability policy disclosure. The specific availability policy disclosure shall contain the following, as applicable— 
+ (1) A summary of the bank's availability policy; 
+ (2) A description of any categories of deposits or checks used by the bank when it delays availability (such as local or nonlocal checks); how to determine the category to which a particular deposit or check belongs; and when each category will be available for withdrawal (including a description of the bank's business days and when a deposit is considered received);
+ 1 
+ 
+ 
+ 1 A bank that distinguishes in its disclosure between local and nonlocal checks based on the routing number on the check must disclose that certain checks, such as some credit union share drafts that are payable by one bank but payable through another bank, will be treated as local or nonlocal checks based upon the location of the bank by which they are payable and not on the basis of the location of the bank whose routing number appears on the check. A bank that makes funds from nonlocal checks available for withdrawal within the time periods required for local checks under §§ 229.12 and 229.13 is not required to provide this disclosure on payable-through checks to its customers. The statement concerning payable-through checks must describe how the customer can determine whether these checks will be treated as local or nonlocal, or state that special rules apply to such checks and that the customer may ask about the availability of these checks. 
+ (3) A description of any of the exceptions in § 229.13 that may be invoked by the bank, including the time following a deposit that funds generally will be available for withdrawal and a statement that the bank will notify the customer if the bank invokes one of the exceptions; 
+ (4) A description, as specified in paragraph (c)(1) of this section, of any case-by-case policy of delaying availability that may result in deposited funds being available for withdrawal later than the time periods stated in the bank's availability policy; and 
+ (5) A description of how the customer can differentiate between a proprietary and a nonproprietary ATM, if the bank makes funds from deposits at nonproprietary ATMs available for withdrawal later than funds from deposits at proprietary ATMs. 
+ (c) Longer delays on a case-by-case basis —(1) Notice in specific policy disclosure. A bank that has a policy of making deposited funds available for withdrawal sooner than required by this subpart may extend the time when funds are available up to the time periods allowed under this subpart on a case-by-case basis, provided the bank includes the following in its specific policy disclosure— 
+ (i) A statement that the time when deposited funds are available for withdrawal may be extended in some cases, and the latest time following a deposit that funds will be available for withdrawal; 
+ (ii) A statement that the bank will notify the customer if funds deposited in the customer's account will not be available for withdrawal until later than the time periods stated in the bank's availability policy; and 
+ (iii) A statement that customers should ask if they need to be sure about when a particular deposit will be available for withdrawal. 
+ (2) Notice at time of case-by-case delay —(i) In general. When a depositary bank extends the time when funds will be available for withdrawal on a case-by-case basis, it must provide the depositor with a written notice. The notice shall include the following information— 
+ (A) A number or code, which need not exceed four digits, that identifies the customer's account. 
+ (B) The date of the deposit; 
+ (C) The amount of the deposit that is being delayed; and 
+ (D) The day the funds will be available for withdrawal. 
+ (ii) Timing of notice. The notice shall be provided to the depositor at the time of the deposit, unless the deposit is not made in person to an employee of the depositary bank or the decision to extend the time when the deposited funds will be available is made after the time of the deposit. If notice is not given at the time of the deposit, the depositary bank shall mail or deliver the notice to the customer not later than the first business day following the banking day the deposit is made. 
+ (3) Overdraft and returned check fees. A depositary bank that extends the time when funds will be available for withdrawal on a case-by-case basis and does not furnish the depositor with written notice at the time of deposit shall not assess any fees for any subsequent overdrafts (including use of a line of credit) or return of checks or other debits to the account, if— 
+ (i) The overdraft or return of the check or other debit would not have occurred except for the fact that the deposited funds were delayed under paragraph (c)(1) of this section; and 
+ (ii) The deposited check was paid by the paying bank. 
+ Notwithstanding the foregoing, the depositary bank may assess an overdraft or returned check fee if it includes a notice concerning overdraft and returned check fees with the notice required in paragraph (c)(2) of this section and, when required, refunds any such fees upon the request of the customer. The notice must state that the customer may be entitled to a refund of overdraft or returned check fees that are assessed if the check subject to the delay is paid and how to obtain a refund. 
+ (d) Credit union notice of interest payment policy. If a bank described in § 229.2(e)(4) begins to accrue interest or dividends on all deposits made in an interest-bearing account, including cash deposits, at a later time than the day specified in § 229.14(a), the bank's specific policy disclosures shall contain an explanation of when interest or dividends on deposited funds begin to accrue. 
+ [53 FR 19433, May 27, 1988, as amended at 53 FR 31292, Aug. 18, 1988; 53 FR 44324, Nov. 2, 1988; Reg. CC, 54 FR 13850, Apr. 6, 1989; 60 FR 51671, Oct. 3, 1995; Reg. CC, 62 FR 13810, Mar. 24, 1997; 69 FR 47311, Aug. 4, 2004]
+ 
+ 
+
+ 
+ § 229.17 Initial disclosures. 
+ Before opening a new account, a bank shall provide a potential customer with the applicable specific availability policy disclosure described in § 229.16. 
+ [Reg. CC, 60 FR 51671, Oct. 3, 1995]
+ 
+ 
+
+ 
+ § 229.18 Additional disclosure requirements. 
+ (a) Deposit slips. A bank shall include on all preprinted deposit slips furnished to its customers a notice that deposits may not be available for immediate withdrawal. 
+ (b) Locations where employees accept consumer deposits. A bank shall post in a conspicuous place in each location where its employees receive deposits to consumer accounts a notice that sets forth the time periods applicable to the availability of funds deposited in a consumer account. 
+ (c) Automated teller machines. (1) A depositary bank shall post or provide a notice at each ATM location that funds deposited in the ATM may not be available for immediate withdrawal. 
+ (2) A depositary bank that operates an off-premises ATM from which deposits are removed not more than two times each week, as described in § 229.19(a)(4), shall disclose at or on the ATM the days on which deposits made at the ATM will be considered received. 
+ (d) Upon request. A bank shall provide to any person, upon oral or written request, a notice containing the applicable specific availability policy disclosure described in § 229.l6. 
+ (e) Changes in policy. A bank shall send a notice to holders of consumer accounts at least 30 days before implementing a change to the bank's availability policy regarding such accounts, except that a change that expedites the availability of funds may be disclosed not later than 30 days after implementation. 
+ 
+
+ 
+ § 229.19 Miscellaneous. 
+ (a) When funds are considered deposited. For the purposes of this subpart— 
+ (1) Funds deposited at a staffed facility, ATM, or contractual branch are considered deposited when they are received at the staffed facility, ATM, or contractual branch; 
+ (2) Funds mailed to the depositary bank are considered deposited on the day they are received by the depositary bank; 
+ (3) Funds deposited to a night depository, lock box, or similar facility are considered deposited on the day on which the deposit is removed from such facility and is available for processing by the depositary bank; 
+ (4) Funds deposited at an ATM that is not on, or within 50 feet of, the premises of the depositary bank are considered deposited on the day the funds are removed from the ATM, if funds normally are removed from the ATM not more than two times each week; and 
+ (5) Funds may be considered deposited on the next banking day, in the case of funds that are deposited— 
+ (i) On a day that is not a banking day for the depositary bank; or 
+ (ii) After a cut-off hour set by the depositary bank for the receipt of deposits of 2:00 p.m. or later, or, for the receipt of deposits at ATMs, contractual branches, or off-premise facilities, of 12:00 noon or later. Different cut-off hours later than these times may be established for the receipt of different types of deposits, or receipt of deposits at different locations. 
+ (b) Availability at start of business day. Except as otherwise provided in § 229.12(d), if any provision of this subpart requires that funds be made available for withdrawal on any business day, the funds shall be available for withdrawal by the later of: 
+ (1) 9:00 a.m. (local time of the depositary bank); or 
+ (2) The time the depositary bank's teller facilities (including ATMs) are available for customer account withdrawals. 
+ (c) Effect on policies of depositary bank. This part does not— 
+ (1) Prohibit a depositary bank from making funds available to a customer for withdrawal in a shorter period of time than the time required by this subpart; 
+ (2) Affect a depositary bank's right— 
+ (i) To accept or reject a check for deposit; 
+ (ii) To revoke any settlement made by the depositary bank with respect to a check accepted by the bank for deposit, to charge back the customer's account for the amount of a check based on the return of the check or receipt of a notice of nonpayment of the check, or to claim a refund of such credit; and 
+ (iii) To charge back funds made available to its customer for an electronic payment for which the bank has not received payment in actually and finally collected funds; 
+ (3) Require a depositary bank to open or otherwise to make its facilities available for customer transactions on a given business day; or 
+ (4) Supersede any policy of a depositary bank that limits the amount of cash a customer may withdraw from its account on any one day, if that policy— 
+ (i) Is not dependent on the time the funds have been deposited in the account, as long as the funds have been on deposit for the time period specified in §§ 229.10, 229.12, or 229.13; and 
+ (ii) In the case of withdrawals made in person to an employee of the depositary bank— 
+ (A) Is applied without discrimination to all customers of the bank; and 
+ (B) Is related to security, operating, or bonding requirements of the depositary bank. 
+ (d) Use of calculated availability. A depositary bank may provide availability to its nonconsumer accounts based on a sample of checks that represents the average composition of the customer's deposits, if the terms for availability based on the sample are equivalent to or more prompt than the availability requirements of this subpart. 
+ (e) Holds on other funds. (1) A depositary bank that receives a check for deposit in an account may not place a hold on any funds of the customer at the bank, where— 
+ (i) The amount of funds that are held exceeds the amount of the check; or 
+ (ii) The funds are not made available for withdrawal within the times specified in §§ 229.10, 229.12, and 229.13. 
+ (2) A depositary bank that cashes a check for a customer over the counter, other than a check drawn on the depositary bank, may not place a hold on funds in an account of the customer at the bank, if— 
+ (i) The amount of funds that are held exceeds the amount of the check; or 
+ (ii) The funds are not made available for withdrawal within the times specified in §§ 229.10, 229.12, and 229.13. 
+ (f) Employee training and compliance. Each bank shall establish procedures to ensure that the bank complies with the requirements of this subpart, and shall provide each employee who performs duties subject to the requirements of this subpart with a statement of the procedures applicable to that employee. 
+ (g) Effect of merger transaction —(1) In general. For purposes of this subpart, except for the purposes of the new accounts exception of § 229.13(a), and when funds are considered deposited under § 229.19(a), two or more banks that have engaged in a merger transaction may be considered to be separate banks for a period of one year following the consummation of the merger transaction. 
+ (2) Merger transactions on or after July 1, 1998, and before March 1, 2000. If banks have consummated a merger transaction on or after July 1, 1998, and before March 1, 2000, the merged banks may be considered separate banks until March 1, 2001. 
+ [Reg. CC, 53 FR 19433, May 27, 1988, as amended by 54 FR 13850, Apr. 6, 1989; 60 FR 51671, Oct. 3, 1995; 62 FR 13810, Mar. 24, 1997; 64 FR 14577, Mar. 26, 1999]
+ 
+ 
+
+ 
+ § 229.20 Relation to state law. 
+ (a) In general. Any provision of a law or regulation of any state in effect on or before September 1, 1989, that requires funds deposited in an account at a bank chartered by the state to be made available for withdrawal in a shorter time than the time provided in subpart B, and, in connection therewith, subpart A, shall— 
+ (1) Supersede the provisions of the EFA Act and subpart B, and, in connection therewith, subpart A, to the extent the provisions relate to the time by which funds deposited or received for deposit in an account are available for withdrawal; and 
+ (2) Apply to all federally insured banks located within the state. 
+ No amendment to a state law or regulation governing the availability of funds that becomes effective after September 1, 1989, shall supersede the EFA Act and subpart B, and, in connection therewith, subpart A, but unamended provisions of state law shall remain in effect.
+ 
+ (b) Preemption of inconsistent law. Except as provided in paragraph (a), the EFA Act and subpart B, and, in connection therewith, subpart A, supersede any provision of inconsistent state law. 
+ (c) Standards for preemption. A provision of a state law in effect on or before September 2, 1989, is not inconsistent with the EFA Act, or subpart B, or in connection therewith, subpart A, if it requires that funds shall be available in a shorter period of time than the time provided in this subpart. Inconsistency with the EFA Act and subpart B, and in connection therewith, subpart A, may exist when state law— 
+ (1) Permits a depositary bank to make funds deposited in an account by cash, electronic payment, or check available for withdrawal in a longer period of time than the maximum period of time permitted under subpart B, and, in connection therewith, subpart A; or 
+ (2) Provides for disclosures or notices concerning funds availability relating to accounts. 
+ (d) Preemption determinations. The Board may determine, upon the request of any state, bank, or other interested party, whether the EFA Act and subpart B, and, in connection therewith, subpart A, preempt provisions of state laws relating to the availability of funds. 
+ (e) Procedures for preemption determinations. A request for a preemption determination shall include the following— 
+ (1) A copy of the full text of the state law in question, including any implementing regulations or judicial interpretations of that law; and 
+ (2) A comparison of the provisions of state law with the corresponding provisions in the EFA Act and subparts A and B of this part, together with a discussion of the reasons why specific provisions of state law are either consistent or inconsistent with corresponding sections of the EFA Act and subparts A and B of this part. 
+ A request for a preemption determination shall be addressed to the Secretary, Board of Governors of the Federal Reserve System. 
+ [53 FR 19433, May 27, 1988, as amended at 69 FR 47311, Aug. 4, 2004]
+ 
+ 
+
+ 
+ § 229.21 Civil liability. 
+ (a) Civil liability. A bank that fails to comply with any requirement imposed under subpart B, and in connection therewith, subpart A, of this part or any provision of state law that supersedes any provision of subpart B, and in connection therewith, subpart A, with respect to any person is liable to that person in an amount equal to the sum of— 
+ (1) Any actual damage sustained by that person as a result of the failure; 
+ (2) Such additional amount as the court may allow, except that— 
+ (i) In the case of an individual action, liability under this paragraph shall not be less than $125 nor greater than $1,350; and 
+ (ii) In the case of a class action— 
+ (A) No minimum recovery shall be applicable to each member of the class; and 
+ (B) The total recovery under this paragraph in any class action or series of class actions arising out of the same failure to comply by the same depositary bank shall not be more than the lesser of $672,950 or 1 percent of the net worth of the bank involved; and 
+ (3) In the case of a successful action to enforce the foregoing liability, the costs of the action, together with a reasonable attorney's fee as determined by the court. 
+ (b) Class action awards. In determining the amount of any award in any class action, the court shall consider, among other relevant factors— 
+ (1) The amount of any damages awarded; 
+ (2) The frequency and persistence of failures of compliance; 
+ (3) The resources of the bank; 
+ (4) The number of persons adversely affected; and 
+ (5) The extent to which the failure of compliance was intentional. 
+ (c) Bona fide errors —(1) General rule. A bank is not liable in any action brought under this section for a violation of this subpart if the bank demonstrates by a preponderance of the evidence that the violation was not intentional and resulted from a bona fide error, notwithstanding the maintenance of procedures reasonably adapted to avoid any such error. 
+ (2) Examples. Examples of a bona fide error include clerical, calculation, computer malfunction and programming, and printing errors, except that an error of legal judgment with respect to the bank's obligation under this subpart is not a bona fide error. 
+ (d) Jurisdiction. Any action under this section may be brought in any United States district court or in any other court of competent jurisdiction, and shall be brought within one year after the date of the occurrence of the violation involved. 
+ (e) Reliance on Board rulings. No provision of this subpart imposing any liability shall apply to any act done or omitted in good faith in conformity with any rule, regulation, or interpretation thereof by the Board, regardless of whether such rule, regulation, or interpretation is amended, rescinded, or determined by judicial or other authority to be invalid for any reason after the act or omission has occurred. 
+ (f) Exclusions. This section does not apply to claims that arise under subpart C of this part or to actions for wrongful dishonor. 
+ (g) Record retention. (1) A bank shall retain evidence of compliance with the requirements imposed by this subpart for not less than two years. Records may be stored by use of microfiche, microfilm, magnetic tape, or other methods capable of accurately retaining and reproducing information. 
+ (2) If a bank has actual notice that it is being investigated, or is subject to an enforcement proceeding by an agency charged with monitoring that bank's compliance with the EFA Act and this subpart, or has been served with notice of an action filed under this section, it shall retain the records pertaining to the action or proceeding pending final disposition of the matter, unless an earlier time is allowed by order of the agency or court. 
+ [53 FR 19433, May 27, 1988, as amended at 69 FR 47311, Aug. 4, 2004; 84 FR 45403, Aug. 29, 2019; 89 FR 43739, May 20, 2024]
+ 
+ 
+
+ 
+ 
+ Subpart C—Collection of Checks 
+ 
+ § 229.30 Electronic checks and electronic information. 
+ (a) Checks under this subpart. Electronic checks and electronic returned checks are subject to this subpart as if they were checks or returned checks, except where “paper check” or “paper returned check” is specified. For the purposes of this subpart, the term “check” or “returned check” as used in Subpart A includes “electronic check” or “electronic returned check,” except where “paper check” or “paper returned check” is specified. 
+ (b) Writings. If a bank is required to provide information in writing under this subpart, the bank may satisfy that requirement by providing the information electronically if the receiving bank agrees to receive that information electronically. 
+ [82 FR 27579, June 15, 2017]
+ 
+ 
+
+ 
+ § 229.31 Paying bank's responsibility for return of checks and notices of nonpayment. 
+ (a) Return of checks. (1) Subject to the requirement of expeditious return under paragraph (b) of this section, a paying bank may send a returned check to the depositary bank, to any other bank agreeing to handle the returned check, or as provided in paragraph (a)(2) of this section. 
+ (2) A paying bank that is unable to identify the depositary bank with respect to a check may send the returned check to any bank that handled the check for forward collection and must advise the bank to which the check is sent that the paying bank is unable to identify the depositary bank. 
+ (3) A paying bank may convert a check to a qualified returned check. A qualified returned check shall be encoded in magnetic ink with the routing number of the depositary bank, the amount of the returned check, and a “2” in the case of an original check (or a “5” in the case of a substitute check) in position 44 of the qualified return MICR line as a return identifier. A qualified returned original check shall be encoded in accordance with ANS X9.13, and a qualified returned substitute check shall be encoded in accordance with ANS X9.100-140. 
+ (4) Except as provided in paragraph (g) of this section, this section does not affect a paying bank's responsibility to return a check within the deadlines required by the UCC or Regulation J (12 CFR part 210). 
+ (b) Expeditious return of checks. (1) Except as provided in paragraph (d) of this section, if a paying bank determines not to pay a check, it shall return the check in an expeditious manner such that the check would normally be received by the depositary bank not later than 2 p.m. (local time of the depositary bank) on the second business day following the banking day on which the check was presented to the paying bank. 
+ (2) If the second business day following the banking day on which the check was presented to the paying bank is not a banking day for the depositary bank, the paying bank satisfies the expeditious return requirement if it sends the returned check in a manner such that the depositary bank would normally receive the returned check not later than 2 p.m. (local time of the depositary bank) on the depositary bank's next banking day. 
+ (c) Notice of nonpayment. (1) If a paying bank determines not to pay a check in the amount of $5,000 or more, it shall provide notice of nonpayment such that the notice would normally be received by the depositary bank not later than 2 p.m. (local time of the depositary bank) on the second business day following the banking day on which the check was presented to the paying bank. If the day the paying bank is required to provide notice is not a banking day for the depositary bank, receipt of notice not later than 2 p.m. (local time of the depositary bank) on the depositary bank's next banking day constitutes timely notice. Notice may be provided by any reasonable means, including the returned check, a writing (including a copy of the check), or telephone. 
+ (2)(i) To the extent available to the paying bank, notice must include the information contained in the check's MICR line when the check is received by the paying bank, as well as— 
+ (A) Name of the payee(s); 
+ (B) Amount; 
+ (C) Date of the indorsement of the depositary bank; 
+ (D) The bank name, routing number, and trace or sequence number associated with the indorsement of the depositary bank; and 
+ (E) Reason for nonpayment. 
+ (ii) If the paying bank is not sure of the accuracy of an item of information, it shall include the information required by this paragraph to the extent possible, and identify any item of information for which the bank is not sure of the accuracy. 
+ (iii) The notice may include other information from the check that may be useful in identifying the check being returned and the customer. 
+ (d) Exceptions to the expeditious return of checks and notice of nonpayment requirements. The expeditious return and notice of nonpayment requirements of paragraphs (b) and (c) of this section do not apply if— 
+ (1) The check is deposited in a depositary bank that is not subject to subpart B of this part; or 
+ (2) A paying bank is unable to identify the depositary bank with respect to the check. 
+ (e) Identification of returned check. A paying bank returning a check shall clearly indicate on the front of the check that it is a returned check and the reason for return. If the paying bank is returning a substitute check or an electronic returned check, the paying bank shall include this information such that the information would be retained on any subsequent substitute check. 
+ (f) Notice in Lieu of Return. If a check is unavailable for return, the paying bank may send in its place a copy of the front and back of the returned check, or, if no such copy is available, a written notice of nonpayment containing the information specified in paragraph (c)(2) of this section. The copy or written notice shall clearly state that it constitutes a notice in lieu of return. A notice in lieu of return is considered a returned check subject to the requirements of this subpart. 
+ (g) Extension of deadline. The deadline for return or notice of dishonor or nonpayment under the UCC or Regulation J (12 CFR part 210), or § 229.36(d)(3) and (4) is extended to the time of dispatch of such return or notice if the depositary bank (or the receiving bank, if the depositary bank is unidentifiable) receives the returned check or notice— 
+ (1) On or before the depositary bank's (or receiving bank's) next banking day following the otherwise applicable deadline by the earlier of the close of that banking day or a cutoff hour of 2 p.m. (local time of the depositary bank or receiving bank) or later set by the depositary bank (or receiving bank) under UCC 4-108, for all deadlines other than those described in paragraph (g)(2) of this section; or 
+ (2) Prior to the cut-off hour for the next processing cycle (if sent to a returning bank), or on the next banking day (if sent to the depositary bank), for a deadline falling on a Saturday that is a banking day (as defined in the UCC) for the paying bank. 
+ (h) Payable-through and payable-at checks. A check payable at or through a paying bank is considered to be drawn on that bank for purposes of the expeditious return and notice of nonpayment requirements of this subpart. 
+ (i) Reliance on routing number. A paying bank may return a returned check based on any routing number designating the depositary bank appearing on the returned check in the depositary bank's indorsement. 
+ [82 FR 27579, June 15, 2017]
+ 
+ 
+
+ 
+ § 229.32 Returning bank's responsibility for return of checks. 
+ (a) Return of checks. (1) Subject to the requirement of expeditious return under paragraph (b) of this section, a returning bank may send a returned check to the depositary bank, to any other bank agreeing to handle the returned check, or as provided in paragraph (a)(2) of this section. 
+ (2) A returning bank that is unable to identify the depositary bank with respect to a check may send the returned check to any collecting bank that handled the returned check for forward collection if the returning bank was not a collecting bank with respect to the returned check, or to a prior collecting bank, if the returning bank was a collecting bank with respect to the returned check. A returning bank sending a returned check under this paragraph to a bank must advise the bank to which the returned check is sent that the returning bank is unable to identify the depositary bank. 
+ (3) A returning bank may convert a check to a qualified returned check. A qualified returned check shall be encoded in magnetic ink with the routing number of the depositary bank, the amount of the returned check, and a “2” in the case of an original check (or a “5” in the case of a substitute check) in position 44 of the qualified return MICR line as a return identifier. A qualified returned original check shall be encoded in accordance with ANS X9.13, and a qualified returned substitute check shall be encoded in accordance with ANS X9.100-140. 
+ (b) Expeditious return of checks. (1) Except as provided in paragraph (c) of this section, a returning bank shall return a returned check in an expeditious manner such that the check would normally be received by the depositary bank not later than 2 p.m. (local time of the depositary bank) on the second business day following the banking day on which the check was presented to the paying bank. 
+ (2) If the second business day following the banking day on which the check was presented to the paying bank is not a banking day for the depositary bank, the returning bank satisfies the expeditious return requirement if it sends the returned check in a manner such that the depositary bank would normally receive the returned check not later than 2 p.m. (local time of the depositary bank) on the depositary bank's next banking day. 
+ (c) Exceptions to the expeditious return of checks. The expeditious return requirement of paragraph (b) of this section does not apply if— 
+ (1) The check is deposited in a depositary bank that is not subject to subpart B of this part; 
+ (2) A paying bank is unable to identify the depositary bank with respect to the check; or 
+ (3) The bank handles a misrouted returned check pursuant to § 229.33(f). 
+ (d) Notice in Lieu of Return. If a check is unavailable for return, the returning bank may send in its place a copy of the front and back of the returned check, or, if no such copy is available, a written notice of nonpayment containing the information specified in § 229.31(c). The copy or written notice shall clearly state that it constitutes a notice in lieu of return. A notice in lieu of return is considered a returned check subject to the requirements of this section and the other requirements of this subpart. 
+ (e) Settlement. A returning bank shall settle with a bank sending a returned check to it for return by the same means that it settles or would settle with the sending bank for a check received for forward collection drawn on the depositary bank. This settlement is final when made. 
+ (f) Charges. A returning bank may impose a charge on a bank sending a returned check for handling the returned check. 
+ (g) Reliance on routing number. A returning bank may return a returned check based on any routing number designating the depositary bank appearing on the returned check in the depositary bank's indorsement or in magnetic ink on a qualified returned check. 
+ [82 FR 27580, June 15, 2017]
+ 
+ 
+
+ 
+ § 229.33 Depositary bank's responsibility for returned checks and notices of nonpayment. 
+ (a) Right to assert claim. (1) A paying bank or returning bank may be liable to a depositary bank under § 229.38 for failing to return a check in an expeditious manner only if the depositary bank has arrangements in place such that the paying bank or returning bank could return a returned check to the depositary bank electronically, directly or indirectly, by commercially reasonable means. 
+ (2) For purposes of paragraph (a)(1) of this section, the depositary bank that has asserted a claim has the burden of proof for demonstrating that the depositary bank's arrangements meet the standard of paragraph (a)(1). 
+ (b) Acceptance of electronic returned checks and electronic notices of nonpayment. A depositary bank's agreement with the transferor bank governs the terms under which the depositary bank will accept electronic returned checks and electronic written notices of nonpayment. 
+ (c) Acceptance of paper returned checks and paper notices of nonpayment. (1) A depositary bank shall accept paper returned checks and paper notices of nonpayment during its banking day— 
+ (i) At a location, if any, at which presentment of paper checks for forward collection is requested by the depositary bank; and 
+ (ii)(A) At a branch, head office, or other location consistent with the name and address of the bank in its indorsement on the check; 
+ (B) If no address appears in the indorsement, at a branch or head office associated with the routing number of the bank in its indorsement on the check; or 
+ (C) If no routing number or address appears in its indorsement on the check, at any branch or head office of the bank. 
+ (2) A depositary bank may require that paper returned checks be separated from paper forward collection checks. 
+ (d) Acceptance of oral notices of nonpayment. A depositary bank shall accept oral notices of nonpayment during its banking day— 
+ (1) At the telephone number indicated in the indorsement; and 
+ (2) At any other number held out by the bank for receipt of notice of nonpayment. 
+ (e) Payment. (1) A depositary bank shall pay the returning bank or paying bank returning the check to it for the amount of the check prior to the close of business on the depositary bank's banking day on which it received the check (“payment date”) by— 
+ (i) Debit to an account of the depositary bank on the books of the returning bank or paying bank; 
+ (ii) Cash; 
+ (iii) Wire transfer; or 
+ (iv) Any other form of payment acceptable to the returning bank or paying bank. 
+ (2) The proceeds of the payment must be available to the returning bank or paying bank in cash or by credit to an account of the returning bank or paying bank on or as of the payment date. If the payment date is not a banking day for the returning bank or paying bank or the depositary bank is unable to make the payment on the payment date, payment shall be made by the next day that is a banking day for the returning bank or paying bank. These payments are final when made. 
+ (f) Misrouted returned checks and written notices of nonpayment. If a bank receives a returned check or written notice of nonpayment on the basis that it is the depositary bank, and the bank determines that it is not the depositary bank with respect to the check or notice, it shall either promptly send the returned check or notice to the depositary bank directly or by means of a returning bank agreeing to handle the returned check or notice, or send the check or notice back to the bank from which it was received. 
+ (g) Charges. A depositary bank may not impose a charge for accepting and paying checks being returned to it. 
+ (h) Notification to customer. If the depositary bank receives a returned check, notice of nonpayment, or notice of recovery under § 229.35(b), it shall send or give notice to its customer of the facts by midnight of the banking day following the banking day on which it received the returned check, notice of nonpayment, or notice of recovery, or within a longer reasonable time. 
+ (i) Depositary bank without accounts. The requirements of this section with respect to notices of nonpayment do not apply to checks deposited in a depositary bank that does not maintain accounts. 
+ [82 FR 27580, June 15, 2017]
+ 
+ 
+
+ 
+ § 229.34 Warranties and indemnities. 
+ (a) Warranties with respect to electronic checks and electronic returned checks. (1) Each bank that transfers or presents an electronic check or electronic returned check and receives a settlement or other consideration for it warrants that— 
+ (i) The electronic image accurately represents all of the information on the front and back of the original check as of the time that the original check was truncated and the electronic information includes an accurate record of all MICR line information required for a substitute check under § 229.2(aaa) and the amount of the check, and 
+ (ii) No person will receive a transfer, presentment, or return of, or otherwise be charged for an electronic check or electronic returned check, the original check, a substitute check, or a paper or electronic representation of a substitute check such that the person will be asked to make payment based on a check it has already paid. 
+ (2) Each bank that makes the warranties under paragraph (a)(1) of this section makes the warranties to— 
+ (i) In the case of transfers for collection or presentment, the transferee bank, any subsequent collecting bank, the paying bank, and the drawer; and 
+ (ii) In the case of transfers for return, the transferee returning bank, any subsequent returning bank, the depositary bank, and the owner. 
+ (b) Transfer and presentment warranties with respect to a remotely created check. (1) A bank that transfers or presents a remotely created check and receives a settlement or other consideration warrants to the transferee bank, any subsequent collecting bank, and the paying bank that the person on whose account the remotely created check is drawn authorized the issuance of the check in the amount stated on the check and to the payee stated on the check. For purposes of this paragraph (b)(1), “account” includes an account as defined in § 229.2(a) as well as a credit or other arrangement that allows a person to draw checks that are payable by, through, or at a bank. 
+ (2) If a paying bank asserts a claim for breach of warranty under paragraph (b)(1) of this section, the warranting bank may defend by proving that the customer of the paying bank is precluded under UCC 4-406, as applicable, from asserting against the paying bank the unauthorized issuance of the check. 
+ (c) Settlement amount, encoding, and offset warranties. (1) Each bank that presents one or more checks to a paying bank and in return receives a settlement or other consideration warrants to the paying bank that the total amount of the checks presented is equal to the total amount of the settlement demanded by the presenting bank from the paying bank. 
+ (2) Each bank that transfers one or more checks or returned checks to a collecting bank, returning bank, or depositary bank and in return receives a settlement or other consideration warrants to the transferee bank that the accompanying information, if any, accurately indicates the total amount of the checks or returned checks transferred. 
+ (3) Each bank that presents or transfers a check or returned check warrants to any bank that subsequently handles it that, at the time of presentment or transfer, the information encoded after issue regarding the check or returned check is accurate. For purposes of this paragraph, the information encoded after issue regarding the check or returned check means any information that could be encoded in the MICR line of a paper check. 
+ (4) If a bank settles with another bank for checks presented, or for returned checks for which it is the depositary bank, in an amount exceeding the total amount of the checks, the settling bank may set off the excess settlement amount against subsequent settlements for checks presented, or for returned checks for which it is the depositary bank, that it receives from the other bank. 
+ (d) Returned check warranties. (1) Each paying bank or returning bank that transfers a returned check and receives a settlement or other consideration for it warrants to the transferee returning bank, to any subsequent returning bank, to the depositary bank, and to the owner of the check, that— 
+ (i) The paying bank, or in the case of a check payable by a bank and payable through another bank, the bank by which the check is payable, returned the check within its deadline under the UCC or § 229.31(g) of this part; 
+ (ii) It is authorized to return the check; 
+ (iii) The check has not been materially altered; and 
+ (iv) In the case of a notice in lieu of return, the check has not and will not be returned. 
+ (2) These warranties are not made with respect to checks drawn on the Treasury of the United States, U.S. Postal Service money orders, or checks drawn on a state or a unit of general local government that are not payable through or at a bank. 
+ (e) Notice of nonpayment warranties. (1) Each paying bank that gives a notice of nonpayment warrants to the transferee bank, to any subsequent transferee bank, to the depositary bank, and to the owner of the check that— 
+ (i) The paying bank, or in the case of a check payable by a bank and payable through another bank, the bank by which the check is payable, returned or will return the check within its deadline under the UCC or § 229.31(g) of this part; 
+ (ii) It is authorized to send the notice; and 
+ (iii) The check has not been materially altered. 
+ (2) These warranties are not made with respect to checks drawn on the Treasury of the United States, U.S. Postal Service money orders, or check drawn on a state or a unit of general local government that are not payable through or at a bank. 
+ (f) Remote deposit capture indemnity. (1) The indemnity described in paragraph (f)(2) of this section is provided by a depositary bank that— 
+ (i) Is a truncating bank under § 229.2(eee)(2) because it accepts deposit of an electronic image or other electronic information related to an original check; 
+ (ii) Does not receive the original check; 
+ (iii) Receives settlement or other consideration for an electronic check or substitute check related to the original check; and 
+ (iv) Does not receive a return of the check unpaid. 
+ (2) A bank described in paragraph (f)(1) of this section shall indemnify, as set forth in § 229.34(i), a depositary bank that accepts the original check for deposit for losses incurred by that depositary bank if the loss is due to the check having already been paid. 
+ (3) A depositary bank may not make an indemnity claim under paragraph (f)(2) of this section if the original check it accepted for deposit bore a restrictive indorsement inconsistent with the means of deposit. 
+ (g) Indemnities with respect to electronically-created items. Each bank that transfers or presents an electronically-created item and receives a settlement or other consideration for it shall indemnify, as set forth in § 229.34(i), each transferee bank, any subsequent collecting bank, the paying bank, and any subsequent returning bank against losses that result from the fact that— 
+ (1) The electronic image or electronic information is not derived from a paper check; 
+ (2) The person on whose account the electronically-created item is drawn did not authorize the issuance of the item in the amount stated on the item or to the payee stated on the item (for purposes of this paragraph (g)(2), “account” includes an account as defined in section 229.2(a) as well as a credit or other arrangement that allows a person to draw checks that are payable by, through, or at a bank); or 
+ (3) A person receives a transfer, presentment, or return of, or otherwise is charged for an electronically-created item such that the person is asked to make payment based on an item or check it has already paid. 
+ (h) Damages. Damages for breach of the warranties in this section shall not exceed the consideration received by the bank that presents or transfers a check or returned check, plus interest compensation and expenses related to the check or returned check, if any. 
+ (i) Indemnity amounts. (1) The amount of the indemnity in paragraphs (f)(2) and (g) of this section shall not exceed the sum of— 
+ (i) The amount of the loss of the indemnified bank, up to the amount of the settlement or other consideration received by the indemnifying bank; and 
+ (ii) Interest and expenses of the indemnified bank (including costs and reasonable attorney's fees and other expenses of representation). 
+ (2)(i) If a loss described in paragraph (f)(2) or (g) of this section results in whole or in part from the indemnified bank's negligence or failure to act in good faith, then the indemnity amount described in paragraph (i)(1) of this section shall be reduced in proportion to the amount of negligence or bad faith attributable to the indemnified bank. 
+ (ii) Nothing in this paragraph (i)(2) affects the rights of a person under the UCC or other applicable provision of state or federal law. 
+ (j) Tender of defense. If a bank is sued for breach of a warranty or for indemnity under this section, it may give a prior bank in the collection or return chain written notice of the litigation, and the bank notified may then give similar notice to any other prior bank. If the notice states that the bank notified may come in and defend and that failure to do so will bind the bank notified in an action later brought by the bank giving the notice as to any determination of fact common to the two litigations, the bank notified is so bound unless after seasonable receipt of the notice the bank notified does come in and defend. 
+ (k) Notice of claim. Unless a claimant gives notice of a claim for breach of warranty or for indemnity under this section to the bank that made the warranty or indemnification within 30 days after the claimant has reason to know of the breach or facts and circumstances giving rise to the indemnity and the identity of the warranting or indemnifying bank, the warranting or indemnifying bank is discharged to the extent of any loss caused by the delay in giving notice of the claim. 
+ [82 FR 27581, June 15, 2017]
+ 
+ 
+
+ 
+ § 229.35 Indorsements. 
+ (a) Indorsement standards. A bank (other than a paying bank) that handles a check during forward collection or a returned check shall indorse the check in a manner that permits a person to interpret the indorsement, in accordance with American National Standard (ANS) Specifications for Physical Check Endorsements, X9.100-111 (ANS X9.100-111), for a paper check other than a substitute check; ANS Specifications for an Image Replacement Document, X9.100-140 (ANS X9.100-140), for a substitute check; and ANS Specifications for Electronic Exchange of Check and Image Data—Domestic, X9.100-187 (ANS X9.100-187), for an electronic check; unless the Board by rule or order determines that different standards apply or the parties otherwise agree. 
+ (b) Liability of bank handling check. A bank that handles a check for forward collection or return is liable to any bank that subsequently handles the check to the extent that the subsequent bank does not receive payment for the check because of suspension of payments by another bank or otherwise. This paragraph applies whether or not a bank has placed its indorsement on the check. This liability is not affected by the failure of any bank to exercise ordinary care, but any bank failing to do so remains liable. A bank seeking recovery against a prior bank shall send notice to that prior bank reasonably promptly after it learns the facts entitling it to recover. A bank may recover from the bank with which it settled for the check by revoking the settlement, charging back any credit given to an account, or obtaining a refund. A bank may have the rights of a holder with respect to each check it handles. 
+ (c) Indorsement by a bank. After a check has been indorsed by a bank, only a bank may acquire the rights of a holder— 
+ (1) Until the check has been returned to the person initiating collection; or 
+ (2) Until the check has been specially indorsed by a bank to a person who is not a bank. 
+ (d) Indorsement for depositary bank. A depositary bank may arrange with another bank to apply the other bank's indorsement as the depositary bank indorsement, provided that any indorsement of the depositary bank on the check avoids the area reserved for the depositary bank indorsement as specified in the indorsement standard applicable to the check under paragraph (a) of this section. The other bank indorsing as depositary bank is considered the depositary bank for purposes of subpart C of this part. 
+ [53 FR 19433, May 27, 1988, as amended at 82 FR 27582, June 15, 2017]
+ 
+ 
+
+ 
+ § 229.36 Presentment and issuance of checks. 
+ (a) Receipt of electronic checks. The terms under which a paying bank will accept presentment of an electronic check is governed by the paying bank's agreement with the presenting bank. 
+ (b) Receipt of paper checks. (1) A paper check is considered received by the paying bank when it is received— 
+ (i) At a location to which delivery is requested by the paying bank; 
+ (ii) At an address of the bank associated with the routing number on the check, whether contained in the MICR line or in fractional form; 
+ (iii) At a branch, head office, or other location consistent with the name and address of the bank on the check if the bank is identified on the check by name and address; or 
+ (iv) At any branch or head office, if the bank is identified on the check by name without address. 
+ (2) A bank may require that checks presented to it as a paying bank be separated from returned checks. 
+ (c) Liability of bank during forward collection. Settlements between banks for the forward collection of a check are final when made; however, a collecting bank handling a check for forward collection may be liable to a prior collecting bank, including the depositary bank, and the depositary bank's customer. 
+ (d) Same-day settlement. (1) A paper check is considered presented, and a paying bank must settle for or return the check pursuant to paragraph (d)(2) of this section, if a presenting bank delivers the check in accordance with reasonable delivery requirements established by the paying bank and demands payment under this paragraph (d)— 
+ (i) At a location designated by the paying bank for receipt of paper checks under this paragraph (d) at which the paying bank would be considered to have received the paper check under paragraph (b) of this section or, if no location is designated, at any location described in paragraph (b) of this section; and 
+ (ii) By 8 a.m. on a business day (local time of the location described in paragraph (d)(1)(i) of this section). 
+ (2) A paying bank may require that paper checks presented for settlement pursuant to paragraph (d)(1) of this section be separated from other forward-collection checks or returned checks. 
+ (3) If presentment of a paper check meets the requirements of paragraph (d)(1) of this section, the paying bank is accountable to the presenting bank for the amount of the check unless, by the close of Fedwire on the business day it receives the check, it either— 
+ (i) Settles with the presenting bank for the amount of the check by credit to an account at a Federal Reserve Bank designated by the presenting bank; or 
+ (ii) Returns the check. 
+ (4) Notwithstanding paragraph (d)(3) of this section, if a paying bank closes on a business day and receives presentment of a paper check on that day in accordance with paragraph (d)(1) of this section— 
+ (i) The paying bank is accountable to the presenting bank for the amount of the check unless, by the close of Fedwire on its next banking day, it either— 
+ (A) Settles with the presenting bank for the amount of the check by credit to an account at a Federal Reserve Bank designated by the presenting bank; or 
+ (B) Returns the check. 
+ (ii) If the closing is voluntary, unless the paying bank settles for or returns the check in accordance with paragraph (d)(3) of this section, it shall pay interest compensation to the presenting bank for each day after the business day on which the check was presented until the paying bank settles for the check, including the day of settlement. 
+ [82 FR 27583, June 15, 2017]
+ 
+ 
+
+ 
+ § 229.37 Variation by agreement. 
+ The effect of the provisions of subpart C may be varied by agreement, except that no agreement can disclaim the responsibility of a bank for its own lack of good faith or failure to exercise ordinary care, or can limit the measure of damages for such lack or failure; but the parties may determine by agreement the standards by which such responsibility is to be measured if such standards are not manifestly unreasonable. 
+ 
+
+ 
+ § 229.38 Liability. 
+ (a) Standard of care; liability; measure of damages. A bank shall exercise ordinary care and act in good faith in complying with the requirements of this subpart. A bank that fails to exercise ordinary care or act in good faith under this subpart may be liable to the depositary bank, the depositary bank's customer, the owner of a check, or another party to the check. The measure of damages for failure to exercise ordinary care is the amount of the loss incurred, up to the amount of the check, reduced by the amount of the loss that party would have incurred even if the bank had exercised ordinary care. A bank that fails to act in good faith under this subpart may be liable for other damages, if any, suffered by the party as a proximate consequence. Subject to a bank's duty to exercise ordinary care or act in good faith in choosing the means of return or notice of nonpayment, the bank is not liable for the insolvency, neglect, misconduct, mistake, or default of another bank or person, or for loss or destruction of a check or notice of nonpayment in transit or in the possession of others. This section does not affect a paying bank's liability to its customer under the U.C.C. or other law. 
+ (b) Paying bank's failure to make timely return. If a paying bank fails both to comply with its expeditious return requirements under § 229.31(b) and with the deadline for return under the UCC, Regulation J (12 CFR part 210), or the extension of deadline under § 229.31(g) in connection with a single nonpayment of a check, the paying bank shall be liable under either § 229.31(b) or such other provision, but not both. 
+ (c) Comparative negligence. If a person, including a bank, fails to exercise ordinary care or act in good faith under this subpart in indorsing a check (§ 229.35), accepting a returned check or notice of nonpayment (§ 229.33(b), (c), and (d)), or otherwise, the damages incurred by that person under § 229.38(a) shall be diminished in proportion to the amount of negligence or bad faith attributable to that person. 
+ (d) Responsibility for certain aspects of checks. (1) A paying bank, or in the case of a check payable through the paying bank and payable by another bank, the bank by which the check is payable, is responsible for damages under paragraph (a) of this section to the extent that the condition of the check when issued by it or its customer adversely affects the ability of a bank to indorse the check legibly in accordance with § 229.35. A depositary bank is responsible for damages under paragraph (a) of this section to the extent that the condition of the back of a check arising after the issuance of the check and prior to acceptance of the check by it adversely affects the ability of a bank to indorse the check legibly in accordance with § 229.35. A reconverting bank is responsible for damages under paragraph (a) of this section to the extent that the condition of the back of a substitute check transferred, presented, or returned by it— 
+ (i) Adversely affects the ability of a subsequent bank to indorse the check legibly in accordance with § 229.35; or 
+ (ii) Causes an indorsement that previously was applied in accordance with § 229.35 to become illegible. 
+ (2) Responsibility under this paragraph (d) shall be treated as negligence of the paying bank, depositary bank, or reconverting bank for purposes of paragraph (c) of this section. 
+ (e) Timeliness of action. If a bank is delayed in acting beyond the time limits set forth in this subpart because of interruption of communication or computer facilities, suspension of payments by a bank, war, emergency conditions, failure of equipment, or other circumstances beyond its control, its time for acting is extended for the time necessary to complete the action, if it exercises such diligence as the circumstances require. 
+ (f) Exclusion. Section 229.21 of this part and section 611 (a), (b), and (c) of the EFA Act (12 U.S.C. 4010 (a), (b), and (c)) do not apply to this subpart. 
+ (g) Jurisdiction. Any action under this subpart may be brought in any United States district court, or in any other court of competent jurisdiction, and shall be brought within one year after the date of the occurrence of the violation involved. 
+ (h) Reliance on Board rulings. No provision of this subpart imposing any liability shall apply to any act done or omitted in good faith in conformity with any rule, regulation, or interpretation thereof by the Board, regardless of whether the rule, regulation, or interpretation is amended, rescinded, or determined by judicial or other authority to be invalid for any reason after the act or omission has occurred. 
+ (i) Presumption of Alteration —(1) Presumption. Subject to paragraphs (i)(2) and (3) of this section and in the absence of a Federal statute or regulation to the contrary, the presumption in this paragraph applies with respect to any dispute between banks arising under Federal or State law as to whether a substitute check or electronic check transferred between those banks contains an alteration or is derived from an original check that was issued with an unauthorized signature of the drawer. When such a dispute arises, there is a rebuttable presumption that the substitute check or electronic check contains an alteration. 
+ (2) Rebuttal of presumption. The presumption of alteration may be overcome by proving by a preponderance of evidence that either the substitute check or electronic check does not contain an alteration, or that the substitute check or electronic check is derived from an original check that was issued with an unauthorized signature of the drawer. 
+ (3) Effect of producing original check. If the original check is made available for examination by all banks involved in the dispute, the presumption in paragraph (i)(1) of this section shall no longer apply. 
+ [53 FR 19433, May 27, 1988, as amended at 82 FR 27583, June 15, 2017; 83 FR 46853, Sept. 17, 2018]
+ 
+ 
+
+ 
+ § 229.39 Insolvency of bank. 
+ (a) Duty of receiver to return unpaid checks. A check or returned check in, or coming into, the possession of a paying bank, collecting bank, depositary bank, or returning bank that suspends payment, and which is not paid, shall be returned by the receiver, trustee, or agent in charge of the closed bank to the bank or customer that transferred the check to the closed bank. 
+ (b) Claims against banks for checks not returned by receiver. If a check or returned check is not returned by the receiver, trustee, or agent in charge of the closed bank under paragraph (a) of this section, a bank shall have claims with respect to the check or returned check as follows: 
+ (1) If the paying bank has finally paid the check, or if a depositary bank is obligated to pay the returned check, and suspends payment without making a settlement for the check or returned check with the prior bank that is or becomes final, the prior bank has a claim against the paying bank or the depositary bank. 
+ (2) If a collecting bank, paying bank, or returning bank receives settlement from a subsequent bank for a check or returned check, which settlement is or becomes final, and suspends payments without making a settlement for the check with the prior bank, which is or becomes final, the prior bank has a claim against the collecting bank or returning bank. 
+ (c) Preferred claim against presenting bank for breach of warranty. If a paying bank settles with a presenting bank for one or more checks, and if the presenting bank breaches a warranty specified in § 229.34(c)(1) or (3) with respect to those checks and suspends payments before satisfying the paying bank's warranty claim, the paying bank has a preferred claim against the presenting bank for the amount of the warranty claim. 
+ (d) Finality of settlement. If a paying bank or depositary bank gives, or a collecting bank, paying bank, or returning bank gives or receives, a settlement for a check or returned check and thereafter suspends payment, the suspension does not prevent or interfere with the settlement becoming final if such finality occurs automatically upon the lapse of a certain time or the happening of certain events. 
+ [82 FR 27583, June 15, 2017]
+ 
+ 
+
+ 
+ § 229.40 Effect of merger transaction. 
+ For purposes of this subpart, two or more banks that have engaged in a merger transaction may be considered to be separate banks for a period of one year following the consummation of the merger transaction. 
+ [82 FR 27584, June 15, 2017]
+ 
+ 
+
+ 
+ § 229.41 Relation to State law. 
+ The provisions of this subpart supersede any inconsistent provisions of the U.C.C. as adopted in any state, or of any other state law, but only to the extent of the inconsistency.

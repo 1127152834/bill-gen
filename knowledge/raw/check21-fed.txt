@@ -1,0 +1,736 @@
+source: check21-fed
+topic: Federal Reserve Check 21 规则（替代支票与图像交换）
+kind: payment_rules
+url: https://www.federalreserve.gov/secrs/2004/may/20040525/r-1176/r-1176_150_1.pdf
+fetched_at: 2026-10-30T19:13:04Z
+content_type: application/pdf
+sha256: 91a66f2aa90b7691f383f0697aa85fe90dd665b691bd97383da5998f57f84a4b
+--- 正文（外链原文摘录，只作离线检索用）---
+
+MICR-LINE ISSUES ASSOCIATED WITH 
+THE CHECK 21 ACT AND THE BOARD’S PROPOSED RULE 
+Prepared by Federal Reserve Board Staff 
+April 27, 2004 
+1. 
+Overview of statutory MICR line requirement and the proposed rule. 
+A. 
+Statutory MICR-line requirement for substitute checks -tj 
+1. Requires a substitute check to “bear a MICR line containing all the information 
+appearing on the MICR line of the original check, except as provided under 
+generally applicable industry standards for substitute checks to facilitate the 
+processing of substitute checks.” This requirement is separate from 
+the 
+requirement that the substitute check contain an image of the original check. 
+B. 
+Proposed rule. 0 
+12 CFR 
+(substitute check definition) and Commentary 
+2. Paragraph 5(a) 
+of the commentary says that the industry standard (ANS X9.90) 
+requires a 4 or 5 in position 44. 
+3. Paragraph 5(b) 
+of the commentary would permit but not require an additional 
+variation to allow banks to correct an amount-encoding error that appeared on an 
+original check (to promote processing of substitute checks in the same manner as 
+original checks, because banks routinely correct errors on originals). 
+4. Paragraph 5(c) 
+of the commentary clarifies that no other MICR-line variations are 
+permissible. Most likely source of a MICR error not present on the original check 
+equipment
+would be 
+did
+if 
+not accurately read the 
+original MICR line. Proposed rule therefore highlighted MICR-read errors as an 
+impermissible MICR-line variation. 0 
+12 CFR 
+(purported substitute check provision) and commentary 
+5. Acknowledged that a check with a MICR error may 
+still be processable even 
+though it does not meet the substitute check definition. Proposed rule would 
+subject such a “purported substitute check” to the substitute check warranties, 
+indemnity, recredit, and consumer awareness provisions to give certainty and 
+Check 2 1 protections to subsequent recipients. 11. 
+Overview of MICR-related comments and issues. 
+A. 
+Variations and repairs. 
+
+-2-
+1. Original check’s MICR line varies over time as it is amount-encoded and/or 
+stripped. At what point is the MICR line on the original check the measure for 
+what must be in the MICR line of the substitute check? 
+2. What is the status of a substitute check made from 
+an original check that was 
+stripped with only the bank routing number and amount prior to truncation? 
+Would a substitute check that only reproduced the MICR strip be a legal 
+equivalent? 
+3. What is the status of a substitute check created from an X9.37 file (or an original 
+check) that does not have an encoded amount field? Unencoded amount should 
+not be considered an error, as suggested by proposed rule. 
+4. Why permit a bank to correct an amount-encoding error on an original but not 
+permit it to correct an error in other field of the MICR line of an original? 
+5. Disagree with Board’s treatment of MICR-line repair issues generally. Suggest 
+alternative approach: a substitute check should have a full MICR line (in 
+magnetic ink) and failure to meet that requirement violates Check 21, but an item 
+with a MICR error nonetheless should be a legal equivalent. Problems 
+with 
+substitute check MICR line should be covered under UCC encoding warranty. 
+6. Proposed rule inadequately addresses the issue of MICR repair by banks other 
+than the reconverting bank. Rule should encourage MICR repair of substitute 
+checks in the same manner as original checks are repaired. Bad repair should be a 
+breach of the UCC encoding warranty but should not implicate the Check 21 
+warranties. 
+7. What i s the status of a substitute check sent as a qualified return that incorrectly 
+identifies the depositary bank? May a collecting bank correct the encoding error, 
+bank for
+or must it return the item 
+correction?
+to the 
+B. 
+Use of magnetic ink. 
+1. For limited purpose of returning paid checks to depositors, reconverting bank 
+should be able to create a substitute check without using magnetic ink. 
+2. Would something without magnetic ink be a purported substitute check? 
+C. 
+Specific issues concerning position 44. 
+1. Is proper encoding of position 44 required to create a valid substitute check? 
+2. Substitute check with 
+position 44 should be legally should remedy 
+be the UCC
+equivalent; 
+encoding warranty. 
+
+- 3 - 
+3. Clarify that a “4” 
+will be placed in position 44 of the actual substitute check 
+MICR line but a “5” 
+will be applied by adding a strip to a qualified return. 
+4. Clarify liability for failure to encode position 44 correctly; reconverting bank that 
+failed to encode should bear losses for later substitute checks that aren’t legally 
+equivalent because of shrunken image. 
+5. What’s the potential liability for a returning bank that creates a qualified returned 
+substitute check with a 2 instead of a 5 in position 44, particularly if that item is 
+then used to create a second substitute check? 
+6. If a collecting bank receives a substitute check stripped without a 4 in position 44, 
+then image-captured that substitute check and converted it to a second substitute 
+check, does the bank that stripped the check provide an encoding warranty? 
+D. 
+Purported substitute checks. 
+1. Purported substitute check provision should apply to a substitute check that fails 
+any of the underlying substitute check requirements, not just the MICR-line 
+requirement. 
+2. Board should clarify when a document would purport to be a substitute check. 
+3. Board should delete purported substitute check provision because it creates 
+uncertainty; not clear whether a subsequent bank has authority to repair 
+something that’s not a legal equivalent. 
+111. 
+Board staffs 
+goals for MICR-line replication and repair. 
+A. 
+Clearly establish the MICR line requirements to be a substitute check. 
+Establish the appropriate time at which the original check’s MICR line becomes 
+the measure for the sufficiency of the substitute check’s MICR line and clearly 
+identify what, if any, variations from that MICR-line are permitted or required. A 
+basic principle of Check 21 is that banks receiving substitute checks need not 
+change the way in which they process checks. Banks therefore should be able to 
+access and rely on the MICR line of a substitute check in the same way that they 
+currently rely on the MICR line of an original check. 
+B. 
+Clarify the legal status of a document that contains a MICR line that does 
+requirements to be
+not meet 
+a
+the 
+substitute check. This 
+should address the status of such a document under both the Check 21 
+D and the UCC. 
+1. A document that doesn’t replicate the MICR line of the original check within the 
+parameters established by the rule is not a substitute check and therefore is not the 
+
+-4- 
+legal equivalent of an original check and does not carry Check 21 Act protections. 
+A bank that creates such a document thus could avoid Check 21 liability, and 
+recipients would be without Check 2 1 protections. These incentives should be 
+discouraged. 
+2. Clarify whether a document without a compliant MICR line (or that fails any 
+other substitute check requirement) is an “item” 
+that can be repaired and collected 
+under the UCC; clarify the application of the UCC and Reg. CC encoding 
+warranties to the initial substitute check MICR line, position 44, and subsequent 
+repairs. 
+C. 
+Clarify the rules that apply to MICR repair. 
+Basic theory should be to facilitate processing of substitute checks as if they were 
+original checks, within the bounds of the basic statutory requirements for 
+substitute checks. 
+IV. 
+Alternative MICR-line framework that better achieves stated goals. 
+A. 
+Basic MICR-line replication requirement -substitute check must bear 
+original check’s when-issued MICR line. 
+A reconverting bank when creating a substitute check must replicate the MICR 
+line information that appeared on the original check at the time that the original 
+check was issued (k, 
+the MICR information that is preprinted on the check). 
+B. 
+Proper encoding of position 44 - required because of industry standard 
+prong, not MICR-line replication prong, of substitute check definition. 
+In addition to replicating the original check’s when-issued MICR line, a 
+reconverting bank must properly encode position 44. This requirement comes not 
+from the MICR-line replication criterion of the substitute check definition, but 
+rather from the “must conform to industry standards for substitute checks” X9.90, 
+criterion 
+the
+(ANS 
+relevant industry standard, requires proper encoding of 
+position 44). Commentary could clarify how a reconverting bank could comply (=, 
+add
+with 
+the
+the position 44 encoding requirement 
+4 to a forward-side 
+substitute check directly if position 44 was blank on the original check (or by strip 5 
+to a
+if position 44 of the original was encoded for forward collection); add the 
+return-side substitute check by strip). 
+C. 
+Reconverting bank and other banks may strip a valid substitute check as 
+needed, subject to encoding warranties. 
+A substitute check that at the time of its creation contained the when-issued met line 
+of 
+the
+the 
+other
+original 
+substitute
+check
+MICR 
+and 
+check requirements 
+would be a substitute check and could be stripped as necessary for forward 
+
+-5- 
+collection and/or return (just as an original check could) without altering the 
+item’s status as a substitute check. Misencoded strips (other than position 44 as 
+encoded by the reconverting bank) would not implicate legal equivalence, 
+warranties, or 
+under Check 21 but would be covered by the UCC 
+and 
+Reg. CC encoding warranties, just as they are today. 
+D. 
+Amount-encoding a substitute check -permitted but not required, just as for 
+original checks today. 
+The reconverting bank or a subsequent bank could encode the amount on the 
+substitute check. This would be considered an addition to the required MICR-line 
+information, not a variation from it. Just as with original checks, a substitute 
+check’s legal status would not be affected by amount encoding, and amount 
+encoding would not implicate legal equivalence or warranties under Check 21. 
+Amount-encoding errors on substitute checks would be covered by the UCC and 
+Reg. CC encoding warranties, just as they are today for original checks. 
+E. 
+Purported substitute checks. 
+Purported substitute checks generally. A document that does not meet the 
+substitute check definition because of a MICR-line deficiency still may be sent 
+through the check collection process as if it were a substitute check. Recipients 
+therefore should have the full range of Check 21 Act protections. Such an item 
+thus should be subject to all parts of subpart D except for 
+(legal 
+equivalence) and 229.5 1(d) (application of other law to legal equivalents). 
+Therefore, a failure to replicate the MICR line or to encode position 44 correctly 
+could give rise to a Check 21 warranty claim (breach of the legal equivalence 
+warranty) or to an indemnity claim (check would have been processed correctly 
+and/or image wouldn’t have been subject to shrinkage if original had been 
+transferred instead). 
+Note: Purported substitute check provision of proposed rule states that an item is 
+purported substitute check if it meets all the substitute check criteria except the 
+MICR-line replication requirement. Therefore, something that does not use 
+magnetic ink is not a purported substitute check under the proposed rule, because 
+that document also fails the “suitable for automated processing” and “industry 
+standard” criteria. 
+Query: Should failure to meet any of the other substitute check criteria also give 
+rise to purported substitute check liabilities? 
+Query: Should a purported substitute check be able to become an actual bank 
+corrects the MICR
+substitute check eligible for legal 
+-
+equivalence if a 
+line 
+error such that it matches the original check’s when-issued MICR line? 
+
+-6-
+2. Legal status of purported substitute checks. A collecting, paying, or returning 
+bank would not be required to repair, transfer, or charge a customer’s account for 
+a purported substitute check and could return the purported substitute check on 
+the grounds that it is neither the legal equivalent of an original check nor an item 
+under the UCC. However, if the basic payment 
+information (bank routing 
+number, account number, and amount) on the purported substitute check were 
+correct, a bank might not detect that it was handling a non-legally-equivalent 
+substitute check, and the paying bank might charge the customer’s account. This 
+would be similar to the treatment of copies in lieu (which are not checks or legal 
+equivalents of checks) today. A bank that transferred or paid a purported 
+substitute check would potentially be liable for the Check 21 Act warranties and 
+indemnity, but that would only arise in practice if there were a problem with the 
+purported substitute check. In other words, a bank would not be prevented from 
+repairing or charging for a purported substitute check, but it would take on a 
+risk in doing so. 
+
+MICR-LINE ISSUES ASSOCIATED WITH 
+THE CHECK 21 ACT AND THE BOARD’S PROPOSED RULE 
+Final Agenda for May 3,2004 
+I. 
+Brief overview of: i. 
+Statutory MICR line requirements .. 11. 
+The Board’s proposed rule iii. 
+Issues raised by commenters 11. 
+Discussion of goals for MICR-line 
+and alternatives for achieving 
+them: i. 
+Clarify what a MICR line must contain to meet the substitute check 
+definition ii. 
+Clarify the effect of check stripping, before or after creation of a substitute 
+check 
+... 111. Clarify the rules for adding to or repairing a MICR line 
+1. Position 44 
+2. Amount 
+3. Other fields 
+iv. Handling of items that purport to be substitute checks but do not meet the 
+substitute check definition because of a MICR-line error 
+1. Which parts of subpart D should apply to items with a MICR-line 
+error? 
+2. 
+banks be able to repair a MICR-line error and thereby 
+create a compliant substitute check? 
+3. Should a document 
+that does not meet the substitute check 
+definition for a reason other than a MICR-line error be treated as a 
+purported substitute check? 
+Revision date: 413012004 
+
+MICR-line issues associated with the Board’s proposed rule to implement the Check 21 Act 
+Notes of 05/03/04 meeting with commenters 
+See attached attendee list. Participation in the meeting was limited to organizations that 
+specifically raised MICR-line issues in their comment letter. 
+MICR line requirements 
+Review of Check 21 statute and Board’s proposed rule 
+Board staff opened the meeting by restating the MICR-line requirement in section 3(16)(B) 
+of the Check 21 Act: 
+Substitute check. The term “substitute check” means a paper reproduction of the 
+original check that- * * * 
+(B) Bears a MICR line containing all the information appearing on the MICR 
+line of the original check, except as provided under generally applicable 
+industry standards for substitute checks to facilitate the processing of 
+substitute checks; * * * 
+Board staff outlined the scope of permissible MICR-line variations set forth in its 
+proposed rule (issued December 22, 2003) implementing this statutory provision: 
+(1) Industry standards require position 44 of the MICR line of the substitute check 
+to vary from position 44 of the MICR line of the original. 
+(2) The amount field of the MICR line of the substitute check may vary from the 
+amount field of the MICR line of the original. 
+(3) No other variations would be 
+That is to say, any other variation 
+would cause the item in question to fail to meet the statutory definition of a 
+substitute check, such that the item could not be the legal equivalent of an 
+original check. 
+Alternative treatment of MICR line then 
+set forth
+Board 
+a
+staff 
+possible alternative regulatory treatment of MICR-line 
+replication and repair: 
+from the
+(1) A substitute check must bear the preprinted MICR line 
+original check (the original check’s “when-issued” MICR line). 
+(2) Proper encoding of position 44 of the substitute check is required by section 3(16)(C) 
+of the statute, which requires a substitute check to conform with 
+generally applicable industry standards for substitute checks. 
+Page 1 of9 511 8/2004 
+
+(3) A substitute check that 
+at the time of its creation contained the when-issued 
+MICR line of the original check (and met the other requirements of the 
+substitute check definition) would be a substitute check and could be stripped 
+as necessary for collection and/or return without altering the item’s status as a 
+substitute check. 
+Handling of items with MICR-encoded strips 
+Industry cominenters 
+expressed concern about the potential impact on paying banks of 
+receiving substitute checks with 
+a MICR line containing only the paying bank’s routing number 
+and amount. Board staff asked how paying banks currently deal with original checks that have been 
+“stripped” with the paying bank’s routing number and amount. Commenters responded that 
+paying banks do one of three things: 
+(1) The paying bank de-strips the item 
+to read the original check MICR line; 
+(2) The paying bank “reads high,” i.e., 
+the paying bank’s check processing 
+equipment reads the original MICR line that is now above the stripped MICR 
+information; or 
+(3) The paying bank’s clerk, visually inspecting the item, manually key-enters 
+the original check’s MICR line information. 
+Board staff noted that paying banks would be able to do neither (1) nor (2) with respect to 
+a substitute check with a MICR line that did not contain all of the fields from the original check’s 
+MICR line. Board staff also noted that, in order for a bank’s depositor to be able to redeposit a 
+substitute check that had been returned unpaid, the substitute check would need to bear a MICR 
+line sufficient to permit the check to be processed for forward collection. Commenters generally 
+agreed. 
+Position 44 of MICR line 
+Position 44 normally is left blank on forward-collection checks, but banks occasionally encode 
+it (usually with an ‘8’ or ‘9’). 
+The question arose as to what would happen to a character 
+contained in position 44 of an original check’s MICR line if the original check subsequently 
+were to become a substitute check, which is required by industry standards to have a ‘4’ in 
+position 44. Would a reconverting bank be allowed to vary the content of position 44 to meet the 
+substitute check requirement, or would it need 
+to replicate the original check’s encoding of that 
+Page 2 of 9 511 
+812004 
+
+position? A commenter stated that the ‘4’ 
+needed for the substitute check would be mandatory, 
+such that the character contained in position 44 of the original check’s MICR line would be lost. 
+This commenter noted that the ability to change the content of position 44 in the MICR line of a 
+substitute check was the reason for the exception clause in the MICR-line prong of the Check 21 
+Act’s substitute check definition. Several other coininenters 
+supported this position. 
+Reconverting hank responsibility for MICR line 
+Several commenters noted that (1) under the statute, banks are not required to create 
+substitute checks, though banks may choose to do so where it is to their benefit, (2) substitute 
+checks with incomplete or incorrect MICR lines would create increased burden for banks that 
+receive substitute checks, and (3) an overarching principle for the Board’s final rule should be to 
+put banks and consumers that receive substitute checks in the same 
+position that they would be in 
+had they received the original check, to the extent practicable. Commenters agreed that it is 
+important for the Board to fashion a rule that places the responsibility on the reconverting bank 
+(the bank that creates a substitute check) to ensure that a substitute check contains a full and 
+accurate MICR line. 
+Given the statutory requirement that a substitute check bear a MICR line containing “all 
+the information” from the original check’s MICR line, Board staff asked commenters whether 
+they would have any concerns with a final rule that made the when-issued original check MICR 
+line the measure of what the substitute check MICR line should replicate. Commenters 
+responded that this measure could be problematic with respect to original checks that had been 
+stripped prior to truncation. Commenters noted that their check processing equipment could 
+detect checks with strips containing only the paying bank’s routing number and the check dollar ftirther 
+noted that,
+amount. However, 
+if
+they 
+the strip were full-field encoded, their equipment 
+be
+would likely not be able to detect that the item had been stripped, and they in turn would 
+able to determine whether the MICR information on the strip differed from the original check’s 
+when-issued MICR line. Commenters also stated that the when-issued MICR line could 
+potentially contain an error, the primary example being that the routing number on an original 
+check may be “obsolete” and that collecting banks sometimes strip the check with the updated 
+routing number. Commenters generally agreed that, with the exception of the routing number 
+Page 3 of 9 
+511812004 
+
+field, collecting banks have no way of determining if there is an error in a field of the original 
+check’s when-issued MICR line. It was noted that X9.37 - the industry standard for exchange of 
+electronic check records -contains data fields for only one forward-collection MICR line. 
+Commenters stated that the extent of the burden placed on reconverting banks by a final 
+rule that makes the when-issued original check MICR line the measure of what the substitute 
+check MICR line should replicate would be difficult to calculate or predict without knowing the 
+legal ramifications of creating a “substitute check” with a MICR line that did not match that of 
+the original check. 
+Purported substitute checks 
+Purported substitute check provision of 
+Board’s proposed rule 
+Board staff noted that there could be cases in which a substitute item does not bear a 
+MICR line containing “all the information” from the original check’s MICR line,i.e., 
+does not 
+meet the statutory definition of “substitute check,” and therefore is not be subject to the Check 
+21 Act. Staff asked how the Board’s final rule should protect recipients of these items, 
+noting 
+that the Board’s proposed rule provided the Check 21 Act’s warranty, indemnity, and expedited recredit 
+protections to recipients of these items. 
+Commenters generally agreed that the Board’s final rule should protect recipients of 
+purported substitute checks, but that it was important that the Board fashion a rule such that 
+banks would be able to charge purported substitute checks with correct payment and routing 
+information to their customers’ accounts, as opposed to rejecting or returning them. Practically 
+speaking, commenters said, it is imperative that such purported substitute checks “clear without 
+issue 99.9 percent of the time” because that is what banks’ customers will expect. 
+Legal status of purported substitute checks under the Uniform Commercial Code 
+Commenters voiced concern that paying banks would not want to charge a customer’s 
+account for a purported substitute check if it would not be legally equivalent to the original check 
+because its status
+under the 
+under
+Act or 
+the Uniform Commercial Code would be Page 4 
+of 9 511 
+812004 
+
+uncertain. Board staff raised the question of whether purported substitute checks would qualify 
+as “items” under Article 4 of the UCC and whether it would be permissible for banks to transfer 
+the items and/or charge them 
+to customers’ accounts. Staff noted that banks currently transfer 
+and/or charge some lion-legally-equivalent items, such as photocopies-in-lieu. Commenters 
+stated that they believed transferring and charging purported substitute checks would require 
+agreement of the parties involved and that account agreements and clearinghouse rules 
+commonly address photocopies. 
+Possible legal equivalencefor purported substitute checks 
+Commenters asked why one would not want to make purported substitute checks 
+nonetheless be the legal equivalent of the original check (provided that the image of the original 
+check is accurate). Such a rule would permit banks to charge the purported substitute checks to 
+customer accounts and would alleviate concerns with respect to making the when-issued original 
+check MICR line the measure of what a substitute check should match. Board staff responded 
+that the primary issue was whether anything other than a substitute check could be a legal 
+equivalent in light of section 4(b) 
+of the Check 2 1 Act (emphasis added): 
+A substitute check shall be the legal equivalent of the original check.. .if the 
+substitute check (1) accurately represents all of the 
+on the front and 
+back of the original check as of the time the original check was truncated; and (2) 
+bears the legend: “This is a legal copy of your check. You can use it the same 
+way you would use the original check.”. 
+Board staff also asked commenters where they would draw the line on what types of 
+items that do not fully meet the Act’s definition of substitute check should qualify as the legal Some 
+commenters suggested
+equivalent of the 
+using
+original check. 
+standards such as “best 
+efforts” or “except as explicitly excluded under UCC presentment agreements.” Others were less 
+comfortable with the breadth of these suggestions, and some maintained that the Board’s final 
+rule should include penalties for missing data. Commenters noted that Board staff should 
+balance bank and consumer perspectives. 
+Board staff asked commenters if they had ideas for an alternate approach that would 
+ensure that reconverting banks create substitute checks that conform to the Act’s requirements 
+Page 5 of 9 
+5/18/2004 
+
+and that can properly be charged to customer accounts. Commenters did not specifically answer, 
+but stated that they believe that the Board’s proposed purported substitute check provision 
+represents a “sledgehammer approach.” Commenters also noted their belief that the Check 2 1 
+Act (section 15) provides the Board with sufficiently broad implementing authority to interpret 
+the Act’s substitute check definition. In this regard, commenters focused on the clause “except 
+as provided under generally applicable industry standards for substitute checks to facilitate the 
+processing of substitute checks” contained in section 3( 16)(B) 
+of the statute. Board staff noted 
+that section 6.1.5 of ANS X9.90 - the applicable industry standard for substitute checks -
+provides that 
+If this IRD is being used under the Check Truncation Act [now Check 211, 
+the 
+MICR line data shall reflect all the 
+encoded on the original check at 
+the time 
+the original check was issued as well as the amount. 
+Commenters expressed their desire that Board staff work to fashion a legal theory that 
+would permit a purported substitute check to be the legal equivalent of an original check. 
+Commenters noted that, should the Board’s final rule deem a substitute item with a MICR line 
+varying from that of the original check to be a legal equivalent, the Board could use the Check 
+21 Act’s general liability provisions (section 10 of the Act) to nonetheless place liability on the 
+reconverting bank for any damages resulting from the substitute item’s non-compliant MICR 
+line. 
+Use of magnetic ink coinmenters 
+had
+Board staff noted that 
+suggested
+several 
+that the Board’s final rule 
+permit reconverting banks to create a substitute check with a MICR line in nonmagnetic ink 
+when the reconverting bank is creating the substitute check solely for the purpose of returning 
+had noted
+the paid check to the drawer with 
+that
+a monthly account statement. automated 
+processing and
+drawers do not require 
+that
+that paid checks be suitable for 
+providing 
+paid checks with MICR lines in nonmagnetic ink would be more cost effective. Board staff 
+asked commenters if corporate drawers might need paid checks’ MICR lines to be in magnetic 
+responded that if
+ink to facilitate their 
+a
+own internal payment processes. 
+given 
+Page 6 of 9 8/2004 
+
+corporate customer requires magnetic ink, then the banks would be able to provide that. 
+Commenters also noted that corporate drawers’ internal processes generally do not rely on 
+magnetic ink, but are instead based around electronic files of MICR information. 
+Page 7 of 9 
+511 812004 
+
+Meeting. Attendee List 
+Mike Canning 
+Arlene Chapman 
+Jeanette Blanco 
+Betty Whitlock 
+In person 
+Tel 
+In person 
+Tel 
+Kimberly Dewey 
+Gary Simpson Tim 
+Day Robcrta 
+Kotkin 
+In person 
+Tel 
+Tel 
+Tel 
+Organization 
+1st 
+Source Bank 
+American Bankers Association 
+Nessa Feddis 
+In person 
+Rob Drozdowski 
+In person
+America's Communitv Bankers 
+Association of Comorate Credit Unions 
+Association of Financial Professtionsal 
+Bank of America 
+Bank of Floyd 
+Bank One Corporation 
+Molly Carpenter I ~nperson 
+Banknorth, NA 
+Michael Crowley I TeS 
+BITS Gary Roboff I 
+Tel 
+Citibank 
+Christian Riehl 
+I TeS City 
+National Bank 
+Neil Martin 
+I 
+Tel 
+Commerce Cash Management 
+Rov Spooner I ~nperson 
+Commercial Federal Bank 
+Jim McGrail I TeS 
+Gail Hillebrand 
+Inperson
+Consumers Union 
+Credit Union National Association 
+Deutsche Bank 
+Michelle Profit 
+Inperson 
+Jim Guerra I 
+Tel 
+Electronic Check Clearing House Organization David Walker I 
+In person 
+Federal Reserve Bank of Atlanta 
+Pat Barron 
+I 
+Tel 
+Federal Reserve Bank of Minneapolis 
+Jim Lyon I 
+Inperson 
+Federal Reserve Retail Pavments 
+Office 
+Fred Herr 
+I In 
+person 
+First Tennessee Bank 
+Janet Honevcutt 
+I 
+Tel FirstData 
+Comoration Adam 
+Covle I 
+Tel 
+Bill Saffici 
+I 
+Tel
+Fiserv 
+Georgia CU League 
+HSBC 
+Huntington Bank 
+Tel
+Cindv Coiinellv 
+, 
+Gea Tung 
+Tel 
+Jim Posani 
+I 
+Tel 
+Independent Community Bankers Association 
+Viveca Ware 
+Inperson JPMorgan 
+Chase Bank 
+Lloyd Harris 
+In person KevBank 
+Brian Guess 
+I 
+Tel 
+Massachussetts Bankers Association Tanya 
+Duncan 
+I 
+Tel 
+Comorate Federal Credit Union 
+Jeffrev Stoner 
+I In 
+person Midstates 
+Comorate Federal Credit Union 
+Terrv Faurote 
+I 
+Tel 
+NACHA 
+National Association of Federal Credit Unions 
+Navy FCU 
+NCR Corporation 
+New York Bankers Association 
+Ian Macov I Inperson 
+Page 8 of 9 
+5/18/2004 
+
+Organization 
+Permanent Editorial Board for the UCC 
+PNC Bank 
+Representative 
+Attendance 
+Sara Jane Hughes 
+In person 
+I Kathleen Kerrigan 
+I 
+Inperson 
+SunCorp Corporate Credit Union 
+SunTrust Banks, Inc. 
+The Clearing House 
+The Savings Bank 
+Tyler Cooper & Alcom, LLP 
+US Bank 
+WACHA 
+Schwartz & Ballen 
+1 Tom Fox 
+I 
+In person 
+Cynthia Koan 
+In person 
+Jose Lopez-Isa 
+In person 
+Henry Wysocki 
+In person 
+Sally Kaldas 
+Tel 
+Fillis Stober 
+In person 
+John King 
+Tel 
+Mary Schnell 
+Tel 
+Southeast Corporate Credit Union 
+Wachovia Corporation 
+Wells Fargo & Company 
+Westem Corporate Federal Credit Union 
+World Savings Bank 
+1 KavMoon 
+I 
+Tel 
+Camilla McDevitt 
+In person 
+Ted Kitada 
+In person 
+Sheri Ledbetter 
+Tel 
+Peter Cowger 
+Tel 
+Note: The Board did not take a roll call of meeting participants. Telephone attendees listed 
+above represent those who notified the Board beforehand that they planned to participate. 
+Page 9 of 9 
+5/18/2004

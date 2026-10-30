@@ -43,6 +43,10 @@
 ## 为什么这样写
 - BoA 流水按「存款 / 取款」两张表分栏，没有 Type 列；卡行末尾是 `… 10/13 Card 4499`；ACH 行是 NACHA 结构化描述符，不是商户名。
 
+## 本地依据（knowledge/）
+- [knowledge/banks/boa.json](../../knowledge/banks/boa.json)
+- [knowledge/regulations.md](../../knowledge/regulations.md)
+
 ## 字段字典
 - [boa-personal.md](../../docs/templates/boa-personal.md)（每个顶层键的类型与样例）
 

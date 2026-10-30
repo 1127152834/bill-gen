@@ -75,6 +75,10 @@
   "card_types": [
     "Purchase"
   ],
+  "knowledge_refs": [
+    "knowledge/banks/boa.json",
+    "knowledge/regulations.md"
+  ],
   "why": "BoA 流水按「存款 / 取款」两张表分栏，没有 Type 列；卡行末尾是 `… 10/13 Card 4499`；ACH 行是 NACHA 结构化描述符，不是商户名。",
   "curated_keys": [
     "columns",

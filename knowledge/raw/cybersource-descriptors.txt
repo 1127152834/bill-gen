@@ -1,0 +1,1383 @@
+source: cybersource-descriptors
+topic: 卡组织商户描述符规范（Visa/Mastercard descriptor 结构）
+kind: card_rules
+url: https://docs.cybersource.com/content/dam/new-documentation/documentation/en/merchant-descriptors/developer/all/so/merchant-descriptors-so-all.pdf
+fetched_at: 2026-10-30T19:13:06Z
+content_type: application/pdf
+sha256: b63f5f9aa752fc43bd7480b03f8060f1567d8d0603b12849e5b2941447689b69
+--- 正文（外链原文摘录，只作离线检索用）---
+
+Merchant Descriptors
+Simple Order API
+Developer Guide
+
+© 2025. Cybersource Corporation. All rights reserved.
+Cybersource Corporation (Cybersource) furnishes this document and the software described in this document under 
+the applicable agreement between the reader of this document (You) and Cybersource (Agreement). You may use this 
+document and/or software only in accordance with the terms of the Agreement. Except as expressly set forth in the 
+Agreement, the information contained in this document is subject to change without notice and therefore should not be 
+interpreted in any way as a guarantee or warranty by Cybersource. Cybersource assumes no responsibility or liability 
+for any errors that may appear in this document. The copyrighted software that accompanies this document is licensed 
+to You for use only in strict accordance with the Agreement. You should read the Agreement carefully before using the 
+software. Except as permitted by the Agreement, You may not reproduce any part of this document, store this document 
+in a retrieval system, or transmit this document, in any form or by any means, electronic, mechanical, recording, or 
+otherwise, without the prior written consent of Cybersource.
+Restricted Rights Legends
+For Government or defense agencies: Use, duplication, or disclosure by the Government or defense agencies is subject to 
+restrictions as set forth the Rights in Technical Data and Computer Software clause at DFARS 252.227-7013 and in similar 
+clauses in the FAR and NASA FAR Supplement.
+For civilian agencies: Use, reproduction, or disclosure is subject to restrictions set forth in subparagraphs (a) through (d) 
+of the Commercial Computer Software Restricted Rights clause at 52.227-19 and the limitations set forth in Cybersource 
+Corporation's standard commercial agreement for this software. Unpublished rights reserved under the copyright laws of 
+the United States.
+Trademarks
+Authorize.net and The Power of Payment are registered trademarks of Cybersource Corporation. Cybersource 
+and Cybersource Decision Manager are trademarks and/or service marks of Cybersource Corporation. Visa, Visa 
+International, Cybersource, the Visa logo, the Cybersource logo, and 3-D Secure are the registered trademarks of 
+Visa International in the United States and other countries. All other trademarks, service marks, registered marks, or 
+registered service marks are the property of their respective owners.
+Version: 25.05.01
+Merchant Descriptors | 2
+
+Contents
+Merchant Descriptors Developer Guide.........................................................................................................4
+Recent Revisions to This Document.......................................................................................................................... 5
+AIBMS Merchant Descriptor............................................................................................................................... 6
+American Express Direct Merchant Descriptors.........................................................................................7
+Barclays Merchant Descriptors.......................................................................................................................10
+Chase Paymentech Solutions Merchant Descriptors............................................................................... 13
+Cielo Merchant Descriptor................................................................................................................................17
+Comercio Latino Merchant Descriptor.........................................................................................................18
+Elavon Merchant Descriptor............................................................................................................................ 19
+Elavon Americas Merchant Descriptors.......................................................................................................20
+FDC Compass Merchant Descriptors.............................................................................................................23
+FDC Nashville Global Merchant Descriptors.............................................................................................. 26
+Getnet Merchant Descriptor.............................................................................................................................31
+GPN Merchant Descriptors............................................................................................................................... 32
+OmniPay Direct Merchant Descriptors.........................................................................................................34
+Prosa Merchant Descriptor.............................................................................................................................. 37
+Rede Merchant Descriptor................................................................................................................................38
+SIX Merchant Descriptors................................................................................................................................. 39
+Streamline Merchant Descriptors..................................................................................................................41
+TSYS Acquiring Solutions Merchant Descriptors......................................................................................43
+Vero Merchant Descriptor.................................................................................................................................45
+Visa Platform Connect Merchant Descriptors............................................................................................46
+Worldpay VAP Merchant Descriptors........................................................................................................... 53
+Merchant Descriptors | Contents | 3
+
+Merchant Descriptors Developer Guide
+This section provides you with information about this developer guide.
+Audience and Purpose
+This guide is written for application developers who want to use the Simple Order API 
+to integrate merchant descriptors into their payment acceptance system.
+Implementing merchant descriptors requires software development skills. You must 
+write code that uses the API request fields to include merchant descriptor fields in 
+payment service requests.
+Conventions
+These statements are used in guides to bring attention to critical information:
+Important: An Important statement contains information essential to 
+successfully completing a task or learning a concept.
+Warning: A Warning contains information or instructions, which, if not 
+heeded, can result in a security risk, irreversible loss of data, or significant cost 
+in time or revenue or both.
+Related Documentation
+Visit the Technical Documentation Hub on the Cybersource Developer Center for links 
+to further documentation resources.
+Customer Support
+For support information about any service, visit the Support Center:
+http://support.visaacceptance.com
+Merchant Descriptors | Merchant Descriptors Developer Guide | 4
+
+Recent Revisions to This Document
+25.09.01
+This update contains only editorial changes and no technical updates.
+25.05.01
+This update contains only editorial changes and no technical updates.
+25.01
+This update contains only editorial changes and no technical updates.
+24.01
+This update contains only editorial changes and no technical updates.
+Merchant Descriptors | Merchant Descriptors Developer Guide | 5
+
+AIBMS Merchant Descriptor
+This feature enables you to submit merchant descriptor values that appear on a cardholder’s 
+statement.
+Prerequisite
+Before including merchant descriptors in your requests, check with your bank to learn whether you 
+must preregister your merchant descriptor information with them.
+Services
+• Authorization
+• Capture
+• Credit
+Merchant Descriptor Fields for AIBMS
+invoiceHeader_merchantDescriptor
+Description: merchant description that appears on the cardholder's statement. When 
+you include more than one consecutive space, extra spaces are removed.
+Required or Optional: required for authorization, capture, and credit services when 
+the merchant descriptor contact is included in the request.
+Data Type: string
+Data Length: 22
+invoiceHeader_merchantDescriptorContact
+Description: merchant contact information, such as a phone number, that appears on 
+the cardholder's statement. When you include more than one consecutive space, extra 
+spaces are removed.
+Required or Optional: optional for authorization, capture, and credit services.
+Data Type: string
+Data Length: 13
+Merchant Descriptors | AIBMS Merchant Descriptor | 6
+
+American Express Direct Merchant Descriptors
+This feature enables you to submit merchant descriptor values that appear on a cardholder's 
+statement.
+Even though merchant descriptors are supported, American Express Direct does not always include 
+all merchant descriptors on the cardholder's statement.
+Prerequisites
+Before including merchant descriptors in your requests:
+• Contact American Express Direct to register the use of merchant descriptors.
+• Contact customer support to have your account configured for this feature.
+Services
+• Capture
+• Credit
+Merchant Descriptor Fields for American Express Direct
+invoiceHeader_merchantDescriptor
+Description: your business name. American Express displays this value on the 
+cardholder's statement. When you include more than one consecutive space, extra 
+spaces are removed. When you do not include this value in your request, the value 
+in your account is sent to the processor. To add this value to your account, contact 
+customer support. If you are an aggregator, see the Payment Services Optional Features 
+Supplement for information about merchant descriptors for aggregator merchants.
+Required or Optional: required for capture and credit services when the merchant 
+descriptor contact is included in the request. You can provide the merchant descriptor 
+in your account instead of in the request.
+Data Type: string
+Data Length: 27
+invoiceHeader_merchantDescriptorCity
+Description: city or phone number for your business. American Express might display 
+this value on the cardholder's statement. For card-present transactions, American 
+Express recommends that this field contain the city in which your business is located. 
+Merchant Descriptors | American Express Direct Merchant Descriptors | 7
+
+For card-not-present transactions, American Express recommends that this field 
+contain the phone number for your business. It should be a toll free number or a local 
+number. When you do not include this value in your request, the value in your account 
+is sent to the processor. To add this value to your account, contact customer support.
+Required or Optional: optional for capture and credit services.
+Data Type: string
+Data Length: 21
+invoiceHeader_merchantDescriptorContact
+Description: contact information for your business. American Express might display 
+this value on the cardholder's statement. This value could be used to resolve billing 
+inquiries and disputes. When you include more than one consecutive space, extra 
+spaces are removed. For card-present transactions, American Express recommends 
+that this field contain your phone number. For card-not-present transactions, 
+American Express recommends that this field contain the URL for your web site. 
+When you do not include this value in your request, the URL or phone number in your 
+account is sent to the processor. To add this value to your account, contact customer 
+support.
+Required or Optional: optional for capture and credit services.
+Data Type: string
+Data Length: 40
+invoiceHeader_merchantDescriptorCountry
+Description: country code for your business location. American Express might display 
+this value on the cardholder's statement. Use the standard ISO Standard Country Codes. 
+When you do not include this value in your request, the value in your account is sent to 
+the processor. To add this value to your account, contact customer support.
+Required or Optional: optional for capture and credit services.
+Data Type: string
+Data Length: 2
+invoiceHeader_merchantDescriptorPostalCode
+Description: postal code for your business location. American Express might display 
+this value on the cardholder's statement. When you do not include this value in your 
+request, the value in your account is sent to the processor. To add this value to your 
+account, contact customer support. Before sending the postal code to the processor, all 
+non-alphanumeric characters are removed and, if the remaining value is longer than 
+nine characters, the value is truncated starting from the right side.
+Required or Optional: optional for the capture service. Required for the credit service 
+for aggregator transactions; otherwise, optional.
+Merchant Descriptors | American Express Direct Merchant Descriptors | 8
+
+Data Type: string
+Data Length: 15
+invoiceHeader_merchantDescriptorState
+Description: state code or region code for your business location. American Express 
+might display this value on the cardholder’s statement. For the US and Canada, use the 
+standard State, Province, and Territory Codes for the United States and Canada. When 
+you do not include this value in your request, the value in your account is sent to the 
+processor. To add this value to your account, contact customer support.
+Required or Optional: optional for capture and credit services.
+Data Type: string
+Data Length: 3
+invoiceHeader_merchantDescriptorStreet
+Description: street address for your business location. American Express might 
+display this value on the cardholder’s statement. If the street address is more than 38 
+characters, use meaningful abbreviations. When you do not include this value in your 
+request, the value in your account is sent to the processor. To add this value to your 
+account, contact customer support.
+Required or Optional: optional for the capture service. Required for the credit service 
+for aggregator transactions; otherwise, optional.
+Data Type: string
+Data Length: 38
+Merchant Descriptors | American Express Direct Merchant Descriptors | 9
+
+Barclays Merchant Descriptors
+This feature enables you to submit merchant descriptor values that appear on a cardholder's 
+statement.
+Prerequisite
+Before including merchant descriptors in your requests, you must be boarded to the Barclays multi-
+currency platform.
+Services
+• Capture
+• Credit
+Merchant Descriptor Fields for Barclays
+invoiceHeader_merchantDescriptor
+Description: merchant description that appears on the cardholder's statement. When 
+you include more than one consecutive space, extra spaces are removed.
+Required or Optional: required for capture and credit services when the merchant 
+descriptor contact is included in the request.
+Data Type: string
+Data Length: 23
+invoiceHeader_merchantDescriptorContact
+Description: merchant contact information, such as a phone number, that appears on 
+the cardholder's statement. When you include more than one consecutive space, extra 
+spaces are removed.
+Required or Optional: optional for capture and credit services.
+Data Type: string
+Data Length: 13
+Merchant Descriptors | Barclays Merchant Descriptors | 10
+
+Payment Descriptor Request
+ {
+ "clientReferenceInformation": {
+ "code": "TC50171_3"
+ },
+ "orderInformation": {
+ "amountDetails": {
+ "totalAmount": "102.21",
+ "currency": "GBP"
+ }
+ },
+ "merchantInformation": {
+ "merchantDescriptor": {
+ "name": "barclaystestdescriptor",
+ "contact": "07854806658"
+ }
+ }
+}
+ 
+Payment Descriptor Response
+ {
+ "_links": {
+ "void": {
+ "method": "POST",
+ "href": "/pts/v2/captures/7479964660936642304805/voids"
+ },
+ "self": {
+ "method": "GET",
+ "href": "/pts/v2/captures/7479964660936642304805"
+ }
+ },
+ "clientReferenceInformation": {
+ "code": "TC50171_3"
+ },
+ "id": "7479964660936642304805",
+ "orderInformation": {
+ "amountDetails": {
+ "totalAmount": "102.21",
+ "currency": "GBP"
+ }
+ },
+ "reconciliationId": "7026822076",
+Merchant Descriptors | Barclays Merchant Descriptors | 11
+
+ "status": "PENDING",
+ "submitTimeUtc": "2025-05-23T10:34:26Z"
+} 
+Merchant Descriptors | Barclays Merchant Descriptors | 12
+
+Chase Paymentech Solutions Merchant Descriptors
+This feature enables you to submit merchant descriptor values that appear on a cardholder's 
+statement.
+Prerequisites
+Before including merchant descriptors in your requests:
+• Prepare a list of the merchant descriptors you plan to use.
+• Contact Chase Paymentech Solutions for information about working with merchant 
+descriptors. Chase Paymentech Solutions restricts the number of merchant descriptors you can 
+use.
+• Contact customer support to have your account enabled for this feature.
+Services
+• Authorization
+• Capture
+• Credit
+Card Types
+• American Express: Transaction Advice Addendum (TAA) field only
+• Discover: merchant descriptor and merchant descriptor contact fields only
+• Mastercard: merchant descriptor and merchant descriptor contact fields only
+• Visa: merchant descriptor and merchant descriptor contact fields only
+Merchant Descriptor Logic
+Important: Some of the logic described in this section might not apply to your 
+implementation depending on which parts of the merchant descriptor functionality are 
+enabled in your account.
+Merchant Descriptors | Chase Paymentech Solutions Merchant Descriptors | 13
+
+The logic described in this section applies to the invoiceHeader_merchantDescriptor and 
+invoiceHeader_merchantDescriptorContact fields. It does not apply to the TAA fields.
+For authorizations, merchant descriptor information is sent to Chase Paymentech Solutions only 
+when you include merchant descriptor information in the authorization request.
+For captures, merchant descriptor information is sent to Chase Paymentech Solutions when you 
+provide merchant descriptor information in the capture request, authorization request, or your 
+account. When you do not include the merchant descriptor values in a capture request, the values 
+from the authorization request are sent. If you did not include the merchant descriptor values in the 
+authorization request, the values in your account are sent.
+For follow-on credits, merchant descriptor information is sent to Chase Paymentech Solutions when 
+you provide merchant descriptor information in the credit request, capture request, authorization 
+request, or your account. When you do not include the merchant descriptor values in a follow-on 
+credit request, the values from the capture request are sent. If you did not include the merchant 
+descriptor values in the capture request, the values from the authorization request are sent. If you 
+did not include the merchant descriptor values in the authorization request, the values in your 
+account are sent.
+For stand-alone credits, merchant descriptor information is sent to Chase Paymentech Solutions 
+when you provide merchant descriptor information in the credit request or your account. When you 
+do not include the merchant descriptor values in a stand-alone credit request, the values in your 
+account are sent.
+To add a merchant descriptor value to your account, contact customer support.
+Characters
+In the merchant descriptor fields, question marks are replaced with spaces.
+Do not use these punctuation characters in the merchant descriptor fields because they will cause 
+the transaction to be rejected with reason code 233:
+• caret ( ^ )
+• backslash ( \ )
+• open bracket ( [ )
+• close bracket ( ] )
+• tilde ( ~ )
+• accent ( ` )
+Merchant Descriptors | Chase Paymentech Solutions Merchant Descriptors | 14
+
+Merchant Descriptor Fields for Chase Paymentech Solutions
+invoiceHeader_amexDataTAA1 through invoiceHeader_amexDataTAA4
+Description: four Transaction Advice Addendum (TAA) fields. These fields are 
+used to display descriptive information about a transaction on the customer’s 
+American Express card statement. When you send TAA fields, start with 
+invoiceHeader_amexDataTAA1, then ...TAA2, and so on. Skipping a TAA field causes 
+subsequent TAA fields to be ignored. These fields are frequently used for Level II 
+transactions. To add this value to your account, contact customer support.
+Required or Optional: optional for capture and credit services.
+Data Type: string
+Data Length: 40
+invoiceHeader_merchantDescriptor
+Description: merchant description that is displayed on the cardholder's statement. 
+When you include more than one consecutive space, extra spaces are removed. This 
+field is supported only for Discover, Mastercard, and Visa. To add this value to your 
+account, contact customer support. For an installment transactions, you must use one 
+of these formats:
+• <12-character merchant name>*PYMT<N>OF<M>
+• <7-character merchant name>*PYMT<N>OF<M>
+• <3-character merchant name>*PYMT<N>OF<M>
+where <N> is the payment number and <M> is the total number of payments. 
+For example, for the third installment in a series of seven payments, the 
+PYMT<N>OF<M> portion of the merchant descriptor would be PYMT3OF7. For 
+other types of transactions, you must use one of these formats:
+◦<12-character merchant name>*<9-character product description>
+◦<7-character merchant name>*<14-character product description>
+◦<3-character merchant name>*<18-character product description>
+Required or Optional: required for authorization, capture, and credit services when 
+the merchant descriptor contact is included in the request.
+Data Type: string
+Data Length: 22
+invoiceHeader_merchantDescriptorContact
+Merchant Descriptors | Chase Paymentech Solutions Merchant Descriptors | 15
+
+Description: merchant contact information, such as a phone number, that is displayed 
+on the cardholder's statement. This field is supported only for Discover, Mastercard, 
+and Visa. To add this value to your account, contact customer support. When you 
+include more than one consecutive space, extra spaces are removed. You must use one 
+of these formats:
+• PCCCCCCCCCCCC
+• NNN-NNN-NNNN
+• NNN-NNN-NAAA
+• NNN-NNN-AAAA
+• NNN-AAAAAAA
+where:
+◦A: Alphanumeric (alpha or numeric)
+◦C: Character (alpha or blank)
+◦N: Numeric
+◦P: Alpha
+Required or Optional: required for authorization, capture, and credit services when 
+the merchant descriptor field is included in the request.
+Data Type: string
+Data Length: 13
+Merchant Descriptors | Chase Paymentech Solutions Merchant Descriptors | 16
+
+Cielo Merchant Descriptor
+This feature enables you to submit a merchant descriptor value that appears on a cardholder’s 
+statement.
+Service
+• Authorization
+Merchant Descriptor Field for Cielo
+invoiceHeader_merchantDescriptor
+Description: your business name. This name appears on the cardholder’s statement. 
+When you do not include this value in your request, the value in your account is sent to 
+the processor. To add this value to your account, contact customer support. This field is 
+used for aggregator support (see the Payment Services Optional Features Supplement 
+for information about merchant descriptors for aggregator merchants).
+Required or Optional: required for aggregator transactions; otherwise, optional.
+Data Type: string
+Data Length: 13
+Merchant Descriptors | Cielo Merchant Descriptor | 17
+
+Comercio Latino Merchant Descriptor
+This feature enables you to submit a merchant descriptor value that appears on a cardholder's 
+statement.
+Service
+• Authorization
+Merchant Descriptor Field for Comercio Latino
+invoiceHeader_merchantDescriptor
+Description: your business name. This name appears on the cardholder's statement. 
+When you do not include this value in your request, the value in your account is sent to 
+the processor. To add this value to your account, contact customer support.
+Required or Optional: optional for the authorization service.
+Data Type: string
+Data Length: 13
+Merchant Descriptors | Comercio Latino Merchant Descriptor | 18
+
+Elavon Merchant Descriptor
+This feature enables you to submit a merchant descriptor value that appears on a cardholder's 
+statement.
+Prerequisite
+Before including merchant descriptors in your requests, check with your bank to learn whether you 
+must preregister your merchant descriptor information with them.
+Services
+• Authorization
+• Capture
+• Credit
+Card Type
+• Diners Club
+Merchant Descriptor Field for Elavon
+invoiceHeader_merchantDescriptor
+Description: merchant description that appears on the cardholder's statement. When 
+you include more than one consecutive space, extra spaces are removed.
+Required or Optional: optional for authorization, capture, and credit services.
+Data Type: string
+Data Length: 22
+Merchant Descriptors | Elavon Merchant Descriptor | 19
+
+Elavon Americas Merchant Descriptors
+This feature enables you to submit merchant descriptor values that appear on a cardholder's 
+statement.
+Prerequisite
+Before including merchant descriptors in your requests, check with your bank to learn whether you 
+must preregister your merchant descriptor information with them.
+Services
+• Authorization
+• Capture
+• Credit
+Merchant Descriptor Fields for Elavon Americas
+invoiceHeader_merchantDescriptor
+Description: your business name. This name appears on the cardholder's statement. 
+When you include more than one consecutive space, extra spaces are removed. When 
+you do not include this value in your authorization request, the merchant name in your 
+account is sent to the processor. To add this value to your account, contact customer 
+support.
+Required or Optional: optional for authorization, capture, and credit services.
+Data Type: string
+Data Length: 23
+invoiceHeader_merchantDescriptorCity
+Description: city for your business location. This value might appear on the 
+cardholder's statement. When you do not include this value in your authorization 
+request, the value in your account is sent to the processor. To add this value to your 
+account, contact customer support.
+Required or Optional: optional for authorization, capture, and credit services.
+Data Type: string
+Data Length: 13
+Merchant Descriptors | Elavon Americas Merchant Descriptors | 20
+
+invoiceHeader_merchantDescriptorContact
+Description: telephone number for your business. This value might appear on the 
+cardholder's statement. When you include more than one consecutive space, extra 
+spaces are removed. When you do not include this value in your authorization request, 
+the merchant phone number in your account is sent to the processor. To add this value 
+to your account, contact customer support.
+Required or Optional: optional for authorization, capture, and credit services.
+Data Type: string
+Data Length: 14
+invoiceHeader_merchantDescriptorCountry
+Description: country code for your business location. Use the standard ISO Standard 
+Country Codes. This value might appear on the cardholder's statement. When you do 
+not include this value in your authorization request, the value in your account is sent to 
+the processor. To add this value to your account, contact customer support.
+Required or Optional: optional for authorization, capture, and credit services.
+Data Type: string
+Data Length: 2
+invoiceHeader_merchantDescriptorPostalCode
+Description: postal code for your business location. This value might appear on the 
+cardholder's statement. If your business is domiciled in the US, you can use a 5-digit or 
+9-digit postal code. A 9-digit postal code must follow this format: [5 digits][dash][4 
+digits]
+Example: 12345-6789
+If your business is domiciled in Canada, you can use a 6-digit or 9-digit postal code. A 
+6-digit postal code must follow this format: [alpha][numeric][alpha][space][numeric]
+[alpha][numeric]
+Example: A1B 2C3
+When you do not include this value in your authorization request, the value in your 
+account is sent to the processor. To add this value to your account, contact customer 
+support.
+Important: Mastercard requires a postal code for any country that uses postal 
+codes. You can provide the postal code in your account or you can include this 
+field in your request.
+Merchant Descriptors | Elavon Americas Merchant Descriptors | 21
+
+Required or Optional: optional for authorization, capture, and credit services.
+Data Type: string
+Data Length: 14
+invoiceHeader_merchantDescriptorState
+Description: state code or region code for your business location. This value might 
+appear on the cardholder's statement. For the US and Canada, use the standard State, 
+Province, and Territory Codes for the United States and Canada. When you do not 
+include this value in your authorization request, the value in your account is sent to the 
+processor. To add this value to your account, contact customer support.
+Required or Optional: optional for authorization, capture, and credit services.
+Data Type: string
+Data Length: 3
+invoiceHeader_merchantDescriptorStreet
+Description: street address for your business location. This value might appear on the 
+cardholder's statement. When you do not include this value in your capture or credit 
+request, the value in your account is sent to the processor. To add this value to your 
+account, contact customer support.
+Required or Optional: optional for authorization, capture, and credit services.
+Data Type: string
+Data Length: 60
+Merchant Descriptors | Elavon Americas Merchant Descriptors | 22
+
+FDC Compass Merchant Descriptors
+This feature enables you to submit merchant descriptor values that appear on a cardholder's 
+statement.
+Prerequisites
+Before including merchant descriptors in your requests:
+• Prepare a list of the merchant descriptors you plan to use.
+• Contact FDC Compass for information about working with merchant descriptors. FDC Compass 
+restricts the number of merchant descriptors you can use.
+• Contact customer support to have your account enabled for this feature.
+Services
+• Authorization: only for aggregators
+• Capture: only for merchants who are not aggregators
+• Credit: only for merchants who are not aggregators
+Characters
+In the merchant descriptor fields, question marks are replaced with spaces.
+Do not use these punctuation characters in the merchant descriptor fields because they will cause 
+the transaction to be rejected with reason code 233:
+• caret ( ^ )
+• backslash ( \ )
+• open bracket ( [ )
+• close bracket ( ] )
+• tilde ( ~ )
+• accent ( ` )
+Merchant Descriptors | FDC Compass Merchant Descriptors | 23
+
+Merchant Descriptor Fields for FDC Compass
+invoiceHeader_amexDataTAA1 through invoiceHeader_amexDataTAA4
+Description: four Transaction Advice Addendum (TAA) fields. These fields are 
+used to display descriptive information about a transaction on the customer’s 
+American Express card statement. When you send TAA fields, start with 
+invoiceHeader_amexDataTAA1, then ...TAA2, and so on. Skipping a TAA field causes 
+subsequent TAA fields to be ignored. These fields are frequently used for Level II 
+transactions. To add this value to your account, contact customer support.
+Required or Optional: optional for capture and credit services.
+Data Type: string
+Data Length: 40
+invoiceHeader_merchantDescriptor
+Description: merchant description that is displayed on the cardholder's statement. 
+When you include more than one consecutive space, extra spaces are removed. This 
+field is supported only for Discover, Mastercard, and Visa. To add this value to your 
+account, contact customer support. For an installment transactions, you must use one 
+of these formats:
+• <12-character merchant name>*PYMT<N>OF<M>
+• <7-character merchant name>*PYMT<N>OF<M>
+• <3-character merchant name>*PYMT<N>OF<M>
+where <N> is the payment number and <M> is the total number of payments. 
+For example, for the third installment in a series of seven payments, the 
+PYMT<N>OF<M> portion of the merchant descriptor would be PYMT3OF7. For 
+other types of transactions, you must use one of these formats:
+◦<12-character merchant name>*<9-character product description>
+◦<7-character merchant name>*<14-character product description>
+◦<3-character merchant name>*<18-character product description>
+Required or Optional: required for authorization, capture, and credit services when 
+the merchant descriptor contact is included in the request.
+Data Type: string
+Data Length: 22
+invoiceHeader_merchantDescriptorContact
+Merchant Descriptors | FDC Compass Merchant Descriptors | 24
+
+Description: merchant contact information, such as a phone number, that is displayed 
+on the cardholder's statement. This field is supported only for Discover, Mastercard, 
+and Visa. To add this value to your account, contact customer support. When you 
+include more than one consecutive space, extra spaces are removed. You must use one 
+of these formats:
+• PCCCCCCCCCCCC
+• NNN-NNN-NNNN
+• NNN-NNN-NAAA
+• NNN-NNN-AAAA
+• NNN-AAAAAAA
+where:
+◦A: Alphanumeric (alpha or numeric)
+◦C: Character (alpha or blank)
+◦N: Numeric
+◦P: Alpha
+Required or Optional: required for authorization, capture, and credit services when 
+the merchant descriptor field is included in the request.
+Data Type: string
+Data Length: 13
+Merchant Descriptors | FDC Compass Merchant Descriptors | 25
+
+FDC Nashville Global Merchant Descriptors
+This feature enables you to submit merchant descriptor values that appear on a cardholder's 
+statement.
+Prerequisites
+Before including merchant descriptors in your requests:
+• Contact FDC Nashville Global to register to use merchant descriptors.
+• Contact customer support to have your account enabled for this feature.
+Services
+• Authorization
+• Capture
+• Credit
+Merchant Descriptor Logic
+Important: Some of the logic described in this section might not apply to your 
+implementation depending on which parts of the merchant descriptor functionality are 
+enabled in your account.
+Important:
+You are responsible for ensuring that all the merchant descriptor location information that is 
+sent to the processor is compatible.
+For example, if a request message includes one merchant descriptor location field, the 
+information in your account might be used to populate the remaining merchant descriptor 
+location values that are sent to the processor. Cybersource does not check the merchant 
+descriptor values to ensure that the combination of values from the request message and 
+from your account are compatible.
+To avoid a mismatch of merchant descriptor location values, it is recommended that you 
+include all the merchant descriptor location fields in a request or do not include any 
+merchant descriptor location fields in a request.
+Merchant Descriptors | FDC Nashville Global Merchant Descriptors | 26
+
+For authorizations, merchant descriptor information is sent to FDC Nashville Global only when you 
+include merchant descriptor information in the authorization request. For each merchant descriptor, 
+when you do not include the merchant descriptor value in an authorization request, no merchant 
+descriptor value is sent to FDC Nashville Global.
+For captures, merchant descriptor information is sent to FDC Nashville Global when you provide 
+merchant descriptor information in the capture request, authorization request, or your account. 
+For each merchant descriptor, when you do not include the merchant descriptor value in a capture 
+request, the value from the authorization request is sent. If you did not include the merchant 
+descriptor value in the authorization request, the value in your account is sent. If the value is not in 
+your account, FDC Nashville Global uses the value in your First Data merchant master file.
+For follow-on credits, merchant descriptor information is sent to FDC Nashville Global when you 
+provide merchant descriptor information in the credit request, capture request, authorization 
+request, or your account. For each merchant descriptor, when you do not include the merchant 
+descriptor value in a follow-on credit request, the value from the capture request is sent. If you did 
+not include the merchant descriptor value in the capture request, the value from the authorization 
+request is sent. If you did not include the merchant descriptor value in the authorization request, the 
+value in your account is sent. If the value is not included in your account, FDC Nashville Global uses 
+the value in your First Data merchant master file.
+For stand-alone credits, merchant descriptor information is sent to FDC Nashville Global when you 
+provide merchant descriptor information in the credit request or your account. For each merchant 
+descriptor, when you do not include the merchant descriptor value in a stand-alone credit request, 
+the value in your account is sent. If the value is not included in your account, FDC Nashville Global 
+uses the value in your First Data merchant master file.
+To add a merchant descriptor value to your account, contact customer support.
+Merchant Descriptor Fields for FDC Nashville Global
+invoiceHeader_merchantDescriptor
+Description: business description. This value must consist of your business name. 
+When payments are made in installments, this value must also include installment 
+information such as “1 of 5” or “3 of 7.” This value appears on the cardholder's 
+statement. When you include this field in a request, you must also include a merchant 
+descriptor contact and merchant descriptor state. For information about what happens 
+when you do not include this value in your request, see Merchant Descriptor Logic in 
+this section.
+Required or Optional: required for authorization, capture, and credit services when 
+a merchant descriptor contact or merchant descriptor state is included; otherwise, 
+optional.
+Data Type: string
+Data Length: 22
+invoiceHeader_merchantDescriptorAlternate
+Merchant Descriptors | FDC Nashville Global Merchant Descriptors | 27
+
+Description: alternate contact information for your business, such as an email address 
+or URL. This value might appear on the cardholder's statement. For information 
+about what happens when you do not include this value in your request, see Merchant 
+Descriptor Logic in this section. For authorizations, this value is not sent to the 
+processor. Instead, this value is stored and sent to the processor for captures and 
+follow-on credits.
+Required or Optional: optional for authorization, capture, and credit services.
+Data Type: string
+Date Length: 13
+invoiceHeader_merchantDescriptorContact
+Description: contact information for your business. For a card-present request, 
+this value must be the city in which your store or outlet is located. For a card-not-
+present request, this value must be your customer service telephone number. When 
+you include more than one consecutive space, extra spaces are removed. This value 
+might appear on the cardholder's statement. When you include this field in a request, 
+you must also include a merchant descriptor and merchant descriptor state. For 
+information about what happens when you do not include this value in your request, 
+see Merchant Descriptor Logic in this section.
+Required or Optional: required for authorization, capture, and credit services when a 
+merchant descriptor or merchant descriptor state is included; otherwise, optional.
+Data Type: string
+Data Length: 11
+invoiceHeader_merchantDescriptorCountry
+Description: country in which your business is located. Use the two-character ISO 
+Standard Country Codes. This value might appear on the cardholder's statement. For 
+information about what happens when you do not include this value in your request, 
+see Merchant Descriptor Logic in this section.
+Required or Optional: optional for authorization, capture, and credit services.
+Data Type: string
+Data Length: 2
+invoiceHeader_merchantDescriptorPostalCode
+Description: postal code for your business location. This value might appear on the 
+cardholder's statement. When the merchant descriptor country is the US, the postal 
+code must consist of five digits or nine digits. A 9-digit postal code must follow this 
+format: [5 digits][dash][4 digits]
+Example: 12345-6789
+Merchant Descriptors | FDC Nashville Global Merchant Descriptors | 28
+
+When the merchant descriptor country is Canada, the 6-digit postal code must follow 
+this format: [alpha][numeric][alpha][space][numeric][alpha][numeric]
+Example: A1B 2C3
+For information about what happens when you do not include this value in your 
+request, see Merchant Descriptor Logic in this section.
+Required or Optional: optional for authorization, capture, and credit services.
+Data Type: string
+Data Length: 10
+invoiceHeader_merchantDescriptorState
+Description: state or territory in which your business is located. This value might 
+appear on the cardholder's statement. When the merchant descriptor country is the US 
+or Canada, use the State, Province, and Territory Codes for the United States and Canada. 
+When you include this field in a request, you must also include a merchant descriptor 
+and merchant descriptor contact. For information about what happens when you do 
+not include this value in your request, see Merchant Descriptor Logic in this section.
+Required or Optional: required for authorization, capture, and credit services when a 
+merchant descriptor or merchant descriptor contact is included; otherwise, optional.
+Data Type: string
+Data Length: 20
+invoiceHeader_merchantDescriptorStreet
+Description: street address for your business location. This value might appear on the 
+cardholder's statement. When you include this value in your request, these actions are 
+recommended:
+• If you are located in the United States or Canada, also include the merchant 
+descriptor country, merchant descriptor state, and merchant descriptor postal 
+code in your request.
+• If you are not located in the United States or Canada, also include the merchant 
+descriptor country and merchant descriptor postal code in your request.
+For information about what happens when you do not include this value in your 
+request, see Merchant Descriptor Logic in this section.
+Required or Optional: optional for authorization, capture, and credit services. FDC 
+Nashville Global recommends that you include this value for debit card requests and 
+for American Express credit card requests.
+Data Type: string
+Merchant Descriptors | FDC Nashville Global Merchant Descriptors | 29
+
+Data Length: 60
+Merchant Descriptors | FDC Nashville Global Merchant Descriptors | 30
+
+Getnet Merchant Descriptor
+This feature enables you to submit a merchant descriptor value that appears on a cardholder's 
+statement.
+Service
+• Authorization
+Merchant Descriptor Field for Getnet
+invoiceHeader_merchantDescriptor
+Description: your business name. This name appears on the cardholder’s statement. 
+When you do not include this value in your request, the value in your account is sent to 
+the processor.
+For aggregator transactions, all characters must be uppercase letters. Special 
+characters are not allowed. See the information about aggregator support in the 
+Payment Features Optional Features Simple Order API Supplement.
+For non-aggregator transactions, these special characters are allowed: % $ , . / & ( ) + = 
+= < > - *
+Required or Optional: required for authorization service aggregator transactions; 
+otherwise, optional.
+Data Type: string
+Data Length: 
+• Aggregator Transactions: 14
+• Other Transactions: 22
+Merchant Descriptors | Getnet Merchant Descriptor | 31
+
+GPN Merchant Descriptors
+This feature enables you to submit merchant descriptor values that appear on a cardholder’s 
+statement.
+To avoid network compliance issues, it is recommended that your authorization and capture 
+transactions use the same merchant descriptors.
+The value you use in your authorization transaction will be the default value in follow-on 
+transactions.
+Prerequisite
+Before including merchant descriptors in your requests, contact your merchant account provider to 
+register to use merchant descriptors.
+Services
+• Capture
+• Credit
+Merchant Descriptor Fields for GPN
+invoiceHeader_merchantDescriptor
+Description: merchant description that appears on the cardholder's statement. When 
+you include more than one consecutive space, extra spaces are removed.
+Required or Optional: required for capture and credit services when the merchant 
+descriptor contact is included in the request.
+Data Type: string
+Data Length: 22
+invoiceHeader_merchantDescriptorContact
+Description: merchant contact information, such as a phone number, that appears on 
+the cardholder's statement. When you include more than one consecutive space, extra 
+spaces are removed.
+Required or Optional: optional for capture and credit services.
+Data Type: string
+Merchant Descriptors | GPN Merchant Descriptors | 32
+
+Data Length: 13
+Merchant Descriptors | GPN Merchant Descriptors | 33
+
+OmniPay Direct Merchant Descriptors
+This feature enables you to submit merchant descriptor values that appear on a cardholder's 
+statement.
+Services
+• Authorization
+• Capture
+• Credit
+Merchant Descriptor Fields for OmniPay Direct
+Important: The values for these fields must consist of English characters.
+invoiceHeader_merchantDescriptor
+Description: your business name. This name appears on the cardholder's statement. 
+When you include more than one consecutive space, extra spaces are removed. When 
+you do not include this value in your capture or credit request, the value from your 
+authorization request is sent to the processor. If you did not include this value in your 
+authorization request, the merchant name in your account is sent. To add this value to 
+your account, contact customer support.
+Required or Optional: optional for authorization, capture, and credit services.
+Data Type: string
+Data Length: 23
+invoiceHeader_merchantDescriptorCity
+Description: city for your business location. This value might appear on the 
+cardholder's statement. When you do not include this value in your capture or credit 
+request, the value from your authorization request is sent to the processor. If you did 
+not include this value in your authorization request, the value in your account is sent. 
+To add this value to your account, contact customer support.
+Required or Optional: optional for authorization, capture, and credit services.
+Data Type: string
+Data Length: 13
+Merchant Descriptors | OmniPay Direct Merchant Descriptors | 34
+
+invoiceHeader_merchantDescriptorCountry
+Description: country code for your business location. Use the standard ISO Standard 
+Country Codes. This value might appear on the cardholder's statement. When you 
+do not include this value in your capture or credit request, the value from your 
+authorization request is sent to the processor. If you did not include this value in your 
+authorization request, the merchant country in your account is sent. To add this value 
+to your account, contact customer support.
+Required or Optional: optional for authorization, capture, and credit services.
+Data Type: string
+Data Length: 2
+invoiceHeader_merchantDescriptorPostalCode
+Description: postal code for your business location. This value might appear on the 
+cardholder's statement. If your business is domiciled in the US, you can use a 5-digit or 
+9-digit postal code. A 9-digit postal code must follow this format: [5 digits][dash][4 
+digits]
+Example: 12345-6789
+If your business is domiciled in Canada, you can use a 6-digit or 9-digit postal code. A 
+6-digit postal code must follow this format: [alpha][numeric][alpha][space][numeric]
+[alpha][numeric]
+Example: A1B 2C3
+When you do not include this value in your capture or credit request, the value from 
+your authorization request is sent to the processor. If you did not include this value in 
+your authorization request, the merchant postal code in your account is sent. To add 
+this value to your account, contact customer support.
+Important: Mastercard requires a postal code for any country that uses postal 
+codes. You can provide the postal code in your account or you can include this 
+field in your request.
+Required or Optional: optional for authorization, capture, and credit services.
+Data Type: string
+Data Length: 10
+invoiceHeader_merchantDescriptorState
+Description: state code or region code for your business location. This value might 
+appear on the cardholder's statement. For the US and Canada, use the standard State, 
+Province, and Territory Codes for the United States and Canada. When you do not 
+Merchant Descriptors | OmniPay Direct Merchant Descriptors | 35
+
+include this value in your capture or credit request, the value from your authorization 
+request is sent to the processor. If you did not include this value in your authorization 
+request, the merchant state in your account is sent. To add this value to your account, 
+contact customer support.
+Required or Optional: optional for authorization, capture, and credit services.
+Data Type: string
+Data Length: 3
+Merchant Descriptors | OmniPay Direct Merchant Descriptors | 36
+
+Prosa Merchant Descriptor
+This feature enables you to submit a merchant descriptor value that appears on a cardholder’s 
+statement.
+Service:
+• Authorization
+Merchant Descriptor Field for Prosa
+invoiceHeader_merchantDescriptor
+Description: your business name. This name appears on the cardholder’s statement. 
+When you do not include this value in your request, the value in your account is sent to 
+the processor. To add this value to your account, contact customer support.
+Required or Optional: optional for the authorization service.
+Data Type: string
+Data Length: 22
+Merchant Descriptors | Prosa Merchant Descriptor | 37
+
+Rede Merchant Descriptor
+This feature enables you to submit a merchant descriptor value that appears on a cardholder's 
+statement.
+Service
+• Authorization
+Merchant Descriptor Field for Rede
+invoiceHeader_merchantDescriptor
+Description: your business name. This name appears on the cardholder's statement. 
+When you include more than one consecutive space, extra spaces are removed. When 
+you send a value that exceeds the maximum length, the value is truncated before it is 
+sent to the processor. This field is used for aggregator support. See the information 
+about aggregator support in the Payment Features Optional Features Simple Order API 
+Supplement.
+Required or Optional: required for the authorization service for aggregator 
+transactions; otherwise, optional.
+Data Type: string
+Data Length: 13
+Merchant Descriptors | Rede Merchant Descriptor | 38
+
+SIX Merchant Descriptors
+This feature enables you to submit merchant descriptor values that appear on a cardholder's 
+statement.
+Prerequisites
+Before including merchant descriptors in your requests:
+• Contact SIX to let them know the values you will be sending in these fields.
+• Contact customer support to have your account configured for this feature.
+Services
+• Authorization
+• Capture
+• Credit
+Merchant Descriptor Fields for SIX
+Important: The values for these fields must consist of English characters.
+invoiceHeader_merchantDescriptor
+Description: your business name. This name appears on the cardholder's statement. 
+When you include more than one consecutive space, extra spaces are removed. When 
+you do not include this value in your capture or credit request, the value from your 
+authorization request is sent to the processor. If you did not include this value in your 
+authorization request, the merchant name in your account is sent. To add this value to 
+your account, contact customer support.
+Required or Optional: required for authorization, capture, and credit services when 
+any other merchant descriptor field is included in the request; otherwise, optional.
+Data Type: string
+Data Length: 23
+invoiceHeader_merchantDescriptorCity
+Merchant Descriptors | SIX Merchant Descriptors | 39
+
+Description: city for your business location. This value might appear on the 
+cardholder's statement. When you do not include this value in your capture or credit 
+request, the value from your authorization request is sent to the processor. If you did 
+not include this value in your authorization request, the merchant city in your account 
+is sent. To add this value to your account, contact customer support.
+Required or Optional: required for authorization, capture, and credit services when 
+any other merchant descriptor field is included in the request; otherwise, optional.
+Data Type: string
+Data Length: 13
+invoiceHeader_merchantDescriptorCountry
+Description: country code for your business location. Use the standard ISO Standard 
+Country Codes. This value might appear on the cardholder's statement. When you 
+do not include this value in your capture or credit request, the value from your 
+authorization request is sent to the processor. If you did not include this value in your 
+authorization request, the merchant country in your account is sent. To add this value 
+to your account, contact customer support.
+Required or Optional: required for authorization, capture, and credit services when 
+any other merchant descriptor field is included in the request; otherwise, optional.
+Data Type: string
+Data Length: 2
+Merchant Descriptors | SIX Merchant Descriptors | 40
+
+Streamline Merchant Descriptors
+This feature enables you to submit merchant descriptor values that appear on a cardholder’s 
+statement.
+Prerequisites
+Before including merchant descriptors in your requests:
+• Contact Streamline to let them know the values you will be sending in these fields.
+• Contact customer support to have your account configured for this feature.
+Services
+• Capture
+• Credit
+Merchant Descriptor Fields for Streamline
+invoiceHeader_merchantDescriptor
+Description: your business name. When you include more than one consecutive space, 
+extra spaces are removed.
+Required or Optional: required for the capture and credit services when any other 
+merchant descriptor field is included in the request; otherwise, optional.
+Data Type: string
+Data Length: 22
+invoiceHeader_merchantDescriptorContact
+Description: contact information for your business. When you include more than one 
+consecutive space, extra spaces are removed. For card-present transactions, Streamline 
+recommends that this field contain your city. For card-not-present transactions, 
+Streamline recommends that this field contain the telephone number for your help 
+desk or the URL for your web site. When you provide a telephone number in this field, 
+the first three digits must be numeric.
+Required or Optional: required for the capture and credit services when any other 
+merchant descriptor field is included in the request; otherwise, optional.
+Data Type: string
+Merchant Descriptors | Streamline Merchant Descriptors | 41
+
+Data Length: 13
+invoiceHeader_merchantDescriptorPostalCode
+Description: postal code for your business location.
+Required or Optional: required for the capture and credit services when any other 
+merchant descriptor field is included in the request; otherwise, optional.
+Data Type: string
+Data Length: 10
+invoiceHeader_merchantDescriptorStreet
+Description: street address for your business location.
+Required or Optional: required for the capture and credit services when any other 
+merchant descriptor field is included in the request; otherwise, optional.
+Data Type: string
+Data Length: 26
+Merchant Descriptors | Streamline Merchant Descriptors | 42
+
+TSYS Acquiring Solutions Merchant Descriptors
+This feature enables you to submit merchant descriptor values that appear on a cardholder's 
+statement.
+Prerequisite
+Before including merchant descriptors in your requests, contact customer support to have your 
+account configured for this feature.
+Services
+• Capture
+• Credit
+Merchant Descriptor Fields for TSYS Acquiring Solutions
+invoiceHeader_merchantDescriptor
+Description: your business name. When you include more than one consecutive 
+space, extra spaces are removed. When you do not include this value in your request, 
+the business name in your account is sent to the processor. To add this value to your 
+account, contact customer support.
+Required or Optional: required for capture and credit services when the merchant 
+descriptor contact field is included in the request; otherwise, optional.
+Data Type: string
+Data Length:
+• American Express: 38
+• All Other Card Types: 23
+invoiceHeader_merchantDescriptorCity
+Description: city for your business location. When you do not include this value in 
+your request, the value in your account is sent to the processor. To add this value to 
+your account, contact customer support.
+Required or Optional: optional for capture and credit services.
+Data Type: string
+Data Length:
+Merchant Descriptors | TSYS Acquiring Solutions Merchant Descriptors | 43
+
+• American Express: 21
+• All Other Card Types: 13
+invoiceHeader_merchantDescriptorContact
+Description: for card-present transactions, TSYS Acquiring Solutions recommends 
+that this field contain the street address for your business location. For card-not-
+present transactions, TSYS Acquiring Solutions recommends that this field contain 
+the phone number for your business or the URL for your web site. When you do not 
+include this value in your request, the value in your account is sent to the processor. To 
+add this value to your account, contact customer support.
+Required or Optional: optional for capture and credit services.
+Data Type: string
+Data Length: 13
+Merchant Descriptors | TSYS Acquiring Solutions Merchant Descriptors | 44
+
+Vero Merchant Descriptor
+This feature enables you to submit a merchant descriptor value that appears on a cardholder's 
+statement.
+Services
+• Authorization
+• Capture
+• Credit
+Merchant Descriptor Fields for Vero
+invoiceHeader_merchantDescriptor
+Description: your business name. This name appears on the cardholder's statement. 
+When you do not include this value in your request, the value in your account is sent to 
+the processor. To add this value to your account, contact customer support.
+Required or Optional: optional for authorization, capture, and credit services.
+Data Type: string
+Data Length: 23
+invoiceHeader_merchantDescriptorContact
+Description: telephone number for your business. This value might appear on the 
+cardholder's statement. When you include more than one consecutive space, extra 
+spaces are removed. When you do not include this value in your authorization request, 
+the merchant phone number in your account is sent to the processor. To add this value 
+to your account, contact customer support.
+Required or Optional: optional for authorization, capture, and credit services.
+Data Type: string
+Data Length: 13
+Merchant Descriptors | Vero Merchant Descriptor | 45
+
+Visa Platform Connect Merchant Descriptors
+This feature enables you to submit merchant descriptor values that appear on a cardholder’s 
+statement.
+Merchant descriptor information is always sent to the acquirer for all your authorization, capture, 
+and credit transactions. The field descriptions in this section describe the values that are sent when 
+you do not include merchant descriptor information in your requests.
+The field descriptions reference the TC 33 Capture file, which contains information about the 
+purchases and refunds that you send to Cybersource. Visa Platform Connect creates the TC 33 
+Capture file at the end of the day and sends it to the merchant’s acquirer, who uses this information 
+to facilitate end-of-day clearing processing with payment networks.
+Prerequisite
+Before including merchant descriptors in your requests, check with your bank to learn whether you 
+must preregister your merchant descriptor information with them.
+Services
+• Authorization
+• Capture
+• Credit
+Merchant Descriptor Authorization Fields for Visa Platform Connect
+Important: The values for these fields must consist of English characters.
+invoiceHeader_merchantDescriptor
+Description: your business name. This name appears on the cardholder’s statement. 
+When you include more than one consecutive space, extra spaces are removed. When 
+you do not include this value in your request, the merchant name in your account is 
+sent to the acquirer. To add this value to your account, contact customer support.
+Required or Optional: optional for the authorization service.
+Data Type: string
+Data Length: 23
+Merchant Descriptors | Visa Platform Connect Merchant Descriptors | 46
+
+invoiceHeader_merchantDescriptorCity
+Description: city for your business location. This value might appear on the 
+cardholder’s statement. When you do not include this value in your request, the value 
+in your account is sent to the acquirer. To add this value to your account, contact 
+customer support.
+Required or Optional: optional for the authorization service.
+Data Type: string
+Data Length: 13
+invoiceHeader_merchantDescriptorContact
+Description: telephone number for your business. This value might appear on the 
+cardholder’s statement. When you include more than one consecutive space, extra 
+spaces are removed. When you do not include this value in your request, the merchant 
+phone number in your account is sent to the acquirer. To add this value to your 
+account, contact customer support.
+Required or Optional: optional for the authorization service.
+Data Type: string
+Data Length: 14
+invoiceHeader_merchantDescriptorCountry
+Description: country code for your business location. Use the ISO Standard Country 
+Codes. This value might appear on the cardholder’s statement. When you do not 
+include this value in your request, the value in your account is sent to the acquirer. To 
+add this value to your account, contact customer support.
+Required or Optional: optional for the authorization service.
+Data Type: string
+Data Length: 2
+invoiceHeader_merchantDescriptorCountryOfOrigin
+Description: merchant country of origin. Use the ISO Standard Country Codes. This 
+field is supported only for Mastercard. If you are a government-controlled merchant, 
+you must include this field. Instead of sending this field, you can ensure that your 
+Cybersource account includes the correct country code.
+Required or Optional: required for the authorization service if you are a government-
+controlled merchant; otherwise, optional.
+Data Type: string
+Data Length: 2
+Merchant Descriptors | Visa Platform Connect Merchant Descriptors | 47
+
+invoiceHeader_merchantDescriptorPostalCode
+Description: postal code for your business location. This value might appear on the 
+cardholder’s statement. If your business is domiciled in the US, you can use a 5-digit or 
+9-digit postal code. A 9-digit postal code must follow this format: [5 digits][dash][4 
+digits]
+Example: 12345-6789
+If your business is domiciled in Canada, you can use a 6-digit or 9-digit postal code. A 
+6-digit postal code must follow this format: [alpha][numeric][alpha][space][numeric]
+[alpha][numeric]
+Example: A1B 2C3
+When you do not include this value in your request, the value in your account is sent to 
+the acquirer. To add this value to your account, contact customer support.
+Important: Mastercard requires a postal code for any country that uses postal 
+codes. You can provide the postal code in your account or you can include this 
+field in your request.
+Required or Optional: required for the authorization service for POS transactions in 
+Brazil; otherwise, optional.
+Data Type: string
+Data Length:
+• Brazil: 8
+• All Other Countries: 14
+invoiceHeader_merchantDescriptorState
+Description: state code or region code for your business location. This value might 
+appear on the cardholder’s statement. For the US and Canada, use the standard State, 
+Province, and Territory Codes for the United States and Canada. When you do not 
+include this value in your request, the value in your account is sent to the acquirer. 
+To add this value to your account, contact customer support. The value for this field 
+corresponds to the following data in the TC 33 capture file:
+• Record: CP01 TCR4
+• Position: 103-105
+• Field: Merchant State/Province Code
+Required or Optional: optional for the authorization service.
+Merchant Descriptors | Visa Platform Connect Merchant Descriptors | 48
+
+Data Type: string
+Data Length: 3
+Merchant Descriptor Capture and Credit Fields for Visa Platform Connect
+Important: The values for these fields must consist of English characters.
+invoiceHeader_merchantDescriptor
+Description: your business name. This name appears on the cardholder’s statement. 
+When you include more than one consecutive space, extra spaces are removed. When 
+you do not include this value in your capture or credit request, the value from your 
+authorization request is sent to the acquirer. If you did not include this value in your 
+authorization request, the merchant name in your account is sent to the acquirer. To 
+add this value to your account, contact customer support.
+Required or Optional: optional for capture and credit services.
+Data Type: string
+Data Length: 23
+invoiceHeader_merchantDescriptorAlternate
+Description: alternate contact information for your business, such as an email address 
+or URL. This value might appear on the cardholder’s statement. When you do not 
+include this value in your request, the merchant URL in your account is sent to the 
+acquirer. To add this value to your account, contact customer support.
+Required or Optional: optional for capture and credit services.
+Data Type: string
+Data Length: 13
+invoiceHeader_merchantDescriptorCity
+Description: city for your business location. This value might appear on the 
+cardholder’s statement. When you do not include this value in your capture or credit 
+request for a card-present transaction, the value from your authorization request is 
+sent to the acquirer. If you did not include this value in your authorization request, 
+the merchant city in your account is sent to the acquirer. When you do not include 
+this value in your capture or credit request for a card-not-present transaction, the 
+merchant city in your account is sent to the acquirer. To add this value to your account, 
+contact customer support.
+Required or Optional: optional for capture and credit services.
+Data Type: string
+Merchant Descriptors | Visa Platform Connect Merchant Descriptors | 49
+
+Data Length: 13
+invoiceHeader_merchantDescriptorContact
+Description: telephone number for your business. This value might appear on the 
+cardholder's statement. When you include more than one consecutive space, extra 
+spaces are removed. When you do not include this value in your capture or credit 
+request, the value from your authorization request is sent to the acquirer. If you did not 
+include this value in your authorization request, the merchant phone number in your 
+account is sent to the acquirer. To add this value to your account, contact customer 
+support.
+Required or Optional: optional for capture and credit services.
+Data Type: string
+Data Length: 14
+invoiceHeader_merchantDescriptorCountry
+Description: country code for your business location. Use the ISO Standard Country 
+Codes. This value might appear on the cardholder’s statement. When you do not 
+include this value in your capture or credit request, the value from your authorization 
+request is sent to the acquirer. If you did not include this value in your authorization 
+request, the merchant country in your account is sent to the acquirer. To add this value 
+to your account, contact customer support.
+Required or Optional: optional for capture and credit services.
+Data Type: string
+Data Length: 2
+invoiceHeader_merchantDescriptorPostalCode
+Description: postal code for your business location. This value might appear on the 
+cardholder's statement. If your business is domiciled in the US, you can use a 5-digit or 
+9-digit postal code. A 9-digit postal code must follow this format: [5 digits][dash][4 
+digits]
+Example: 12345-6789
+If your business is domiciled in Canada, you can use a 6-digit or 9-digit postal code. A 
+6-digit postal code must follow this format: [alpha][numeric][alpha][space][numeric]
+[alpha][numeric]
+Example: A1B 2C3
+When you do not include this value in your capture or credit request, the value from 
+your authorization request is sent to the acquirer. If you did not include this value in 
+your authorization request, the merchant postal code in your account is sent to the 
+acquirer. To add this value to your account, contact customer support.
+Merchant Descriptors | Visa Platform Connect Merchant Descriptors | 50
+
+Important: Mastercard requires a postal code for any country that uses postal 
+codes. You can provide the postal code in your account or you can include this 
+field in your request.
+Required or Optional: required for capture and credit services for POS transactions in 
+Brazil; otherwise, optional.
+Data Type: string
+Data Length:
+• Brazil: 8
+• All Other Countries: 14
+invoiceHeader_merchantDescriptorState
+Description: state code or region code for your business location. This value might 
+appear on the cardholder's statement. For the US and Canada, use the standard State, 
+Province, and Territory Codes for the United States and Canada. When you do not 
+include this value in your capture or credit request, the value from your authorization 
+request is sent to the acquirer. If you did not include this value in your authorization 
+request, the merchant state in your account is sent to the acquirer. To add this value 
+to your account, contact customer support. The value for this field corresponds to the 
+following data in the TC 33 capture file:
+• Record: CP01 TCR4
+• Position: 103-105
+• Field: Merchant State/Province Code
+Required or Optional: optional for capture and credit services.
+Data Type: string
+Data Length: 3
+invoiceHeader_merchantDescriptorStreet
+Description: street address for your business location. This value might appear on 
+the cardholder's statement. When you do not include this value in your request, the 
+value in your account is sent to the acquirer. To add this value to your account, contact 
+customer support.
+Required or Optional: optional for capture and credit services.
+Data Type: string
+Merchant Descriptors | Visa Platform Connect Merchant Descriptors | 51
+
+Data Length: 60
+Merchant Descriptors | Visa Platform Connect Merchant Descriptors | 52
+
+Worldpay VAP Merchant Descriptors
+This feature enables you to submit merchant descriptor values that appear on a cardholder's 
+statement.
+If merchant descriptors are enabled for your account, merchant descriptor information is sent to 
+the processor for all your authorization transactions. When you do not include merchant descriptor 
+information in an authorization request, the default values in your account are sent. To add merchant 
+descriptor values to your account, contact customer support.
+Worldpay VAP was previously called Litle. Litle was purchased by Vantiv, which was then purchased 
+by Worldpay VAP. If you have any questions, contact your account manager at Worldpay VAP.
+Prerequisites
+Before including merchant descriptors in your requests:
+• Contact Worldpay VAP to register to use merchant descriptors.
+• Contact customer support to have your account configured for this feature.
+Services
+• Authorization
+• Credit: stand-alone credits only. Worldpay VAP does not accept merchant descriptors in follow-
+on credit requests.
+Merchant Descriptor Fields for Worldpay VAP
+invoiceHeader_merchantDescriptor
+Description: your business name. This name appears on the cardholder's statement. 
+When you include more than one consecutive space, extra spaces are removed. When 
+you do not include this value in your request, the value in your account is sent to the 
+processor. To add this value to your account, contact customer support. You can use 
+one of these formats for the merchant descriptor field. You are not required to use 
+these formats.
+• <12-character prefix>*<9-character product description>
+• <7-character prefix>*<14-character product description>
+• <3-character prefix>*<18-character product description>
+Merchant Descriptors | Worldpay VAP Merchant Descriptors | 53
+
+When you use one of these formats:
+• The prefix in the merchant descriptor field must be exactly the same as the prefix 
+set in your Worldpay VAP account. Typically, the prefix is your merchant name.
+• The valid characters for the merchant descriptor are:
+◦Numbers
+◦Letters
+◦These special characters: ampersand (&), asterisk (*), dash (-), pound sign 
+(#), comma, and period
+Required or Optional: required for authorization and credit services in the request 
+or your account when the merchant descriptor contact is included in the request; 
+otherwise, optional.
+Data Type: string
+Data Length: 22
+invoiceHeader_merchantDescriptorAlternate
+Description: alternate contact information for your business, such as an email address 
+or URL. This value might appear on the cardholder's statement. When you do not 
+include this value in your request, the merchant URL in your account is sent to the 
+processor. To add this value to your account, contact customer support.
+Required or Optional: optional for authorization and credit services.
+Data Type: string
+Data Length: 13
+invoiceHeader_merchantDescriptorCity
+Description: city or phone number for your business. This value might appear on the 
+cardholder's statement. When you do not include this value in your request, the value 
+in your account is sent to the processor. To add this value to your account, contact 
+customer support.
+Required or Optional: optional for authorization and credit services.
+Data Type: string
+Data Length: 50
+invoiceHeader_merchantDescriptorContact
+Description: contact information for your business. This value might appear on 
+the cardholder's statement. This value could be used to resolve billing inquiries 
+and disputes. When you include more than one consecutive space, extra spaces are 
+Merchant Descriptors | Worldpay VAP Merchant Descriptors | 54
+
+removed. When you do not include this value in your request, the URL or phone 
+number in your account is sent to the processor. To add this value to your account, 
+contact customer support.
+Required or Optional: optional for authorization and credit services.
+Data Type: string
+Data Length: 13
+Merchant Descriptors | Worldpay VAP Merchant Descriptors | 55

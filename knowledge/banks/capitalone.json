@@ -1,0 +1,43 @@
+{
+  "theme": "capitalone",
+  "generated_by": "tools/build_bank_kb.py",
+  "facts": [
+    {
+      "field": "identity.legal_name",
+      "value": "Capital One, National Association",
+      "source": "fdic-capitalone",
+      "quote": "Capital One, National Association",
+      "confidence": "high"
+    },
+    {
+      "field": "identity.hq",
+      "value": "1680 Capital One Dr, McLean, VA 22102",
+      "source": "fdic-capitalone",
+      "quote": "1680 Capital One Dr",
+      "confidence": "high"
+    },
+    {
+      "field": "identity.website",
+      "value": "www.capitalone.com",
+      "source": "fdic-capitalone",
+      "quote": "www.capitalone.com",
+      "confidence": "high"
+    },
+    {
+      "field": "statement.category_column",
+      "value": "Category 列是消费分类，不是交易类型（Debit/Credit 不进这列）",
+      "source": "c1-total-control",
+      "quote": "Lien and Set-Off",
+      "confidence": "low"
+    }
+  ],
+  "sources": [
+    "c1-total-control",
+    "fdic-capitalone"
+  ],
+  "gaps": [
+    "Capital One 的披露页是 JS 渲染，正文没抓到可引用的事实（FACTS 里只有 FDIC 身份）",
+    "所以 Capital One 的行格式只能以本地参考 PDF（C1-Personal-Statement-SAMPLE.pdf）为准"
+  ],
+  "problems": []
+}

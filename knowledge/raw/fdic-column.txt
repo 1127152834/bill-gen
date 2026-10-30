@@ -1,0 +1,22 @@
+source: fdic-column
+topic: FDIC BankFind（按 CERT 精确命中）：法定名称 / 总部地址 / 电话 / 官网
+kind: bank_identity
+url: https://api.fdic.gov/banks/institutions?filters=CERT%3A58224&fields=NAME%2CCITY%2CSTALP%2CADDRESS%2CZIP%2CPHONE%2CWEBADDR%2CCERT%2CRSSDHID&limit=1&format=json
+fetched_at: 2026-10-30T19:14:35Z
+content_type: application/json
+sha256: 6c6c4db06cd94f512fea7149963f53ae4d5cf333679fc2449f751da9b8baf458
+--- 正文（外链原文摘录，只作离线检索用）---
+
+[
+ {
+ "NAME": "Column National Association",
+ "ADDRESS": "350 E 400 S",
+ "CITY": "Salt Lake City",
+ "STALP": "UT",
+ "ZIP": "84111",
+ "PHONE": null,
+ "WEBADDR": "https://column.com/",
+ "CERT": 58224,
+ "RSSDHID": null
+ }
+]

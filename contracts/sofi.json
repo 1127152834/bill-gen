@@ -83,6 +83,10 @@
   "card_types": [
     "Card Purchase"
   ],
+  "knowledge_refs": [
+    "knowledge/banks/sofi.json",
+    "knowledge/regulations.md"
+  ],
   "why": "SoFi 有 Type 列（Card Purchase / Direct Payment / Transfer…），并且**按时间倒序**打印；内部转账写成 `To Savings - 1943`。",
   "curated_keys": [
     "columns",

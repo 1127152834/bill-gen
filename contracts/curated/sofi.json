@@ -60,5 +60,9 @@
   ],
   "card_types": [
     "Card Purchase"
+  ],
+  "knowledge_refs": [
+    "knowledge/banks/sofi.json",
+    "knowledge/regulations.md"
   ]
 }

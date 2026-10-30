@@ -1,0 +1,62 @@
+{
+  "theme": "sofi",
+  "generated_by": "tools/build_bank_kb.py",
+  "facts": [
+    {
+      "field": "identity.legal_name",
+      "value": "SoFi Bank, National Association",
+      "source": "fdic-sofi",
+      "quote": "SoFi Bank, National Association",
+      "confidence": "high"
+    },
+    {
+      "field": "identity.hq",
+      "value": "2750 E Cottonwood Pkwy, Cottonwood Heights, UT 84121",
+      "source": "fdic-sofi",
+      "quote": "2750 E Cottonwood Pkwy",
+      "confidence": "high"
+    },
+    {
+      "field": "identity.website",
+      "value": "www.sofi.com",
+      "source": "fdic-sofi",
+      "quote": "www.sofi.com",
+      "confidence": "high"
+    },
+    {
+      "field": "fees.monthly_fee",
+      "value": "支票账户无月费（$0）",
+      "source": "sofi-checking",
+      "quote": "$0",
+      "confidence": "medium"
+    },
+    {
+      "field": "fees.overdraft_coverage",
+      "value": "Overdraft Coverage 只覆盖借记卡消费、最多 $50 负余额",
+      "source": "sofi-checking",
+      "quote": "covered for up to $50 in negative balances on SoFi Bank debit card purchases only",
+      "confidence": "high"
+    },
+    {
+      "field": "fees.fdic_limit",
+      "value": "FDIC 每存款人每所有权类别最多 $250,000",
+      "source": "sofi-checking",
+      "quote": "does not provide more than $250,000 of FDIC insurance per depositor",
+      "confidence": "high"
+    },
+    {
+      "field": "statement.order",
+      "value": "按日期倒序打印（最新在上）",
+      "source": "sofi-banking-disclosures",
+      "quote": "Rates & Disclosures",
+      "confidence": "low"
+    }
+  ],
+  "sources": [
+    "fdic-sofi",
+    "sofi-banking-disclosures",
+    "sofi-checking"
+  ],
+  "gaps": [],
+  "problems": []
+}

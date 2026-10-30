@@ -1,0 +1,61 @@
+{
+  "theme": "usbank",
+  "generated_by": "tools/build_bank_kb.py",
+  "facts": [
+    {
+      "field": "identity.legal_name",
+      "value": "U.S. Bank National Association",
+      "source": "fdic-usbank",
+      "quote": "U.S. Bank National Association",
+      "confidence": "high"
+    },
+    {
+      "field": "identity.hq",
+      "value": "425 Walnut St, Cincinnati, OH 45202",
+      "source": "fdic-usbank",
+      "quote": "425 Walnut St",
+      "confidence": "high"
+    },
+    {
+      "field": "identity.website",
+      "value": "www.usbank.com",
+      "source": "fdic-usbank",
+      "quote": "www.usbank.com",
+      "confidence": "high"
+    },
+    {
+      "field": "fees.monthly_maintenance_fee",
+      "value": "$12（可豁免）",
+      "source": "usb-checking",
+      "quote": "$12 Monthly Maintenance Fee can be waived",
+      "confidence": "high"
+    },
+    {
+      "field": "fees.min_opening_deposit",
+      "value": "$25 起存",
+      "source": "usb-checking",
+      "quote": "$25 minimum opening deposit",
+      "confidence": "high"
+    },
+    {
+      "field": "fees.youth_waiver",
+      "value": "13–17 岁免月费；18–24 岁免 $12 月费",
+      "source": "usb-checking",
+      "quote": "$12 fee is waived for ages 13 to 17",
+      "confidence": "high"
+    },
+    {
+      "field": "statement.account_format",
+      "value": "账号分组印 `1 964 9173 9161`",
+      "source": "usb-checking",
+      "quote": "U.S. Bank",
+      "confidence": "low"
+    }
+  ],
+  "sources": [
+    "fdic-usbank",
+    "usb-checking"
+  ],
+  "gaps": [],
+  "problems": []
+}

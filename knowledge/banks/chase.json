@@ -1,0 +1,90 @@
+{
+  "theme": "chase",
+  "generated_by": "tools/build_bank_kb.py",
+  "facts": [
+    {
+      "field": "identity.legal_name",
+      "value": "JPMorgan Chase Bank, National Association",
+      "source": "fdic-chase",
+      "quote": "JPMorgan Chase Bank, National Association",
+      "confidence": "high"
+    },
+    {
+      "field": "identity.hq",
+      "value": "1111 Polaris Pkwy, Columbus, OH 43240",
+      "source": "fdic-chase",
+      "quote": "1111 Polaris Pkwy",
+      "confidence": "high"
+    },
+    {
+      "field": "identity.website",
+      "value": "www.jpmorganchase.com",
+      "source": "fdic-chase",
+      "quote": "www.jpmorganchase.com",
+      "confidence": "high"
+    },
+    {
+      "field": "identity.consumer_brand",
+      "value": "Chase",
+      "source": "chase-personal-checking",
+      "quote": "Chase Total Checking",
+      "confidence": "medium"
+    },
+    {
+      "field": "fees.monthly_service_fee_personal",
+      "value": "$15（可豁免）",
+      "source": "chase-personal-checking",
+      "quote": "$15 or $0 Monthly Service Fee",
+      "confidence": "high"
+    },
+    {
+      "field": "fees.msf_waiver_personal",
+      "value": "每期电子入账合计 ≥ $500，或每日开始时余额 ≥ $1,500",
+      "source": "chase-personal-checking",
+      "quote": "$500+ in qualifying electronic deposits",
+      "confidence": "high"
+    },
+    {
+      "field": "fees.msf_waiver_alt",
+      "value": "$5,000+ 期初日均余额（与其他合格账户合并计算）",
+      "source": "chase-personal-checking",
+      "quote": "$5,000+ average beginning day balance in this account",
+      "confidence": "medium"
+    },
+    {
+      "field": "fees.overdraft_small_amount",
+      "value": "日终透支 ≤ $50 不收透支费",
+      "source": "chase-personal-checking",
+      "quote": "No overdraft fee if you're overdrawn by $50 or less",
+      "confidence": "high"
+    },
+    {
+      "field": "fees.msf_business_tiers",
+      "value": "$15 / $40 / $95（三档企业支票账户）",
+      "source": "chase-business-checking",
+      "quote": "$15 or $0 Avoid fee",
+      "confidence": "high"
+    },
+    {
+      "field": "fees.business_included_items",
+      "value": "Complete Checking：每期含 20 笔柜面/纸质交易与 $5,000 柜面现金存入",
+      "source": "chase-business-checking",
+      "quote": "Up to 20 paper and teller transactions",
+      "confidence": "high"
+    },
+    {
+      "field": "statement.cycle",
+      "value": "按月出账，statement period 起止都印在页眉",
+      "source": "chase-personal-checking",
+      "quote": "each statement period",
+      "confidence": "medium"
+    }
+  ],
+  "sources": [
+    "chase-business-checking",
+    "chase-personal-checking",
+    "fdic-chase"
+  ],
+  "gaps": [],
+  "problems": []
+}

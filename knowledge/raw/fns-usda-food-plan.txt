@@ -1,0 +1,1085 @@
+source: fns-usda-food-plan
+topic: USDA 官方食品计划成本（月度食品支出下限参照）
+kind: statistics
+url: https://www.fns.usda.gov/cnpp/usda-food-plans-cost-food-reports
+fetched_at: 2026-10-30T19:13:10Z
+content_type: text/html
+sha256: 74ad487c321e6b893be1e855a9627e15713d0dc7c9ee80575f4a8957539d9948
+--- 正文（外链原文摘录，只作离线检索用）---
+
+USDA Food Plans | Food and Nutrition Administration 
+ 
+ 
+ 
+ 
+ 
+
+ 
+
+ 
+ 
+ 
+ Skip to main content
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ An official website of the United States government 
+ Here's how you know 
+ 
+ 
+ Here's how you know 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Official websites use .gov 
+ 
+ A .gov website belongs to an official government organization in the United States.
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Secure .gov websites use HTTPS 
+ 
+ A lock ( 
+ 
+ Lock 
+ Locked padlock 
+ 
+ 
+ 
+ ) or https:// means you’ve safely connected to the .gov website. Share sensitive information only on official, secure websites.
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+
+ You are now leaving the USDA Food and Nutrition Administration website and entering a non-government or non-military external link or a third-party site. We provide links to other websites with additional information that may be useful or interesting and is consistent with the intended purpose of the content you are viewing on our website. We are providing these links for your reference. We are not responsible for the content, copyright, and licensing restrictions of the new site. 
+ 
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Food and Nutrition Administration 
+ U.S. Department of Agriculture 
+ 
+ 
+ 
+ 
+ Menu 
+
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Home 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Programs 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ Programs 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ SNAP 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ WIC 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Meals for Schools and Childcare 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Summer Nutrition Programs for Kids 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Assistance for Older Adults 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Food Distribution & Emergency Assistance 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Farmers Market Programs 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Nutrition Education & Food Safety 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ NAP Block Grants for Territories 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Data & Research 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ Data & Research 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Data Visualizations 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Research & Analysis 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Peer Review 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Program Data 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Funding 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ Funding 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Grant Opportunities 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Grants Management 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Doing Business with FNA 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Newsroom 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ Newsroom 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Press Releases 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Federal Register Notices 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Newsletters 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ USDA Press Releases 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ USDA Blogs 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Contact FNA Press Office 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Resources 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ Resources 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Fact sheets 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Federal Register 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Infographics 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Guidance documents 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Media gallery 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Policy memos 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Technical assistance 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Videos/Webinars 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ About FNA 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ About FNA 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Administrator 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Contact Us 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ FNA Careers 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Reorganization 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Program Integrity 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Civil Rights 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Freedom of Information Act 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ State Systems Office 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ USDA National Hunger Hotline 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Search 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ Contact Us 
+ 
+ 
+ 
+ 
+ 
+ Report Fraud 
+ 
+ 
+ 
+ 
+ 
+ USDA.gov 
+ 
+ 
+ 
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ USDA Food Plans 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Breadcrumb 
+ 
+ 
+ Home 
+ 
+ 
+ Research & Analysis 
+ 
+ 
+ 
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Resource Type 
+ 
+ 
+ Research and Data 
+ 
+ 
+ 
+ 
+ Research Reports 
+ 
+ 
+ 
+ 
+ 
+ 
+ Related Content 
+ 
+
+ 
+ Thrifty Food Plan, 2021 
+ Thrifty Food Plan Cost Estimates for Alaska and Hawaii 
+ Statewide Thrifty Food Plan Cost Estimate for Hawaii - 2024 
+ Alternative Approaches to Reevaluating the Thrifty Food Plan 
+ A Feasibility Assessment of Alternative Approaches for Reevaluating the Thrifty Food Plan 
+ Measuring the Cost of a Thrifty Food Plan in Puerto Rico 
+ USDA Food Plans: Monthly Cost of Food Reports 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ A healthy diet can help individuals achieve and maintain good health and reduce their risk of chronic disease throughout all stages of life. Countless foods and beverages are available for purchase, ranging in nutrient density and price. As such, a healthy diet can be achieved at many cost levels, including on a limited budget. USDA has produced food plans since 1894 to illustrate how a healthy diet can be achieved through nutritious meals and snacks at home at various costs. USDA Food Plans are made up of two components: Market baskets defining weekly quantities of foods and beverages in their purchasable forms that, together, make up a healthy, practical diet for various age-sex groups. Cost levels defining the dollar value of each market basket given average food prices. USDA produces four food plans at successively higher cost levels: the Thrifty, Low-Cost, Moderate-Cost, and Liberal Food Plans. Federal law requires that the Thrifty Food Plan be based on current food prices, food composition data, consumption patterns, and dietary guidance. USDA last updated the cost levels and market baskets of the Thrifty Food Plan in 2021 and published cost adjustments to reflect higher food prices in Alaska and Hawaii in 2023 . The One Big Beautiful Bill Act requires that the next reevaluation of the Thrifty Food Plan be no earlier than Oct. 1, 2027, and that future reevaluations are held cost-neutral. The Low-Cost, Moderate-Cost, and Liberal Food Plans cost levels were last set in 1983 and their respective market baskets were last reevaluated in 2007, maintaining the same inflation-adjusted costs as previous editions. USDA updates the cost levels of all four food plans monthly for food price inflation using the Consumer Price Index for All Urban Consumers (CPI-U). Thrifty Food Plan Background The Thrifty Food Plan outlines nutrient-dense foods and beverages, their amounts, and associated costs that can be purchased on a limited budget to support a healthy diet through nutritious meals and snacks at home. Federal law specifies that the cost of the Thrifty Food Plan in June for a reference family of four (a man and woman 20 through 50 years of age, a child 6 through 8 years of age, and a child 9 through 11 years of age) serves as the basis for setting: Maximum Supplemental Nutrition Assistance Program (SNAP) benefit allotments for the following federal fiscal year beginning each Oct. 1 ( 7 USC 2012(u) ). Annual adjustments to block grant amounts for the Nutrition Assistance Program in Puerto Rico and American Samoa ( 7 USC 2028(a)(2)(A)(ii) ). Annual adjustments to the dollar amount of commodities the Secretary of Agriculture has the authority to acquire through the Commodity Credit Corporation each fiscal year ( 7 USC 2036(a)(2)(E) ). The cost of the Thrifty Food Plan in November for the reference family also serves as the basis for updating Summer Electronic Benefits Transfer benefit allotments for the following calendar year ( 42 USC 1762(b)(2)(A)(ii) ). Recent Reports Household Food Waste in the United States: An Evidence Scan The USDA Nutrition Evidence Systematic Review (NESR) team conducted an evidence scan to evaluate the volume and characteristics of current research related to household food waste in the United States to help inform future reevaluations of USDA Food Plans. The objective of this evidence scan was to answer the following questions: What evidence has been published that describes how much food is wasted at home? What evidence has been published that describes factors associated with food wasted at home? A detailed description of the methodology used to complete this evidence scan is found within the report. The evidence scan is informed by 305 articles providing evidence from studies on household food waste in the United States. Alternative Approaches to Reevaluating the Thrifty Food Plan The Alternative Approaches to Reevaluating the Thrifty Food Plan report explores different approaches to reevaluating the Thrifty Food Plan. The current method for reevaluating the Thrifty Food Plan uses a model that selects quantities of foods and beverages to represent a healthy, practical, cost-effective diet. As part of our commitment to continuous process improvement and evidence-based policy making, this externally-conducted report describes three potential revisions to that model as well as three alternative approaches, including the advantages, disadvantages, and expected level of effort of each based on input from external experts. The report does not include feasibility testing, which will be covered in a follow-up report. Implementing Alternative Approaches to Reevaluating the Thrifty Food Plan The Feasibility Assessment of Alternative Approaches for Reevaluating the Thrifty Food Plan report is a follow-up to the 2024 Alternative Approaches to Reevaluating the Thrifty Food Plan report . The 2024 report describes three potential alternative approaches and three potential revisions to the existing optimization model used in reevaluating the Thrifty Food Plan. This follow-up report implements the alternatives raised in the 2024 report in a series of test cases that provides detailed information on the feasibility of each option. Information on the feasibility of each approach will be used to determine which, if any, of the alternative approaches can be incorporated into future Thrifty Food Plan reevaluations. Statewide Thrifty Food Plan Cost Estimate for Hawaii By law, the cost of the Thrifty Food Plan for Hawaii is based on the price of food in Honolulu. In December 2024, we issued a proposed rule that would revise regulations such that the cost would instead be based the price of food throughout the state of Hawaii rather than from Honolulu alone. We published the Statewide Thrifty Food Plan Cost Estimate for Hawaii report alongside the proposed rule, providing details on the data and methodology used to calculate a Thrifty Food Plan cost estimate in this manner. Measuring the Cost of a Thrifty Food Plan in Puerto Rico In response to a Congressional Directive, USDA commissioned the  Measuring the Cost of a Thrifty Food Plan in Puerto Rico  study. The purpose of the study was to provide USDA with options for measuring the cost of a Thrifty Food Plan in Puerto Rico, where food benefits are currently provided through the  Nutrition Assistance Program . To identify options, the study team conducted an environmental scan, convened an expert study group, conducted interviews with subject matter experts, and synthesized information across sources. The final options are described in the externally-conducted report, along with each option's advantages and disadvantages, as well as cost and timeline to implement. Ongoing Projects Linking USDA Nutrition Data to Retail and Household Food Scanner Data Thrifty Food Plan reevaluations are required by federal law to be based on current food prices. We are collaborating with the USDA Economic Research Service (ERS) on a project to estimate current prices for foods and beverages reported in What We Eat in America, the dietary component of the National Health and Nutrition Examination Survey (WWEIA NHANES) by building on the existing Purchase to Plate ERS data product. This project will provide national average prices for use in the next Thrifty Food Plan reevaluation. Classifying and Measuring Household Food Waste The USDA Food Plans optimization model has included food waste adjustments since at least the 1962 creation of the Family Food Plans to account for edible food that is purchased but not consumed. To inform future reevaluations of the USDA Food Plans, we have commissioned a study to develop and express food waste estimates by category and source in percentage terms and to report nationally representative estimates of the food-at-home waste distribution. The study will also report how these measures of food waste vary by relevant household characteristics and the extent to which households adhere to best practices in minimizing household food waste. Finally, the study will identify the minimum level of food waste by food category and source that can be observed in a sample of four person households, or an alternative estimate of the lowest amount of food waste that could reasonably be expected in a four-person household. Food Price Data Collection in the Non-Contiguous States and U.S. Territories We have commissioned a study to collect new, representative food price data in Alaska, Hawaii, and the U.S. Territories. Having access to high quality food price data will support us in tailoring research, policy, and consumer education efforts to meet local needs and advance nutrition security in these places. Convenience and Variety of Foods and Beverages in the Thrifty Food Plan Market Baskets To inform future reevaluations of the USDA Food Plans, we have commissioned a study to evaluate approaches for defining and measuring the level of convenience and amount of variety in the Thrifty Food Plan market basket. The study will also consider how future communications could be strengthened to promote clarity and transparency around the Thrifty Food Plan market basket’s level of convenience and amount of variety. Low-Cost, Moderate-Cost, and Liberal Food Plans The  Low-Cost, Moderate-Cost, and Liberal Food Plans  outline nutrient-dense foods and beverages, their amounts, and associated costs that can be purchased on three successively higher budgets, each supporting a healthy diet through nutritious meals and snacks at home. The Low-Cost Food Plan represents food expenditures in the second from the bottom quartile of food spending. The Moderate-Cost Food Plan represents food expenditures in the second from the top quartile of food spending. The Liberal Food Plan represents food expenditures in the top quartile of food spending. These food plans are used by various federal and state agencies and the court system for a variety of purposes. For example, the cost of the Liberal Food Plan in October for an adult man age 19 through 50 is used by the Department of Defense in updating the Basic Allowance for Subsistence for military personnel in the following calendar year ( 37 USC 402(b)(A) ). The market baskets for these food plans are based on dietary standards, food composition, consumption data, and food prices current at the time of publication. The same model used to calculate the Thrifty Food Plan, 2006 , was used to calculate these food plans, with different cost levels and different assumptions regarding food waste. Questions? For technical inquiries, contact:  FNA.FoodPlans@usda.gov . 
+ 
+ 
+
+ 
+ 
+ 
+ Page updated: August 24, 2026 
+ 
+
+ 
+
+ 
+ 
+ 
+
+ 
+ 
+ Return to top 
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Home 
+ 
+ 
+ 
+ Programs 
+ 
+ 
+ 
+ Data & Research 
+ 
+ 
+ 
+ Funding 
+ 
+ 
+ 
+ Newsroom 
+ 
+ 
+ 
+ Resources 
+ 
+ 
+ 
+ About FNA 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ USDA.gov 
+ 
+ 
+ WhiteHouse.gov 
+ 
+ 
+ USA.gov 
+ 
+ 
+ Privacy Policy 
+ 
+ 
+ Vulnerability Disclosure Policy 
+ 
+ 
+ Non-Discrimination Statements 
+ 
+ 
+ Accessibility Statement 
+ 
+ 
+ FOIA 
+ 
+ 
+ Plain Writing 
+ 
+ 
+ Information Quality 
+ 
+ 
+ Small Business Rights 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ Sign up for Updates 
+ 
+ Your Email Address: 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Food and Nutrition Administration 
+ U.S. Department of Agriculture 
+ 
+ 
+ 
+ 
+ Menu 
+ 
+ 
+ 
+ 
+
+ Stay Connected X Facebook Gov Delivery Instagram Flickr YouTube Linkedin RSS Feeds

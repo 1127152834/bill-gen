@@ -66,5 +66,9 @@
   "card_types": [
     "Card"
   ],
-  "type_column": true
+  "type_column": true,
+  "knowledge_refs": [
+    "knowledge/banks/mercury.json",
+    "knowledge/regulations.md"
+  ]
 }
