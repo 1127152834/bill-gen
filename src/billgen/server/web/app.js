@@ -7,7 +7,6 @@ const legacyPaths = {
   "boa-personal": "/boa/?tpl=personal",
   "boa-business": "/boa/?tpl=business",
   wellsfargo: "/wf/",
-  amex: "/ae/",
   mercury: "/merc/?template=mercury",
   capitalone: "/merc/?template=capitalone",
   sofi: "/merc/?template=sofi",
@@ -626,7 +625,6 @@ function renderNav() {
         "span",
         "template-monogram",
         {
-          amex: "AE",
           wellsfargo: "WF",
           capitalone: "C1",
           "boa-personal": "BA",
