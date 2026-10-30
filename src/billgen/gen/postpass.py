@@ -128,7 +128,10 @@ _CHAIN_STATES: dict[str, frozenset[str]] = {
     "WEGMANS": frozenset({"NY", "NJ", "PA", "VA", "MD", "MA", "CT", "DE", "DC", "NC", "ME", "NH", "RI", "VT"}),
     "PUBLIX": frozenset({"FL", "GA", "SC", "NC", "TN", "AL", "KY", "VA"}),
     "H-E-B": frozenset({"TX", "MX"}),
-    "KROGER": frozenset({"OH", "MI", "IN", "IL", "KY", "TN", "VA", "WV", "GA", "SC", "NC", "AL", "MS", "LA", "TX", "AR", "MO", "KS", "NE", "CO", "AZ", "UT", "ID", "WA", "OR", "AK", "WY", "NM", "NV", "CA", "MD", "DE", "DC"}),
+    # Kroger 退出加州后由 Ralphs / Vons / Food 4 Less 承牌，别在 CA 账单上印 KROGER。
+    "KROGER": frozenset({"OH", "MI", "IN", "IL", "KY", "TN", "VA", "WV", "GA", "SC", "NC", "AL", "MS", "LA", "TX", "AR", "MO", "KS", "NE", "AZ", "UT", "ID", "WA", "OR", "AK", "WY", "NM", "NV", "MD", "DE", "DC", "CO"}),
+    "VONS": frozenset({"CA", "NV"}),
+    "FOOD 4 LESS": frozenset({"CA", "NV", "IL", "IN", "MO", "KS", "NE", "IA", "TX", "OR", "WA", "AZ", "NM"}),
     "WAWA": frozenset({"PA", "NJ", "DE", "MD", "VA", "FL", "DC", "NC", "GA", "AL", "SC", "TN", "KY", "OH", "IN"}),
     "SHEETZ": frozenset({"PA", "VA", "WV", "MD", "OH", "NC", "KY", "NY", "SC", "TN", "GA", "AL", "MI", "IN"}),
     "SPROUTS": frozenset({"AZ", "CA", "CO", "FL", "GA", "KS", "LA", "MO", "MS", "NV", "NM", "OK", "TN", "TX", "UT", "VA", "WA", "WY", "AL", "DE", "IL", "IN", "MD", "MI", "MN", "NE", "NJ", "OH", "OR", "PA", "SC", "SD", "WI"}),
