@@ -477,6 +477,30 @@ def diversify_amounts(data: dict[str, Any], *, seed: str = "") -> int:
     return changed
 
 
+_TYPE_ALIASES = {
+    "ACH": "ACH Out",
+    "ach": "ACH Out",
+    "DEBIT": "Card",
+    "debit": "Card",
+    "PURCHASE": "Card",
+    "WITHDRAWAL": "Card",
+}
+
+
+def normalize_types(data: dict[str, Any]) -> int:
+    """Type 列只允许 Card / ACH Out / ACH In 三种写法（Mercury 真账单就这么印）。"""
+    changed = 0
+    for row in _iter_rows(data):
+        current = row.get("type")
+        if not isinstance(current, str) or not current.strip():
+            continue
+        fixed = _TYPE_ALIASES.get(current.strip(), current.strip())
+        if fixed != current:
+            row["type"] = fixed
+            changed += 1
+    return changed
+
+
 def dedupe_recurring(data: dict[str, Any]) -> int:
     """固定扣款一个月只留一笔（会员费、保费、话费、水电）。返回删掉几行。"""
     removed = 0
@@ -1076,6 +1100,7 @@ def repair_month(
         "stores": vary_chain_stores(data),
         "decap": decap_amounts(data, seed=str(state)),
         "varied": diversify_amounts(data, seed=f"{seed}|{city}"),
+        "types": normalize_types(data),
     }
     return report
 

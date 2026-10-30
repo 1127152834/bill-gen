@@ -136,6 +136,7 @@ def test_repair_month_reports_each_category():
         "stores",
         "decap",
         "varied",
+        "types",
     }
 
 
@@ -342,3 +343,14 @@ def test_repeated_amounts_within_a_category_get_spread():
     assert len(set(amounts)) == 3
     lo, hi = postpass.range_for("dining")
     assert all(lo <= value <= hi for value in amounts)
+
+
+def test_type_column_only_uses_card_and_ach_forms():
+    data = _mercury_like([
+        {"date": "Dec 1", "desc": "SO CAL GAS", "amount": -74.51, "type": "ACH"},
+        {"date": "Dec 3", "desc": "CHIPOTLE 7008 TEMPLE CITY CA", "amount": -16.43, "type": "DEBIT"},
+        {"date": "Dec 5", "desc": "VONS 4865 TEMPLE CITY CA", "amount": -14.4, "type": "Card"},
+    ])
+    changed = postpass.normalize_types(data)
+    assert changed == 2
+    assert [row["type"] for row in data["transactions"]] == ["ACH Out", "Card", "Card"]
