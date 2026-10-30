@@ -80,7 +80,11 @@ class LlmConfig:
 
 
 def _resolve(path: Path | str | None) -> Path:
-    return Path(path) if path is not None else DEFAULT_CONFIG_PATH
+    """解析配置文件路径：显式传入 > 环境变量（调用时读，改了就生效）> 默认值。"""
+    if path is not None:
+        return Path(path)
+    env = os.environ.get("BILLGEN_LLM_CONFIG")
+    return Path(env) if env else DEFAULT_CONFIG_PATH
 
 
 def _text(value: Any) -> str:

@@ -231,3 +231,12 @@ def test_json_total_issues_ignores_data_without_rows():
     assert json_total_issues(empty) == [
         {"rule": "no_transactions_found", "path": "", "detail": "交付件里找不到流水行，模板导入后会是空账单"}
     ]
+
+
+def test_delivered_data_never_keeps_sample_watermark():
+    """交付件是成品：template JSON 里若带 watermark=True，导入出片会被印成样张。"""
+    from billgen.synth import monthpack as mp
+
+    data = {"watermark": True, "transactions": []}
+    mp.check_delivered("mercury", "2026-08", data)
+    assert data["watermark"] is False

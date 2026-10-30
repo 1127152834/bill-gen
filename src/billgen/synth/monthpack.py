@@ -425,6 +425,9 @@ def check_delivered(template_id: str, month: str, data: dict[str, Any]) -> dict[
     跨月连续性由调用方拿 `opening`/`closing` 自己比。
     """
     defaults = registry.get_renderer(template_id).default_data()
+    # 交付件是成品，不是样张：任何模板只要数据里有 watermark 开关，一律按 False 交代。
+    if "watermark" in data and data["watermark"]:
+        data["watermark"] = False
     structure, warnings = _structure_issues(template_id, data)
     structure.extend(_value_format_issues(defaults, data))
     rows = json_rows(data)

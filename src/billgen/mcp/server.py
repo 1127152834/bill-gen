@@ -272,7 +272,7 @@ def build(*, out_dir: str | None = None):  # noqa: ANN201 - 返回 FastMCP，避
 
     @server.tool(description="渲染 PDF 并落盘；返回文件路径、页数、字节数、sha256、已知提示")
     def render(template_id: str, data: dict[str, Any], filename: str = "",
-               watermark: bool = True, encrypt: bool = False) -> dict[str, Any]:
+               watermark: bool = False, encrypt: bool = False) -> dict[str, Any]:
         renderer = registry.get_renderer(template_id)
         opts = RenderOptions(watermark=watermark, encrypt=encrypt,
                              font_policy=renderer.spec.default_options.font_policy)

@@ -163,3 +163,17 @@ def test_format_date_accepts_iso_and_passthrough():
     assert format_date("2026-10-28") == "October 28, 2026"
     assert format_date("2026/01/05") == "January 5, 2026"
     assert format_date("October 28, 2026") == "October 28, 2026"
+
+
+def test_mercury_statement_skips_ein_for_personal_accounts():
+    """底稿是企业样例才印 EIN；个人账户印一串企业号是硬伤。"""
+    from billgen import registry
+    from billgen.spec import RenderOptions
+    import fitz
+
+    data = registry.get_renderer("mercury").default_data()
+    data["ein"] = ""
+    pdf = registry.get_renderer("mercury").render(data, RenderOptions(watermark=False))
+    with fitz.open(stream=pdf.pdf, filetype="pdf") as doc:
+        text = "".join(page.get_text() for page in doc)
+    assert "EIN" not in text

@@ -99,6 +99,20 @@ MCP 侧同名能力：`month_json(template_id, result, account?, cycle?, bank_na
 | `no_months` | 一份都没出 |
 | `failed` | 有月份未通过（列月份名） |
 
+## 交付 JSON 的默认渲染口径
+
+导入一份交付 JSON 出账单时，下面三条是「默认就该对」的，不该靠人记得传参：
+
+- **不盖 SAMPLE**：`application.render_synth()` 与 MCP `render` 的 `watermark` 默认改成
+  `False`。走到这两个入口的都是用户自己的数据；要样张得显式传 `True`。另外
+  `monthpack.check_delivered()` 会把交付件里残留的 `watermark: true` 就地改成 `False`，
+  免得「JSON 写着 True、渲染器照着盖」。
+- **行址取档案**：`gen/runner.py::_flatten_profile()` 把档案 `payload`（`name` / `address` /
+  `legalName` / `entityType`）摊平到顶层再喂流水线。不摊平的话流水线读不到地址，会退回
+  模型猜的城市，账单上就会出现「1 Market Street / Austin, TX」这种跟档案无关的行址。
+- **个人账户不印 EIN**：Mercury 底稿是企业样例，`ein` 只是那一版的数据；个人账户没有 EIN，
+  `themes/mercury/generate_statement.py` 现在只在 `ein` 非空时才画这一行。
+
 ## 行为约定
 
 - **选 3 个月就 3 份**：`months` 不传按账本实际月份出；传了只出这几月，但期初仍按

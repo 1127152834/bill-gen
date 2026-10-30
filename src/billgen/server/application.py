@@ -172,9 +172,13 @@ class ApplicationService:
         return json.loads(encoded)
 
     def render_synth(self, template_id: str, result=None, *, account=None, cycle=-1,
-                     bank_name=None, watermark=True, brand=True, docinfo=True,
+                     bank_name=None, watermark=False, brand=True, docinfo=True,
                      options=None, request_id=None):
-        """场景生成结果 → 模板数据 → PDF，返回与模板导出同形状的任务。"""
+        """场景生成结果 → 模板数据 → PDF，返回与模板导出同形状的任务。
+
+        ``watermark`` 默认 **False**：走到这里的是「用户自己的账单数据」，
+        盖 SAMPLE 只会把成品弄成样张；要样张得显式传 True。
+        """
         with RENDER_LOCK:
             self._server_spec(template_id)
             try:

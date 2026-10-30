@@ -14,7 +14,9 @@ from pathlib import Path
 
 import pytest
 
+from billgen.gen import pipeline
 from billgen.gen import prompts as P
+from billgen.gen.prompts import MERCHANT_EXAMPLES, merchant_pool
 from billgen.gen.llm import LlmBadJson
 from billgen.gen.pipeline import build_ledger, generate, node_normalize
 from billgen.gen.tavily import TavilyQuotaExceeded, TavilyResult
@@ -454,3 +456,199 @@ def test_runs_offline(tmp_path, monkeypatch):
 
     res = _gen(tmp_path)
     assert all(item.ok for item in res.months)
+
+
+# ---- 商户名 / 水印 / 填充（回归：真实产物里出现过搜索标题当商户名）-------
+
+
+def _walk_strings(node) -> list[str]:
+    """递归取出交付 JSON 里所有字符串（各模板结构不同，不逐字段硬编码）。"""
+    if isinstance(node, str):
+        return [node]
+    if isinstance(node, dict):
+        out: list[str] = []
+        for value in node.values():
+            out.extend(_walk_strings(value))
+        return out
+    if isinstance(node, (list, tuple)):
+        out = []
+        for value in node:
+            out.extend(_walk_strings(value))
+        return out
+    return []
+
+
+def _brands() -> set[str]:
+    return {brand for pool in P.MERCHANT_EXAMPLES.values() for brand in pool}
+
+
+def _card_merchants(data: dict) -> list[str]:
+    """Chase 卡行里的商户短语：``Card Purchase          07/04 SPROUTS MKT 7243 AUSTIN TX Card 8326``。"""
+    out: list[str] = []
+    for text in _walk_strings(data):
+        match = re.search(r"Card Purchase\s+\d{2}/\d{2}\s+(.+)", text)
+        if not match:
+            continue
+        body = re.sub(r"\s+Card \d{4}$", "", match.group(1)).strip()
+        body = re.sub(r"\s+[A-Z][A-Z .]+ [A-Z]{2}$", "", body).strip()  # 去掉尾部城市州
+        out.append(body)
+    return out
+
+
+def test_no_doubled_card_prefix(tmp_path):
+    """适配器已经印 ``Card Purchase``/``POS PURCHASE``，pipeline 不许再拼一层。"""
+    res = _gen(tmp_path, template="chase-personal")
+
+    for month in res.months:
+        for text in _walk_strings(month.data):
+            assert "POS PURCHASE POS PURCHASE" not in text.upper()
+            assert "POS PURCHASE" not in text.upper(), text
+            assert "CHECKCARD" not in text.upper(), text
+
+
+def test_card_merchant_is_a_brand_name(tmp_path):
+    """卡行商户名必须来自品牌池，且不含调研标题词（average/prices/summary/restaurants）。"""
+    res = _gen(tmp_path, template="chase-personal")
+    brands = _brands()
+    noise = re.compile(
+        r"\b(AVERAGE|AVG|PRICES|PRICE|SUMMARY|RESTAURANTS|RESTAURANT|CHEAPEST|"
+        r"COST OF LIVING|HOW MUCH|DEALS|COUPONS|NEAR ME|REVIEWS)\b"
+    )
+    merchants = [
+        name for month in res.months for name in _card_merchants(month.data)
+    ]
+    assert merchants, "本测试依赖至少一条卡行"
+    for name in merchants:
+        assert not noise.search(name.upper()), name
+        assert any(name.upper().startswith(brand) for brand in brands), name
+    # 同一 seed 下同一商户 key 只对应一个品牌（不能一单一个店名）
+    assert len(set(merchants)) < len(merchants), merchants
+
+
+def test_delivered_data_has_no_sample_watermark(tmp_path):
+    """交付 JSON 的 watermark 必须是 false，否则出片会印 S A M P L E。"""
+    res = _gen(tmp_path, template="chase-personal")
+
+    for month in res.months:
+        assert month.data["watermark"] is False, month.month
+        assert not month.data.get("encrypt"), month.month
+    assert not any("SAMPLE" in text.upper() for month in res.months for text in _walk_strings(month.data))
+
+
+def test_merchant_names_are_stable_across_runs(tmp_path):
+    """同一个 seed 两次跑出的商户名一致；换 seed 允许不同。"""
+    first = _gen(tmp_path / "a", template="chase-personal", seed="fix-1")
+    second = _gen(tmp_path / "b", template="chase-personal", seed="fix-1")
+    for left, right in zip(first.months, second.months, strict=False):
+        assert _card_merchants(left.data) == _card_merchants(right.data)
+
+
+def test_build_ledger_watermark_and_check_numbers(tmp_path):
+    """账本本身就不带水印；支票行必须有票号（否则 Chase 印不出 ``Check Paid 1110``）。"""
+    res = _gen(tmp_path, template="chase-personal")
+    norm = node_normalize(PROFILE, template="chase-personal", months=MONTHS, seed="fix-1")
+    check_row = {
+        "date": date(2026, 9, 2),
+        "posted": date(2026, 9, 2),
+        "type": "CHECK",
+        "direction": "debit",
+        "amount_cents": 158000,
+        "description": "GREYSTAR MGMT",
+        "memo": "Rent payment",
+        "merchant": None,
+        "reference": "1234567890",
+    }
+    ledger = build_ledger(norm, PROFILE, _model(), [check_row], template="chase-personal")
+
+    assert ledger.watermark is False
+    assert ledger.rows[0].check_no and ledger.rows[0].check_no.isdigit()
+    assert len(ledger.rows[0].check_no) == 4
+    assert res.months[0].data["watermark"] is False
+
+
+def test_clean_merchant_scrubs_research_titles():
+    """兜底路径：搜索标题片段要洗成人话，且不超过 18 字符。"""
+    from billgen.gen.pipeline import MERCHANT_MAX_CHARS, _clean_merchant
+
+    for raw in (
+        "GAS PRICES BY STATION NEAR ME",
+        "AVERAGE GROCERY PRICES AUSTIN",
+        "PRESCRIPTION PRICES SUMMARY",
+        "RESTAURANTS IN AUSTIN TX",
+        "Shell Station 4412 Austin TX",
+    ):
+        cleaned = _clean_merchant(raw)
+        # 整句都是标题词时洗成空串是对的：调用方随即落回品牌池。
+        assert len(cleaned) <= MERCHANT_MAX_CHARS, cleaned
+        assert not re.search(r"\b(AVERAGE|PRICES|SUMMARY|RESTAURANTS|COSTS)\b", cleaned), cleaned
+        # 洗空了或只剩残片 → 最终商户名来自品牌池；能留下人话时也不许带标题词。
+        brand = pipeline._merchant_for("no-such-category", key=raw, seed="fix-1", fallback=raw)
+        assert brand in MERCHANT_EXAMPLES["retail"] or not re.search(
+            r"\b(AVERAGE|PRICES|SUMMARY|RESTAURANTS|COSTS|STATION)\b", brand
+        ), brand
+    assert _clean_merchant("Shell Station 4412 Austin TX")
+
+
+def test_merchant_examples_cover_intents():
+    """决策 14 的池子：21 个类别、每类 6–10 个品牌、全部短名大写。"""
+    assert len(P.MERCHANT_EXAMPLES) >= 21
+    for category, pool in P.MERCHANT_EXAMPLES.items():
+        assert 6 <= len(pool) <= 10, category
+        for brand in pool:
+            assert brand == brand.upper(), brand
+            assert 1 < len(brand) <= 18, brand
+
+
+def test_research_title_never_becomes_merchant():
+    """调研标题（``Gas Prices By Station``）洗成商户名时不许留下标题词。"""
+    noise_words = ("AVERAGE", "AVG", "PRICES", "PRICE", "SUMMARY", "RESTAURANTS", "CHEAPEST")
+    titles = (
+        "Gas Prices By Station",
+        "Average Grocery Costs In Austin",
+        "Prescription Prices At Pharmacies",
+        "Restaurants Summary 2026",
+    )
+    for title in titles:
+        cleaned = pipeline._clean_merchant(title)
+        assert len(cleaned) <= pipeline.MERCHANT_MAX_CHARS, cleaned
+        assert not any(word in cleaned for word in noise_words), cleaned
+        assert not cleaned.split()[-1:] or cleaned.split()[-1] not in {"IN", "AT", "A", "AN", "OF"}
+        # 洗成残片（"GAS"）或洗空时，最终商户名必须落回真品牌池，绝不上标题。
+        brand = pipeline._merchant_for("no-such-category", key=title, seed="fix-1", fallback=title)
+        assert brand in MERCHANT_EXAMPLES["retail"], brand
+        assert not any(word in brand for word in noise_words), brand
+
+
+def test_merchant_pool_is_stable_and_branded():
+    """同一 seed 挑出的商户名完全一致，且都来自品牌池（大写、不带城市）。"""
+    first = pipeline._merchant_for("groceries", key="fact-1", seed="fix-1")
+    second = pipeline._merchant_for("groceries", key="fact-1", seed="fix-1")
+    other = pipeline._merchant_for("groceries", key="fact-2", seed="fix-1")
+    assert first == second
+    assert first in MERCHANT_EXAMPLES["groceries"]
+    assert other in MERCHANT_EXAMPLES["groceries"]
+    assert all(name == name.upper() for name in MERCHANT_EXAMPLES["groceries"])
+
+
+def test_regional_billers_follow_the_profile_state():
+    """Austin 的账户不该在电费里出现 Con Edison / PG&E（跨辖区一眼假）。"""
+    texas = merchant_pool("utilities", state="TX")
+    assert "AUSTIN ENERGY" in texas
+    assert not any(name in texas for name in ("CON EDISON", "PG&E", "SCE"))
+    assert "CON EDISON" in merchant_pool("utilities", state="NY")
+    assert merchant_pool("utilities", state="ZZ") == merchant_pool("utilities")
+
+
+def test_bill_entries_drop_invented_labels():
+    """ACH 账单描述 = 品牌 + 引用号；模型编的 ``UTIL BILL`` 之类说明不进描述。"""
+    row = {
+        "type": "ACH",
+        "merchant_key": "utility-1",
+        "base_description": "CON EDISON",
+        "category": "utilities",
+        "city": "Austin",
+        "state": "TX",
+    }
+    norm = {"template": "chase-personal", "seed": "fix-1"}
+    assert pipeline._final_description(row, "CON EDISON UTIL BILL", norm) == "CON EDISON"
+    assert pipeline._final_description(row, "PPD ID:8837", norm).startswith("CON EDISON PPD ID")

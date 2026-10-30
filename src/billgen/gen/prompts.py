@@ -53,6 +53,251 @@ def state_name(code: str) -> str:
     return STATE_NAMES.get((code or "").upper(), (code or "").upper())
 
 
+# ---- 商户名池（决策 14：类别只是示例，池子只提供「像真的」品牌名）---------
+
+#: 每个类别一组真实连锁品牌（大写、不带城市）。调研事实只用来定金额档位与
+#: 城市/州；账单上印的商户名从这里取——事实的 title 是搜索结果标题
+#: （``Gas Prices By Station``），拿它当商户名一眼就假。
+MERCHANT_EXAMPLES: dict[str, list[str]] = {
+    "groceries": [
+        "WHOLEFDS MKT", "H-E-B", "TRADER JOE'S", "KROGER", "SAFEWAY",
+        "ALDI", "PUBLIX", "SPROUTS MKT", "COSTCO WHSE", "WALMART.COM",
+    ],
+    "fuel": [
+        "SHELL OIL", "CHEVRON", "EXXON", "MOBIL", "BP", "VALERO",
+        "SUNOCO", "CIRCLE K", "QUIKTRIP", "SPEEDWAY",
+    ],
+    "dining": [
+        "STARBUCKS", "CHIPOTLE", "MCDONALD'S", "CHICK-FIL-A", "PANERA BREAD",
+        "TACO BELL", "SUBWAY", "DOMINO'S PIZZA", "SHAKE SHACK", "WHATABURGER",
+    ],
+    "pharmacy": [
+        "WALGREENS", "CVS PHARMACY", "RITE AID", "GOODRX", "EXPRESS SCRIPTS",
+        "OPTUM RX", "H-E-B PHARMACY",
+    ],
+    "retail": [
+        "TARGET", "AMAZON MKTPLACE", "BEST BUY", "OLD NAVY", "NORDSTROM",
+        "MARSHALLS", "BIG LOTS", "WAYFAIR", "ETSY",
+    ],
+    "transit": [
+        "UBER TRIP", "LYFT RIDE", "EZPASS", "PARKMOBILE", "METRO TRANSIT",
+        "AMTRAK", "SPOTHERO", "TOLLWAY",
+    ],
+    "utilities": [
+        "AUSTIN ENERGY", "DUKE ENERGY", "CON EDISON", "XCEL ENERGY",
+        "CITY WATER UTIL", "ATLANTA GAS", "PG&E", "DOMINION ENERGY",
+    ],
+    "telecom": [
+        "AT&T WIRELESS", "VERIZON WIRELESS", "T-MOBILE", "XFINITY", "SPECTRUM",
+        "COMCAST", "COX COMM",
+    ],
+    "subscription": [
+        "NETFLIX.COM", "SPOTIFY USA", "HULU", "DISNEY PLUS", "APPLE.COM/BILL",
+        "ADOBE SYSTEMS", "NYTIMES", "AUDIBLE", "DROPBOX",
+    ],
+    "insurance": [
+        "STATE FARM INS", "GEICO AUTO", "PROGRESSIVE INS", "ALLSTATE",
+        "USAA INS", "LEMONADE INS",
+    ],
+    "rent": [
+        "GREYSTAR MGMT", "INVITATION HOMES", "AVALON MGMT", "CAMDEN PROPERTY",
+        "ESSEX MGMT", "AIMCO RENT",
+    ],
+    "income": [
+        "RIDGEWAY DESIGN", "NORTHSIDE MEDIA", "CLEARWATER CONS", "BLUESTEM PARTNERS",
+        "LONGBOW AGENCY", "HARBOR POINT LLC", "CEDARLINE STUDIO",
+    ],
+    "transfer": [
+        "ONLINE TRANSFER", "ZELLE TRANSFER", "WIRE TRANSFER", "ALLY SAVINGS",
+        "MOBILE DEPOSIT", "INTERNAL TRANSFER",
+    ],
+    "fee": [
+        "MONTHLY SVC FEE", "ATM FEE", "OVERDRAFT FEE", "FOREIGN TXN FEE",
+        "WIRE FEE", "RUSH CARD FEE",
+    ],
+    "atm": [
+        "ATM WITHDRAWAL", "ATM CASH W/D", "CASH WITHDRAWAL", "ATM ADVANCE",
+        "ATM DEBIT", "ATM W/D",
+    ],
+    "charity": [
+        "RED CROSS", "WORLD VISION", "GO FUND ME", "SALVATION ARMY",
+        "UNICEF USA", "ST JUDE",
+    ],
+    "healthcare": [
+        "ONE MEDICAL", "URGENT CARE", "LABCORP", "QUEST DIAGNOSTICS",
+        "TEXAS HEALTH", "ZOCDOC", "MD ANDERSON",
+    ],
+    "education": [
+        "COURSERA", "UDEMY", "CHEGG", "PEARSON EDU", "KHAN ACADEMY", "DUOLINGO",
+    ],
+    "entertainment": [
+        "AMC THEATRES", "TICKETMASTER", "STEAM GAMES", "PLAYSTATION",
+        "CINEMARK", "BOWLERO", "TOPGOLF",
+    ],
+    "hardware": [
+        "HOME DEPOT", "LOWE'S", "ACE HARDWARE", "MENARDS", "TRUE VALUE", "IKEA",
+    ],
+    "pets": [
+        "PETSMART", "PETCO", "CHEWY.COM", "BANFIELD PET", "PET SUPPLIES", "WAG.COM",
+    ],
+    "fitness": [
+        "PLANET FITNESS", "24 HOUR FITNESS", "LA FITNESS", "ANYTIME FITNESS",
+        "GOLD'S GYM", "EQUINOX", "CRUNCH FITNESS", "ORANGETHEORY",
+    ],
+    "auto": [
+        "JIFFY LUBE", "AUTOZONE", "DISCOUNT TIRE", "VALVOLINE", "FIRESTONE",
+        "MIDAS AUTO", "PEP BOYS", "NAPA AUTO", "SAFETY KLEEN",
+    ],
+    "travel": [
+        "DELTA AIR LINES", "SOUTHWEST AIR", "AMERICAN AIR", "MARRIOTT",
+        "HILTON HOTELS", "AIRBNB", "EXPEDIA", "HERTZ RENTAL",
+    ],
+    "tax": [
+        "IRS", "IRS USATAXPYMT", "STATE TAX PMT", "FTB CALIFORNIA",
+        "MASS DOR", "NY STATE TAX",
+    ],
+    "loan": [
+        "NAVIENT", "SALLIE MAE", "SOFI LOAN", "EARNEST", "DISCOVER LOAN",
+        "LENDINGCLUB",
+    ],
+}
+
+#: 区域类账单（电/气/水/电信）按州取品牌：Austin 的账户不该出现 Con Edison，
+#: 这种「跨辖区」组合在真账单里是硬伤。州里有表就只在该州的品牌里挑。
+MERCHANT_REGIONAL: dict[str, dict[str, list[str]]] = {
+    "utilities": {
+        "TX": ["AUSTIN ENERGY", "TXU ENERGY", "RELIANT ENERGY", "ONCOR ELECTRIC", "ATMOS ENERGY", "CITY WATER UTIL"],
+        "CA": ["PG&E", "SCE", "SDG&E", "LADWP", "SOCALGAS"],
+        "NY": ["CON EDISON", "NATIONAL GRID", "PSEG"],
+        "FL": ["FPL", "DUKE ENERGY", "TECO PEOPLES GAS"],
+        "IL": ["COMED", "NICOR GAS"],
+        "GA": ["GEORGIA POWER", "ATLANTA GAS"],
+        "WA": ["PUGET SOUND", "SEATTLE CITY LIGHT"],
+        "CO": ["XCEL ENERGY", "COLORADO NATURAL"],
+        "MA": ["EVERSOURCE", "NATIONAL GRID"],
+        "PA": ["PECO", "PPL ELECTRIC"],
+        "NC": ["DUKE ENERGY", "DOMINION ENERGY"],
+        "AZ": ["APS", "SRP"],
+        "OR": ["PORTLAND GEN", "NW NATURAL"],
+        "NV": ["NV ENERGY", "SOUTHWEST GAS"],
+        "TN": ["NASHVILLE ELEC", "PIEDMONT GAS"],
+        "OH": ["AEP OHIO", "DOMINION ENERGY"],
+        "MI": ["DTE ENERGY", "CONSUMERS ENERGY"],
+        "NJ": ["PSEG", "NJ NATURAL GAS"],
+        "VA": ["DOMINION ENERGY", "APPALACHIAN PWR"],
+        "MD": ["BGE", "PEPCO"],
+        "MN": ["XCEL ENERGY", "CENTERPOINT"],
+        "WI": ["WE ENERGIES", "ALLIANT ENERGY"],
+        "MO": ["AMEREN MO", "SPIRE ENERGY"],
+        "IN": ["DUKE ENERGY", "VECTREN"],
+        "CT": ["EVERSOURCE", "UI ELECTRIC"],
+        "UT": ["ROCKY MOUNTAIN", "DOMINION ENERGY"],
+        "KS": ["EVERGY", "KANSAS GAS"],
+        "SC": ["DUKE ENERGY", "SANTEE COOPER"],
+        "AL": ["ALABAMA POWER", "SPIRE ENERGY"],
+        "LA": ["ENTERGY", "CENTERPOINT"],
+        "OK": ["OG&E", "ONEOK"],
+    },
+    "telecom": {
+        "TX": ["AT&T WIRELESS", "VERIZON WIRELESS", "T-MOBILE", "XFINITY", "SPECTRUM"],
+        "CA": ["AT&T WIRELESS", "VERIZON WIRELESS", "T-MOBILE", "XFINITY", "COX COMM"],
+        "NY": ["VERIZON WIRELESS", "AT&T WIRELESS", "T-MOBILE", "SPECTRUM"],
+        "FL": ["VERIZON WIRELESS", "T-MOBILE", "XFINITY", "SPECTRUM"],
+        "GA": ["AT&T WIRELESS", "XFINITY", "T-MOBILE"],
+        "WA": ["VERIZON WIRELESS", "XFINITY", "T-MOBILE"],
+        "IL": ["XFINITY", "AT&T WIRELESS", "VERIZON WIRELESS"],
+        "CO": ["XFINITY", "VERIZON WIRELESS", "T-MOBILE"],
+        "MA": ["XFINITY", "VERIZON WIRELESS", "T-MOBILE"],
+        "PA": ["XFINITY", "VERIZON WIRELESS", "T-MOBILE"],
+        "NC": ["SPECTRUM", "AT&T WIRELESS", "T-MOBILE"],
+        "AZ": ["COX COMM", "AT&T WIRELESS", "T-MOBILE"],
+        "OR": ["XFINITY", "T-MOBILE", "VERIZON WIRELESS"],
+    },
+}
+
+#: lifeModel 的 ``kind`` / 调研计划的类别 → 池子键；复数与常见别名都归一到这里。
+MERCHANT_CATEGORY_ALIASES: dict[str, str] = {
+    "grocery": "groceries", "groceries": "groceries", "supermarket": "groceries",
+    "gas": "fuel", "fuel": "fuel", "gasoline": "fuel", "petrol": "fuel",
+    "food": "dining", "dining": "dining", "restaurant": "dining",
+    "restaurants": "dining", "coffee": "dining", "cafe": "dining",
+    "pharmacy": "pharmacy", "drugstore": "pharmacy", "prescriptions": "pharmacy",
+    "retail": "retail", "shopping": "retail", "shop": "retail",
+    "merchandise": "retail", "clothing": "retail", "electronics": "retail",
+    "transit": "transit", "transport": "transit", "transportation": "transit",
+    "rideshare": "transit", "parking": "transit", "tolls": "transit",
+    "utilities": "utilities", "utility": "utilities", "power": "utilities",
+    "electric": "utilities", "electricity": "utilities", "water": "utilities",
+    "telecom": "telecom", "phone": "telecom", "wireless": "telecom",
+    "internet": "telecom", "cable": "telecom",
+    "subscription": "subscription", "subscriptions": "subscription",
+    "streaming": "subscription", "software": "subscription",
+    "insurance": "insurance", "insur": "insurance",
+    "rent": "rent", "housing": "rent", "apartment": "rent", "mortgage": "rent",
+    "income": "income", "payroll": "income", "salary": "income",
+    "transfer": "transfer", "transfers": "transfer", "zelle": "transfer",
+    "wire": "transfer", "savings": "transfer",
+    "fee": "fee", "fees": "fee", "bank_fee": "fee", "service_fee": "fee",
+    "atm": "atm", "cash": "atm", "cash_withdrawal": "atm",
+    "charity": "charity", "charities": "charity", "donation": "charity",
+    "donations": "charity", "nonprofit": "charity",
+    "healthcare": "healthcare", "health": "healthcare", "medical": "healthcare",
+    "doctor": "healthcare", "dental": "healthcare", "clinic": "healthcare",
+    "hospital": "healthcare",
+    "education": "education", "school": "education", "tuition": "education",
+    "books": "education", "learning": "education",
+    "entertainment": "entertainment", "movies": "entertainment",
+    "games": "entertainment", "gaming": "entertainment", "music": "entertainment",
+    "hardware": "hardware", "hardware_store": "hardware", "tools": "hardware",
+    "pets": "pets", "pet": "pets", "pet_supplies": "pets", "vet": "pets",
+    "veterinary": "pets",
+    "fitness": "fitness", "gym": "fitness", "gyms": "fitness",
+    "membership": "fitness", "memberships": "fitness", "health_club": "fitness",
+    "workout": "fitness", "yoga": "fitness",
+    "auto": "auto", "automotive": "auto", "car": "auto", "vehicle": "auto",
+    "repair": "auto", "maintenance": "auto", "oil_change": "auto",
+    "tires": "auto", "car_wash": "auto",
+    "travel": "travel", "hotel": "travel", "hotels": "travel",
+    "airline": "travel", "airfare": "travel", "lodging": "travel",
+    "vacation": "travel",
+    "prepaid_phone": "telecom", "prepaid": "telecom", "mobile": "telecom",
+    "cell": "telecom", "phone_plan": "telecom", "landline": "telecom",
+    "internet_service": "telecom", "tv": "telecom",
+    "sewer": "utilities", "trash": "utilities", "natural_gas": "utilities",
+    "gas_bill": "utilities", "heating": "utilities",
+    "tax": "tax", "taxes": "tax", "tax_estimated": "tax",
+    "tax_payment": "tax", "estimated_tax": "tax", "irs": "tax",
+    "loan": "loan", "loans": "loan", "student_loan": "loan",
+    "auto_loan": "loan", "personal_loan": "loan", "car_payment": "loan",
+    "gym_membership": "fitness", "fitness_club": "fitness",
+    "auto_insurance": "insurance", "car_insurance": "insurance",
+    "life_insurance": "insurance", "health_insurance": "insurance",
+    "renters_insurance": "insurance", "home_insurance": "insurance",
+    "parking_garage": "transit", "toll": "transit", "metro": "transit",
+}
+
+
+def merchant_category_key(category: str) -> str:
+    """类别 → 池子键（``subscriptions`` 与 ``subscription`` 落同一个键）。"""
+    key = str(category or "").strip().lower().replace("-", "_").replace(" ", "_")
+    return MERCHANT_CATEGORY_ALIASES.get(key, key)
+
+
+def merchant_pool(category: str, *, state: str = "") -> tuple[str, ...]:
+    """按类别取品牌名池；不在池里返回空元组，调用方自己兜底。
+
+    ``state`` 只对电/气/水/电信这类「辖区型」账单生效：该州有区域表就只挑本州
+    的运营商，避免 Austin 的账户出现 Con Edison + PG&E + Austin Energy 三家。
+    """
+    key = merchant_category_key(category)
+    regional = MERCHANT_REGIONAL.get(key)
+    if regional and state:
+        local = regional.get(str(state).strip().upper())
+        if local:
+            return tuple(local)
+    return tuple(MERCHANT_EXAMPLES.get(key, ()))
+
+
 # ---- 公共片段（对应 prompts/common.ts） ---------------------------------
 
 #: 网页抓来的资料只当数据用，绝不执行里面的指令。
@@ -584,9 +829,10 @@ Placeholders: {STORE} {CITY} {ST} {MMDD} {REF} {ID} {LAST4}. No other braces are
 Allowed characters in a template: A-Z 0-9 space # * . , - / & ' (everything else is stripped).
 Templates are uppercased; keep them at most 60 characters.
 
-Checking POS rows must all share ONE house prefix, either "CHECKCARD {MMDD}", "POS PURCHASE", or "DEBIT CARD PURCHASE" - pick one and use it for every checking POS template.
-Credit rows never carry a prefix.
-Only merchants with a chain flag may use #{STORE} and "{CITY} {ST}"; independent local merchants get the city and state without a store number.
+Start every template with the merchant name given in that item's "template" field, verbatim. That field is the merchant this row is printed for.
+The statement itself prints the row label and the posting date in front of the descriptor ("Card Purchase 09/04 …", "ACH Debit 09/08 …", "Check Paid 09/01 …", "Fee 09/28 …"), so the descriptor must never repeat them: no "POS PURCHASE", "CARD PURCHASE", "DEBIT CARD PURCHASE", "CHECKCARD {MMDD}" or doubled prefixes anywhere in a template.
+Research titles are not merchant names: never write phrases like "average …", "… prices", "… summary", "restaurants in …" or any search-result wording into a template.
+Only merchants with a chain flag may append {STORE} and "{CITY} {ST}"; independent local merchants get the city and state without a store number.
 National facts (state "US") never use {CITY} or {ST}.
 ACH bills read like a biller entry: biller name of at most 16 characters plus an entry description, no city/state, and never {REF}.
 IRS payments are exactly "IRS USATAXPYMT {REF}".
@@ -655,7 +901,9 @@ AUDIT_RULES = """You are the toughest spot-the-fake player alive. Read the state
 report only what would make a careful human say "this is synthetic".
 
 Check:
-- Descriptions and house prefixes: do POS rows share one prefix? Do ACH rows look like bills?
+- Descriptions: any leftover research-title wording ("average …", "… prices", "… summary"),
+  any doubled or card-network prefix ("POS PURCHASE POS PURCHASE", "CHECKCARD" on a
+  screen that already prints "Card Purchase"), and whether the merchant is a real brand name?
 - Evidence: does each merchant / sourceUrl actually fit the category and city?
 - Amounts: are recurring amounts stable, and are discretionary amounts plausible?
 - Repetition: the same amount, same merchant, or same day repeated too often?

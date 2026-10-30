@@ -116,6 +116,28 @@ def _manifest(result: GenResult, files: list[dict[str, Any]], out_dir: Path) -> 
     }
 
 
+def _flatten_profile(record: dict[str, Any]) -> dict[str, Any]:
+    """把档案记录摊平成流水线认的形状。
+
+    档案是 ``{id, kind, bank, display_name, payload: {...}, accounts: {...}}``，
+    而 ``payload`` 里才是 ``name`` / ``address`` / ``legalName`` 这些真人信息。
+    流水线（``node_normalize`` / ``_holder_name`` / ``_address_lines``）读的是顶层键，
+    不摊平就会拿不到地址，退回到模型瞎猜的城市——账单上就会出现「1 Market Street /
+    Austin, TX」这种跟档案无关的行址。
+    """
+    flat = dict(record)
+    payload = record.get("payload")
+    if isinstance(payload, Mapping):
+        flat.update(payload)
+    flat["profile_id"] = record.get("id") or ""
+    flat["bank"] = record.get("bank") or flat.get("bank") or ""
+    flat["display_name"] = record.get("display_name") or flat.get("display_name") or ""
+    accounts = record.get("accounts")
+    if isinstance(accounts, Mapping):
+        flat["accounts"] = dict(accounts)
+    return flat
+
+
 def make_runner(*, profiles: Path | str | None = None):
     """造一个给 `JobQueue` 用的 runner；档案库路径可注入（测试用）。"""
     target = Path(profiles) if profiles is not None else store_path()
@@ -135,7 +157,7 @@ def make_runner(*, profiles: Path | str | None = None):
         try:
             result = generate(
                 ctx,
-                profile=profile.to_dict(),
+                profile=_flatten_profile(profile.to_dict()),
                 template=job.template,
                 months=job.months,
                 llm=llm,

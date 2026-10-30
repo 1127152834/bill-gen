@@ -209,3 +209,14 @@ def test_synth_render_is_byte_stable(web):
     first = get(web, post(web, "/api/v1/synth/render", body)[1]["links"]["pdf"])[2]
     second = get(web, post(web, "/api/v1/synth/render", body)[1]["links"]["pdf"])[2]
     assert first == second
+
+
+def test_synth_render_defaults_to_no_sample_watermark(web):
+    """用户导入自己的账本时不该被盖 SAMPLE：默认 watermark=False。"""
+    status, job = post(web, "/api/v1/synth/render", {"template": "boa-personal", "result": result()})
+    assert status == 201
+    assert job["data"]["watermark"] is False
+    pdf = get(web, job["links"]["pdf"])[2]
+    with fitz.open(stream=pdf, filetype="pdf") as doc:
+        text = "".join(page.get_text() for page in doc)
+    assert "SAMPLE" not in text

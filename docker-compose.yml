@@ -8,6 +8,11 @@ services:
     environment:
       BILL_GEN_DATA_DIR: /data/billgen
       BILLGEN_OUT: /data/renders
+      # 账单 JSON 生成器（Python 版）：档案库、任务目录、模型配置都在挂载盘上
+      BILLGEN_PROFILES: /data/billgen/profiles.json
+      BILLGEN_JOBS_DIR: /data/jobs
+      BILLGEN_JOB_WORKERS: ${BILLGEN_JOB_WORKERS:-2}
+      BILLGEN_LLM_CONFIG: /data/billgen/llm.json
       BILLGEN_MCP_CMD: /opt/billgen/bin/billgen
       # auto = 由推荐器按账本形状挑模板（boa/chase/usbank/... 前 N 名）
       BILLGEN_TEMPLATES: ${BILLGEN_TEMPLATES:-auto}

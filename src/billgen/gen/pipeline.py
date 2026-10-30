@@ -240,6 +240,196 @@ def _rng(seed: str, *parts: str) -> random.Random:
     return random.Random(int.from_bytes(digest[:8], "big"))
 
 
+# ---- 商户名：类别池 + 调研标题清洗 ---------------------------------------
+
+#: 品牌名长度上限。Chase 描述列 38 字符里还要塞日期/城市/卡尾号，
+#: 品牌独占 18 已是上限（``WALMART SUPERCENTER`` 那种长名在池子里被截短）。
+MERCHANT_MAX_CHARS = 18
+
+#: 调研标题里出现、但绝不是商户名的词。事实（fact）只用来定金额档位与城市/州，
+#: 标题片段（``GAS PRICES BY STA``、``AVERAGE GROCER``）一律当噪声洗掉。
+_RESEARCH_NOISE: tuple[str, ...] = (
+    "pos purchase",
+    "debit card purchase",
+    "card purchase",
+    "purchase",
+    "checkcard",
+    "average",
+    "avg",
+    "prices",
+    "price",
+    "summary",
+    "restaurants",
+    "restaurant",
+    "cost of living",
+    "how much",
+    "cheapest",
+    "cheap",
+    "deals",
+    "coupons",
+    "locations",
+    "near me",
+    "reviews",
+    "rankings",
+    "ranking",
+    "breakdown",
+    "compared",
+    "guide",
+    "by station",
+    "station",
+    "stations",
+    "per gallon",
+    # 类别名 / 账单说明里的通用词：真账单印的是「谁收了钱」，不是「这类花费叫什么」。
+    "grocery",
+    "groceries",
+    "gasoline",
+    "prescription",
+    "prescriptions",
+    "costs",
+    "cost",
+    "bills",
+    "bill",
+    "membership",
+    "memberships",
+    "expense",
+    "expenses",
+    "insurance",
+    "utilities",
+    "utility",
+    "subscription",
+    "subscriptions",
+    "service fee",
+)
+
+#: 账单模板自己会印在描述前面的字头（``POS PURCHASE``/``CHECKCARD {MMDD}``）。
+#: 适配器已经印过一遍，pipeline 再拼一次就是 ``POS PURCHASE POS PURCHASE``。
+_HOUSE_PREFIXES: tuple[str, ...] = (
+    "POS PURCHASE",
+    "DEBIT CARD PURCHASE",
+    "CARD PURCHASE",
+    "CHECKCARD",
+    "RECURRING PAYMENT",
+    "PURCHASE",
+)
+
+#: 卡行会自带门店号的类别（真账单里 ``WHOLEFDS MKT 10427`` 就是这么来的）。
+_STATE_ABBREV: frozenset[str] = frozenset(
+    """AL AK AZ AR CA CO CT DE DC FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO
+    MT NE NV NH NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY""".split()
+)
+
+#: 模板里这些词是账单自己的语法（``PPD``/``WEB`` 之类入账方式），不算模型编的说明。
+_KEEP_EXTRA_TOKENS: frozenset[str] = frozenset(
+    {"USATAXPYMT", "TAX", "PPD", "WEB", "ACH", "PMT", "PAYMT", "DES", "ID", "CO", "INDN", "REF"}
+)
+
+_STORE_CATEGORIES: frozenset[str] = frozenset(
+    {"groceries", "fuel", "dining", "pharmacy", "retail", "hardware", "pets", "atm"}
+)
+
+#: 适配器自己会把「城市 州」拼到**卡行**末尾（再自带一份就成 ``AUSTIN TX AUSTIN TX``）。
+_CARD_ADDS_PLACE: frozenset[str] = frozenset({"wellsfargo", "capitalone", "sofi"})
+#: 适配器自己就把 ATM 的城市州印上去了。
+_ATM_ADDS_PLACE: frozenset[str] = frozenset({"mercury"})
+#: 适配器自己会印 ATM 标签；其余的模板得把 ``ATM WITHDRAWAL`` 留在描述里。
+_ATM_PRINTS_LABEL: frozenset[str] = frozenset({"chase", "wellsfargo", "usbank", "mercury"})
+
+
+def _template_family(norm: Mapping[str, Any] | None) -> str:
+    """``chase-personal`` → ``chase``：用来判断这个版式的适配器补不补地点/标签。"""
+    return str((norm or {}).get("template") or "").split("-")[0].strip().lower()
+
+
+def _seed_of(norm: Mapping[str, Any] | None, seed: str = "") -> str:
+    if seed:
+        return str(seed)
+    return str((norm or {}).get("seed") or "")
+
+
+def _strip_house_prefix(text: str) -> str:
+    """剥掉适配器已经印过的字头（含 ``CHECKCARD {MMDD}`` 与叠了两层的情况）。"""
+    out = re.sub(r"\s+", " ", str(text or "")).strip()
+    for _ in range(4):  # 叠几层剥几层，最多防呆 4 层
+        upper = out.upper()
+        for prefix in _HOUSE_PREFIXES:
+            if not upper.startswith(prefix):
+                continue
+            out = out[len(prefix) :]
+            out = re.sub(r"^[\s:#*\-]+", "", out)
+            out = re.sub(r"^\{MMDD\}\s*\d{0,4}\s*", "", out)
+            out = re.sub(r"^\d{2}/\d{2}\s+", "", out)
+            out = re.sub(r"\s+", " ", out).strip()
+            break
+        else:
+            break
+    return out
+
+
+def _scrub_noise(text: str) -> str:
+    """大写、单空格，并洗掉叠字头与调研标题词（尾部虚词也一起去掉）。"""
+    out = _strip_house_prefix(_BAD_CHARS_RE.sub(" ", str(text or "").upper()))
+    for word in _RESEARCH_NOISE:
+        out = re.sub(rf"\b{re.escape(word.upper())}\b", " ", out)
+    out = re.sub(r"\b(19|20)\d{2}\b", " ", out)  # 搜索标题里的年份
+    for _ in range(3):
+        trimmed = re.sub(r"\s*\b(IN|NEAR|AT|FOR|BY|AND|THE|OF|TO|VS|ON|WITH|OR)\b\s*$", " ", out)
+        if trimmed == out:
+            break
+        out = trimmed
+    out = re.sub(r"^\s*\b(IN|AT|ON|NEAR|THE|OF|FOR|BY|AND|OR|WITH)\b\s+", "", out)
+    out = re.sub(r"\s+", " ", out).strip(" .,-/&'*#")
+    # ``CHECKCARD 0904 …`` 剥完字头还会剩一串门店号；留着它当商户名很假。
+    if len(out) > 8:
+        out = re.sub(r"^\d{3,4}\s+", "", out)
+    return out
+
+
+def _clean_merchant(text: str, *, limit: int | None = MERCHANT_MAX_CHARS) -> str:
+    """把一段文本洗成能当商户名的短语；``limit=None`` 时只洗不截。"""
+    out = _scrub_noise(text)
+    if limit and len(out) > limit:
+        cut = out[:limit]
+        if " " in cut[4:]:
+            cut = cut[: cut.rindex(" ")]
+        out = cut.strip()
+    # 截断会把 "… COSTS IN | AUSTIN" 切成挂在尾巴上的虚词，再收一次尾。
+    for _ in range(3):
+        trimmed = re.sub(r"\s*\b(A|AN|IN|AT|ON|OF|TO|FOR|BY|AND|OR|THE|WITH|NEAR|VS)\b\s*$", "", out)
+        if trimmed == out:
+            break
+        out = trimmed
+    # 描述里常见的尾巴是门店所在州（"AUSTIN TX"）：州名不是商户的一部分。
+    tail = re.search(r"\s+([A-Z]{2})$", out)
+    if tail and tail.group(1) in _STATE_ABBREV:
+        out = out[: tail.start()]
+    out = out.strip(" .,-/&'*#")
+    # "GAS" / "ATM" 这种两三个字母的残片当不了商户名，交给品牌池。
+    return out if any(len(token) >= 4 for token in out.split()) else ""
+
+
+def _merchant_for(
+    category: str, *, key: str, seed: str, fallback: str = "", state: str = ""
+) -> str:
+    """按类别从品牌池挑商户名；池里没有就清洗兜底文本（决策 14：类别不设白名单）。"""
+    pool = P.merchant_pool(category, state=state) or P.merchant_pool(category)
+    rng = _rng(seed, "merchant", str(key or category or "merchant"))
+    if pool:
+        return rng.choice(list(pool))
+    cleaned = _clean_merchant(fallback)
+    # 洗成 "GAS" / "AUSTIN" / "GROCERY" 这种单词残片宁可换品牌：真商户名很少是
+    # 一个光秃秃的类别词或城市名。
+    if len(cleaned) >= 4 and len(cleaned.split()) >= 2:
+        return cleaned
+    # 类别既不在池里、兜底文本又被洗空了：拿零售池（真品牌）顶上，绝不留占位词。
+    return rng.choice(list(P.merchant_pool("retail")))
+
+
+def _store_number(key: str, seed: str) -> str:
+    """连锁店门店号（``WHOLEFDS MKT 10427``）；真账单的卡行几乎都带一个。"""
+    return f"{_rng(seed, 'store', str(key or 'store')).randint(1000, 9999)}"
+
+
+
 def _parse_month(month: str) -> tuple[int, int]:
     match = _MONTH_RE.match(month or "")
     if not match:
@@ -1078,7 +1268,8 @@ def node_schedule(
 ) -> list[dict]:
     """把生活模型铺成逐笔流水（不含最终描述文本，描述由 descriptors 决定）。"""
     fact_by_id = {str(fact.get("id")): fact for fact in facts}
-    rng = _rng(seed or str(norm.get("seed") or ""), "schedule")
+    seed_key = _seed_of(norm, seed)
+    rng = _rng(seed_key, "schedule")
     loc = norm.get("location") or {}
     rate = float(loc.get("combined_sales_tax_rate") or 0.0)
     rows: list[dict] = []
@@ -1089,6 +1280,10 @@ def node_schedule(
         month_rows: list[dict] = []
 
         for stream in model.get("incomeStreams") or []:
+            key = str(stream.get("id") or "income")
+            base = _merchant_for(
+                "income", key=key, seed=seed_key, fallback=str(stream.get("payerName") or "")
+            )
             for when in _income_dates(stream, year, mon, rng):
                 amount = _income_amount(stream, mon, rng)
                 fact = None
@@ -1098,9 +1293,9 @@ def node_schedule(
                         "DEPOSIT",
                         "credit",
                         amount,
-                        key=str(stream.get("id") or "income"),
+                        key=key,
                         fact=fact,
-                        base=str(stream.get("payerName") or "Client payment"),
+                        base=base,
                         memo="Client payment",
                         category="income",
                         rng=rng,
@@ -1113,6 +1308,17 @@ def node_schedule(
 
         for item in model.get("recurring") or []:
             fact = fact_by_id.get(str(item.get("factId") or ""))
+            key = str(item.get("id") or "bill")
+            category = str(item.get("kind") or "other")
+            # 账单上的商户是「真品牌」，不是 lifeModel 随手起的 label；label 只当兜底。
+            # 电/气/水/电信按州挑（Austin 的账户不该出现 Con Edison）。
+            base = _merchant_for(
+                category,
+                key=key,
+                seed=seed_key,
+                fallback=str(item.get("label") or ""),
+                state=str(loc.get("state") or ""),
+            )
             for when in _recurring_dates(item, year, mon, norm):
                 amount = _recurring_amount(item, mon, rng)
                 txn = str(item.get("txnType") or "ACH").upper()
@@ -1123,14 +1329,17 @@ def node_schedule(
                         txn if txn in {"ACH", "POS", "CHECK", "ZELLE"} else "ACH",
                         "debit",
                         amount,
-                        key=str(item.get("id") or "bill"),
+                        key=key,
                         fact=fact,
-                        base=str(item.get("label") or "Bill"),
+                        base=base,
                         memo=f"{item.get('label')} payment",
-                        category=str(item.get("kind") or "other"),
+                        category=category,
                         rng=rng,
                         start=start,
                         end=end,
+                        # 银行卡付的固定账单也要有城市/州（R7：POS 行必须有地点）。
+                        city=str(loc.get("city") or ""),
+                        state=str(loc.get("state") or ""),
                     )
                 )
 
@@ -1147,7 +1356,9 @@ def node_schedule(
                     amount,
                     key="atm",
                     fact=None,
-                    base="ATM WITHDRAWAL",
+                    base=_merchant_for(
+                        "atm", key=f"atm-{month}", seed=seed_key, fallback="ATM WITHDRAWAL"
+                    ),
                     memo="Cash withdrawal",
                     category="cash",
                     rng=rng,
@@ -1194,17 +1405,28 @@ def node_schedule(
                 elif location == "travel":
                     city = "Denver"
                     state = "CO"
+                key = str(item.get("factId") or "shop")
+                # 事实只定城市/州与金额档位；商户名按类别从品牌池取（决策 14）。
+                category = P.merchant_category_key(
+                    str((fact or {}).get("category") or item.get("category") or "shopping")
+                )
+                # 事实的 name 是搜索标题（"Best Graphic Design Services"），
+                # 永远不进商户名：类别不在池里就换零售品牌，也不拿标题凑。
+                base = _merchant_for(category, key=key, seed=seed_key, state=state)
+                memo = _clean_merchant(
+                    str((fact or {}).get("category") or "Purchase"), limit=None
+                ).title()
                 month_rows.append(
                     _make_row(
                         when,
                         "POS",
                         "debit",
                         amount,
-                        key=str(item.get("factId") or "shop"),
+                        key=key,
                         fact=fact,
-                        base=str((fact or {}).get("name") or "Local Merchant"),
-                        memo=str((fact or {}).get("category") or "Purchase").title(),
-                        category=str((fact or {}).get("category") or "shopping"),
+                        base=base,
+                        memo=memo or "Purchase",
+                        category=category,
                         rng=rng,
                         start=start,
                         end=end,
@@ -1439,25 +1661,19 @@ def node_descriptors(
 
 
 def _default_template(item: Mapping[str, Any], norm: Mapping[str, Any]) -> str:
-    """没有模型输出时的描述模板；遵守 POS 前缀与连锁店规则。"""
-    fact = item.get("fact") or {}
-    name = re.sub(r"[^A-Z0-9 ]", " ", str(fact.get("name") or item["merchantKey"]).upper())
-    name = re.sub(r"\s+", " ", name).strip()[:18] or "MERCHANT"
+    """没有模型输出时的描述模板：只给商户名本体（字头与日期由账单自己印）。"""
+    key = str(item.get("merchantKey") or "")
+    category = P.merchant_category_key(str((item.get("fact") or {}).get("category") or ""))
+    seed = _seed_of(norm)
+    name = _clean_merchant(str(item.get("template") or ""), limit=None)
+    if not name:
+        name = _merchant_for(category or "retail", key=key, seed=seed)
     txn = str(item.get("type") or "POS").upper()
-    city = re.sub(r"[^A-Z ]", "", str(fact.get("city") or "").upper())[:12]
-    state = str(fact.get("state") or "").upper()[:2]
-    if txn == "POS":
-        tail = f"{name} {city} {state}".strip() if city and state and state != "US" else name
-        return f"CHECKCARD {{MMDD}} {tail}"
-    if txn in {"ACH", "ZELLE", "CHECK"}:
-        return name
-    if txn == "DEPOSIT":
-        return name
-    if txn == "ATM":
-        return "ATM WITHDRAWAL"
+    if txn in {"POS", "ATM"}:
+        return f"{name} {_store_number(key, seed)}".strip()
     if txn == "FEE":
-        return "MONTHLY SERVICE FEE"
-    return name
+        return name or "MONTHLY SVC FEE"
+    return name or key.upper()
 
 
 def _sanitize_template(template: str, fact: Any) -> str:
@@ -1492,7 +1708,10 @@ def _render_template(
     when = row.get("date")
     if not isinstance(when, date):
         when = _parse_iso(when)
-    store = str((fact.get("storeNumber") or digits(str(norm.get("seed") or ""), 3)) or "")
+    store = str(fact.get("storeNumber") or "")
+    if not store:
+        # 门店号也该确定性：同一个商户在整个账本里始终是同一家店。
+        store = _store_number(str(row.get("merchant_key") or ""), _seed_of(norm))
     values = {
         "STORE": store,
         "CITY": str(row.get("city") or "").upper(),
@@ -1510,6 +1729,68 @@ def _render_template(
     return text.replace("{", "").replace("}", "")
 
 
+def _merchant_display(row: Mapping[str, Any], *, seed: str = "") -> str:
+    """商户名 = 品牌（+ 连锁店门店号）；描述、merchant 字段共用同一份。"""
+    key = str(row.get("merchant_key") or "")
+    brand = _clean_merchant(str(row.get("base_description") or ""), limit=None)
+    if not brand:
+        brand = _merchant_for(str(row.get("category") or "retail"), key=key, seed=seed)
+    category = P.merchant_category_key(str(row.get("category") or ""))
+    if category in _STORE_CATEGORIES:
+        return f"{brand} {_store_number(key, seed)}".strip()
+    return brand
+
+
+def _place_of(row: Mapping[str, Any]) -> str:
+    city = re.sub(r"\s+", " ", re.sub(r"[^A-Z ]", " ", str(row.get("city") or "").upper())).strip()
+    state = str(row.get("state") or "").upper()[:2]
+    if not city or not state or state == "US":
+        return ""
+    return f"{city} {state}"
+
+
+def _final_description(
+    row: Mapping[str, Any],
+    text: str,
+    norm: Mapping[str, Any],
+    *,
+    seed: str = "",
+) -> str:
+    """最终描述：品牌名与城市州由 pipeline 确定性拼，字头留给适配器。
+
+    POS/ATM 不看模型模板（模型一自由发挥就会把调研标题或叠前缀写回来）；账单类行
+    用模板，但品牌名必须在位、标题噪声先洗掉。
+    """
+    seed = _seed_of(norm, seed)
+    txn = str(row.get("type") or "POS").upper()
+    family = _template_family(norm)
+    display = _merchant_display(row, seed=seed)
+    if txn in {"POS", "ATM"}:
+        parts = [display]
+        place = _place_of(row)
+        adds_place = family in (_ATM_ADDS_PLACE if txn == "ATM" else _CARD_ADDS_PLACE)
+        if place and not adds_place:
+            parts.append(place)
+        if txn == "ATM" and family not in _ATM_PRINTS_LABEL:
+            parts.insert(0, "ATM WITHDRAWAL")
+        return _scrub_noise(" ".join(parts)) or _scrub_noise(display) or "PURCHASE"
+    brand = _scrub_noise(display)
+    if txn == "FEE":
+        # 账单自己印 "Fee <日期>"，描述只要费用名（"ATM FEE"/"MONTHLY SVC FEE"）。
+        return brand or _scrub_noise(text) or "SERVICE FEE"
+    desc = _scrub_noise(text)
+    if brand:
+        # 真账单的 ACH 行是「收款方 + 引用号」：模板里没数字的多半是模型自己编的
+        # 说明（"CON EDISON UTIL BILL"），只留品牌；带数字的引用号（IRS
+        # ``USATAXPYMT 1234567890``、``PPD ID:8837``）才留在描述里。
+        brand_tokens = brand.split()
+        extra = [token for token in desc.split() if token not in brand_tokens]
+        if txn != "ZELLE" and not any(re.search(r"\d", token) for token in extra):
+            extra = [token for token in extra if token in _KEEP_EXTRA_TOKENS]
+        desc = " ".join([brand, *extra]).strip()
+    return desc or brand or "PAYMENT"
+
+
 def apply_descriptors(
     norm: Mapping[str, Any],
     rows: Sequence[Mapping[str, Any]],
@@ -1518,17 +1799,14 @@ def apply_descriptors(
     seed: str = "",
 ) -> list[dict]:
     """套模板并做最终清洗；返回带 ``description`` 的新行列表。"""
-    rng = _rng(seed or str(norm.get("seed") or ""), "descriptors")
+    seed_key = _seed_of(norm, seed)
+    rng = _rng(seed_key, "descriptors")
     out: list[dict] = []
     for row in rows:
         entry = descriptors.get(str(row.get("merchant_key") or "")) or {}
         template = entry.get("template") or ""
-        if template:
-            description = _render_template(template, row, None, norm, rng)
-        else:
-            description = str(row.get("base_description") or "PURCHASE")
-            if str(row.get("type")) == "POS":
-                description = f"POS PURCHASE {description}"
+        rendered = _render_template(template, row, None, norm, rng) if template else ""
+        description = _final_description(row, rendered, norm, seed=seed_key)
         description = _BAD_CHARS_RE.sub(" ", description.upper())
         description = re.sub(r"\s+", " ", description).strip()[: P.DESCRIPTOR_MAX_CHARS]
         if not description:
@@ -1542,7 +1820,7 @@ def apply_descriptors(
             int.from_bytes(hashlib.sha256(ref_payload.encode("utf-8")).digest()[:6], "big") % 10**10
         ).zfill(10)
         merchant = None
-        name = str(row.get("base_description") or "")
+        name = _merchant_display(row, seed=seed_key)
         if name:
             merchant = {
                 "name": name[:40],
@@ -1821,22 +2099,29 @@ def build_ledger(
 
     ledger_rows: list[LedgerRow] = []
     balance = opening
+    check_seq = _rng(seed, "check-no").randint(1000, 1099)
     for row in sorted(rows, key=lambda item: (item["date"], item["posted"], item["amount_cents"])):
         amount = max(1, int(row.get("amount_cents") or 1))
         direction = "credit" if row.get("direction") == "credit" else "debit"
         balance += amount if direction == "credit" else -amount
+        txn = str(row.get("type") or "POS").upper()
+        check_no = None
+        if txn == "CHECK":
+            # 支票行必须带票号：没有号的 "Check Paid" 是真账单里不存在的东西。
+            check_no = str(row.get("check_no") or check_seq)
+            check_seq += 1
         ledger_rows.append(
             LedgerRow(
                 date=row["date"],
                 posted=row["posted"],
                 description=str(row.get("description") or row.get("base_description") or "PURCHASE"),
                 memo=str(row.get("memo") or "Purchase"),
-                type=str(row.get("type") or "POS"),
+                type=txn,
                 direction=direction,
                 amount_cents=amount,
                 balance_cents=balance,
                 merchant=row.get("merchant"),
-                check_no=None,
+                check_no=check_no,
                 reference=str(row.get("reference") or ""),
             )
         )
@@ -1849,6 +2134,8 @@ def build_ledger(
         closing_cents=balance,
         rows=tuple(ledger_rows),
         seed=seed,
+        # 交付数据永远不带 SAMPLE 水印：它会把 PDF 印成样张，用户拿到就废了。
+        watermark=False,
         extras={
             "months": list(norm.get("months") or []),
             "subjectType": norm.get("subject_type"),

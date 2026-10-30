@@ -561,7 +561,9 @@ def page_summary(doc, *, ctx=None):
         addr_lines.extend(_wrap_words(a, 10, _VAR, COL_W, ctx=ctx))
     for i, ln in enumerate(addr_lines):
         put(page, 40.0, y_addr + i * 16.0, ln, 10, ctx=ctx)
-    put(page, 40.0, y_addr + len(addr_lines) * 16.0 + 16.0, ctx.data["ein"], 10, ctx=ctx)
+    # 个人账户没有 EIN：底稿是企业样例才印这一行，别把企业号盖到个人账单上。
+    if str(ctx.data.get("ein") or "").strip():
+        put(page, 40.0, y_addr + len(addr_lines) * 16.0 + 16.0, ctx.data["ein"], 10, ctx=ctx)
 
     # 右栏（2026 版式 x=252.20；值右对齐 572 不变；标题用 480 字体）
     RC = 252.20
