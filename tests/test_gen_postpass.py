@@ -135,6 +135,7 @@ def test_repair_month_reports_each_category():
         "recurring",
         "stores",
         "decap",
+        "varied",
     }
 
 
@@ -315,3 +316,29 @@ def test_injected_rows_carry_the_keys_the_theme_needs():
     for row in data["transactions"]:
         assert row.get("dir") in {"in", "out"}
         assert "amount" in row and "date" in row and "desc" in row
+
+
+def test_personal_accounts_do_not_print_an_ein():
+    """Mercury 底稿是企业样例，个人账单上不该有 EIN 那一行。"""
+    data = {"company": "HENG LI", "ein": "EIN ••3170", "transactions": []}
+    postpass.repair_month(data, state="CA", city="Temple City", business=False)
+    assert data["ein"] == ""
+
+    data2 = {"company": "LUMEN CREATIVE LLC", "ein": "EIN ••3170", "transactions": []}
+    postpass.repair_month(data2, state="CA", city="Temple City", business=True)
+    assert data2["ein"] == "EIN ••3170"
+
+
+def test_repeated_amounts_within_a_category_get_spread():
+    """$43.65 连着出现三次最像机器：同类目同额要各挪一点。"""
+    data = _mercury_like([
+        {"date": "Dec 1", "desc": "CHIPOTLE 7008 TEMPLE CITY CA", "amount": -43.65},
+        {"date": "Dec 3", "desc": "PANERA BREAD 8229 TEMPLE CITY CA", "amount": -43.65},
+        {"date": "Dec 5", "desc": "IN-N-OUT 3069 TEMPLE CITY CA", "amount": -43.65},
+    ])
+    changed = postpass.diversify_amounts(data, seed="t")
+    amounts = [abs(row["amount"]) for row in data["transactions"]]
+    assert changed == 2
+    assert len(set(amounts)) == 3
+    lo, hi = postpass.range_for("dining")
+    assert all(lo <= value <= hi for value in amounts)

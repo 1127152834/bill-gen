@@ -157,10 +157,12 @@ def make_runner(*, profiles: Path | str | None = None):
         tavily = TavilyClient(cfg, max_queries=int(os.environ.get("BILLGEN_MAX_QUERIES") or 40))
 
         ctx.log(f"任务开始：{job.template} · {', '.join(job.months)}", percent=1)
+        flat_profile = _flatten_profile(profile.to_dict())
+        is_business = bool(str(flat_profile.get("legalName") or "").strip())
         try:
             result = generate(
                 ctx,
-                profile=_flatten_profile(profile.to_dict()),
+                profile=flat_profile,
                 template=job.template,
                 months=job.months,
                 llm=llm,
@@ -215,6 +217,7 @@ def make_runner(*, profiles: Path | str | None = None):
                     city=city,
                     income_hint=income_hint,
                     rent_hint=rent_hint,
+                    business=is_business,
                 )
                 # 信封补齐：低于下限的类目把已有行抬进区间，公用事业缺一家就补一张
                 try:

@@ -444,6 +444,39 @@ def decap_amounts(data: dict[str, Any], *, seed: str = "") -> int:
     return changed
 
 
+def diversify_amounts(data: dict[str, Any], *, seed: str = "") -> int:
+    """同类目里出现相同金额的，按确定性抖动各挪一点（机器感最强的就是整齐重复）。"""
+    changed = 0
+    seen: dict[tuple[str, float], int] = {}
+    used_amounts: dict[str, set[float]] = {}
+    for row in _iter_rows(data):
+        desc = _row_desc(row)
+        amount = _row_amount(row)
+        if not desc or amount is None or amount >= 0:
+            continue
+        category = _category_of(desc) or "other"
+        lo, hi = range_for(category)
+        key = (category, round(abs(amount), 2))
+        hits = seen.get(key, 0)
+        seen[key] = hits + 1
+        used_amounts.setdefault(category, set()).add(round(abs(amount), 2))
+        if hits == 0:
+            continue
+        target = abs(amount)
+        for attempt in range(6):
+            digest = hashlib.sha256(f"{seed}|{_norm(desc)}|{hits}|{attempt}".encode()).hexdigest()[:6]
+            factor = 0.93 + (int(digest, 16) % 12) / 100.0  # 0.93–1.04
+            target = round(min(max(abs(amount) * factor, lo), hi * 0.96), 2)
+            if target not in used_amounts.get(category, set()) and abs(target - abs(amount)) >= 0.02:
+                break
+        used_amounts.setdefault(category, set()).add(target)
+        _set_amount(row, -target)
+        changed += 1
+    if changed:
+        _rescale_amounts(data)
+    return changed
+
+
 def dedupe_recurring(data: dict[str, Any]) -> int:
     """固定扣款一个月只留一笔（会员费、保费、话费、水电）。返回删掉几行。"""
     removed = 0
@@ -605,7 +638,7 @@ def top_up_to_envelope(
                                 "date": f"{month_tag} {day}",
                                 "desc": desc,
                                 "amount": -amount,
-                                "type": base.get("type", "Card"),
+                                "type": _type_for(desc),
                             },
                         )
                     )
@@ -640,7 +673,7 @@ def top_up_to_envelope(
                         "date": day or "15",
                         "desc": missing,
                         "amount": -amount,
-                        "type": "ACH",
+                        "type": "ACH Out",
                     },
                 )
                 arrays = list(_iter_arrays(data))
@@ -657,6 +690,11 @@ def top_up_to_envelope(
 _ROW_DEFAULTS = {"memo": "", "icon": "card"}
 
 
+def _type_for(desc: str) -> str:
+    """真账单的 Type 列：刷卡消费是 Card，自动扣款才是 ACH Out。"""
+    return "ACH Out" if _is_recurring(desc) else "Card"
+
+
 def _make_row(template_row: Mapping[str, Any], *, date: str, desc: str, amount: float) -> dict[str, Any]:
     """按已有行的字段形状造一行（版式读 `dir`/`icon` 之类的键，缺了就渲染崩）。"""
     row: dict[str, Any] = {key: template_row[key] for key in ("memo", "id", "icon") if key in template_row}
@@ -668,7 +706,7 @@ def _make_row(template_row: Mapping[str, Any], *, date: str, desc: str, amount: 
             "date": date,
             "desc": desc,
             "amount": round(amount, 2),
-            "type": template_row.get("type") or "Card",
+            "type": _type_for(desc),
             "dir": direction,
         }
     )
@@ -1016,8 +1054,16 @@ def repair_month(
     income_hint: Any = None,
     rent_hint: Any = None,
     fix_money: bool = True,
+    business: bool = True,
+    seed: str = "",
 ) -> dict[str, int]:
-    """把一个月的模板数据整体过一遍，返回每类修改的计数。"""
+    """把一个月的模板数据整体过一遍，返回每类修改的计数。
+
+    ``business=False`` 时按个人账户处理：清掉模板自带的 EIN（Mercury 底稿是企业
+    样例，个人账单上不该出现税号）。
+    """
+    if not business and str(data.get("ein") or "").strip():
+        data["ein"] = ""
     report = {
         "utilities": fix_utilities(data, state=state, city=city),
         "duplicate_utilities": dedupe_utilities(data, state=state, city=city),
@@ -1029,6 +1075,7 @@ def repair_month(
         "recurring": dedupe_recurring(data),
         "stores": vary_chain_stores(data),
         "decap": decap_amounts(data, seed=str(state)),
+        "varied": diversify_amounts(data, seed=f"{seed}|{city}"),
     }
     return report
 
