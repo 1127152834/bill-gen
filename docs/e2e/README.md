@@ -77,3 +77,16 @@ docker exec bill-gen-v2-billgen-1 python /app/tools/realism_rules.py
 8. **Chase 续页有 1pt 隐形标记**：`*start*dre portrait disclosure message area` /
    `*end*…`，出自参考件本身（`themes/chase/layout_personal.json` 的 `spans[58]/[59]`），
    肉眼不可见。删它要连 layout json 一起删，否则 layout 比对会报缺 span。
+
+## 目标完成度自评（收口）
+
+| 目标项 | 证据 |
+| --- | --- |
+| ① langgraph 走通真实生成 | 线上 `POST /api/generations` 个人 job `dc2006c4`（checking 42 笔 + credit 36 笔）、企业 job `5e5543aa`（business_checking + credit），均 `completed` |
+| ② 逐套出片 + 与参考件逐项对比 | [report-personal.md](report-personal.md)（8 套：5 套有参考 PDF 差异 0 项、boa/wf 版式漂移 0 段、amex 无参考件只自检）、[report-business.md](report-business.md)（boa 漂移 0 段、chase/usbank 差异 0 项）+ `img/` 8 张并排图 |
+| ③ 差异逐条修复并复验 | 24 轮记录见 [../notes/e2e-round1.md](../notes/e2e-round1.md)，每轮都带复验数据与回滚命令 |
+| ④ 每步 commit + push | 45 个提交全部推到 `origin/master` |
+| ⑤ 全程笔记 | `docs/notes/e2e-round1.md`（24 轮 + 回滚）、本文件（闸门清单 + 已知限制） |
+
+当前闸门状态：`pytest` 569 passed / 16 skipped / 33 subtests；`realism_rules.py` 全部规则通过；
+`gen_bank_forms_assets.py --check` 一致；两份对比报告 0 差异、0 段漂移。
