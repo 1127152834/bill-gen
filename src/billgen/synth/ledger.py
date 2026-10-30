@@ -88,8 +88,21 @@ _REAL_TRAITS: dict[str, dict[str, str]] = {
         "phone_service": "1-800-935-9935", "phone_es": "1-888-609-7805",
         "phone_intl": "1-512-895-5962", "phone_metro": "1-800-935-9935",
     },
+    # Rewards Checking（存款账户）的口径，照 Amex 自己的账户条款 PDF 抄：
+    # "Rewards Checking US Toll Free: 1-877-221-2639 / International Call collect: 1-801-945-2639
+    #  Address: American Express National Bank PO Box 31492 Salt Lake City, UT 84131-0300
+    #  Website: americanexpress.com/rewardschecking"
     "american express national bank": {
         "legal": "American Express National Bank", "domain": "americanexpress.com",
+        "phone": "1-877-221-2639", "po_box": "P.O. Box 31492",
+        "po_box_alt": "P.O. Box 31492", "city_state_zip": "Salt Lake City, UT 84131-0300",
+        "phone_service": "1-877-221-2639", "phone_es": "1-800-842-7600",
+        "phone_intl": "1-801-945-2639", "phone_metro": "1-877-221-2639",
+    },
+    # 信用卡（Hilton Honors 那类）口袋里的号码，别用到存款账单上：1-800-528-4800 是
+    # Card Member 服务线，PO Box 981540/El Paso 是还款地址。留给将来的信用卡版式。
+    "american express card": {
+        "legal": "American Express", "domain": "americanexpress.com",
         "phone": "1-800-528-4800", "po_box": "P O Box 981540",
         "po_box_alt": "P O Box 981540", "city_state_zip": "El Paso, TX 79998-1540",
         "phone_service": "1-800-528-4800", "phone_es": "1-800-842-7600",

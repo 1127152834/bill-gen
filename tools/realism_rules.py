@@ -663,6 +663,29 @@ def fake_contact_problems(template: str, text: str) -> list[dict[str, str]]:
     return out
 
 
+# 产品线专用的号码/路径：印错了就是「把信用卡的客服线印在存款账单上」这种硬伤。
+# amex 的 Rewards Checking 条款 PDF 写的是 US Toll Free 1-877-221-2639、
+# International Call collect 1-801-945-2639、Website americanexpress.com/rewardschecking；
+# 1-800-528-4800 是 Card Member 服务线，1-336-393-1111 也是卡侧号码。
+_PRODUCT_MISMATCH = {
+    "amex": {
+        "1-800-528-4800": "Amex 信用卡 Card Member 服务线（存款账单该用 1-877-221-2639）",
+        "1-336-393-1111": "Amex 卡侧国际线",
+        "rewardscheckingdashboard": "条款 PDF 里的路径是 /rewardschecking，没有 dashboard",
+    },
+}
+
+
+def product_mismatch_problems(template: str, text: str) -> list[dict[str, str]]:
+    """别把同一家银行**另一个产品**的号码/路径印到这份账单上。"""
+    out = []
+    for token, why in _PRODUCT_MISMATCH.get(template, {}).items():
+        if token in text:
+            out.append({"template": template, "rule": "product-mismatch",
+                        "label": f"印了别的产品线的号码/路径：{why}", "hit": token})
+    return out
+
+
 def check_template(template: str, ledger) -> list[dict[str, str]]:
     pdf = render(template, ledger).pdf
     with fitz.open(stream=pdf, filetype="pdf") as doc:
@@ -674,6 +697,7 @@ def check_template(template: str, ledger) -> list[dict[str, str]]:
     problems.extend(font_parity_problems(template, pdf))
     problems.extend(micro_line_problems(template, pdf))
     problems.extend(fake_contact_problems(template, text))
+    problems.extend(product_mismatch_problems(template, text))
     for key, label, pattern in COMMON_RULES:
         hit = pattern.search(text)
         if hit:

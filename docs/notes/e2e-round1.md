@@ -692,3 +692,43 @@ renders: chase-business business_checking 3p / usbank-business business_checking
 `$1,650.00` 这类正常写法，没有 `$` 残留成列、也没有 `NaN`。
 `e2e_compare --label business` 用这份账本重跑：boa-business 版式漂移 0 段、
 chase-business 差异 0 项、usbank-business 差异 0 项。
+
+## 第二十五轮（amex：把信用卡的号码从存款账单上摘下来）
+
+线索：用户给了 `https://www.scribd.com/document/704269324/2024-01-14#page=1`，问是不是 amex 账单。
+- 沙箱打不开 Scribd：`web_fetch` 报 `URL hostname "www.scribd.com" resolves to a non-public IP address`。
+- 换个路子抓到的公开 amex 账单（`https://erskinecharters.org/wp-content/uploads/2025/08/2025-07-17_Redacted.pdf`）
+  是 **Hilton Honors Business Card**：12 页、648×792、扫描件无文字层，
+  版式 `New Balance / Minimum Payment Due / Payment Due Date` + `Late Payment Warning`
+  + 还款存根 + 底部磁码 —— **信用卡**，不是我们的 Rewards Checking 存款账单。
+- 于是改抓 amex 自己的《Rewards Checking 账户条款》PDF
+  （`americanexpress.com/.../rewards-checking-account-terms.pdf`，52 页有文字层），
+  里面写死了存款账户口径：`Rewards Checking US Toll Free: 1-877-221-2639`、
+  `International Call collect: 1-801-945-2639`、
+  `American Express National Bank PO Box 31492 Salt Lake City, UT 84131-0300`、
+  `Website: americanexpress.com/rewardschecking`。
+
+查出来的真问题（两处，都是「产品串味」）：
+1. `src/billgen/synth/ledger.py` 的 `american express national bank` 抄的是**信用卡**档案：
+   `phone 1-800-528-4800`、`po_box P O Box 981540`、`city_state_zip El Paso, TX 79998-1540`。
+   `branding.TEXT_SLOTS["amex"]` 的 `{phone_service}` / `{mail_line}` 两个槽位一渲染，
+   就把主题里印对的 `1-877-221-2639` 与 `P.O. Box 31492` 擦掉、换成信用卡的客服线与还款地址。
+2. 主题里那个 `americanexpress.com/rewardscheckingdashboard` 是自己拼的路径，条款 PDF 里只有
+   `/rewardschecking`。
+
+修法：
+- `ledger.py`：amex 条目改成存款口径（`1-877-221-2639` / `P.O. Box 31492` /
+  `Salt Lake City, UT 84131-0300` / `phone_intl 1-801-945-2639`）；
+  信用卡那套原样搬到新键 `american express card`，注释写明留给将来的信用卡版式。
+- `src/billgen/themes/amex/generate_sample_statement.py`：两处路径改 `/rewardschecking`；
+  联系块地址补 `-0300`（与 traits 一致，`_same_text()` 认得出，不再多画一遍）。
+- 新闸门 `tools/realism_rules.py::product_mismatch_problems` + `_PRODUCT_MISMATCH["amex"]`
+  （`1-800-528-4800` / `1-336-393-1111` / `rewardscheckingdashboard` 一出现就报
+  `product-mismatch`），单测 `test_product_mismatch_rule_catches_card_phone_on_deposit_statement`。
+
+验证：amex 出片文本里只剩 `1-877-221-2639` 与 `americanexpress.com/rewardschecking`，
+`El Paso` 与 `528-4800` 均为 0；`pytest` 570 passed / 16 skipped / 33 subtests；
+`realism_rules.py` 全部规则通过；`gen_bank_forms_assets.py --check` 一致；
+`e2e_compare --label personal` 里 amex 仍为「无参考件只自检」。amex 的六个文本/像素基线已重采。
+
+回滚：`git revert <本轮提交>`（只动 amex 的 traits、主题路径与一个新闸门）。

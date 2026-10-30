@@ -391,15 +391,15 @@ def draw_bottom_block(context, page, dy=0.0):
     put(page, 362.2, 605.4 + dy, b, bold, 8)
     put(page, 362.2 + bold.text_length(b, fontsize=8), 605.6 + dy, ".", reg, 8)
     # 虚构行名的域名可能比原稿长，盒子宽度固定，按可用宽度缩字号（最小 6pt）
-    url = f"{bank_of(context.data)['domain']}/rewardscheckingdashboard"
+    url = f"{bank_of(context.data)['domain']}/rewardschecking"
     # 盒子右内边 561.34；留 2pt 余量给原版线条的出头
     width = reg.text_length(url, fontsize=8)  # 用真实字体的度量，别拿 Helvetica 估
     limit = 8.0 * (561.3435 - 3.0 - 362.2) / max(width, 1e-6)
     put(page, 362.2, 619.7 + dy,
-        f"{bank_of(context.data)['domain']}/rewardscheckingdashboard", reg,
+        f"{bank_of(context.data)['domain']}/rewardschecking", reg,
         max(6.0, min(8.0, limit)))
     put(page, 362.2, 633.9 + dy, "1-877-221-2639", reg, 8)
-    put(page, 362.2, 648.1 + dy, "P.O. Box 31492, Salt Lake City, UT 84131", reg, 8)
+    put(page, 362.2, 648.1 + dy, "P.O. Box 31492, Salt Lake City, UT 84131-0300", reg, 8)
 
     # 积分提示盒（同上，4 条线段）
     for (x0, y0, x1, y1) in [

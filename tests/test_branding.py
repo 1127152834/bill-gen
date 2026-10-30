@@ -279,7 +279,8 @@ REAL_CONTACT_DIGITS = {
     "chase-personal": ("9359935",),
     "usbank-personal": ("8722657", "3528"),
     "usbank-business": ("8722657", "3528"),
-    "amex": ("5284800", "981540"),
+    # Rewards Checking（存款）口径：1-877-221-2639 / PO Box 31492 Salt Lake City
+    "amex": ("8772212639", "31492"),
 }
 
 

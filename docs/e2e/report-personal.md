@@ -146,5 +146,5 @@
 
 无参考件（无 PDF、无 layout 底稿）：本轮只做自检指标与区块标题检查。
 
-- 页数：3；墨量：[8.0, 4.5, 5.0]；字体：BentonSans-Bold, BentonSans-Regular, BentonSans-RegularItalic, Helvetica
+- 页数：3；墨量：[7.9, 4.5, 5.0]；字体：BentonSans-Bold, BentonSans-Regular, BentonSans-RegularItalic, Helvetica
 
