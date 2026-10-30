@@ -26,14 +26,14 @@ export function accountsError(accounts: AccountsDraft): string | undefined {
   return accounts.checking.enabled ? undefined : '请至少选择一个账户'
 }
 
-/** 版式选项：`auto` 交给推荐器打分，其余是钉死一家银行（按账单主体分个人/企业版）。 */
+/** 版式选项：一套版式就是一家银行，按账单主体分个人/企业版。 */
 export type TemplateChoice = { id: string; label: string }
 
+/** 引擎里 `templates: []` 仍表示「交给推荐器」，但界面只让人手选，这里不再暴露该选项。 */
 export const TEMPLATE_AUTO = 'auto'
 
 export const TEMPLATE_CHOICES: Record<SubjectType, readonly TemplateChoice[]> = {
   personal: [
-    { id: 'auto', label: '自动挑（按推荐器打分）' },
     { id: 'boa-personal', label: '美国银行 · 个人账单' },
     { id: 'chase-personal', label: '大通银行 · 个人账单' },
     { id: 'usbank-personal', label: '美国合众银行 · 个人账单' },
@@ -43,29 +43,24 @@ export const TEMPLATE_CHOICES: Record<SubjectType, readonly TemplateChoice[]> = 
     { id: 'sofi', label: '索菲银行' },
   ],
   business: [
-    { id: 'auto', label: '自动挑（按推荐器打分）' },
     { id: 'boa-business', label: '美国银行 · 商业账单' },
     { id: 'chase-business', label: '大通银行 · 商业账单' },
     { id: 'usbank-business', label: '美国合众银行 · 商业账单' },
   ],
 }
 
-/** 出片选择：钉死一家银行的版式，或者交给推荐器自动挑（再定挑几套）。 */
-export type RenderDraft = { template: string; autoLimit: string }
+/** 出片选择：一套版式。个人/企业各有一套清单，默认取该主体的第一项。 */
+export type RenderDraft = { template: string }
 
-export const DEFAULT_RENDER: RenderDraft = { template: TEMPLATE_AUTO, autoLimit: '2' }
+export function defaultRender(subjectType: SubjectType): RenderDraft {
+  return { template: TEMPLATE_CHOICES[subjectType][0]!.id }
+}
 
-export const AUTO_LIMIT_MIN = 1
-export const AUTO_LIMIT_MAX = 11
+export const DEFAULT_RENDER: RenderDraft = defaultRender('personal')
 
+/** 只有「没选」才算错：下拉里只剩具体版式，选中即合法。 */
 export function renderError(draft: RenderDraft): string | undefined {
-  if (draft.template === TEMPLATE_AUTO && !draft.template) return '请选择要出的账单版式'
-  if (draft.template === TEMPLATE_AUTO) {
-    const n = Number(draft.autoLimit)
-    if (!/^\d+$/.test(draft.autoLimit.trim()) || n < AUTO_LIMIT_MIN || n > AUTO_LIMIT_MAX) {
-      return `自动挑选个数要在 ${AUTO_LIMIT_MIN}–${AUTO_LIMIT_MAX} 之间`
-    }
-  }
+  if (!draft.template || draft.template === TEMPLATE_AUTO) return '请选择要出的账单版式'
   return undefined
 }
 
@@ -88,7 +83,7 @@ export type RequestInput = {
   months: 1 | 3 | 6
   endMonth: string
   seed: string
-  /** 出哪套版式、auto 时挑几套、账单上印哪家银行名 —— 都属于这一次生成。 */
+  /** 出哪套版式 —— 属于这一次生成。 */
   render?: RenderDraft
 }
 
@@ -111,7 +106,6 @@ export function buildRequest(input: RequestInput): GenerationRequest | undefined
     months: input.months,
     endMonth: input.endMonth,
     templates: [render.template],
-    ...(render.template === TEMPLATE_AUTO && { templateLimit: Number(render.autoLimit) }),
     ...(seed !== '' && { seed }),
   })
   return parsed.success ? parsed.data : undefined

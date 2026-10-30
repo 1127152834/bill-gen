@@ -923,3 +923,22 @@ Design LLC`）、`GET /api/settings`、`POST /api/settings/test`、`POST /api/ba
 只是界面不再暴露。真生成时 `bank_name` 恒为空，出片用版式自带的真行名、真电话、真信箱。
 
 验证：`vitest apps/web` 86 passed、`tsc -p apps/web` 干净、bundle 重建（`index-SLjFHYdO.js`）。
+
+## 第三十二轮（2026-10-30）：去掉「自动挑」，版式只能手选
+
+用户要求：自动挑几套也不要，就手动选。于是界面上不再有 `auto`，也没有挑选个数：
+
+- `flow/apps/web/src/lib/requestForm.ts`：`TEMPLATE_CHOICES` 里删掉 `{ id: 'auto', label: '自动挑（按推荐器打分）' }`
+  两项；`RenderDraft` 只剩 `{ template }`；新增 `defaultRender(subjectType)`（取该主体第一项：
+  个人 `boa-personal`、企业 `boa-business`）；`renderError()` 只判「没选」；
+  `buildRequest` 恒定输出 `templates: [template]`，不再发 `templateLimit`。
+- `flow/apps/web/src/pages/New.tsx`：删掉「自动挑几套」数字框与 `AUTO_LIMIT_*` 导入；下拉只列具体版式；
+  切主体类型时若当前版式不属于新主体，回落到该主体第一项，并且**请求里的模板与下拉显示用同一个
+  `effectiveRender`**（否则会出现「显示企业版、请求里还带着个人版 id」这种隐性错配）。
+- 文案改成「选哪家银行就出哪家的账单：版式和银行是同一个东西，纸上的行名、电话、信箱都随版式走」。
+- 引擎侧不动：`render.ts` 里 `templates` 为空仍表示「推荐器 auto」，MCP/CLI 与离线探针照旧能用；
+  只是网页不再产生这种请求。
+
+验证：`vitest apps/web` 86 passed（`lib.test.ts` 改成断言 `templates: ['boa-personal']`、
+`defaultRender` 两个主体、`renderError` 拒空与拒 `auto`）、`tsc -p apps/web` 干净、
+`pytest` 560 passed、bundle `index-CjlSexxo.js`。

@@ -263,8 +263,7 @@ describe('submit', () => {
       accounts: { checking: { min: 10, max: 30 } },
       months: 6,
       endMonth: '2026-09',
-      templates: ['auto'],
-      templateLimit: 2,
+      templates: ['boa-personal'],
     })
   })
 

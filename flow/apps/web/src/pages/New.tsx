@@ -7,11 +7,8 @@ import { ProfileForm } from '../components/ProfileForm'
 import { StepIndicator } from '../components/StepIndicator'
 import { EMPTY_DRAFT, buildProfile, hasErrors, inputErrors, type Draft } from '../lib/profileDraft'
 import {
-  AUTO_LIMIT_MAX,
-  AUTO_LIMIT_MIN,
   DEFAULT_ACCOUNTS,
   DEFAULT_RENDER,
-  TEMPLATE_AUTO,
   TEMPLATE_CHOICES,
   accountsError,
   buildRequest,
@@ -70,18 +67,27 @@ export default function New() {
   }
 
   const profile = subject && !systemPersona ? buildProfile(subject, draft) : undefined
-  const request =
-    subject && (systemPersona || profile)
-      ? buildRequest({ subjectType: subject, profile, accounts, months, endMonth, seed, render })
-      : undefined
-  const noAccount = accountsError(accounts)
-  const monthError = endMonthError(endMonth)
-  const templateError = renderError(render)
-  // 换主体类型时，原来选的版式可能不属于它（个人版/企业版是两套底稿）。
+  // 换主体类型时，原来选的版式可能不属于它（个人版/企业版是两套底稿），回落到该主体的第一项。
   const templateChoices = TEMPLATE_CHOICES[subject ?? 'personal']
   const activeTemplate = templateChoices.some((c) => c.id === render.template)
     ? render.template
-    : TEMPLATE_AUTO
+    : templateChoices[0]!.id
+  const effectiveRender: RenderDraft = { template: activeTemplate }
+  const request =
+    subject && (systemPersona || profile)
+      ? buildRequest({
+          subjectType: subject,
+          profile,
+          accounts,
+          months,
+          endMonth,
+          seed,
+          render: effectiveRender,
+        })
+      : undefined
+  const noAccount = accountsError(accounts)
+  const monthError = endMonthError(endMonth)
+  const templateError = renderError(effectiveRender)
 
   const submit = async (e: FormEvent) => {
     e.preventDefault()
@@ -179,7 +185,7 @@ export default function New() {
 
             <fieldset className="m-0 mt-6 min-w-0 border-0 p-0">
               <legend className="field-label mb-2">出哪家银行的账单</legend>
-              <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-start">
+              <div className="grid gap-3 sm:items-start">
                 <label className="block">
                   <select
                     className="input"
@@ -194,27 +200,12 @@ export default function New() {
                     ))}
                   </select>
                 </label>
-                {activeTemplate === TEMPLATE_AUTO && (
-                  <label className="block">
-                    <span className="field-label mb-1 block">自动挑几套</span>
-                    <input
-                      type="number"
-                      className="input sm:w-28"
-                      min={AUTO_LIMIT_MIN}
-                      max={AUTO_LIMIT_MAX}
-                      step={1}
-                      aria-label="自动挑选个数"
-                      value={render.autoLimit}
-                      onChange={(e) => setRender((r) => ({ ...r, autoLimit: e.target.value }))}
-                    />
-                  </label>
-                )}
               </div>
               {templateError ? (
                 <p className="field-error">{templateError}</p>
               ) : (
                 <p className="mt-1 text-xs text-muted">
-                  选一家银行就只出这一套版式（版式和银行是同一个东西）；选「自动挑」由推荐器按账户类型打分。
+                  选哪家银行就出哪家的账单：版式和银行是同一个东西，纸上的行名、电话、信箱都随版式走。
                 </p>
               )}
             </fieldset>

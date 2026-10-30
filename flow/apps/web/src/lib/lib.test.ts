@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest'
 import { EMPTY_DRAFT, applyField, buildPartial, buildProfile, inputErrors, type Draft } from './profileDraft'
 import {
   DEFAULT_ACCOUNTS,
-  DEFAULT_RENDER,
   buildRequest,
+  defaultRender,
   endMonthError,
   previousMonth,
   rangeError,
@@ -71,26 +71,28 @@ describe('requestForm', () => {
     expect(buildRequest({ subjectType: 'business', profile: undefined, accounts: none, months: 1, endMonth: '2020-01', seed: '' })).toBeUndefined()
   })
 
-  it('carries the layout choice, and drops the auto count when a bank is pinned', () => {
-    const auto = buildRequest({
+  it('carries exactly one layout, never the auto count', () => {
+    const fallback = buildRequest({
       subjectType: 'personal', profile: undefined, accounts: DEFAULT_ACCOUNTS,
       months: 1, endMonth: '2020-01', seed: '',
     })
-    expect(auto).toMatchObject({ templates: ['auto'], templateLimit: 2 })
+    expect(fallback).toMatchObject({ templates: ['boa-personal'] })
+    expect(fallback).not.toHaveProperty('templateLimit')
 
     const pinned = buildRequest({
       subjectType: 'personal', profile: undefined, accounts: DEFAULT_ACCOUNTS, months: 1, endMonth: '2020-01', seed: '',
-      render: { ...DEFAULT_RENDER, template: 'chase-personal', autoLimit: '4' },
+      render: { template: 'chase-personal' },
     })
     expect(pinned).toMatchObject({ templates: ['chase-personal'] })
-    expect(pinned).not.toHaveProperty('bankName')
     expect(pinned).not.toHaveProperty('templateLimit')
+    expect(pinned).not.toHaveProperty('bankName')
   })
 
-  it('rejects an auto pick count outside 1-11', () => {
-    expect(renderError({ ...DEFAULT_RENDER, autoLimit: '0' })).toBe('自动挑选个数要在 1–11 之间')
-    expect(renderError({ ...DEFAULT_RENDER, autoLimit: '' })).toBe('自动挑选个数要在 1–11 之间')
-    expect(renderError({ ...DEFAULT_RENDER, autoLimit: '12' })).toBe('自动挑选个数要在 1–11 之间')
-    expect(renderError({ ...DEFAULT_RENDER, template: 'sofi', autoLimit: '0' })).toBeUndefined()
+  it('defaults to the first layout of each subject type and refuses an empty pick', () => {
+    expect(defaultRender('personal').template).toBe('boa-personal')
+    expect(defaultRender('business').template).toBe('boa-business')
+    expect(renderError({ template: 'sofi' })).toBeUndefined()
+    expect(renderError({ template: '' })).toBe('请选择要出的账单版式')
+    expect(renderError({ template: 'auto' })).toBe('请选择要出的账单版式')
   })
 })
