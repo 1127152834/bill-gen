@@ -48,6 +48,29 @@ def _opts(args: argparse.Namespace, base: RenderOptions | None = None) -> Render
     )
 
 
+def _rebrand(pdf: bytes, spec_id: str, data: dict) -> bytes:
+    """数据里带了 ``bank`` 块时，把版式里烙印的真实行名换成它。
+
+    走 ``billgen render --data`` 的人拿到的是一份 JSON，没有账本也就没人调
+    ``apply_brand()``；于是 U.S. Bank 底稿左上角还印着底稿那家银行的信箱和电话，
+    而我们自己的客户名/账号已经是数据里的——一份纸上两家银行。这里补上同一套
+    替换：行名与版式本家相同时保留原图形标（只换文字槽），不同时连 logo 一起重画。
+    """
+    bank = data.get("bank") if isinstance(data.get("bank"), dict) else {}
+    if not str(bank.get("name") or "").strip():
+        return pdf
+    import fitz
+
+    from . import branding
+    from .synth import bridge
+
+    same_bank = bridge._same_bank_as_template(str(bank["name"]), spec_id)
+    with fitz.open(stream=pdf, filetype="pdf") as doc:
+        branding.apply(doc, spec_id, branding.brand_from_data(data),
+                       redraw_logo=not same_bank)
+        return doc.tobytes(garbage=3, deflate=True)
+
+
 def _render_one(spec_id: str, args: argparse.Namespace, out: Path) -> dict:
     spec = registry.get_spec(spec_id)
     renderer = registry.get_renderer(spec_id)
@@ -56,8 +79,9 @@ def _render_one(spec_id: str, args: argparse.Namespace, out: Path) -> dict:
     else:
         data = renderer.default_data()
     result = renderer.render(data, _opts(args, spec.default_options))
+    pdf = _rebrand(result.pdf, spec_id, data) if args.data else result.pdf
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_bytes(result.pdf)
+    out.write_bytes(pdf)
     return {
         "template": spec_id,
         "pages": result.pages,

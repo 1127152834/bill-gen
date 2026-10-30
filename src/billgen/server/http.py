@@ -13,6 +13,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlsplit
 
+from .. import delivery, synth
 from ..hunter import HunterProcess, SettingsError, SettingsStore
 from ..hunter.probe import ProbeError, probe_llm, probe_tavily
 from ..hunter.proxy import forward
@@ -378,6 +379,28 @@ class Handler(BaseHTTPRequestHandler):
                         raise ApplicationError("invalid_request", "template is required", 400)
                     job = app.render_synth(template, request_id=self.request_id, **payload)
                     return self._json(self._job_links(job), 201)
+                if self.command == "POST" and path == "/api/v1/synth/months":
+                    payload = self._body(("template", "result", "account", "cycle", "bank_name", "months"))
+                    template = payload.pop("template", None)
+                    if not isinstance(template, str) or not template:
+                        raise ApplicationError("invalid_request", "template is required", 400)
+                    if not isinstance(payload.get("result"), dict):
+                        raise ApplicationError("invalid_request", "result is required", 400)
+                    try:
+                        body, manifest = delivery.build_package(
+                            template, payload.pop("result"), **payload
+                        )
+                    except (KeyError, ValueError, synth.SynthLintError) as err:
+                        return self._json({"error": str(err)}, 400)
+                    return self._send(
+                        body,
+                        "application/zip",
+                        headers={
+                            "Content-Disposition": f'attachment; filename="{template}-months.zip"',
+                            "X-Month-Count": str(manifest["count"]),
+                            "X-Month-OK": "1" if manifest["ok"] else "0",
+                        },
+                    )
                 if path.startswith("/api/v1/synth/"):
                     return self._error("method_not_allowed", "Method not allowed", 405)
                 match = re.fullmatch(r"/api/v1/templates/([a-z0-9-]+)/(data|preview|export)", path)

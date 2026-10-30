@@ -20,6 +20,7 @@ from typing import Any
 import fitz
 
 from .. import audit, branding, paths, registry, synth
+from ..synth import monthpack
 from ..synth.bridge import TEMPLATE_BANK
 from ..engine.base import RenderError
 from ..spec import RenderOptions
@@ -346,6 +347,36 @@ def build(*, out_dir: str | None = None):  # noqa: ANN201 - 返回 FastMCP，避
             "rows": len(ledger.rows),
             "opening_cents": ledger.opening_cents, "closing_cents": ledger.closing_cents,
         }}
+
+    @server.tool(
+        description=(
+            "按自然月把账期拆成多份模板 JSON（选 3 个月就返回 3 份），逐月校验结构/内容/跨月连续；"
+            "返回每月数据 + 三层报告，不落盘"
+        )
+    )
+    def month_json(template_id: str, result: dict[str, Any], account: str = "",
+                   cycle: int = -1, bank_name: str = "", months: list[str] | None = None) -> dict[str, Any]:
+        try:
+            ledger = synth.from_game_result(result, account=account or None, cycle=cycle,
+                                            template=template_id, bank_name=bank_name or None)
+        except (KeyError, ValueError, synth.SynthLintError) as err:
+            return {"ok": False, "errors": [str(err)]}
+        artifacts = monthpack.month_artifacts(template_id, ledger, months or None)
+        batch = monthpack.validate_batch(artifacts)
+        return {
+            "ok": batch["ok"],
+            "template": template_id,
+            "batch": batch,
+            "files": [
+                {
+                    "month": item.month,
+                    "filename": f"{template_id}-{item.month}.json",
+                    "data": item.data,
+                    "report": item.report(),
+                }
+                for item in artifacts
+            ],
+        }
 
     return server
 
