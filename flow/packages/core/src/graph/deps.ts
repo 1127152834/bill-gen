@@ -23,6 +23,12 @@ export type BillgenConfig = {
   modelFill: boolean | 'always';
   /** How many templates `auto` keeps per statement (default 2). */
   templateLimit?: number;
+  /**
+   * 交付物形态：
+   * - `'json'`（默认）每月一份模板 JSON——用户自己导进模板出账单；
+   * - `'pdf'` 直接出片（老路径，保留给需要现成 PDF 的场合）。
+   */
+  deliver?: 'json' | 'pdf';
 };
 
 /** Everything the generation graph needs from the outside world. One `Budget` per job. */

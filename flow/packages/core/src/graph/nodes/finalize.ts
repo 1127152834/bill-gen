@@ -42,6 +42,7 @@ export const finalizeStep =
       statements: view.statements,
       audit: { rules: view.ruleResults, findings: view.findings },
       usage: deps.budget.usage(),
+      monthFiles: [],
       warnings: [...s.warnings, ...s.degraded, ...leftovers],
       renders: [],
     status: leftovers.length > 0 || s.degraded.length > 0 ? 'completed_with_warnings' : 'completed',

@@ -61,6 +61,7 @@ function depsWith(
   llm: StructuredLlm,
   modelFill: boolean | 'always' = true,
   templates: string[] = ['boa-personal'],
+  deliver: 'json' | 'pdf' = 'pdf',
 ): GraphDeps {
   return {
     ...createFixtureDeps(),
@@ -72,6 +73,7 @@ function depsWith(
       outDir,
       modelFill,
       templateLimit: 2,
+      deliver,
     },
   };
 }
@@ -206,6 +208,41 @@ describe.skipIf(!hasBillgen)('render node over MCP', () => {
     expect(pdfText(first!.path)).toContain('Cascade Trust Bank');
   }, 240_000);
 
+  it('delivers one template JSON per month instead of a PDF', async () => {
+    // 默认交付物是 JSON：用户自己导进模板出账单，服务端不再拼 PDF。
+    const base = result();
+    const statement = base.statements.find((s) => s.accountType === 'checking')!;
+    const months = [
+      { cycleStart: '2026-07-24', cycleEnd: '2026-08-23' },
+      { cycleStart: '2026-08-24', cycleEnd: '2026-09-23' },
+      { cycleStart: '2026-09-24', cycleEnd: '2026-10-23' },
+    ].map((m) => ({ ...m, openingBalanceCents: 100000, closingBalanceCents: 120000, totalCreditsCents: 0, totalDebitsCents: 0, transactionCount: 0 }));
+    const value = GenerationResultSchema.parse({ ...base, statements: [{ ...statement, months }] });
+    const deps = depsWith(stubLlm((d) => d), false, ['boa-personal'], 'json');
+    const update = (await renderStep(deps, () => {})(stateWith(value))) as RenderUpdate;
+
+    expect(update.result?.renders ?? []).toHaveLength(0);
+    const files = update.result?.monthFiles ?? [];
+    expect(files.map((f) => f.month)).toEqual(['2026-07', '2026-08', '2026-09']);
+    expect(new Set(files.map((f) => f.path)).size).toBe(3);
+    for (const file of files) {
+      expect(existsSync(file.path)).toBe(true);
+      const data = JSON.parse(readFileSync(file.path, 'utf8')) as Record<string, unknown>;
+      expect(Object.keys(data).length).toBeGreaterThan(4);
+      expect(file.bytes).toBeGreaterThan(100);
+      expect(file.sha256).toHaveLength(64);
+    }
+  }, 240_000);
+
+  it('marks a failed month on the file instead of dropping it silently', async () => {
+    const deps = depsWith(stubLlm((d) => d), false, ['boa-personal'], 'json');
+    const update = (await renderStep(deps, () => {})(stateWith(result()))) as RenderUpdate;
+    for (const file of update.result?.monthFiles ?? []) {
+      // ok=false 的月份照样交付（用户能看见哪个月没过），只是 warnings 里点名
+      if (!file.ok) expect(update.warnings?.some((w) => w.includes(file.month))).toBe(true);
+    }
+  }, 240_000);
+
   it('reports a warning instead of throwing when the server cannot start', async () => {
     const deps = depsWith(stubLlm((d) => d), false);
     deps.billgen = { ...deps.billgen!, command: join(outDir, 'does-not-exist') };
@@ -225,6 +262,8 @@ describe.skipIf(!hasBillgen)('mcp client', () => {
       expect(tools.map((t) => t.name).sort()).toEqual([
         'draft_from_ledger',
         'list_templates',
+        'month_files',
+        'month_json',
         'preview',
         'recommend_templates',
         'render',

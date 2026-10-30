@@ -19,7 +19,7 @@ from typing import Any
 
 import fitz
 
-from .. import audit, branding, paths, registry, synth
+from .. import audit, branding, delivery, paths, registry, synth
 from ..synth import monthpack
 from ..synth.bridge import TEMPLATE_BANK
 from ..engine.base import RenderError
@@ -376,6 +376,58 @@ def build(*, out_dir: str | None = None):  # noqa: ANN201 - 返回 FastMCP，避
                 }
                 for item in artifacts
             ],
+        }
+
+    @server.tool(
+        description=(
+            "按自然月落盘每月模板 JSON（另写 validation-report.json 与 manifest.json），返回文件路径 + 三层结论"
+        )
+    )
+    def month_files(template_id: str, result: dict[str, Any], account: str = "",
+                    cycle: int = -1, bank_name: str = "", months: list[str] | None = None,
+                    out_dir: str = "") -> dict[str, Any]:
+        try:
+            ledger = synth.from_game_result(result, account=account or None, cycle=cycle,
+                                            template=template_id, bank_name=bank_name or None)
+        except (KeyError, ValueError, synth.SynthLintError) as err:
+            return {"ok": False, "errors": [str(err)]}
+        artifacts = monthpack.month_artifacts(template_id, ledger, months or None)
+        batch = monthpack.validate_batch(artifacts)
+        target = _out_dir(out_dir or None)
+        target.mkdir(parents=True, exist_ok=True)
+        files: list[dict[str, Any]] = []
+        for artifact in artifacts:
+            blob = monthpack.dumps(artifact).encode()
+            path = target / f"{template_id}-{artifact.month}.json"
+            path.write_bytes(blob)
+            files.append({
+                "month": artifact.month,
+                "path": str(path),
+                "bytes": len(blob),
+                "sha256": hashlib.sha256(blob).hexdigest(),
+                "rows": artifact.rows,
+                "ok": artifact.ok,
+            })
+        report = {
+            "ok": batch["ok"],
+            "template": template_id,
+            "batch": batch,
+            "months": [artifact.report() for artifact in artifacts],
+        }
+        (target / "validation-report.json").write_text(
+            json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+        (target / "manifest.json").write_text(
+            json.dumps(delivery.manifest_for(template_id, artifacts), ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        return {
+            "ok": batch["ok"],
+            "dir": str(target),
+            "files": files,
+            "batch": batch,
+            "report": str(target / "validation-report.json"),
+            "manifest": str(target / "manifest.json"),
         }
 
     return server

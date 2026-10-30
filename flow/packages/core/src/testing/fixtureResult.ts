@@ -2767,6 +2767,7 @@ const RESULT: GenerationResult = {
   },
   "warnings": [],
   "renders": [],
+  "monthFiles": [],
   "status": "completed"
 };
 

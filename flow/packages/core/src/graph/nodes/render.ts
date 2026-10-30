@@ -11,7 +11,7 @@
  * structured errors. Rendering failures never fail the job — they become warnings on the result.
  */
 import { z } from 'zod';
-import type { GenerationResult, RenderArtifact, Statement } from '../../schemas/index.js';
+import type { GenerationResult, MonthFile, RenderArtifact, Statement } from '../../schemas/index.js';
 import type { Emit, GraphDeps } from '../deps.js';
 import type { GraphStateUpdate, GraphStateValue } from '../state.js';
 import { sharedMcpPool, type McpStdioClient } from '../../mcp/client.js';
@@ -56,6 +56,24 @@ const ContractSchema = z.object({
   limits: z.record(z.string(), z.unknown()),
 });
 type Contract = z.infer<typeof ContractSchema>;
+
+const MonthFilesSchema = z.object({
+  ok: z.boolean().optional(),
+  errors: z.array(z.string()).optional(),
+  dir: z.string().optional(),
+  files: z.array(
+    z.object({
+      month: z.string(),
+      path: z.string(),
+      rows: z.number(),
+      bytes: z.number(),
+      sha256: z.string(),
+      ok: z.boolean(),
+    }),
+  ).default([]),
+  batch: z.record(z.string(), z.unknown()).optional(),
+});
+type MonthFilesAnswer = z.infer<typeof MonthFilesSchema>;
 
 const ValidateSchema = z.object({
   ok: z.boolean(),
@@ -215,8 +233,9 @@ async function renderMonthly(
   statement: Statement,
   recommend?: { reasons: string[]; score: number },
   bankName = '',
-): Promise<{ artifacts: RenderArtifact[]; warnings: string[] }> {
+): Promise<{ artifacts: RenderArtifact[]; monthFiles: MonthFile[]; warnings: string[] }> {
   const artifacts: RenderArtifact[] = [];
+  const monthFiles: MonthFile[] = [];
   const warnings: string[] = [];
   const cycles = statement.months.length > 0 ? statement.months.map((m) => m.cycleStart.slice(0, 7)) : [''];
   for (const [index, period] of cycles.entries()) {
@@ -224,9 +243,15 @@ async function renderMonthly(
       deps, emit, client, templateId, result, statement, recommend, bankName, index, period,
     );
     if (one.artifact) artifacts.push(one.artifact);
+    hit(one.monthFiles, monthFiles);
     if (one.warning) warnings.push(one.warning);
   }
-  return { artifacts, warnings };
+  return { artifacts, monthFiles, warnings };
+}
+
+/** 月份文件是按月出的，这里只是把数组摊平（保持顺序：模板 → 月份升序）。 */
+function hit(from: MonthFile[] | undefined, into: MonthFile[]): void {
+  for (const file of from ?? []) into.push(file);
 }
 
 /** One template × one statement: draft → (model fill → validate)* → render. */
@@ -241,7 +266,7 @@ async function renderOne(
   bankName = '',
   cycle = -1,
   period = '',
-): Promise<{ artifact?: RenderArtifact; warning?: string }> {
+): Promise<{ artifact?: RenderArtifact; monthFiles?: MonthFile[]; warning?: string }> {
   const contract = await client.callTool<Contract>('template_contract', { template_id: templateId });
 
   const draft = await client.callTool<z.infer<typeof DraftSchema>>('draft_from_ledger', {
@@ -266,7 +291,41 @@ async function renderOne(
   const policy = deps.billgen?.modelFill ?? true;
 
   /** 出片：不管走的是快路径还是模型补全，收尾只有这一处。 */
-  const finish = async (): Promise<{ artifact?: RenderArtifact; warning?: string }> => {
+  const finish = async (): Promise<{ artifact?: RenderArtifact; monthFiles?: MonthFile[]; warning?: string }> => {
+    // 默认交付「每月一份模板 JSON」：用户自己导进模板出账单，服务端不再拼 PDF。
+    if (deps.billgen?.deliver !== 'pdf') {
+      const answer = await client.callTool<MonthFilesAnswer>('month_files', {
+        template_id: templateId,
+        result,
+        account: statement.accountType,
+        cycle,
+        ...(bankName && { bank_name: bankName }),
+        ...(period && { months: [period] }),
+      });
+      if (answer.errors?.length) {
+        return { warning: `${templateId}${period ? ` ${period}` : ''}: 月度 JSON 失败 (${answer.errors.join('; ')})` };
+      }
+      const files: MonthFile[] = answer.files.map((file) => ({
+        template: templateId,
+        account: statement.accountType,
+        month: file.month,
+        path: file.path,
+        rows: file.rows,
+        bytes: file.bytes,
+        sha256: file.sha256,
+        ok: file.ok,
+      }));
+      if (files.length === 0) {
+        return { warning: `${templateId}${period ? ` ${period}` : ''}: 没有月份可交付（账期里没有流水）` };
+      }
+      const failed = files.filter((file) => !file.ok).map((file) => file.month);
+      return {
+        monthFiles: files,
+        ...(failed.length > 0 && {
+          warning: `${templateId}: ${failed.join(', ')} 未通过校验（结构/内容/跨月三层，见 validation-report.json）`,
+        }),
+      };
+    }
     const rendered = await client.callTool<z.infer<typeof RenderSchema>>('render', {
       template_id: templateId,
       data,
@@ -393,6 +452,7 @@ export const renderStep =
     }
 
     const artifacts: RenderArtifact[] = [];
+    const monthFiles: MonthFile[] = [];
     const warnings: string[] = [...skipWarnings];
     try {
       await sharedMcpPool.with(
@@ -419,7 +479,8 @@ export const renderStep =
             }
           }
           // 模板之间互不依赖：并行出片，两个同时在跑（MCP 客户端是同一连接，别把并发开太大）。
-          const slots: { artifacts: RenderArtifact[]; warnings: string[] }[] = new Array(targets.length);
+          const slots: { artifacts: RenderArtifact[]; monthFiles: MonthFile[]; warnings: string[] }[] =
+            new Array(targets.length);
           let cursor = 0;
           const worker = async (): Promise<void> => {
             for (let i = cursor++; i < targets.length; i = cursor++) {
@@ -430,19 +491,20 @@ export const renderStep =
                 );
               } catch (err) {
                 const message = err instanceof Error ? err.message : String(err);
-                slots[i] = { artifacts: [], warnings: [`${target.templateId}: ${message}`] };
+                slots[i] = { artifacts: [], monthFiles: [], warnings: [`${target.templateId}: ${message}`] };
               }
             }
           };
           await Promise.all(Array.from({ length: Math.min(RENDER_CONCURRENCY, targets.length) }, worker));
           for (const slot of slots) {
             artifacts.push(...(slot?.artifacts ?? []));
+            hit(slot?.monthFiles, monthFiles);
             warnings.push(...(slot?.warnings ?? []));
           }
         },
       );
     } catch (err) {
-      warnings.push(`billgen mcp unavailable (${err instanceof Error ? err.message : String(err)}); no PDFs rendered`);
+      warnings.push(`billgen mcp unavailable (${err instanceof Error ? err.message : String(err)}); nothing delivered`);
     } finally {
       emit({ type: 'node_end', node: 'billgen' });
     }
@@ -452,6 +514,7 @@ export const renderStep =
       result: {
         ...result,
         renders: artifacts,
+        monthFiles,
         warnings: [...result.warnings, ...warnings],
       },
       warnings,

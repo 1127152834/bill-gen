@@ -151,6 +151,21 @@ export const RenderArtifactSchema = z.object({
   score: z.number().optional(),
 });
 
+/** 按自然月拆出来的一份模板 JSON（交付物；用户自己导进模板出账单）。 */
+export const MonthFileSchema = z.object({
+  template: z.string().min(1),
+  account: z.string().min(1),
+  /** `YYYY-MM`：一个月一份。 */
+  month: z.string().regex(/^\d{4}-\d{2}$/),
+  path: z.string().min(1),
+  rows: z.number().int().min(0),
+  bytes: z.number().int().min(0),
+  sha256: z.string(),
+  /** 该份过了结构 + 内容 + 跨月三层校验。 */
+  ok: z.boolean(),
+});
+export type MonthFile = z.infer<typeof MonthFileSchema>;
+
 export const GenerationResultSchema = z.object({
   id: z.string().min(1),
   seed: z.string(),
@@ -166,6 +181,8 @@ export const GenerationResultSchema = z.object({
   status: z.enum(['completed', 'completed_with_warnings']),
   /** PDFs rendered by the billgen MCP server; empty when rendering was not configured. */
   renders: z.array(RenderArtifactSchema).default([]),
+  /** 每月一份模板 JSON（默认交付物）；`deliver: 'pdf'` 时为空。 */
+  monthFiles: z.array(MonthFileSchema).default([]),
 });
 export type RenderArtifact = z.infer<typeof RenderArtifactSchema>;
 export type GenerationResult = z.infer<typeof GenerationResultSchema>;
