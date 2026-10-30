@@ -433,11 +433,9 @@ LITERALS: dict[str, tuple[tuple[str, str], ...]] = {
                         ("U.S. Bank P.O. Box 64991 St. Paul, MN", "{legal}, {po_box_alt}"),
                         ("55164-9505.", "{city_state_zip}."),
                         ("U.S. Bank National Association", "{legal}")),
-    "sofi": (("1-855-456-7634", "{phone_service}"),
-             # 原稿把法务段落的联系地址写成 SoFi 总部：信箱与城市行一起换成虚构地址
-             ("2750 East Cottonwood Parkway #300, Cottonwood Heights,",
-              "{po_box_alt},"),
-             ("Utah 84121 as soon as possible.", "{city_state_zip} as soon as possible.")),
+    # 参考件的法务段落写的就是「街址 + 数字号」，早先拿虚构信箱去盖只会盖成
+    # `SoFi, N.A., SoFi, N.A., Cottonwood Heights` 这种病句；只留电话一条兜底。
+    "sofi": (("1-855-456-7634", "{phone_service}"),),
     "wellsfargo": (("Portland, OR", "{city_state}"),
                    ("97228-6995", "{zip4}"),
                    ("Wells Fargo Bank", "{legal}"),
@@ -459,36 +457,59 @@ def _spans(page: fitz.Page) -> list[dict]:
 #: 各主题「自带字体」的正文绘制器。品牌替换默认用 base-14 Helvetica，但那会在
 #: 一份全是嵌入子集字体的账单里凭空多出一个非嵌入字体（`pdffonts` 一眼可见）。
 #: 有主题字体就用主题字体画，字宽也用它量。
-_THEME_FONTS = {"boa": "Reg"}
+_THEME_FONTS = {"boa": "Reg", "usbank": "F6"}
 
 
-def _theme_font(template_id: str) -> tuple[object, str] | None:
-    name = _THEME_FONTS.get(template_id.split("-")[0])
-    if not name:
+def _theme_module(template_id: str):
+    """取主题自己的绘制模块与字体资源名（取不到就返回 None）。"""
+    root = template_id.split("-")[0]
+    fname = _THEME_FONTS.get(root)
+    if not fname:
         return None
     try:
-        from .themes.boa import generate as boa
-
-        return boa, name
+        if root == "boa":
+            from .themes.boa import generate as module
+        elif root == "usbank":
+            biz = template_id.endswith("business")
+            module = __import__(
+                f"billgen.themes.usbank.generate_{'biz' if biz else 'us'}",
+                fromlist=["cid_bytes"],
+            )
+        else:  # pragma: no cover - 目前只有这两家有自带字体
+            return None
+        return module, fname
     except Exception:  # noqa: BLE001 - 拿不到主题字体就退回 base-14
         return None
 
 
 def _text_width(template_id: str, text: str, size: float) -> float:
-    theme = _theme_font(template_id)
+    theme = _theme_module(template_id)
     if theme:
         module, fname = theme
-        return module.tlen(text, fname, size)
+        measure = getattr(module, "tlen", None) or module.text_w
+        return measure(text, fname, size) if module.__name__.endswith("boa.generate") else module.text_w(0, fname, text, size)
     return fitz.get_text_length(text, fontname="helv", fontsize=size)
 
 
 def _draw_text(page, template_id: str, x: float, baseline: float, text: str,
                size: float, color: tuple[float, float, float] = (0, 0, 0)) -> None:
-    theme = _theme_font(template_id)
+    theme = _theme_module(template_id)
     if theme:
         module, fname = theme
-        module.txt(page, x, baseline, text, fname, size, color)
-        return
+        if hasattr(module, "txt"):                      # BoA：主题自带的整段绘制
+            module.txt(page, x, baseline, text, fname, size, color)
+            return
+        # U.S. Bank：页面字体是 CID 编码的子集，按 CID 写进内容流
+        body = module.cid_bytes(page.number, fname, text)
+        if body is not None:
+            ops = (f"q {color[0]:g} {color[1]:g} {color[2]:g} rg BT /{fname} {size:g} Tf "
+                   f"1 0 0 1 {x:.2f} {page.rect.height - baseline:.2f} Tm "
+                   f"<{body.hex().upper()}> Tj ET Q").encode()
+            doc = page.parent
+            cts = page.get_contents()
+            if cts:
+                doc.update_stream(cts[-1], doc.xref_stream(cts[-1]) + b"\n" + ops)
+            return
     page.insert_text(fitz.Point(x, baseline), text, fontsize=size,
                      fontname="helv", color=color)
 
@@ -518,6 +539,9 @@ def replace_literals(page: fitz.Page, template_id: str, brand: Brand) -> int:
     page.apply_redactions(images=fitz.PDF_REDACT_IMAGE_REMOVE,
                           graphics=fitz.PDF_REDACT_LINE_ART_REMOVE_IF_COVERED,
                           text=fitz.PDF_REDACT_TEXT_REMOVE)
+    hits = [h for h in hits if not _same_text(page, h[0], h[3])]
+    if not hits:
+        return 0
     for rect, size, baseline, text, room in hits:
         size = size if size >= 3 else 8.0
         # 换字后变长时必须缩到「到同一行下一个 span 为止」的宽度，否则会压住后面的正文
@@ -551,6 +575,19 @@ def _rect_kind(doc: fitz.Document, rect: fitz.Rect, vector: bool) -> str:
     if doc.page_count and _logo_boxes(doc[0], rect):
         return "image"
     return "text"
+
+
+def _flat(text: str) -> str:
+    return " ".join(text.split())
+
+
+def _same_text(page: fitz.Page, rect: fitz.Rect, text: str) -> bool:
+    """这一格里已经印的就是这句话？
+
+    同家银行的账单，替换后的字与模板里的字一模一样 —— 不重画就不会凭空带进
+    一个 base-14 字体（U.S. Bank 的源件全是 Arial 子集，多一个 Helvetica 是破绽）。
+    """
+    return _flat(page.get_text("text", clip=rect)) == _flat(text)
 
 
 def _has_text(page: fitz.Page, rect: fitz.Rect) -> bool:
@@ -611,6 +648,7 @@ def apply(doc: fitz.Document, template_id: str, brand: Brand, *, redraw_logo: bo
             else:
                 page_rects.extend(tuple(box) for box in _logo_boxes(page, rect))
         page_slots = [slot for slot in slots if slot.page == index]
+        page_slots = [slot for slot in page_slots if not _same_text(page, fitz.Rect(*slot.rect), slot.text(brand))]
         # 正文里的字面量每页都要扫（不止页眉那一页）
         drawn += replace_literals(page, template_id, brand)
         for x0, y0, x1, y1 in page_rects:

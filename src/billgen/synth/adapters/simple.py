@@ -185,9 +185,14 @@ def build_sofi(ledger: LedgerDocument, defaults: dict[str, Any]) -> dict[str, An
             "address_lines": _addr(ledger),
             "bank": bank_block(ledger),
             # 法务段落里印着原行总部地址与客服线，品牌态要换成这组虚构值
-            "contact_phone": ledger.bank.phone_service,
-            # 第三个槽位是空行占位（原稿三行地址），补空串避免越界
-            "contact_address": [ledger.bank.po_box, ledger.bank.city_state_zip, ""],
+            # 联系方式块印的是参考件原样（字母号 + 三行地址），模板默认数据最准
+            "contact_phone": d.get("contact_phone") or ledger.bank.phone_service,
+            # 参考件这三行是「法定行名 / 街道 / 城市州邮编」，空值退回模板默认值
+            "contact_address": d.get("contact_address") or [
+                ledger.bank.legal,
+                ledger.bank.po_box,
+                ledger.bank.city_state_zip,
+            ],
             "account_number": ledger.account.display,
             "account_last4": ledger.account.last4,
             "account_type": ledger.account.product,

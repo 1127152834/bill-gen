@@ -346,11 +346,12 @@ def test_sofi_legal_page_keeps_the_real_bank_name(branded_pdf):
     assert "Insured Deposit Program" in text
     assert "Member of FDIC" in text
     assert "sofi.com/banking/fdic/sidpterms" in text.replace(" ", "")
-    # 真行址与客服线：原稿总部街址换成账单信箱，城市行保留
+    # 真行址与客服线：参考件法务段落写的是数字号 + 街址（不是信箱），
+    # 联系方式块写的是字母号 `(855) 456-SOFI (7634)`。
     assert "1-855-456-7634" in text
-    assert "Cottonwood Heights, UT 84047-4197" in text
-    assert "2750 East Cottonwood Parkway" not in text
-    assert re.search(r"P O Box \d{4}, [A-Za-z .]+, [A-Z]{2} \d{5}", text), text[-400:]
+    assert "2750 East Cottonwood Parkway #300" in text
+    assert "Cottonwood Heights, Utah 84121" in text
+    assert "(855) 456-SOFI (7634)" in text
     assert not audit.scan_placeholders(text)
     # 法务段落没有溢出边界：最宽的一行仍落在版心内
     with fitz.open(stream=branded_pdf("sofi"), filetype="pdf") as doc:

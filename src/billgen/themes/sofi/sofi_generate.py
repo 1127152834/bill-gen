@@ -10,7 +10,7 @@ SoFi 银行账单模板 — 1:1 排版复刻
 布局：联系信息位置动态（随交易行数自适应），支持分页
 """
 import datetime as _dt
-import fitz, os, math, json
+import fitz, os, math, json, re
 
 from copy import deepcopy
 from dataclasses import dataclass, field
@@ -115,7 +115,9 @@ DEMO_DATA = {'holder_name': 'Maya Okafor',
  'contact_phone': '(855) 456-SOFI (7634)',
  'legal_footer': 'SoFi Checking and Savings accounts are offered through SoFi Bank, N.A., Member FDIC',
  'footnote1': ('Interest accrues daily at the rates as described in the SoFi Bank '
-                'Rate Sheet and is paid on the last day of the Statement Period.')}
+                'Rate Sheet and is paid on the last day of the Statement Period. '
+                'The Annual Percentage Yield Earned, as shown on your statement, may '
+                'reflect account adjustments from previous statement periods.')}
 
 # 原稿基线：与 asset 里的样张一字不差，供 parity 回归比对（不要改）。
 PARITY_DATA = {'holder_name': 'RILEY NAKAMURA',
@@ -152,7 +154,9 @@ PARITY_DATA = {'holder_name': 'RILEY NAKAMURA',
  'contact_phone': '(855) 456-SOFI (7634)',
  'legal_footer': 'SoFi Checking and Savings accounts are offered through SoFi Bank, N.A., Member FDIC',
  'footnote1': ('Interest accrues daily at the rates as described in the SoFi Bank '
-                'Rate Sheet and is paid on the last day of the Statement Period.')}
+                'Rate Sheet and is paid on the last day of the Statement Period. '
+                'The Annual Percentage Yield Earned, as shown on your statement, may '
+                'reflect account adjustments from previous statement periods.')}
 
 #: 引擎默认数据 = 原稿基线（`build()` 不带 data 时用它，parity 回归依赖这一点）。
 DATA = PARITY_DATA
@@ -640,6 +644,10 @@ def _brand_texts(ctx):
     name = str(bank.get("name") or "").strip()
     if not name:
         return None
+    # 同一家银行（SoFi 自己）：原稿的法务段落就是真文本，一个字都别改 ——
+    # 之前 `SoFi Bank` → name 那一步会把 `SoFi Bank, N.A.` 啃成 `SoFi, N.A.`。
+    if name.lower().strip() in ("sofi", "sofi bank"):
+        return None
     legal = str(bank.get("legal") or "").strip() or name
     domain = str(bank.get("domain") or "").strip() or name.lower().replace(" ", "-") + ".com"
     return name, legal, domain
@@ -664,6 +672,12 @@ def _subst(text, brand, contact=None):
     return text
 
 
+#: 参考件法务段落里那三行联系地址的原样（用于判断「根本不用换」）
+ORIGINAL_CONTACT_ADDRESS = (
+    "SoFi Bank, N.A., 2750 East Cottonwood Parkway #300, Cottonwood Heights, Utah 84121"
+)
+
+
 def _contact_subs(ctx):
     """原稿法务段落里的总部地址与客服热线 → 数据里的虚构联系方式。
 
@@ -675,11 +689,16 @@ def _contact_subs(ctx):
     phone = str(ctx.data.get("contact_phone") or "").strip()
     lines = [str(x).strip() for x in (ctx.data.get("contact_address") or []) if str(x).strip()]
     subs: list[tuple[str, str]] = []
-    if phone:
+    # 参考件法务段落写的是「数字号 + 街址」；联系方式块才印字母号。数据跟原稿
+    # 是同一组值（同一家银行）时就别换 —— 换只会把句子拼成
+    # `SoFi, N.A., SoFi, N.A., Cottonwood Heights, Cottonwood Heights…`。
+    digits = re.sub(r"\D", "", phone)
+    same_phone = not digits or digits[-10:] == "8554567634"
+    if phone and not same_phone:
         subs.append(("1-855-456-7634", phone))
-    if lines:
-        joined = ", ".join(lines)
-        subs.append(("2750 East Cottonwood Parkway #300, Cottonwood Heights, Utah 84121", joined))
+    joined = ", ".join(lines)
+    if lines and joined != ORIGINAL_CONTACT_ADDRESS:
+        subs.append((ORIGINAL_CONTACT_ADDRESS, joined))
         subs.append(("2750 East Cottonwood Parkway #300, Cottonwood Heights,", f"{lines[0]},"))
         if len(lines) > 1:
             subs.append(("Utah 84121", lines[-1]))

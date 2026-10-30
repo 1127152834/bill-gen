@@ -99,12 +99,31 @@ _BANK_FIELDS = ("name", "legal", "domain", "phone", "po_box", "po_box_alt", "cit
                 "phone_service", "phone_es", "phone_intl", "phone_metro")
 
 
-def _adopt_template_bank(ledger: LedgerDocument, defaults: dict[str, Any]) -> LedgerDocument:
+#: 「从零手写」的主题默认数据里没有 `bank` 字典（联系方式散在 contact_* 字段里），
+#: 只靠 defaults 认不出这家是谁 —— 于是行名留空时账本身份全空，SoFi 封面的寄送地址
+#: 与客服线整块变成空白。按模板归属补一张表。
+TEMPLATE_BANK = {
+    "boa": "Bank of America",
+    "chase": "JPMorgan Chase",
+    "usbank": "U.S. Bank",
+    "wellsfargo": "Wells Fargo",
+    "capitalone": "Capital One",
+    "mercury": "Mercury",
+    "sofi": "SoFi",
+    "amex": "American Express",
+}
+
+
+def _adopt_template_bank(
+    ledger: LedgerDocument, defaults: dict[str, Any], template_id: str = ""
+) -> LedgerDocument:
     """行名留空 = 用模板自带的那家银行（模板自己知道该印什么，避免版式与行名错配）。"""
     if ledger.bank.name:
         return ledger
     bank = {k: str(v) for k, v in (defaults.get("bank") or {}).items() if k in _BANK_FIELDS}
     name = bank.get("name", "").strip()
+    if not name:
+        name = TEMPLATE_BANK.get(template_id.split("-")[0], "")
     if not name:
         return ledger
     from .ledger import BankIdentity, real_traits, refresh_references, routing_for
@@ -138,6 +157,10 @@ def _same_bank_as_template(name: str, template_id: str) -> bool:
         return False
     template_name = str(bank.get("name") or "").strip()
     if not template_name:
+        # 从零手写的主题默认数据里没有 `bank` 字典（SoFi/Amex/Mercury 都是），
+        # 但它们的 logo 是矢量原稿 —— 认不出「同一家」就会在真 logo 上盖一个假字标。
+        template_name = TEMPLATE_BANK.get(template_id.split("-")[0], "").strip()
+    if not template_name:
         return False
     from .ledger import real_traits
 
@@ -152,7 +175,7 @@ def build_data(template_id: str, ledger: LedgerDocument, *, verify_rows: bool = 
     binding = binding_for(template_id)
     renderer = registry.get_renderer(template_id)
     defaults = renderer.default_data()
-    ledger = _adopt_template_bank(ledger, defaults)
+    ledger = _adopt_template_bank(ledger, defaults, template_id)
     data = binding.build(ledger, defaults)
     if verify_rows:
         verify(ledger, data, template_id)
@@ -173,7 +196,7 @@ def render(
 ) -> RenderResult:
     renderer = registry.get_renderer(template_id)
     # 行名留空时先换成模板自带的那家，后续的品牌重绘才知道该画谁。
-    ledger = _adopt_template_bank(ledger, renderer.default_data())
+    ledger = _adopt_template_bank(ledger, renderer.default_data(), template_id)
     data = build_data(template_id, ledger, verify_rows=verify_rows)
     # 水印是输出选项而不是数据：amex/capitalone/sofi/mercury 只认 opts.watermark，
     # 不把账本上的开关传下去，它们就会一直盖 `SAMPLE`（出件形态直接穿帮）。

@@ -23,13 +23,13 @@ ENGINES = [
 DEFAULT_TEXT_SHA = {
     "mercury": "03624891786d6e2bd4dfbac2b305bdff1458b1db0304ab3d1b702bda7a6d4f2f",
     "capitalone": "d07cdc3528341c4c08497836b8896fa221bbb021d0fa2f229784c11579e0c0b0",
-    "sofi": "4260995e2f8761189763277b12b3f1114e09cd2467070b4279aa688d57a70f32",
+    "sofi": "be4d3087f99fb851e450e03d992c9bdde845cc659fdfd2b7d23981b0043c8ad0",
 }
 DEFAULT_PIXELS = {
     "mercury": ['f5ba07c7d5a6a5efedfefb58b4180c4c', '4ae7e9f5265b75ff1020257b3a002c6c'],
     # 2026-10-30 第 3 页条款换成参考件原文，第三页像素随之改变
     "capitalone": ['039826011de069ddf80cf0e19916ede6', 'bf95905cb2ce2cf46a18b025ae935a1a', 'e94c861c64e8ae4697b5504e7cf73e48'],
-    "sofi": ['beddba3594841db54db4b629da43a055', 'af167418cb9d2a86127a55cbc24bb796'],
+    "sofi": ['fb4b1d2db43638f1b828d525a6ade4fd', 'af167418cb9d2a86127a55cbc24bb796'],
 }
 
 

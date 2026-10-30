@@ -399,3 +399,31 @@ Wells Fargo / Amex 都对得上）。
 `e2e_compare` 个人 7 套差异 0 项 + boa/wf 版式漂移 0 段；usbank 出片字体表与参考件逐项一致。
 
 回滚：`git revert <本轮提交>`（branding 字体 + 水印 CID + 字体闸门 + 基线在同一提交）。
+
+## 第十五轮（同一家银行时，别再拿虚构值去盖真文本）
+
+字体查完之后顺着「账单里到底写了谁的信息」往下挖，发现一个方向性错误：
+**模板本来就是那家银行时，我们还在用派生出来的虚构行址/客服线去覆盖真文本。**
+
+三处表现：
+
+1. **U.S. Bank 凭空多出 Helvetica**。品牌替换（`branding._draw_text`）对 usbank 用 base-14 画，
+   而源件全是 Arial 子集；更要命的是这些「替换」在同行同址时根本没有视觉变化，纯属自找麻烦。
+   → `_THEME_FONTS` 增加 usbank，`_draw_text` 改为把 CID 文本写进页面内容流（`cid_bytes`），
+   用的就是账单自带字体；另加 `_same_text()`，要盖的字跟原字一模一样就整块跳过。
+2. **SoFi 的联系方式块整块空白**。账本行名留空时 `_adopt_template_bank` 只认默认数据里的
+   `bank` 字典，而 SoFi 是从零手写的主题、联系方式散在 `contact_*` 里 → 身份全空。
+   → 新增 `TEMPLATE_BANK`（8 个主题 → 行名）兜底；`_same_bank_as_template` 也用它，
+   否则会在真 logo 上盖一个假字标（`SOFI` + 下划线）。
+3. **SoFi 法务段落被拼成病句**：`write us at SoFi, N.A., SoFi, N.A., Cottonwood Heights, …`。
+   原因两层：`_contact_subs()` 把「信箱 + 城市」当成替换目标（参考件写的其实是街址），
+   以及 `_subst()` 里 `("SoFi Bank", name)` 会把 `SoFi Bank, N.A.` 啃掉半截。
+   → 同家银行时 `_brand_texts()` 直接返回 `None`（原稿一字不改）；`_contact_subs()` 只在
+   数据与参考件不同时才生成替换；参考件里那一句补全（`… may reflect account adjustments
+   from previous statement periods.`，第 1 页脚注）。
+
+验证：`pytest` 565 passed / 16 skipped / 33 subtests；`realism_rules.py` 11 套全绿；
+`e2e_compare --label personal` 个人 7 套差异 0 项 + boa/wf 版式漂移 0 段；
+SoFi 参考件逐行比对只剩商户名一类的数据行（不再是版式缺失）。
+
+回滚：`git revert <本轮提交>`（branding 字体分流 + TEMPLATE_BANK + sofi 三处 + 基线）。

@@ -109,11 +109,14 @@ _REAL_TRAITS: dict[str, dict[str, str]] = {
         "phone_service": "1-800-227-4825", "phone_es": "1-800-442-7922",
         "phone_intl": "1-804-934-2001", "phone_metro": "1-800-227-4825",
     },
+    # 参考件 `SoFi-Statement-SAMPLE.pdf` 第 1 页 Contact Information 印的就是这个
+    # 街道地址（不是信箱），客服线带字母号 `(855) 456-SOFI (7634)`。
     "sofi bank": {
         "legal": "SoFi Bank, N.A.", "domain": "sofi.com",
-        "phone": "1-855-456-7634", "po_box": "P O Box 4197",
-        "po_box_alt": "P O Box 4197", "city_state_zip": "Cottonwood Heights, UT 84047-4197",
-        "phone_service": "1-855-456-7634", "phone_es": "1-855-456-7634",
+        "phone": "1-855-456-7634", "po_box": "2750 East Cottonwood Parkway #300",
+        "po_box_alt": "P O Box 4197", "city_state_zip": "Cottonwood Heights, Utah 84121",
+        # 法务段落里的客服线是数字号；联系方式块的字母号由主题默认数据提供
+        "phone_service": "1-855-456-7634", "phone_es": "(855) 456-SOFI (7634)",
         "phone_intl": "1-855-456-7634", "phone_metro": "1-855-456-7634",
     },
     "mercury": {
