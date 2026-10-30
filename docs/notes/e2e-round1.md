@@ -605,3 +605,28 @@ Oshkosh, WI 54903-3528.`；`pytest` 567 passed / 16 skipped / 33 subtests；
 `realism_rules.py` 全绿；`e2e_compare --label personal` 7 套 0 差异。
 
 回滚：`git revert <本轮提交>`（只删一行 `_THEME_FONTS` 与 `_theme_module()` 的 usbank 分支）。
+
+## 第二十二轮（换家银行出片：amex 标题被吃掉、chase 域名重影、真行名反而配假联系）
+
+把「虚构行名塞进每一套版式」这条路走全（8 家都印一遍，不只是肉眼过的那几家），三处硬伤：
+
+1. **amex 标题被啃掉前半**：页眉大标题是 `{name}® Rewards Checking Statement`（x 从 107.1 起），
+   而 `PLACEMENTS["amex"]` 第二块矩形 `(107.1, 26.6, 172.7, 40.6)` 正好压在同一位置——
+   换名后红章擦掉标题前几个字，再画一块 65×14 的小字标，出片读作
+   `rust Bank® Rewards Checking Statement`。标题里已带全名，小字标直接删掉。
+2. **chase 域名重影**：`cascade-trust-bank.comst-bank.com`。原因是主题的 subs 已经会把
+   `Chase.com` 换成 data 里的 domain，`branding.TEXT_SLOTS["chase-personal"]` 里那条
+   `{domain}` 又画了一遍，两个落点差 100pt → 叠字。删掉那条槽位。
+   同时给 subs 加闸：`not b["domain"].lower().endswith("chase.com")` —— 真 Chase 时
+   `real_traits` 派生出来的是 `jpmorgan-chase.com`，替换会把 donor 的 `Chase.com`
+   换成 `jpmorgan-jpmorgan-chase.co`（域名规则与行名规则叠加）。
+3. **真行名配假联系**：`real_traits("JPMorgan Chase")` 命中不了（表里只有
+   `jpmorgan chase bank` / `chase`），退化成派生行址 `P O Box 51963 / Charlotte /
+   1-800-555-0004` —— 一张真的 Chase 账单印着 555 号码和北卡信箱。
+   加别名 `"jpmorgan chase"`，并把「本行出片不许出现 555 假号码 / 重影行名」
+   做成闸门 `fake_contact_problems()` + 反向单测。
+
+验证：`pytest` 568 passed / 16 skipped / 33 subtests；`realism_rules.py` 11 套全绿；
+`e2e_compare --label personal` 有参考件的 5 套 0 差异、boa/wf 版式漂移 0 段。
+
+回滚：`git revert <本轮提交>`（amex 词标 / chase 槽位 / 别名三处互不依赖）。

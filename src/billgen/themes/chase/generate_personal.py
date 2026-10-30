@@ -370,7 +370,10 @@ def build_subs(d):
         subs.append((DEFAULT_LEGAL, b["legal"]))
     # 域名必须先于银行短名：否则 Chase.com 先被 (Chase→name) 吃掉，
     # 只剩 ".com" 挂在行名后面（实测坑，与商业版保持一致）
-    if b.get("domain"):
+    # 同一家银行时域名就是 chase.com，别拿派生出来的 jpmorgan-chase.com 去替换
+    # （会把 donor 的 `Chase.com` 换成更长的串，还和 `chase.com` 那条规则叠加，
+    # 印成 `jpmorgan-jpmorgan-chase.co`）。
+    if b.get("domain") and not str(b["domain"]).lower().endswith("chase.com"):
         # 带路径的串必须再先一步：只换域名时路径会留着，替换后比原 span 长得多，
         # 会压到同一行后文的 " or call us at the number…"（实测）
         subs.append(("chase.com/business/disclosures", f"{b['domain']}/business/disclosures"))

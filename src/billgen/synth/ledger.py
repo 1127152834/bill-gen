@@ -147,6 +147,9 @@ _REAL_TRAITS: dict[str, dict[str, str]] = {
 # 品牌重绘把原稿短名换成 ledger.bank.name，名字一致才不会叠成 "Chase Chase"。
 _REAL_TRAITS.update({
     "chase": _REAL_TRAITS["jpmorgan chase bank"],
+    # 模板和模型都爱写「JPMorgan Chase」这个中间形态：剥词剥到这里就断了，
+    # 会退化成派生出来的假行址（P O Box 51963 / Charlotte / 1-800-555-0004）。
+    "jpmorgan chase": _REAL_TRAITS["jpmorgan chase bank"],
     "u.s. bank": _REAL_TRAITS["u.s. bank national association"],
     "sofi": _REAL_TRAITS["sofi bank"],
     "american express": _REAL_TRAITS["american express national bank"],

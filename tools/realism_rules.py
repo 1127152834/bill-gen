@@ -641,6 +641,28 @@ def statement_text(template: str, ledger, *, watermark: bool = False) -> str:
         return "\n".join(page.get_text() for page in doc)
 
 
+_FAKE_CONTACT = re.compile(r"1-8\d\d-555-\d{4}|\b555-\d{4}\b")
+_DOUBLE_BRAND = re.compile(r"jpmorgan-jpmorgan|chase-chase|cascade-trust-bank\w*[A-Za-z]st-bank")
+
+
+def fake_contact_problems(template: str, text: str) -> list[dict[str, str]]:
+    """本行出片里不许出现 555 假号码，也不许出现「替换叠加」造成的重影行名。
+
+    555-01xx 是北美影视专用号段，真账单不会印；`jpmorgan-jpmorgan-chase.co`
+    这种是同一处被替换两次的痕迹（先换域名、又换行名），一眼假。
+    """
+    out = []
+    hit = _FAKE_CONTACT.search(text)
+    if hit:
+        out.append({"template": template, "rule": "fake-contact",
+                    "label": "本行出片里出现 555 假号码", "hit": hit.group(0)})
+    hit = _DOUBLE_BRAND.search(text)
+    if hit:
+        out.append({"template": template, "rule": "double-brand",
+                    "label": "行名/域名被替换叠加成重影", "hit": hit.group(0)})
+    return out
+
+
 def check_template(template: str, ledger) -> list[dict[str, str]]:
     pdf = render(template, ledger).pdf
     with fitz.open(stream=pdf, filetype="pdf") as doc:
@@ -651,6 +673,7 @@ def check_template(template: str, ledger) -> list[dict[str, str]]:
     problems.extend(url_path_problems(template, text))
     problems.extend(font_parity_problems(template, pdf))
     problems.extend(micro_line_problems(template, pdf))
+    problems.extend(fake_contact_problems(template, text))
     for key, label, pattern in COMMON_RULES:
         hit = pattern.search(text)
         if hit:

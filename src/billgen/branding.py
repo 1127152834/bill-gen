@@ -33,7 +33,11 @@ PLACEMENTS: dict[str, tuple[tuple[float, float, float, float], ...]] = {
     "boa-personal": ((36.0, 46.8, 205.9, 77.0),),
     "boa-business": ((36.0, 46.8, 205.9, 77.0), (378.0, 55.0, 514.8, 80.2)),
     "wellsfargo": ((516.0, 21.8, 564.8, 70.5),),
-    "amex": ((50.4, 26.4, 92.6, 69.1), (107.1, 26.6, 172.7, 40.6)),
+    # 只重画方形标（CT 字母块）。底稿右侧那块 65×14 的「AMERICAN EXPRESS」小字标
+    # 与页眉大标题（`{name}® Rewards Checking Statement`，x 从 107.1 起）重叠：
+    # 换家银行时把它一起重画，红章会把大标题的前几个字吃掉（实测印出
+    # `rust Bank® Rewards Checking Statement`）。标题里已经带全名，小字标直接略过。
+    "amex": ((50.4, 26.4, 92.6, 69.1),),
     "mercury": ((38.0, 38.0, 181.0, 74.0),),
     "capitalone": ((57.6, 21.6, 201.6, 72.0),),
     "sofi": ((470.85, 49.85, 574.40, 77.45),),
@@ -292,7 +296,9 @@ TEXT_SLOTS: dict[str, tuple[TextSlot, ...]] = {
         # 右边界取底稿里客服电话值列的实际右沿（530.1），不是页边 600：
         # 底稿的 "chase.com" 就压在 CUSTOMER SERVICE INFORMATION 盒内的右列，
         # 右对齐到页边会把域名甩到盒子外面（实测）。
-        TextSlot((470.0, 103.0, 530.1, 117.5), (528.6, 113.6), 9.6, "{domain}", align="right"),
+        # `web site:` 那一格由主题自己替换（`generate_personal.py` 的 subs 会把
+        # `Chase.com` 换成 data 里的 domain）。这里再画一次会和主题的落点错开，
+        # 印出 `cascade-trust-bank.comst-bank.com` 这种重影。
         TextSlot((455.0, 116.0, 560.0, 129.0), (465.3, 125.8), 9.6, "{phone_service}"),
         TextSlot((455.0, 128.0, 560.0, 141.0), (465.3, 136.6), 9.6, "{phone_es}"),
         TextSlot((455.0, 140.0, 560.0, 153.0), (465.3, 148.4), 9.6, "{phone_intl}"),

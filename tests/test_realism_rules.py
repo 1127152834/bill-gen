@@ -171,3 +171,20 @@ def test_micro_line_rule_catches_routing_in_the_magnetic_line(tmp_path):
     assert micro_line_problems("chase-personal", good) == []
     # 别家版式没有这条微缩行，不该被这条规则管
     assert micro_line_problems("boa-personal", bad) == []
+
+def test_fake_contact_rule_catches_555_and_double_brand():
+    import importlib.util, pathlib, sys
+
+    path = pathlib.Path(__file__).resolve().parents[1] / "tools" / "realism_rules.py"
+    spec = importlib.util.spec_from_file_location("realism_rules_probe", path)
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules["realism_rules_probe"] = mod
+    spec.loader.exec_module(mod)
+
+    assert mod.fake_contact_problems("chase-personal", "Service Center: 1-800-935-9935") == []
+    bad = mod.fake_contact_problems(
+        "chase-personal", "Service Center: 1-800-555-0004\nchase.com")
+    assert [p["rule"] for p in bad] == ["fake-contact"]
+    dup = mod.fake_contact_problems(
+        "chase-personal", "Web site: jpmorgan-jpmorgan-chase.com")
+    assert [p["rule"] for p in dup] == ["double-brand"]
