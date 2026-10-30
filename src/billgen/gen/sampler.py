@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import math
 import random
-from dataclasses import dataclass, field
+from dataclasses import dataclass, replace, field
 from datetime import date, timedelta
 from typing import Any, Mapping, Sequence
 
@@ -53,6 +53,17 @@ class CategoryModel:
             value = high - (value - high) * rng.random() * 0.5
         cents = int(round(value))
         return max(1, cents)
+
+
+# 同一类目里品牌价位并不一样：EQUINOX 月费 $180–320，PLANET FITNESS $25–50。
+# 只按类目给一个区间，会印出「EQUINOX $45.88」这种一眼假的组合。
+BRAND_TIERS: dict[str, tuple[int, int]] = {
+    "EQUINOX": (180_00, 320_00),
+    "PLANET FITNESS": (25_00, 50_00),
+    "24 HOUR FITNESS": (30_00, 60_00),
+    "CRUNCH FITNESS": (25_00, 55_00),
+    "LA FITNESS": (30_00, 60_00),
+}
 
 
 CATEGORIES: dict[str, CategoryModel] = {
@@ -554,6 +565,10 @@ def _balance_count(
             category = "convenience"
         model = CATEGORIES[category]
         when = _pick_day(year, mon, model, rng)
+        brand = _pick_brand(plan, category, state, rng)
+        tier = BRAND_TIERS.get(str(brand).upper())
+        if tier:
+            model = replace(model, median=(tier[0] + tier[1]) // 2, sigma=0.08, clamp=tier)
         amount = model.amount(rng)
         if model.taxable:
             amount = int(round(amount * (1 + tax_rate)))
@@ -564,7 +579,7 @@ def _balance_count(
             "POS",
             "debit",
             amount,
-            _pick_brand(plan, category, state, rng),
+            brand,
             category,
             rng,
             start,

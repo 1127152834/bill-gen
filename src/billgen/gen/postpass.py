@@ -1182,3 +1182,47 @@ def rechain(months: Sequence[dict[str, Any]]) -> int:
         _, closing = month_totals(data)
         previous = closing
     return changed
+
+
+def fill_row_ids(data: dict, template_id: str) -> int:
+    """给每一行补上版式默认行有、但采样器没生成的编号字段（`txid`/`id`）。
+
+    为什么需要：Mercury 这类版式的默认行带 `txid`，交付件里没有就会在
+    `validation-report.json` 里堆一片 `row_field_absent ['txid']` 提醒 —— 提醒本身
+    不拦，但真正的错误会被埋掉。编号必须**按行唯一**，所以用行内容哈希，
+    而不是拿默认值糊一遍（十行同一个流水号比没有更假）。
+    """
+    import hashlib
+
+    from .. import registry
+
+    try:
+        defaults = registry.get_renderer(template_id).default_data()
+    except Exception:  # 未知版式就什么都不做，别把交付弄挂
+        return 0
+
+    # 默认数据里流水行的编号字段（按「行内容的形状」记住，交付件里按顺序对位）。
+    wanted: set[str] = set()
+    for rows in _iter_arrays(defaults):
+        if rows and isinstance(rows[0], dict):
+            wanted |= {k for k in ("txid", "id", "reference") if k in rows[0]}
+    if not wanted:
+        return 0
+
+    filled = 0
+    for rows in _iter_arrays(data):
+        for index, row in enumerate(rows):
+            if not isinstance(row, dict):
+                continue
+            missing = [key for key in sorted(wanted) if not str(row.get(key) or "").strip()]
+            if not missing:
+                continue
+            seed = "|".join(
+                str(row.get(part, "")) for part in ("date", "posted", "desc", "amount", "amount_cents")
+            ) + f"|{index}"
+            digest = hashlib.sha256(seed.encode("utf-8")).hexdigest()
+            for key in missing:
+                number = int(digest[:12], 16) % 10**10
+                row[key] = f"{number:010d}"
+                filled += 1
+    return filled

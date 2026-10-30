@@ -365,3 +365,36 @@ def test_merchant_purchases_never_stay_ach():
     assert postpass.normalize_types(data) == 2
     types = [row["type"] for row in data["transactions"]]
     assert types[0] == "Card" and types[1] == "Card" and types[2] == "ACH Out"
+
+
+def test_fill_row_ids_gives_every_row_a_unique_stable_number():
+    """默认行有 txid，交付件也得有：不补就是一片 row_field_absent 提醒。"""
+    from billgen.gen import postpass
+
+    data = {
+        "transactions": [
+            {"date": "Sep 1", "desc": "AVALON MGMT", "amount": -2600.00, "type": "ACH Out"},
+            {"date": "Sep 2", "desc": "VONS 1350", "amount": -99.92, "type": "Card"},
+            {"date": "Sep 2", "desc": "VONS 1350", "amount": -99.92, "type": "Card"},
+        ]
+    }
+    # mercury 的默认行同时带 txid 与 id，两个编号都要补（每行两个）。
+    assert postpass.fill_row_ids(data, "mercury") == 6
+    for key in ("txid", "id"):
+        ids = [row[key] for row in data["transactions"]]
+        assert all(len(value) == 10 and value.isdigit() for value in ids), (key, ids)
+        assert len(set(ids)) == 3, (key, ids)  # 同一天同店同额也不能撞号
+    ids = [row["txid"] for row in data["transactions"]]
+    again = {"transactions": [dict(row) for row in data["transactions"]]}
+    for row in again["transactions"]:
+        row.pop("txid")
+        row.pop("id")
+    postpass.fill_row_ids(again, "mercury")
+    assert [row["txid"] for row in again["transactions"]] == ids  # 同数据同结果
+
+
+def test_fill_row_ids_leaves_unknown_templates_alone():
+    from billgen.gen import postpass
+
+    data = {"transactions": [{"date": "Sep 1", "desc": "X", "amount": -1.0}]}
+    assert postpass.fill_row_ids(data, "does-not-exist") == 0

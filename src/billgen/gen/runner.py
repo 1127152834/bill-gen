@@ -233,6 +233,7 @@ def make_runner(*, profiles: Path | str | None = None):
                     topped[outcome.month] = counts
                 # 补齐过程会把多笔同类消费抬到同一个数（$43.65 ×4），最后再打散一次
                 polished = {
+                    "row_ids": postpass.fill_row_ids(data, job.template),
                     "decap": postpass.decap_amounts(data, seed=str(job.seed or "")),
                     "varied": postpass.diversify_amounts(data, seed=f"{job.seed or ''}|{outcome.month}"),
                     "types": postpass.normalize_types(data),
