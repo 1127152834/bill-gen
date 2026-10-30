@@ -302,6 +302,53 @@ def url_path_problems(template: str, text: str) -> list[dict[str, str]]:
     ]
 
 
+_SUBSET_PREFIX = re.compile(r"^[A-Z]{6}\+")
+
+
+def _font_names(source) -> set[str]:
+    """文档里出现过的字体名（去掉子集前缀 `ABCDEF+`）。"""
+    names: set[str] = set()
+    opener = (lambda: fitz.open(stream=source, filetype="pdf")) if isinstance(source, bytes) else (lambda: fitz.open(str(source)))
+    with opener() as doc:
+        for page in doc:
+            for entry in page.get_fonts():
+                names.add(_SUBSET_PREFIX.sub("", entry[3]))
+    return names
+
+
+#: 参考件里的字体名本身就残缺时，给一个等价表（我们的名字 → 参考件里的名字）。
+#: Capital One 条款页的 medium 子集在官方 PDF 里 BaseFont 就是一个小数点
+#: （`AAAAZO+.`），PyMuPDF 读出来叫 `.`；我们插的是同一款字，只是名字正常。
+FONT_EQUIVALENTS: dict[str, dict[str, str]] = {"capitalone": {"MyFontMedium": "."}}
+
+
+def font_parity_problems(template: str, pdf: bytes) -> list[dict[str, str]]:
+    """出片的字体清单不能比参考件多。
+
+    换掉正文是最容易漏的地方：我们用 base-14 Helvetica 往一份「所有字体都嵌入
+    子集」的账单上写字，`pdffonts` 里立刻多一个 `no`（未嵌入）。这种差异不会
+    出现在肉眼里，但只要有人查字体就露馅。
+    """
+    rel = REFERENCE_PDF.get(template)
+    if not rel:
+        return []
+    try:
+        want = _font_names(ROOT / rel)
+    except Exception:  # noqa: BLE001 - 参考件读不到时不阻断规则
+        return []
+    if not want:
+        return []
+    ours = _font_names(pdf)
+    for mine, theirs in FONT_EQUIVALENTS.get(template, {}).items():
+        if mine in ours and theirs in want:
+            ours.discard(mine)
+    extra = sorted(ours - want)
+    return [
+        {"template": template, "rule": "font-parity", "label": "多出参考件没有的字体", "hit": name}
+        for name in extra
+    ]
+
+
 def pdf_fingerprint_problems(template: str, pdf: bytes) -> list[dict[str, str]]:
     """扫原始字节 + 文档信息：生成器指纹残留、producer 与真实账单不符。"""
     problems: list[dict[str, str]] = []
@@ -510,6 +557,7 @@ def check_template(template: str, ledger) -> list[dict[str, str]]:
     problems.extend(page_number_problems(template, pdf))
     problems.extend(summary_arithmetic_problems(template, pdf))
     problems.extend(url_path_problems(template, text))
+    problems.extend(font_parity_problems(template, pdf))
     for key, label, pattern in COMMON_RULES:
         hit = pattern.search(text)
         if hit:

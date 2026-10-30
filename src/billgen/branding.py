@@ -456,6 +456,43 @@ def _spans(page: fitz.Page) -> list[dict]:
     return out
 
 
+#: 各主题「自带字体」的正文绘制器。品牌替换默认用 base-14 Helvetica，但那会在
+#: 一份全是嵌入子集字体的账单里凭空多出一个非嵌入字体（`pdffonts` 一眼可见）。
+#: 有主题字体就用主题字体画，字宽也用它量。
+_THEME_FONTS = {"boa": "Reg"}
+
+
+def _theme_font(template_id: str) -> tuple[object, str] | None:
+    name = _THEME_FONTS.get(template_id.split("-")[0])
+    if not name:
+        return None
+    try:
+        from .themes.boa import generate as boa
+
+        return boa, name
+    except Exception:  # noqa: BLE001 - 拿不到主题字体就退回 base-14
+        return None
+
+
+def _text_width(template_id: str, text: str, size: float) -> float:
+    theme = _theme_font(template_id)
+    if theme:
+        module, fname = theme
+        return module.tlen(text, fname, size)
+    return fitz.get_text_length(text, fontname="helv", fontsize=size)
+
+
+def _draw_text(page, template_id: str, x: float, baseline: float, text: str,
+               size: float, color: tuple[float, float, float] = (0, 0, 0)) -> None:
+    theme = _theme_font(template_id)
+    if theme:
+        module, fname = theme
+        module.txt(page, x, baseline, text, fname, size, color)
+        return
+    page.insert_text(fitz.Point(x, baseline), text, fontsize=size,
+                     fontname="helv", color=color)
+
+
 def replace_literals(page: fitz.Page, template_id: str, brand: Brand) -> int:
     """把正文段落里零散出现的真实行号码/信箱换掉，返回处理数量。"""
     pairs = LITERALS.get(template_id, ())
@@ -484,11 +521,10 @@ def replace_literals(page: fitz.Page, template_id: str, brand: Brand) -> int:
     for rect, size, baseline, text, room in hits:
         size = size if size >= 3 else 8.0
         # 换字后变长时必须缩到「到同一行下一个 span 为止」的宽度，否则会压住后面的正文
-        width = fitz.get_text_length(text, fontname="helv", fontsize=size)
+        width = _text_width(template_id, text, size)
         if room > 0 and width > room:
             size *= room / width
-        page.insert_text(fitz.Point(rect.x0, baseline), text, fontsize=size,
-                         fontname="helv", color=(0, 0, 0))
+        _draw_text(page, template_id, rect.x0, baseline, text, size)
     return len(hits)
 
 
@@ -595,16 +631,15 @@ def apply(doc: fitz.Document, template_id: str, brand: Brand, *, redraw_logo: bo
             size = slot.size
             x, y = slot.origin
             if slot.align == "right":
-                x = slot.rect[2] - fitz.get_text_length(text, fontname="helv", fontsize=size)
+                x = slot.rect[2] - _text_width(template_id, text, size)
             if slot.fit and text:
                 room = slot.rect[2] - x
-                width = fitz.get_text_length(text, fontname="helv", fontsize=size)
+                width = _text_width(template_id, text, size)
                 if width > room > 0:
                     size *= room / width
             if not text:
                 drawn += 1
                 continue
-            page.insert_text(fitz.Point(x, y), text, fontsize=size,
-                             fontname="helv", color=(0, 0, 0))
+            _draw_text(page, template_id, x, y, text, size)
             drawn += 1
     return drawn

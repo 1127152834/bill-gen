@@ -361,3 +361,41 @@ Wells Fargo / Amex 都对得上）。
 `e2e_compare` 个人 7 套差异 0 项 + 2 套版式漂移 0 段。
 
 回滚：`git revert <本轮提交>`（sofi 倒序 + `_with_place` 在同一提交）。
+
+## 第十四轮（字体这一层：不再往账单里塞非嵌入的 Helvetica）
+
+前面查元数据时确认过 title/producer/creator 都是真人银行口径，但**字体**这一层还留着两处
+「不是这家银行的东西」：
+
+1. **BoA 的联系方式块**（`Customer service: 1-800-432-1000`、`En Español`、`P O Box 25118`、
+   `Tampa, FL 33622-5118`）由 `src/billgen/branding.py` 用 `insert_text(fontname="helv")` 画。
+   BoA 主题自己的字体是 Connections 系列子集，源件里根本没有 base-14 —— 于是这份账单的
+   字体表里凭空多出一个**未嵌入的 Helvetica**，`pdffonts` 一列 `emb` 就能看出来。
+2. **U.S. Bank 的水印**（`generate_us.py` / `generate_biz.py` 的 `add_watermark`）自己新建了
+   一个 `/BaseFont /Helvetica-Bold` 的 Type1 字体对象。参考件 `us_static_personal.pdf` 的
+   字体**全部嵌入**（Arial 系列 + 两个数据流字体），我们却多一个非嵌入字体。
+
+修法：
+
+- `branding.py` 加 `_THEME_FONTS = {"boa": "Reg"}` 与 `_draw_text()` / `_text_width()`：
+  有主题字体就用主题字体画、也用它量宽（`txt()` 自带缺字兜底，空格只推进不画）；
+  没有主题字体的模板保持 base-14（Chase 参考件本身就是 Type3 + Helvetica，改了反而不像）。
+- U.S. Bank 水印新增 `_wm_units()`：用**页面自带的嵌入字体**按 CID 编码画（`cid_bytes()`），
+  字号/位置/角度不变；只有这一页完全取不到字体时才退回旧路径（`_wm_register_helv()`）。
+  这样水印的字体就是账单自己的字体，跟真件一致。
+
+新增闸门 `font_parity_problems(template, pdf)`：出片的字体名集合不许比参考件多
+（去掉子集前缀后比）。单测 `test_font_parity_rule_catches_stray_base14` 往干净的 usbank 账单上
+补一笔 `helv`，必须报 `Helvetica`。
+
+一处已知等价：Capital One 条款页的 medium 子集在官方 PDF 里 `BaseFont` 就是一个小数点
+（`AAAAZO+.`，PyMuPDF 读成 `.`），我们插的是同款字、名字正常（`MyFontMedium`）——
+记在 `FONT_EQUIVALENTS` 里，不当作破绽。
+
+基线影响：`tests/test_usbank_shared.py` 的 `us-default` / `usbiz-default`（只有开水印那两例）
+文本与像素双变，`tools/render_regression.py refresh` 重采 8 例。
+
+验证：`pytest` 565 passed / 16 skipped / 33 subtests；`realism_rules.py` 11 套全绿；
+`e2e_compare` 个人 7 套差异 0 项 + boa/wf 版式漂移 0 段；usbank 出片字体表与参考件逐项一致。
+
+回滚：`git revert <本轮提交>`（branding 字体 + 水印 CID + 字体闸门 + 基线在同一提交）。

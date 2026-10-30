@@ -361,18 +361,23 @@ def us_calc(d):
 
 
 # ============ 水印 ============
-def add_watermark(doc, page):
-    t = "S A M P L E"
-    size = 100
-    w = text_w(page.number, ROW_FONT, t, size)
-    cx, cy = 306.0, 396.0
-    c45, s45 = math.cos(math.radians(45)), math.sin(math.radians(45))
-    x = cx - w / 2 * c45
-    y = cy + w / 2 * s45
-    hex_t = "<" + "".join(f"{ord(c):04X}" for c in t) + ">"
-    ops = (f"q 0.78 0.78 0.78 rg BT /W {size} Tf "
-           f"1 0 0 1 {x:.2f} {y:.2f} Tm {c45:.4f} {s45:.4f} {-s45:.4f} "
-           f"{c45:.4f} 0 0 Tm {hex_t} Tj ET Q").encode()
+def _wm_units(pg_i, fname, text, size, x, y, c45, s45, gray=0.78):
+    """水印用页面自带的嵌入字体画（CID 编码），不新建 base-14 Helvetica。
+
+    参考件的字体全是嵌入子集，凭空多一个非嵌入 Helvetica-Bold 会被 `pdffonts`
+    一眼看出来。返回 None 表示这一页没有可用字体（调用方退回旧路径）。
+    """
+    body = cid_bytes(pg_i, fname, text)
+    if body is None:
+        return None
+    hexstr = "<" + body.hex().upper() + ">"
+    return (f"q {gray:g} {gray:g} {gray:g} rg BT /{fname} {size} Tf "
+            f"1 0 0 1 {x:.2f} {y:.2f} Tm {c45:.4f} {s45:.4f} {-s45:.4f} "
+            f"{c45:.4f} 0 0 Tm {hexstr} Tj ET Q").encode()
+
+
+def _wm_register_helv(doc, page):
+    """退回路径：把 base-14 Helvetica-Bold 注册进页面字体资源。"""
     if not hasattr(doc, "_wm_font_xref"):
         doc._wm_font_xref = doc.get_new_xref()
         doc.update_object(doc._wm_font_xref,
@@ -393,6 +398,24 @@ def add_watermark(doc, page):
         if "/W " not in old:
             doc.xref_set_key(page.xref, "Resources/Font",
                              old[:-2] + f" {ent}>>")
+
+
+def add_watermark(doc, page):
+    t = "S A M P L E"
+    size = 100
+    w = text_w(page.number, ROW_FONT, t, size)
+    cx, cy = 306.0, 396.0
+    c45, s45 = math.cos(math.radians(45)), math.sin(math.radians(45))
+    x = cx - w / 2 * c45
+    y = cy + w / 2 * s45
+    ops = _wm_units(page.number, ROW_FONT, t, size, x, y, c45, s45)
+    if ops is None:
+        # 这一页没有任何可用的嵌入字体（例如纯图片页）——退回 base-14
+        hex_t = "<" + "".join(f"{ord(c):04X}" for c in t) + ">"
+        ops = (f"q 0.78 0.78 0.78 rg BT /W {size} Tf "
+               f"1 0 0 1 {x:.2f} {y:.2f} Tm {c45:.4f} {s45:.4f} {-s45:.4f} "
+               f"{c45:.4f} 0 0 Tm {hex_t} Tj ET Q").encode()
+        _wm_register_helv(doc, page)
     cts = page.get_contents()
     if cts:
         # 前置：水印在内容之下，不压金额

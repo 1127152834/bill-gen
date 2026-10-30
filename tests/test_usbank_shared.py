@@ -27,12 +27,13 @@ THEME = Path(__file__).resolve().parents[1] / "src/billgen/themes/usbank"
 # Arial 补轮廓后像素变了、文本层不变 —— 文本摘要未动，仅四个 us 像素摘要更新。
 GOLDENS = {
     # 2026-10-30 重采：页码由「物理页数」改为「账单页总数」（参考件 4 页只印 of 2），
-    # 披露页与尾空白页不再补页码。
-    "us-default": (3, "0f7173d13de7ae22347db26c2c751ded3bd6a0ffe55556b55f826f84aefcdffe", "250086045a1575ab6e48f99d9ab1c4fd0257aa673f458e141e4f991984acf158"),
+    # 披露页与尾空白页不再补页码；水印改用页面自带的嵌入字体（CID 编码）画，
+    # 不再往账单里塞一个非嵌入的 Helvetica-Bold。
+    "us-default": (3, "ca9bdd585c2ffc096f8e93061ca40cedab155e2db60066479919985eb42280b3", "e59828eba9eabf5e2968bad7657f5cb510d48b5d4eb07963461e858583c7c8e4"),
     "us-empty": (3, "3349a76319fbe1ebd907aa705b68a5fc8f13232debfeaf71355143f3bb760dda", "cf10d21cfabc7505f1f084496471b7631c582185ae2c9027e4a74562194eac40"),
     "us-multipage": (8, "1e52a148153c9d8f439ee6ad1032787325a751cb1bd9abf4ac8659ddcfadbf39", "b4c2176c842e7d77eeba704cb120298d9e97d7d6c37aca0ddb4cfec735a066c6"),
     "us-replay": (3, "7faf4e493a0ba90cd77321cf2694a9ab6dc4ff89b4b3a472722587233d02d71c", "5da0b054a1917641c886b4b6361c8b8bd476bddae734e330d9eaba55459b2e6b"),
-    "usbiz-default": (2, "bdd436d75ef9b8d258fc9697fe72b0b0d14bb3903e69e5eba2770fc2230e56cf", "5a043c15a62b5fd9dbab3d1003c442d4194feec4b8e2668e57e0d69ff7d445ed"),
+    "usbiz-default": (2, "b566e539ad5013f1feb201952522021e4252f79c993dce10068d3b7f876a387d", "2080816ec24a425d6bffe664a83356dc8ceb919681d167998923f5775e33c1ff"),
     "usbiz-empty": (2, "b9955a234a9d1f6af73026c2a46665cfeaf1cb4b8305cdcf424b0eb96468d5c3", "09570e4e88d27ab5da2322a52f84827597b6779a57fb86821e57d60afdf00ba9"),
     "usbiz-multipage": (8, "c2b7145065ef3eabe27d0ac022b7d94514b9314d5fd9fe013cf3d28202cd7c2f", "3e0030d3e9c8d9e22911f4d826951f8af089eb74560917c852cf59b5a3073b8b"),
     "usbiz-replay": (2, "eeecd67866135a0c365715279c747ee4b179476e8f16f95bd97591f487b0bcec", "8cf098ac8e67a6d4ff79cf44f7324614c0e314eabff13a9f2a252948947cc906"),

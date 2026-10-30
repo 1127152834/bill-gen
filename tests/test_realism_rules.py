@@ -116,3 +116,26 @@ def test_summary_arithmetic_rule_catches_broken_total():
     bad = rr.summary_arithmetic_problems("chase-personal", page("1,000.00", "500.00", "-250.00", "1,350.00"))
     assert [p["rule"] for p in bad] == ["summary-arithmetic"]
     assert "1,250.00" in bad[0]["hit"] or "125000" in bad[0]["hit"]
+
+
+def test_font_parity_rule_catches_stray_base14():
+    """往一份全嵌入字体的账单上写一笔 Helvetica，字体闸门必须报。"""
+    import fitz
+
+    from billgen.synth.bridge import from_game_result, render
+    from tools.realism_rules import font_parity_problems
+
+    import json
+
+    payload = json.loads((ROOT / "tests/fixtures/synth_result.json").read_text())
+    ledger = from_game_result(payload, watermark=False, template="usbank-personal")
+    clean = render("usbank-personal", ledger).pdf
+    assert font_parity_problems("usbank-personal", clean) == []
+
+    doc = fitz.open(stream=clean, filetype="pdf")
+    doc[0].insert_text(fitz.Point(72, 700), "HELLO", fontsize=12, fontname="helv")
+    dirty = doc.tobytes()
+    doc.close()
+
+    hits = font_parity_problems("usbank-personal", dirty)
+    assert [h["hit"] for h in hits] == ["Helvetica"]
