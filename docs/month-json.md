@@ -4,8 +4,22 @@
 程序只保证交付件结构正确、内容自洽、跨月接得上。
 
 - 模块：`src/billgen/synth/monthpack.py`（拆月 + 校验）、`src/billgen/delivery.py`（打 zip 交付包）
-- 入口：HTTP `POST /api/v1/synth/months`、MCP 工具 `month_json`
+- 入口：HTTP `POST /api/v1/synth/months`、MCP 工具 `month_json`（不落盘）/ `month_files`（落盘 + 报告 + 清单）
 - 测试：`tests/test_monthpack.py`（11 条）、`tests/test_delivery.py`（3 条）
+
+## 两条落地路径
+
+| 谁在用 | 怎么走 | 结果 |
+| --- | --- | --- |
+| LangGraph 工作流（`flow/`） | 渲染节点把 `billgen.deliver` 设成 `'json'`（默认），逐月调 MCP `month_files` | 结果里 `renders` 为空、`monthFiles[]` 有值；每份带 `path/rows/bytes/sha256/ok` |
+| 直接调 Python 服务 | `POST /api/v1/synth/months` 或 MCP `month_files` | 落盘 JSON + 校验报告 + 清单（或打 zip） |
+
+模型侧的规范写在技能里：`flow/skills/bank-forms/SKILL.md` 的「交付物：每月一份模板 JSON」一节，
+字段含义在 `flow/skills/bank-forms/fields/<template>.md`（由 `tools/gen_bank_forms_assets.py` 生成，`--check` 验同源）。
+
+页面上：结果页的「模板 JSON」面板按份列出月份/行数/大小/校验状态，每份给下载链接，
+底部给 `validation-report.json` 与 `manifest.json`。下载走 `GET /api/v1/renders/<文件名>`
+（只认一层文件名 + `pdf/json/png` 后缀）。`deliver: 'pdf'` 时仍会出片，旧面板照旧显示。
 
 ## 为什么在账本层拆月
 
