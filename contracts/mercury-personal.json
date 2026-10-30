@@ -1,0 +1,65 @@
+{
+  "template_id": "mercury-personal",
+  "kind": "deposit",
+  "columns": [
+    "date",
+    "description",
+    "type",
+    "amount",
+    "balance"
+  ],
+  "type_enum": [
+    "Card",
+    "ACH Out",
+    "ACH In"
+  ],
+  "descriptor": {
+    "card": {
+      "template": "{merchant}",
+      "rules": [
+        "no_city",
+        "no_card_tail",
+        "upper"
+      ],
+      "max_len": 42
+    },
+    "ach": {
+      "template": "{payee}",
+      "rules": [
+        "upper",
+        "no_payment_tail"
+      ],
+      "max_len": 42
+    },
+    "atm": {
+      "template": "ATM WITHDRAWAL {city} {state}",
+      "rules": [
+        "upper"
+      ],
+      "max_len": 42
+    }
+  },
+  "row_rules": {
+    "amount_decimals": 2,
+    "date_format": "%b %-d",
+    "balance_chain": true
+  },
+  "forbidden_literals": [
+    "SAMPLE",
+    "billgen",
+    "PyMuPDF",
+    "Bank of America",
+    "Lorem"
+  ],
+  "evidence": [
+    "src/billgen/themes/mercury/Demo-Bank-Statement-SAMPLE.pdf#p1",
+    "src/billgen/synth/line_styles.py#mercury_desc"
+  ],
+  "type_aliases": {
+    "Card Purchase": "Card",
+    "ACH Debit": "ACH Out",
+    "ACH Credit": "ACH In",
+    "DEBIT": "Card",
+    "ACH": "ACH Out"
+  }
+}

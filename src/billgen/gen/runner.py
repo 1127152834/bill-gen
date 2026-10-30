@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from ..jobs import JobCancelled, JobContext
+from .. import contracts
 from ..synth import monthpack
 from ..profiles import ProfileStore
 from . import envelope as envelope_mod
@@ -209,6 +210,7 @@ def make_runner(*, profiles: Path | str | None = None):
         repaired: dict[str, dict[str, int]] = {}
         topped: dict[str, dict[str, int]] = {}
         polished_counts: dict[str, dict[str, int]] = {}
+        contract_warnings: list[str] = []
         for outcome in result.months:
             data = getattr(outcome, "data", None)
             if isinstance(data, dict):
@@ -241,6 +243,19 @@ def make_runner(*, profiles: Path | str | None = None):
                 }
                 if any(polished.values()):
                     polished_counts[outcome.month] = polished
+                # 格式常识按契约统一执行：谁家行尾带城市/卡号，由 contracts/<template>.json 说了算
+                contract_id = contracts.resolve(job.template)
+                try:
+                    shaped = contracts.conform(contract_id, data)
+                    if any(shaped.values()):
+                        polished_counts.setdefault(outcome.month, {}).update(
+                            {f"contract_{key}": value for key, value in shaped.items() if value}
+                        )
+                    leftover = contracts.check(contract_id, data)
+                    if leftover:
+                        contract_warnings.append(f"{outcome.month} 契约未过：{leftover[0]}")
+                except FileNotFoundError:
+                    pass
         if topped:
             ctx.log("收尾：低于预算信封的类目已补齐（加油、公用事业、医疗等）", percent=94)
         if any(sum(v.values()) for v in repaired.values()):
@@ -296,6 +311,7 @@ def make_runner(*, profiles: Path | str | None = None):
             "envelope": envelope_problems,
             "topped_up": topped,
             "polished": polished_counts,
+            "contract_warnings": contract_warnings,
         }
         _write(out_dir / "job-summary.json", summary)
 

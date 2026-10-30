@@ -1,0 +1,60 @@
+{
+  "template_id": "chase-personal",
+  "kind": "deposit",
+  "columns": [
+    "date",
+    "description",
+    "amount",
+    "balance"
+  ],
+  "type_enum": [
+    "Card Purchase",
+    "ACH Credit",
+    "ACH Debit",
+    "Zelle Payment",
+    "Check Paid",
+    "Fee",
+    "Deposit",
+    "Withdrawal"
+  ],
+  "descriptor": {
+    "card": {
+      "template": "Card Purchase {mm/dd} {merchant} {city} {state} Card {last4}",
+      "rules": [
+        "has_card_tail",
+        "upper"
+      ],
+      "max_len": 90
+    },
+    "ach": {
+      "template": "{kind} {payee}",
+      "rules": [
+        "upper"
+      ],
+      "max_len": 90
+    }
+  },
+  "row_rules": {
+    "amount_decimals": 2,
+    "date_format": "%m/%d",
+    "balance_chain": true,
+    "no_leading_padding": true
+  },
+  "forbidden_literals": [
+    "SAMPLE",
+    "billgen",
+    "PyMuPDF",
+    "Bank of America",
+    "Lorem"
+  ],
+  "evidence": [
+    "src/billgen/themes/chase/assets/chase_static_personal.pdf#p1",
+    "src/billgen/synth/adapters/chase.py#_personal_desc"
+  ],
+  "type_aliases": {
+    "Card": "Card Purchase",
+    "ACH In": "ACH Credit",
+    "ACH Out": "ACH Debit",
+    "ACH": "ACH Debit"
+  }
+}
