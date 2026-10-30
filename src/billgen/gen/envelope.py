@@ -108,6 +108,32 @@ def envelope_line(env: Mapping[str, tuple[int, int]]) -> str:
     )
 
 
+#: 分类词表散落在 postpass 与别处，统一成信封里的类目名。
+_CATEGORY_ALIASES = {
+    "utility": "utilities",
+    "utilities": "utilities",
+    "grocery": "groceries",
+    "groceries": "groceries",
+    "dining": "dining",
+    "restaurant": "dining",
+    "fuel": "fuel",
+    "gas": "fuel",
+    "rent": "rent",
+    "shopping": "shopping",
+    "subscription": "subscription",
+    "phone": "phone",
+    "insurance": "insurance",
+    "health": "health",
+    "rideshare": "rideshare",
+    "coffee": "dining",
+    "pharmacy": "health",
+}
+
+
+def _canonical(name: str | None) -> str:
+    return _CATEGORY_ALIASES.get(str(name or "").strip().lower(), str(name or "").strip().lower())
+
+
 def _realized(rows: Iterable[Mapping[str, Any]]) -> dict[str, int]:
     """把流水按类目汇总（负数取绝对值），返回分。"""
     from . import postpass
@@ -119,6 +145,7 @@ def _realized(rows: Iterable[Mapping[str, Any]]) -> dict[str, int]:
         entry = row.get("merchant") if isinstance(row.get("merchant"), Mapping) else {}
         if category == "other":
             category = str(entry.get("category") or "other")
+        category = _canonical(category)
         cents = row.get("amount_cents")
         if isinstance(cents, int) and not isinstance(cents, bool):
             cents = abs(cents)

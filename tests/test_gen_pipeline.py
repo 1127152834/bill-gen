@@ -289,7 +289,9 @@ def _gen(tmp_path: Path, *, llm=None, tavily=None, ctx=None, profile=None,
 # ---- 测试 ----------------------------------------------------------------
 
 
-def test_three_months_all_ok(tmp_path):
+def test_three_months_all_ok(tmp_path, monkeypatch):
+
+    monkeypatch.setenv("BILLGEN_SCHEDULER", "model")  # 这条测的是模型逐行生成的老链路
     llm = FakeLlm()
     res = _gen(tmp_path, llm=llm)
 
@@ -333,7 +335,9 @@ def test_build_ledger_closes_by_arithmetic():
     assert ledger.period.start == date(2026, 7, 1) and ledger.period.end == date(2026, 9, 30)
 
 
-def test_arithmetic_gate_is_per_month(tmp_path):
+def test_arithmetic_gate_is_per_month(tmp_path, monkeypatch):
+
+    monkeypatch.setenv("BILLGEN_SCHEDULER", "model")  # 这条测的是模型逐行生成的老链路
     model = _model()
     model["monthClosings"] = {"2026-08": 999999}  # 8 月故意不闭合，7/9 月应不受连坐
     res = _gen(tmp_path, llm=FakeLlm(model=model))
@@ -348,7 +352,9 @@ def test_arithmetic_gate_is_per_month(tmp_path):
     assert res.months[0].data and res.months[2].data
 
 
-def test_audit_high_only_warns(tmp_path):
+def test_audit_high_only_warns(tmp_path, monkeypatch):
+
+    monkeypatch.setenv("BILLGEN_SCHEDULER", "model")  # 这条测的是模型逐行生成的老链路
     finding = {
         "severity": "high",
         "transactionIds": ["CHK2"],
@@ -410,7 +416,9 @@ def test_ctx_keyword_only_log(tmp_path):
     assert any("finalize" in message for message in ctx.logs)
 
 
-def test_ctx_logs_each_node(tmp_path):
+def test_ctx_logs_each_node(tmp_path, monkeypatch):
+
+    monkeypatch.setenv("BILLGEN_SCHEDULER", "model")  # 这条测的是模型逐行生成的老链路
     ctx = FakeCtx()
     _gen(tmp_path, ctx=ctx)
     joined = " ".join(ctx.logs)
@@ -506,8 +514,10 @@ def test_no_doubled_card_prefix(tmp_path):
             assert "CHECKCARD" not in text.upper(), text
 
 
-def test_card_merchant_is_a_brand_name(tmp_path):
+def test_card_merchant_is_a_brand_name(tmp_path, monkeypatch):
     """卡行商户名必须来自品牌池，且不含调研标题词（average/prices/summary/restaurants）。"""
+    monkeypatch.setenv("BILLGEN_SCHEDULER", "model")  # 这条测的是模型逐行生成的老链路
+
     res = _gen(tmp_path, template="chase-personal")
     brands = _brands()
     noise = re.compile(

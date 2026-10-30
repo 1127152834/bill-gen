@@ -178,6 +178,21 @@ CATEGORY_RANGES: dict[str, tuple[float, float]] = {
     "insurance": (60.0, 320.0),
 }
 
+#: 信封用的是复数类目名，金额档用的是单数/习惯名，这里做一层对齐。
+_RANGE_ALIASES = {
+    "utilities": "utility",
+    "groceries": "grocery",
+    "health": "pharmacy",
+    "subscription": "subscription",
+}
+
+
+def range_for(category: str) -> tuple[float, float]:
+    """取类目的单笔金额档（兼容信封的复数类目名）。"""
+    key = _RANGE_ALIASES.get(category, category)
+    return CATEGORY_RANGES.get(key, CATEGORY_RANGES.get(category, (10.0, 400.0)))
+
+
 _CATEGORY_TOKENS: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("fuel", ("SHELL", "CHEVRON", "MOBIL", "ARCO", "EXXON", "BP ", "CITGO", "VALERO", "76 ", "CIRCLE K", "QUIKTRIP", "BUC-EE", "SPEEDWAY", "SHEETZ", "WAWA", "EXXONMOBIL")),
     ("coffee", ("STARBUCKS", "DUNKIN", "PEET", "BLUE BOTTLE", "DUTCH BROS", "COFFEE")),
@@ -214,6 +229,21 @@ def _is_gas(desc: str) -> bool:
     return any(token in up for token in _GAS_TOKENS)
 
 
+_RENT_TOKENS = (
+    "RENT",
+    "MGMT",
+    "MANAGEMENT",
+    "APARTMENTS",
+    "APARTMENT",
+    "PROPERTY",
+    "PROPERTIES",
+    "LEASING",
+    "RESIDENTIAL",
+    "REALTY",
+    "HOUSING",
+)
+
+
 def _category_of(desc: str) -> str | None:
     up = _norm(desc)
     for name, tokens in _CATEGORY_TOKENS:
@@ -221,7 +251,7 @@ def _category_of(desc: str) -> str | None:
             return name
     if _is_utility(up):
         return "utility"
-    if "RENT" in up:
+    if any(token in up for token in _RENT_TOKENS):
         return "rent"
     return None
 
@@ -323,8 +353,20 @@ def _swap_for(category: str, state: str) -> tuple[str, ...]:
     return _REGIONAL_SWAPS.get((category, state.upper()[:2])) or _DEFAULT_SWAP.get(category) or ()
 
 
+def _place_tail(desc: str) -> str:
+    """从原描述里取尾部的「城市 州」（没传 city 时用它保地点）。"""
+    match = re.search(r"([A-Z][A-Za-z.'\- ]{1,22}?)\s+([A-Z]{2})$", desc.strip())
+    if not match:
+        return ""
+    return f"{match.group(1).strip().upper()} {match.group(2)}"
+
+
 def fix_chains(data: dict[str, Any], *, state: str, city: str = "") -> int:
-    """把不在本州经营的连锁换成同地区的替代品，返回改了几行。"""
+    """把不在本州经营的连锁换成同地区的替代品，返回改了几行。
+
+    换名时**整条重写**：`{新品牌} {门店号} {城市 州}`。不要拿原描述做字符串替换，
+    否则会留下 `TRADER JOE'S RALPHS KROGER` 这种把旧品牌当城市名的垃圾。
+    """
     state = state.upper()[:2]
     if not state:
         return 0
@@ -335,26 +377,96 @@ def fix_chains(data: dict[str, Any], *, state: str, city: str = "") -> int:
         if not up:
             continue
         for chain, allowed in _CHAIN_STATES.items():
-            if chain in up and state not in allowed:
-                category = _category_of(desc) or "dining"
-                options = _swap_for(category, state)
-                if not options:
-                    break
-                # 用商户名做确定性选择：同一个错误连锁每次换成同一家，重跑结果稳定。
-                pick = options[sum(map(ord, up)) % len(options)]
-                suffix = ""
-                store = re.search(r"\b(\d{3,5})\b", desc)
-                if store:
-                    suffix = f" {store.group(1)}"
-                place = re.search(r"\b([A-Z][A-Za-z .'-]*?),?\s+([A-Z]{2})\s*$", desc)
-                if place and place.group(1).strip().upper() not in _NOT_CITY:
-                    suffix += f" {place.group(1).strip().upper()} {place.group(2)}"
-                elif city and state:
-                    suffix += f" {city.upper()} {state}"
-                _set_desc(row, f"{pick}{suffix}".strip())
-                changed += 1
+            if chain not in up or state in allowed:
+                continue
+            category = _category_of(desc) or "dining"
+            options = _swap_for(category, state)
+            if not options:
                 break
+            pick = options[sum(map(ord, up)) % len(options)]
+            store = re.search(r"\b(\d{3,5})\b", desc)
+            parts = [pick]
+            if store:
+                parts.append(store.group(1))
+            place = f"{city.upper()} {state}" if city else _place_tail(desc)
+            if place:
+                parts.append(place)
+            _set_desc(row, " ".join(parts))
+            changed += 1
+            break
     return changed
+
+
+def top_up_to_envelope(
+    data: dict[str, Any],
+    env: Mapping[str, Any],
+    *,
+    seed: str = "",
+    state: str = "",
+    city: str = "",
+) -> dict[str, int]:
+    """把低于信封下限的类目补到区间内（改已有行优先，必要时补一张该有的票）。
+
+    模型常见毛病是「类目漏了」或「金额偏小」：11 月只有电费没有燃气、加油只有五六笔
+    小额。这里按信封下限补齐，单笔仍受 `CATEGORY_RANGES` 约束；公用事业缺一家的，
+    就把该州另一家（燃气）补上——真账单本来就是电、气各一张。
+    """
+    from . import envelope as envelope_mod
+
+    counts = {"scaled": 0, "added": 0}
+    totals = envelope_mod._realized(_iter_rows(data))
+    for category, bucket in env.items():
+        low, high = int(bucket[0]), int(bucket[1])
+        actual = totals.get(envelope_mod._canonical(category), 0)
+        if not low or actual >= low * 0.9:
+            continue
+        rows = [
+            row
+            for row in _iter_rows(data)
+            if envelope_mod._canonical(_category_of(_row_desc(row)) or "") == envelope_mod._canonical(category)
+            and (_row_amount(row) or 0) < 0
+        ]
+        lo_range, hi_range = range_for(category)
+        deficit = low * 1.05 - actual
+        for row in rows:
+            if deficit <= 0:
+                break
+            amount = abs(float(_row_amount(row) or 0.0))
+            room = hi_range - amount
+            if room <= 1.0:
+                continue
+            lift = min(deficit / 100.0 / max(len(rows), 1), room)
+            if lift <= 0.5:
+                continue
+            _set_amount(row, -(round(amount + lift, 2)))
+            deficit -= int(round(lift * 100))
+            counts["scaled"] += 1
+        # 公用事业：缺一家就补另一家（电/气各一张）
+        if category == "utilities" and deficit > 0:
+            pair = _utilities_for(state, city)
+            present = " ".join(_norm(_row_desc(row)) for row in rows)
+            missing = ""
+            if pair:
+                for name in pair:
+                    if not any(word in present for word in _norm(name).split()[:2]):
+                        missing = name
+                        break
+            if missing:
+                amount = round(min(max(deficit / 100.0, lo_range), hi_range), 2)
+                day = str(rows[0].get("date") or "").strip() if rows else ""
+                row = {
+                    "date": day or "15",
+                    "desc": missing,
+                    "amount": -amount,
+                    "type": "ACH",
+                }
+                _iter_arrays(data)[0].append(row)
+                deficit -= int(round(amount * 100))
+                counts["added"] += 1
+    if counts["scaled"] or counts["added"]:
+        _rescale_amounts(data)
+        sort_rows(data)
+    return counts
 
 
 def _rescale_amounts(data: dict[str, Any]) -> None:
@@ -398,8 +510,8 @@ def _rescale_amounts(data: dict[str, Any]) -> None:
 def fix_amounts(data: dict[str, Any], *, severity: float = 0.35) -> int:
     """把明显离谱的金额拉回该品类的真实档位，返回改了几行。
 
-    ``severity`` 是容忍度：金额落在 ``[lo*severity, hi/severity]`` 之外的才动，
-    免得把「小额咖啡」「便利店买水」这类合理的小票金额也一起改掉。
+    容忍度是**不对称**的：下限松（小额小票很常见），上限紧——`hi/0.35` 会让
+    $222 的 Subway 混过去，所以上界只用 ``hi*1.5``。``severity`` 仍控制下界。
     """
     changed = 0
     for row in _iter_rows(data):
@@ -412,7 +524,7 @@ def fix_amounts(data: dict[str, Any], *, severity: float = 0.35) -> int:
             continue
         lo, hi = CATEGORY_RANGES[category]
         abs_amount = abs(amount)
-        if lo * severity <= abs_amount <= hi / severity:
+        if lo * severity <= abs_amount <= hi * 1.5:
             continue
         # 用行内容做确定性取值，落在区间中部，重跑不会跳来跳去。
         span = hi - lo
@@ -639,6 +751,38 @@ def fix_budget(
     return changed
 
 
+_MONTHS = {name: index for index, name in enumerate(
+    ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"), start=1
+)}
+
+
+def _row_sort_key(row: Mapping[str, Any]) -> tuple[int, int]:
+    """`"Nov 26"` / `"11/26"` / `"2026-11-26"` 都能排的键。"""
+    text = str(row.get("date") or row.get("posted") or "")
+    match = re.search(r"(\d{1,2})/(\d{1,2})", text)
+    if match:
+        return (int(match.group(1)), int(match.group(2)))
+    match = re.search(r"(\d{4})-(\d{2})-(\d{2})", text)
+    if match:
+        return (int(match.group(2)), int(match.group(3)))
+    match = re.match(r"([A-Za-z]{3})[a-z]*\s+(\d{1,2})", text)
+    if match:
+        month = _MONTHS.get(match.group(1).title(), 0)
+        return (month, int(match.group(2)))
+    return (0, 0)
+
+
+def sort_rows(data: dict[str, Any]) -> int:
+    """把每个流水数组按日期排好，返回重排过的数组个数。"""
+    moved = 0
+    for array in _iter_arrays(data):
+        ordered = sorted(array, key=_row_sort_key)
+        if ordered != array:
+            array[:] = ordered
+            moved += 1
+    return moved
+
+
 def repair_month(
     data: dict[str, Any],
     *,
@@ -656,6 +800,7 @@ def repair_month(
         "chains": fix_chains(data, state=state, city=city),
         "budget": fix_budget(data, income_hint=income_hint, rent_hint=rent_hint),
         "amounts": fix_amounts(data) if fix_money else 0,
+        "sorted": sort_rows(data),
     }
     return report
 

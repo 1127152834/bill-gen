@@ -228,6 +228,28 @@ def make_runner(*, profiles: Path | str | None = None):
                 outcome.report = monthpack.check_delivered(job.template, outcome.month, outcome.data)
                 outcome.ok = bool(outcome.report.get("ok"))
 
+        # 信封对照：实际花销 vs 收入档算出的区间，偏差只进 warnings（不拦交付）。
+        envelope_problems: dict[str, list[str]] = {}
+        for outcome in result.months:
+            data = getattr(outcome, "data", None)
+            if not isinstance(data, dict):
+                continue
+            try:
+                year, month = (int(part) for part in str(outcome.month).split("-"))
+            except ValueError:
+                continue
+            month_env = seasonal.envelope_for_month(base_env, year, month)
+            rows = [
+                row
+                for array in postpass._iter_arrays(data)
+                for row in array
+                if isinstance(row, dict)
+            ]
+            problems = envelope_mod.envelope_report(rows, month_env)
+            if problems:
+                envelope_problems[outcome.month] = problems
+                result.warnings.extend(f"信封偏差（{outcome.month}）：{item}" for item in problems)
+
         files = _month_files(result, out_dir)
         report = _batch_report(result)
         _write(out_dir / "validation-report.json", report)
@@ -243,6 +265,7 @@ def make_runner(*, profiles: Path | str | None = None):
             "warnings": list(result.warnings),
             "postpass": repaired,
             "seasonal": seasonal_added,
+            "envelope": envelope_problems,
         }
         _write(out_dir / "job-summary.json", summary)
 

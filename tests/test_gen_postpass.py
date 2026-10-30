@@ -131,6 +131,7 @@ def test_repair_month_reports_each_category():
         "chains",
         "budget",
         "amounts",
+        "sorted",
     }
 
 

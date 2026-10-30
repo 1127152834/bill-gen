@@ -22,6 +22,7 @@ from __future__ import annotations
 import calendar
 import hashlib
 import json
+import os
 import random
 import re
 import tempfile
@@ -43,7 +44,7 @@ from ..synth.ledger import (
     Period,
 )
 from ..synth.money import aba_routing, account_number, digits
-from . import envelope, seasonal
+from . import envelope, sampler, seasonal
 from . import prompts as P
 from .llm import LlmBadJson, LlmError
 from .tavily import TavilyError, TavilyQuotaExceeded
@@ -197,6 +198,12 @@ class _Usage:
 
     llm_calls: int = 0
     tavily_queries: int = 0
+
+
+def _scheduler() -> str:
+    """调度方式：``sampler``（默认，按分布采样）或 ``model``（旧的逐行生成）。"""
+    value = str(os.environ.get("BILLGEN_SCHEDULER") or "sampler").strip().lower()
+    return "model" if value == "model" else "sampler"
 
 
 def _as_ctx(ctx: Any) -> Any:
@@ -1098,6 +1105,16 @@ def _apply_patch(model: dict, patch: Any) -> dict:
     return _normalize_model(out, {"period": {"start": "1970-01-01"}, "months": []}, seed="")
 
 
+def _has_placeholder(text: str) -> bool:
+    """按词边界判占位词：`FOOD 4 LESS` 含 "foo"，但它不是占位词。"""
+    lowered = text.lower()
+    for word in _PLACEHOLDER_WORDS:
+        pattern = r"(?<![a-z])" + re.escape(word) + r"(?![a-z])"
+        if re.search(pattern, lowered):
+            return True
+    return False
+
+
 _PLACEHOLDER_WORDS = (
     "acme", "example", "sample", "fictional", "dummy", "test", "demo",
     "foo", "bar", "lorem", "xyz", "your company",
@@ -1360,6 +1377,96 @@ def _fallback_model(
 
 
 # ---- schedule 节点 -------------------------------------------------------
+
+def node_sample_rows(
+    norm: Mapping[str, Any],
+    profile: Mapping[str, Any],
+    facts: Sequence[Mapping[str, Any]],
+    *,
+    seed: str = "",
+    log: Any = None,
+) -> tuple[list[dict], dict]:
+    """按分布采样流水（替代「模型逐行编 + 事后修补」）。
+
+    模型只提供生活形态（收入档位、房租量级、品牌偏好、订阅），笔数/间隔/金额/星期
+    由 :mod:`billgen.gen.sampler` 从分布里抽；同族账单每月一笔、固定账单锚定日、
+    期初按「绝不透支」兜底。
+    """
+    loc = norm.get("location") or {}
+    state = str(loc.get("state") or "")
+    plan = sampler.plan_from_profile(profile, state=state, months=norm.get("months") or [])
+    weights = _category_weights(profile)
+    plan.category_weights = weights
+    rows = sampler.sample_rows(
+        plan,
+        months=norm.get("months") or [],
+        state=state,
+        seed=_seed_of(norm, seed),
+        tax_rate=float(loc.get("combined_sales_tax_rate") or 0.0),
+        row_target=(
+            int(norm["row_range"]["min"]),
+            int(norm["row_range"]["max"]),
+        ),
+    )
+    # 采样出来的每一类消费都要有「出处」：按品类造一条合成事实（同城同州），
+    # 这样 R7（POS 行必须有城市/州）与 R9（POS 行必须有事实来源）仍然成立，
+    # 而事实本身不掺任何模型编造的地名。
+    facts = list(facts)
+    pseudo: dict[str, str] = {}
+    for row in rows:
+        if row.get("type") != "POS":
+            continue
+        category = str(row.get("category") or "shopping")
+        if category not in pseudo:
+            fact_id = f"plan-{category}"
+            pseudo[category] = fact_id
+            facts.append(
+                {
+                    "id": fact_id,
+                    "name": f"{category} spend",
+                    "category": category,
+                    "city": str(loc.get("city") or ""),
+                    "state": state,
+                    "national": False,
+                    "source": "sampler",
+                }
+            )
+        row["fact_id"] = pseudo[category]
+        row["city"] = row.get("city") or str(loc.get("city") or "")
+        row["state"] = row.get("state") or state
+    opening = sampler.opening_for(rows)
+    model = {
+        "openingBalanceCents": opening,
+        "incomeStreams": [{"id": "inc1", "label": "Client payments"}],
+        "recurring": [],
+        "discretionaryPool": [],
+    }
+    _log(log, f"sample：按分布采样 {len(rows)} 笔（同族账单每月一笔）", 45)
+    return rows, model
+
+
+def _category_weights(profile: Mapping[str, Any]) -> dict[str, float]:
+    """档案里的偏好 → 品类权重；没写就用一份成年人的常见形状。"""
+    base = {
+        "grocery": 1.0,
+        "dining": 1.0,
+        "coffee": 1.0,
+        "fuel": 1.0,
+        "pharmacy": 0.6,
+        "shopping": 1.0,
+        "rideshare": 0.8,
+        "convenience": 1.0,
+        "fitness": 1.0,
+    }
+    hints = profile.get("category_weights")
+    if isinstance(hints, Mapping):
+        for key, value in hints.items():
+            try:
+                base[str(key)] = max(0.0, float(value))
+            except (TypeError, ValueError):
+                continue
+    return base
+
 
 def node_schedule(
     norm: Mapping[str, Any],
@@ -2057,7 +2164,7 @@ def node_validate(
     placeholders = [
         {"transactionIds": [], "message": f"描述含占位词：{row.get('description')}"}
         for row in rows
-        if any(word in str(row.get("description") or "").lower() for word in _PLACEHOLDER_WORDS)
+        if _has_placeholder(str(row.get("description") or ""))
     ]
     add("R12_no_placeholder_names", placeholders)
 
@@ -2460,16 +2567,22 @@ def generate(
 
     for attempt in range(2):
         _check(ctx)
-        model = node_life_model(
-            norm, profile, facts, llm=llm, usage=usage, warnings=warnings,
-            feedback=feedback or None, log=ctx,
-        )
-        _check(ctx)
-        try:
-            rows = node_schedule(norm, model, facts, seed=seed, log=ctx)
-        except Exception as exc:  # 调度异常按校验失败处理，第二轮再兜底
-            warnings.append(f"schedule 失败：{type(exc).__name__}: {exc}")
-            rows = []
+        if _scheduler() == "sampler":
+            # 分布采样：笔数/间隔/金额/星期由 sampler 抽，模型不再逐行编流水。
+            rows, model = node_sample_rows(
+                norm, profile, facts, seed=f"{seed}#{attempt}", log=ctx
+            )
+        else:
+            model = node_life_model(
+                norm, profile, facts, llm=llm, usage=usage, warnings=warnings,
+                feedback=feedback or None, log=ctx,
+            )
+            _check(ctx)
+            try:
+                rows = node_schedule(norm, model, facts, seed=seed, log=ctx)
+            except Exception as exc:  # 调度异常按校验失败处理，第二轮再兜底
+                warnings.append(f"schedule 失败：{type(exc).__name__}: {exc}")
+                rows = []
         _check(ctx)
         descriptors = node_descriptors(
             norm, profile, rows, facts, llm=llm, usage=usage, warnings=warnings, log=ctx
