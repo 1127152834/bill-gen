@@ -1,5 +1,5 @@
 # One image, one runtime: the Python renderer/API (billgen) and its web workbench.
-FROM python:3.11-bookworm-slim
+FROM python:3.11-slim-bookworm
 ENV PATH="/opt/billgen/bin:${PATH}" \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \

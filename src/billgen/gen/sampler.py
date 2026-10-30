@@ -298,6 +298,11 @@ def _sample_month(
     subs = _sample_subscriptions(plan, year, mon, rng=rng)
     rows.extend(subs)
 
+    fixed_rows = len(rows)
+    spend_low = max(1, int(target[0]) - fixed_rows)
+    spend_high = max(spend_low, int(target[1]) - fixed_rows)
+    target = (spend_low, spend_high)
+
     weights = dict(plan.category_weights or {})
     seasonal = 1.0 + 0.08 * math.sin((mon - 1) / 12 * 2 * math.pi)
     # 品类占比要贴着模型，但一个月总笔数受版式行数区间约束：先按比例把 λ 缩放到
@@ -472,10 +477,10 @@ def _row(
     state: str = "",
     city: str = "",
 ) -> dict[str, Any]:
-    if txn_type == "POS":
-        posted = min(end, when + timedelta(days=rng.randint(1, 2)))
-    else:
-        posted = when
+    # 张贴日 == 交易日：账单是按同一个顺序印的，余额也按这个顺序滚动。
+    # 早先给 POS 行加 1–2 天滞后，但排序仍按交易日，于是「张贴日往回跳、余额却按行序」，
+    # audit 的 schedule 规则会点名（而且真实账单也不会这么排）。
+    posted = when
     return {
         "date": when,
         "posted": posted,

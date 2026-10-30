@@ -155,15 +155,14 @@ def test_missing_budget_hints_fall_back_to_state_medians():
     assert 0.25 * monthly <= plan.rent_median <= 0.36 * monthly
 
 
-def test_spend_rows_stay_inside_the_statement_row_range():
-    """一个月消费笔数必须落在版式行数区间里，不能靠事后删行硬凑。"""
+def test_total_rows_stay_inside_the_statement_row_range():
+    """整月行数（工资 + 固定账单 + 订阅 + 消费）必须落在版式行数区间里。"""
     plan = sampler.plan_from_profile({"name": "HENG LI"}, state="CA")
     for seed in ("rows-1", "rows-2", "rows-3"):
         rows = sampler.sample_rows(
-            plan, months=["2026-09"], state="CA", seed=seed, row_target=(8, 14)
+            plan, months=["2026-09"], state="CA", seed=seed, row_target=(16, 26)
         )
-        spend = [row for row in rows if row["type"] == "POS" and row["category"] != "subscription"]
-        assert 8 <= len(spend) <= 14, (seed, len(spend))
+        assert 16 <= len(rows) <= 26, (seed, len(rows))
 
 
 def test_no_single_category_dominates_a_month():
