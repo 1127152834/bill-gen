@@ -175,6 +175,11 @@ class Handler(BaseHTTPRequestHandler):
     def _letter(self, path: str):
         base = self._LETTER_BASE
         tail = path[len(base):].rstrip("/")
+        # 页面里的 fetch 写的是 `<BASE>api/render`（独立编辑器 letter_studio 的路由是
+        # `/api/*`），挂到主服务后少了一层前缀，这里把可选的 `api` 吃掉，两种写法都
+        # 落到同一处——否则前端 404 只会在错误条里印一句 [object Object]。
+        if tail.startswith("/api/"):
+            tail = tail[len("/api"):]
         if tail == "" and self.command in ("GET", "HEAD"):
             return self._send(letter_web.PAGE.encode(), "text/html; charset=utf-8")
         if tail == "/defaults" and self.command == "GET":

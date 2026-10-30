@@ -98,3 +98,22 @@ def test_letter_unknown_subpath_is_404(web):
 
 def test_home_page_links_to_the_letter_editor(web):
     assert "/letters/mercury/" in get(web, "/")[2].decode()
+
+
+def test_letter_page_fetch_targets_exist_on_the_mount(web):
+    """页面里的 fetch 是 `<BASE>api/render`，主服务必须认这个写法。
+
+    以前主服务只挂 `/letters/mercury/render`，页面一打开就 404，错误条里只剩
+    [object Object]，预览永远停在「正在准备预览…」。
+    """
+    assert "BASE + 'api/render'" in get(web, "/letters/mercury/")[2].decode()
+
+    status, _, body = get(web, "/letters/mercury/api/defaults")
+    assert status == 200 and json.loads(body)["account"]["routing"]
+
+    status, headers, body = post(web, "/letters/mercury/api/render", {"company": {"name": "Aurora Labs LLC"}})
+    assert status == 200 and headers.get_content_type() == "application/pdf"
+    assert body.startswith(b"%PDF-")
+
+    status, headers, body = post(web, "/letters/mercury/api/png", {})
+    assert status == 200 and headers.get_content_type() == "image/png"

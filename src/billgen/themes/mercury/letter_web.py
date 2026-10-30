@@ -181,10 +181,28 @@ const BASE = location.pathname.endsWith('/') ? location.pathname : location.path
 const state = { data: null, url: null, timer: null, seq: 0 };
 
 function setStatus(text) { document.getElementById('status').textContent = text; }
+// 服务端错误体是 {"error": {"code":…, "message":…}}，`textContent = 对象` 只会印出
+// [object Object]，所以统一在这里把任意形状压成一句人话。
+function errorText(value) {
+  if (value == null) return '';
+  if (typeof value === 'string') return value;
+  if (value instanceof Error) return value.message;
+  const err = value.error || value;
+  if (typeof err === 'string') return err;
+  if (err && (err.message || err.code)) return String(err.message || err.code);
+  try { return JSON.stringify(value); } catch (e) { return String(value); }
+}
 function showError(text) {
   const box = document.getElementById('error');
-  box.style.display = text ? 'block' : 'none';
-  box.textContent = text || '';
+  const msg = errorText(text);
+  box.style.display = msg ? 'block' : 'none';
+  box.textContent = msg;
+  if (msg) {
+    const empty = document.getElementById('empty');
+    if (empty && empty.style.display !== 'none') {
+      empty.textContent = '预览没出来：' + msg;
+    }
+  }
 }
 
 function getPath(obj, path) {
@@ -228,8 +246,8 @@ async function renderPdf(blob = true) {
   });
   if (seq !== state.seq) return null;            // 快速连打时丢掉旧响应
   if (!resp.ok) {
-    let msg = '渲染失败';
-    try { msg = (await resp.json()).error || msg; } catch (e) {}
+    let msg = '渲染失败（HTTP ' + resp.status + '）';
+    try { msg = errorText(await resp.json()) || msg; } catch (e) {}
     showError(msg); setStatus(''); return null;
   }
   showError('');
@@ -257,7 +275,14 @@ function download(blob, name) {
 }
 
 async function init() {
-  const defaults = await (await fetch(BASE + 'api/defaults')).json();
+  const resp = await fetch(BASE + 'api/defaults');
+  if (!resp.ok) {
+    throw new Error(errorText(await resp.json().catch(() => null)) || ('默认值读取失败（HTTP ' + resp.status + '）'));
+  }
+  const defaults = await resp.json();
+  if (!defaults || typeof defaults !== 'object' || defaults.error) {
+    throw new Error(errorText(defaults) || '默认值格式不对');
+  }
   const saved = localStorage.getItem('mercury-letter-data');
   state.data = saved ? JSON.parse(saved) : defaults;
   fillForm(state.data);
