@@ -460,6 +460,14 @@ def vary_chain_stores(data: dict[str, Any], *, seed: str = "") -> int:
     return changed
 
 
+def _row_index(row: Mapping[str, Any]) -> int:
+    """一个稳定的行序号（拿不到就用描述长度），只为了给「顶到上限」加确定性抖动。"""
+    try:
+        return int(row.get("_index") or 0)
+    except (TypeError, ValueError):
+        return len(str(row.get("desc") or "")) % 11
+
+
 def top_up_to_envelope(
     data: dict[str, Any],
     env: Mapping[str, Any],
@@ -506,8 +514,15 @@ def top_up_to_envelope(
                 lift = min(deficit / 100.0 / max(len(rows), 1), room)
                 if lift <= 0.5:
                     continue
-                _set_amount(row, -(round(amount + lift, 2)))
-                deficit -= int(round(lift * 100))
+                # 顶到单笔上限时别正好写成 $95.00：真账单不会连着两笔整数上限。
+                target = round(amount + lift, 2)
+                if hi_range and target >= hi_range - 0.5:
+                    wobble = ((_row_index(row) * 37) % 7) / 100.0  # 0–6%
+                    target = round(hi_range * (1.0 - 0.03 - wobble), 2)
+                _set_amount(row, -target)
+                # 按「实际抬了多少」记账：顶到上限时抖动过，不能让 deficit 凭空消失，
+                # 否则该补的那张票（例如只有电费没燃气）就补不上了。
+                deficit -= int(round((target - amount) * 100))
                 counts["scaled"] += 1
                 progressed = True
             if not progressed:
