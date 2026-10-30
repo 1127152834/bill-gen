@@ -4,7 +4,9 @@ from __future__ import annotations
 import hashlib
 import importlib
 import inspect
+import json
 from copy import deepcopy
+from pathlib import Path
 
 import pytest
 
@@ -178,3 +180,23 @@ def test_context_owns_cjk_and_mutable_font_caches(engine):
             data[holder] = supported
             assert mod._render_context(data, False).font_cjk == mod.FONT_CJK_BASE
             assert mod._render_context(mod.DATA, False).font_cjk is None
+
+
+def test_chase_rows_never_start_with_padding_spaces() -> None:
+    """Chase 行必须是「标签 + 内容」，不能靠空格顶出十个前导空白。
+
+    曾经的写法用 `SUB_PAD = "          "` 拼空标签，文本层里存款行开头就是
+    十个空格（`          08/27 ...`），一眼看出是程序拼的。
+    """
+    from billgen.synth import build_data, from_game_result
+
+    raw = json.loads((Path(__file__).parent / "fixtures" / "synth_result.json").read_text())
+    ledger = from_game_result(raw, watermark=False, template="chase-personal")
+    data = build_data("chase-personal", ledger)
+    rows = list(data.get("transactions") or [])
+    assert rows
+    for row in rows:
+        desc = str(row.get("desc") or "")
+        assert desc.strip(), row
+        assert not desc.startswith(" "), f"行描述带前导空格：{desc!r}"
+        assert desc.split()[0].isalpha(), f"行描述缺少标签：{desc!r}"

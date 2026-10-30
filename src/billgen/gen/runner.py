@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from ..jobs import JobCancelled, JobContext
+from ..synth import monthpack
 from ..profiles import ProfileStore
 from . import postpass
 from .config import load_config
@@ -192,6 +193,16 @@ def make_runner(*, profiles: Path | str | None = None):
                 )
         if any(sum(v.values()) for v in repaired.values()):
             ctx.log("收尾：已按档案所在地修正公用事业/连锁/金额档位", percent=94)
+
+        # 收尾改过金额，跨月余额链得重新接一遍；然后按最终数据复核每月算术。
+        months_data = [o.data for o in result.months if isinstance(o.data, dict)]
+        adjusted = postpass.rechain(months_data)
+        if adjusted:
+            ctx.log(f"收尾：{adjusted} 个月的期初按上月末重新接续", percent=95)
+        for outcome in result.months:
+            if isinstance(outcome.data, dict):
+                outcome.report = monthpack.check_delivered(job.template, outcome.month, outcome.data)
+                outcome.ok = bool(outcome.report.get("ok"))
 
         files = _month_files(result, out_dir)
         report = _batch_report(result)

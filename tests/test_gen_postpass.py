@@ -148,3 +148,25 @@ def test_repair_month_keeps_the_sum_consistent():
     postpass.repair_month(data, state="TX", city="Austin")
     total = sum(row["amount"] for row in data["transactions"])
     assert round(data["beginning_balance"] + total, 2) == data["current_balance"]
+
+
+def test_rechain_links_next_month_to_previous_closing() -> None:
+    """收尾改过金额后，下个月期初必须等于上个月重算出来的期末。"""
+    july = {"beginning_balance": 1000.0, "transactions": [{"date": "Jul 2", "desc": "X", "amount": -100.0}]}
+    august = {"beginning_balance": 900.0, "transactions": [{"date": "Aug 3", "desc": "Y", "amount": 250.0}]}
+    # 模拟收尾把 7 月那笔从 -100 改成 -50：7 月期末变 950，8 月期初还停在 900。
+    july["transactions"][0]["amount"] = -50.0
+    assert postpass.month_totals(july) == (1000.0, 950.0)
+
+    assert postpass.rechain([july, august]) == 1
+    assert postpass.month_totals(august)[0] == 950.0
+    assert postpass.month_totals(august)[1] == 1200.0
+
+
+def test_rechain_is_a_noop_when_the_chain_already_lines_up() -> None:
+    months = [
+        {"beginning_balance": 500.0, "transactions": [{"date": "Sep 1", "desc": "A", "amount": -50.0}]},
+        {"beginning_balance": 450.0, "transactions": [{"date": "Oct 1", "desc": "B", "amount": 100.0}]},
+    ]
+    assert postpass.rechain(months) == 0
+    assert postpass.month_totals(months[1]) == (450.0, 550.0)

@@ -658,3 +658,70 @@ def repair_month(
         "amounts": fix_amounts(data) if fix_money else 0,
     }
     return report
+
+
+_OPENING_KEYS = ("beginning_balance", "begin_balance", "opening_balance")
+_CLOSING_KEYS = ("current_balance", "ending_balance", "end_balance", "closing_balance", "statement_balance")
+
+
+def _opening_of(data: Mapping[str, Any]) -> float | None:
+    for key in _OPENING_KEYS:
+        value = data.get(key)
+        if isinstance(value, (int, float)) and not isinstance(value, bool):
+            return float(value)
+    summary = data.get("summary")
+    if isinstance(summary, dict):
+        for key in ("beginning_balance", "begin_balance"):
+            value = summary.get(key)
+            if isinstance(value, (int, float)) and not isinstance(value, bool):
+                return float(value)
+    return None
+
+
+def _set_opening(data: dict[str, Any], value: float) -> None:
+    for key in _OPENING_KEYS:
+        if key in data:
+            data[key] = round(value, 2)
+            break
+    summary = data.get("summary")
+    if isinstance(summary, dict):
+        for key in ("beginning_balance", "begin_balance"):
+            if isinstance(summary.get(key), (int, float)):
+                summary[key] = round(value, 2)
+
+
+def month_totals(data: Mapping[str, Any]) -> tuple[float, float]:
+    """返回 ``(期初, 期末)``；期末按期初 + 流水重算，不信任文件里印的数。"""
+    opening = _opening_of(data) or 0.0
+    total = 0.0
+    for row in _iter_rows(data):
+        amount = _row_amount(row)
+        if amount is not None:
+            total += amount
+    return round(opening, 2), round(opening + total, 2)
+
+
+def rechain(months: Sequence[dict[str, Any]]) -> int:
+    """把一批月份重新接成一条余额链，返回改动过的月份数。
+
+    收尾阶段会改金额（把 `$4` 的加油拉回 `$40`），这时上个月的期末就变了，
+    下个月的期初还停在收尾前算出来的数 —— 跨月就对不上（实测差 25 美元）。
+    这里逐月把「上期末」写成「下期初」，再按新流水重算期末。
+    """
+    changed = 0
+    previous: float | None = None
+    for data in months:
+        if not isinstance(data, dict):
+            continue
+        opening = _opening_of(data)
+        if previous is not None and opening is not None and abs(opening - previous) > 0.005:
+            _set_opening(data, previous)
+            _rescale_amounts(data)
+            changed += 1
+        elif previous is not None and opening is None:
+            _set_opening(data, previous)
+            _rescale_amounts(data)
+            changed += 1
+        _, closing = month_totals(data)
+        previous = closing
+    return changed
