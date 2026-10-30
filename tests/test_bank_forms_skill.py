@@ -92,3 +92,38 @@ def test_skill_assets_have_no_placeholder_words() -> None:
         if banned.search(path.read_text()):
             hits.append(path.name)
     assert not hits, f"样例里还有占位词：{hits}"
+
+
+@pytest.mark.parametrize("template_id", _form_templates())
+def test_field_dictionary_matches_generator(template_id: str) -> None:
+    """字段字典（路径/类型/样例/说明）也必须与引擎同源：模型照着它逐条填。"""
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("gen_bank_forms_assets", ROOT / "tools" / "gen_bank_forms_assets.py")
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+
+    path = SKILL / "fields" / f"{template_id}.md"
+    assert path.exists(), f"缺少字段字典：{path}，跑 tools/gen_bank_forms_assets.py"
+    assert path.read_text() == module.field_payload(template_id), (
+        f"{template_id} 的字段字典与引擎默认数据不一致，跑 tools/gen_bank_forms_assets.py"
+    )
+
+
+@pytest.mark.parametrize("template_id", _form_templates())
+def test_field_dictionary_covers_every_field(template_id: str) -> None:
+    """字典要覆盖这套版式的每个字段：漏一个，模型就只能瞎猜那个字段。"""
+    from billgen.mcp import contract as contracts
+
+    text = (SKILL / "fields" / f"{template_id}.md").read_text()
+    missing = [path for path in contracts.field_types(template_id) if f"`{path}`" not in text]
+    assert not missing, f"{template_id} 字段字典漏了：{missing[:5]}"
+
+
+def test_skill_documents_month_json_delivery() -> None:
+    """技能里必须写清交付形态：每月一份 JSON，不是 PDF。"""
+    text = (SKILL / "SKILL.md").read_text()
+    assert "fields/" in text, "SKILL.md 要指向字段字典目录"
+    assert "YYYY-MM" in text, "SKILL.md 要写清按月命名规则"
+    assert "validation-report.json" in text, "SKILL.md 要写清校验报告随包交付"
