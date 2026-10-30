@@ -24,6 +24,10 @@ test-results.xml
 **/*.png
 # 端到端对比的并排图是交付证据，要进仓库
 !docs/e2e/img/*.png
+# Mercury 验证信模板的底稿与字体（用户提供的 ArcadiaText）要进仓库
+!src/billgen/themes/mercury/assets/letter/
+!src/billgen/themes/mercury/assets/letter/*.ttf
+!src/billgen/themes/mercury/assets/letter/*.pdf
 **/*.jpg
 **/*.jpeg
 **/*.ttf
