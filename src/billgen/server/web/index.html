@@ -358,42 +358,65 @@
         </button>
       </div>
     </dialog>
-    <dialog id="hunter-settings-dialog">
+    <dialog id="hunter-settings-dialog" aria-labelledby="cfg-title">
       <div class="dialog-heading">
-        <h2>模型与生成配置</h2>
+        <div class="cfg-title">
+          <h2 id="cfg-title">模型与生成配置</h2>
+          <span id="cfg-mode" class="cfg-mode" hidden></span>
+        </div>
         <button id="hunter-settings-close" class="icon-button" aria-label="关闭模型配置">×</button>
       </div>
-      <p class="synth-intro">
-        只管模型接入。保存后会重启猎手服务并在新进程里生效；密钥只写不读，留空表示沿用已存的值。
-        三项齐备（地址、Key、Tavily）就走真实模型，缺任何一项自动用本地演示数据。
+      <p class="cfg-intro">
+        地址、模型 Key、Tavily Key 三项齐备走真实模型，缺任何一项自动用本地演示数据。保存后重启猎手服务生效。
       </p>
-      <div class="settings-grid">
-        <label>模型接口地址<input id="cfg-base-url" type="text"
-          placeholder="https://your-proxy/v1" autocomplete="off" /></label>
-        <label>模型 API Key<input id="cfg-api-key" type="password"
-          autocomplete="new-password" placeholder="留空沿用" /></label>
-        <label>模型名称<input id="cfg-model" type="text" placeholder="gpt-6.1-sol" /></label>
-        <label>结构化输出<select id="cfg-structured">
-          <option value="json_schema">json_schema</option>
-          <option value="function_calling">function_calling</option>
-          <option value="json_mode">json_mode</option>
-        </select></label>
-        <label class="settings-span">Tavily Key<input id="cfg-tavily" type="password"
-          autocomplete="new-password" placeholder="留空沿用；真实模式下用于本地化调研" /></label>
-        <label class="settings-wide"><input id="cfg-ai-fill" type="checkbox" />
-          让模型自己填模板字段（关闭则用确定性草稿）</label>
-        <div class="settings-wide cfg-test-row">
-          <button id="cfg-test-llm" class="button quiet" type="button">测试模型连接</button>
+      <section class="cfg-section" aria-labelledby="cfg-llm-heading">
+        <header class="cfg-section-head">
+          <h3 id="cfg-llm-heading">模型接入</h3>
           <span id="cfg-llm-result" class="cfg-result" role="status">未测试</span>
-          <button id="cfg-test-tavily" class="button quiet" type="button">测试 Tavily</button>
-          <span id="cfg-tavily-result" class="cfg-result" role="status">未测试</span>
+          <button id="cfg-test-llm" class="button small" type="button">测试连接</button>
+        </header>
+        <div class="settings-grid">
+          <label class="settings-span">接口地址<input id="cfg-base-url" type="url"
+            placeholder="https://your-proxy/v1" autocomplete="off" spellcheck="false" /></label>
+          <label class="settings-span">API Key
+            <span class="cfg-secret"><input id="cfg-api-key" type="password"
+              autocomplete="new-password" spellcheck="false" placeholder="未配置" /><button
+              class="cfg-reveal" type="button" data-target="cfg-api-key" aria-label="显示 API Key">显示</button></span>
+            <small id="cfg-api-key-hint" class="cfg-hint">密钥只写不读；留空沿用已存的值</small></label>
+          <label>模型名称<input id="cfg-model" type="text" placeholder="gpt-6.1-sol"
+            autocomplete="off" spellcheck="false" /></label>
+          <label>结构化输出<select id="cfg-structured">
+            <option value="json_schema">json_schema</option>
+            <option value="function_calling">function_calling</option>
+            <option value="json_mode">json_mode</option>
+          </select></label>
         </div>
-      </div>
-      <p id="cfg-status" class="cfg-status" role="status"></p>
-      <p id="cfg-storage" class="cfg-status muted" role="note"></p>
-      <div class="dialog-actions">
-        <button id="cfg-cancel" class="button quiet" type="button">取消</button
-        ><button id="cfg-save" class="button primary" type="button" disabled>保存并重启</button>
+        <p id="cfg-llm-detail" class="cfg-detail" hidden></p>
+      </section>
+      <section class="cfg-section" aria-labelledby="cfg-tavily-heading">
+        <header class="cfg-section-head">
+          <h3 id="cfg-tavily-heading">Tavily 调研</h3>
+          <span id="cfg-tavily-result" class="cfg-result" role="status">未测试</span>
+          <button id="cfg-test-tavily" class="button small" type="button">测试连接</button>
+        </header>
+        <div class="settings-grid">
+          <label class="settings-span">Tavily Key
+            <span class="cfg-secret"><input id="cfg-tavily" type="password"
+              autocomplete="new-password" spellcheck="false" placeholder="未配置" /><button
+              class="cfg-reveal" type="button" data-target="cfg-tavily" aria-label="显示 Tavily Key">显示</button></span>
+            <small id="cfg-tavily-hint" class="cfg-hint">真实模式下用于本地化调研；留空沿用已存的值</small></label>
+        </div>
+        <p id="cfg-tavily-detail" class="cfg-detail" hidden></p>
+      </section>
+      <label class="cfg-toggle"><input id="cfg-ai-fill" type="checkbox" />
+        <span><b>让模型自己填模板字段</b><small>关闭则用确定性草稿</small></span></label>
+      <div class="cfg-footer">
+        <p id="cfg-storage" class="cfg-storage" role="note"></p>
+        <div class="dialog-actions">
+          <span id="cfg-status" class="cfg-status" role="status"></span>
+          <button id="cfg-cancel" class="button quiet" type="button">取消</button
+          ><button id="cfg-save" class="button primary" type="button">保存并重启</button>
+        </div>
       </div>
     </dialog>
     <dialog id="help-dialog">

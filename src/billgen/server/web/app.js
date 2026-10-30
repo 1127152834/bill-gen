@@ -1171,8 +1171,8 @@ const hunterState = {
   status: null,
   loaded: false,
   busy: false,
-  // 连通性测试结果：sig 记「测的是哪一组输入」，字段一改就作废，保存按钮跟着关。
-  tests: { llm: false, tavily: false, llmSig: "", tavilySig: "" },
+  // 连通性测试结果：sig 记「测的是哪一组输入」，字段一改就作废，保存前得重测。
+  tests: { llm: null, tavily: null },
 };
 
 function setView(view) {
@@ -1248,48 +1248,70 @@ function fmtTime(iso) {
 
 function renderSettingsStorage(settings) {
   const storage = settings.storage || {};
+  const node = $("cfg-storage");
   const bits = [];
-  if (storage.path) bits.push(`配置文件 ${storage.path}`);
-  if (storage.bytes) bits.push(`${storage.bytes} 字节`);
-  bits.push(`最后保存 ${fmtTime(storage.saved_at)}`);
-  bits.push(storage.writable === false ? "目录不可写（重建容器会丢）" : "落在数据卷里，重启/重建都不丢");
-  $("cfg-storage").textContent = bits.join(" · ");
+  if (storage.path) bits.push(storage.path);
+  bits.push(storage.saved_at ? `最后保存 ${fmtTime(storage.saved_at)}` : "从未保存");
+  if (storage.writable === false) bits.push("目录不可写，重建容器会丢");
+  node.textContent = bits.join(" · ");
+  node.classList.toggle("bad", storage.writable === false);
+  node.title = [
+    storage.path && `配置文件 ${storage.path}`,
+    storage.bytes && `${storage.bytes} 字节`,
+    storage.writable === false ? "目录不可写" : "落在数据卷里，重启/重建都不丢",
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
+
+const CFG_TESTS = {
+  llm: { label: "模型接入", button: "cfg-test-llm", result: "cfg-llm-result", detail: "cfg-llm-detail" },
+  tavily: {
+    label: "Tavily",
+    button: "cfg-test-tavily",
+    result: "cfg-tavily-result",
+    detail: "cfg-tavily-detail",
+  },
+};
 
 function fillHunterSettings(settings) {
   const storage = settings.storage || {};
   $("cfg-base-url").value = settings.base_url || "";
   $("cfg-api-key").value = "";
   $("cfg-api-key").placeholder = settings.has_api_key
-    ? `已配置（${storage.key_hint || "留空沿用"}）`
+    ? `已配置 ${storage.key_hint || ""}`.trim()
     : "未配置";
   $("cfg-model").value = settings.model || "";
   $("cfg-structured").value = settings.structured_mode || "json_schema";
   $("cfg-tavily").value = "";
   $("cfg-tavily").placeholder = settings.has_tavily_key
-    ? `已配置（${storage.tavily_hint || "留空沿用"}）`
+    ? `已配置 ${storage.tavily_hint || ""}`.trim()
     : "未配置";
   $("cfg-ai-fill").checked = settings.ai_fill !== false;
   // 「离线夹具」不再是一个开关：三项凭据齐就走真实模型，缺一项用本地演示数据。
-  $("cfg-status").textContent = settings.llm_fake
-    ? "当前用本地演示数据（模型地址 / Key / Tavily 未配齐）"
-    : "当前链路：真实模型";
+  const mode = $("cfg-mode");
+  mode.hidden = false;
+  mode.textContent = settings.llm_fake ? "当前：本地演示数据" : "当前：真实模型";
+  mode.classList.toggle("live", !settings.llm_fake);
+  mode.title = settings.llm_fake ? "模型地址 / Key / Tavily 未配齐" : "";
   // 状态接口带的是 public()，没有 storage；别用它把「配置文件在哪」覆盖成空。
   if (settings.storage) renderSettingsStorage(settings);
   // 已经真跑通过的配置不需要重新点测试；只有改了字段才要求重测。
   const ready = Boolean(settings.model_ready);
   hunterState.tests = {
-    llm: ready,
-    tavily: ready,
-    llmSig: cfgSigLlm(),
-    tavilySig: cfgSigTavily(),
+    llm: { ok: ready, sig: cfgSig("llm"), text: "已生效" },
+    tavily: { ok: ready, sig: cfgSig("tavily"), text: "已生效" },
   };
-  setTestResult("llm", ready ? "既有配置已生效，无需重测" : "未测试", ready ? "ok" : "");
-  setTestResult("tavily", ready ? "既有配置已生效，无需重测" : "未测试", ready ? "ok" : "");
+  for (const kind of Object.keys(CFG_TESTS)) {
+    if (ready) setTestResult(kind, "已生效", "ok");
+    else setTestResult(kind, "未测试", "");
+  }
+  setCfgStatus("");
   updateSaveGate();
 }
 
-function cfgSigLlm() {
+function cfgSig(kind) {
+  if (kind === "tavily") return JSON.stringify([$("cfg-tavily").value.trim()]);
   return JSON.stringify([
     $("cfg-base-url").value.trim(),
     $("cfg-api-key").value.trim(),
@@ -1298,32 +1320,43 @@ function cfgSigLlm() {
   ]);
 }
 
-function cfgSigTavily() {
-  return JSON.stringify([$("cfg-tavily").value.trim()]);
+function testPassed(kind) {
+  const test = hunterState.tests[kind];
+  return Boolean(test?.ok && test.sig === cfgSig(kind));
 }
 
-function setTestResult(kind, text, tone) {
-  const node = kind === "llm" ? $("cfg-llm-result") : $("cfg-tavily-result");
+// 标题行只放短结论（通过 · 123ms / 失败），上游错误原文单独一行完整显示，方便排查。
+function setTestResult(kind, text, tone, detail = "") {
+  const node = $(CFG_TESTS[kind].result);
   node.textContent = text;
-  node.classList.toggle("ok", tone === "ok");
-  node.classList.toggle("bad", tone === "bad");
+  node.title = detail || text;
+  node.dataset.tone = tone || "";
+  const detailNode = $(CFG_TESTS[kind].detail);
+  detailNode.textContent = detail;
+  detailNode.hidden = !(detail && tone === "bad");
 }
 
+// 字段改回到测过的那组值时，测试结果自动恢复，不用再点一次。
+function refreshTestResult(kind) {
+  const test = hunterState.tests[kind];
+  if (testPassed(kind)) setTestResult(kind, test.text, "ok");
+  else if (test?.ok) setTestResult(kind, "已修改，需重测", "");
+}
+
+function pendingTests() {
+  return Object.keys(CFG_TESTS).filter((kind) => !testPassed(kind));
+}
+
+// 保存按钮不再灰掉：没测通时它变成「测试并保存」，点一下先跑没过的测试再存。
 function updateSaveGate() {
-  const ready =
-    hunterState.tests.llm &&
-    hunterState.tests.tavily &&
-    hunterState.tests.llmSig === cfgSigLlm() &&
-    hunterState.tests.tavilySig === cfgSigTavily();
-  $("cfg-save").disabled = !ready && !hunterState.busy;
-  if (!ready && !hunterState.busy) {
-    const missing = [];
-    if (!hunterState.tests.llm || hunterState.tests.llmSig !== cfgSigLlm())
-      missing.push("模型连接");
-    if (!hunterState.tests.tavily || hunterState.tests.tavilySig !== cfgSigTavily())
-      missing.push("Tavily");
-    $("cfg-status").textContent = `先测通「${missing.join("」和「")}」再保存`;
-  }
+  const save = $("cfg-save");
+  const pending = pendingTests();
+  save.disabled = hunterState.busy;
+  if (hunterState.busy) return;
+  save.textContent = pending.length ? "测试并保存" : "保存并重启";
+  save.title = pending.length
+    ? `先测试「${pending.map((kind) => CFG_TESTS[kind].label).join("」「")}」，通过后保存并重启`
+    : "";
 }
 
 function probePayload() {
@@ -1340,37 +1373,32 @@ function probePayload() {
 }
 
 async function testConnection(kind) {
-  const button = kind === "llm" ? $("cfg-test-llm") : $("cfg-test-tavily");
-  const sig = kind === "llm" ? cfgSigLlm() : cfgSigTavily();
+  const button = $(CFG_TESTS[kind].button);
+  const sig = cfgSig(kind);
   button.disabled = true;
-  button.textContent = "测试中…";
-  setTestResult(kind, "正在打一次最小请求…", "");
+  setTestResult(kind, "测试中…", "busy");
+  let ok = false;
   try {
-    const result = await api(`/api/v1/hunter/test-${kind === "llm" ? "llm" : "tavily"}`, {
+    const result = await api(`/api/v1/hunter/test-${kind}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(probePayload()),
     });
-    if (result.ok) {
-      hunterState.tests[kind] = true;
-      hunterState.tests[kind + "Sig"] = sig;
-      setTestResult(
-        kind,
-        `通过 · ${result.latency_ms}ms · ${result.detail || result.endpoint}`,
-        "ok",
-      );
-    } else {
-      hunterState.tests[kind] = false;
-      setTestResult(kind, `失败 · ${result.error || "未知错误"}`, "bad");
-    }
+    ok = Boolean(result.ok);
+    const text = ok ? `通过 · ${result.latency_ms}ms` : "失败";
+    const detail = ok ? result.detail || result.endpoint || "" : result.error || "未知错误";
+    hunterState.tests[kind] = { ok, sig, text };
+    setTestResult(kind, text, ok ? "ok" : "bad", detail);
   } catch (error) {
-    hunterState.tests[kind] = false;
-    setTestResult(kind, `失败 · ${error.message}`, "bad");
+    hunterState.tests[kind] = { ok: false, sig, text: "" };
+    setTestResult(kind, "失败", "bad", error.message);
   } finally {
     button.disabled = false;
-    button.textContent = kind === "llm" ? "测试模型连接" : "测试 Tavily";
+    // 测试期间字段又被改了：结果作废，提示重测。
+    refreshTestResult(kind);
     updateSaveGate();
   }
+  return ok && sig === cfgSig(kind);
 }
 
 async function openHunterSettings() {
@@ -1380,17 +1408,31 @@ async function openHunterSettings() {
     // 状态接口里的 public() 不含这些。
     fillHunterSettings(await api("/api/v1/hunter/settings"));
   } catch (error) {
-    $("cfg-status").textContent = error.message;
+    setCfgStatus(error.message, "bad");
+    updateSaveGate();
   }
+  for (const button of document.querySelectorAll(".cfg-reveal")) setReveal(button, false);
   $("hunter-settings-dialog").showModal();
 }
 
 async function saveHunterSettings() {
   if (hunterState.busy) return;
   hunterState.busy = true;
-  $("cfg-save").disabled = true;
-  $("cfg-status").textContent = "正在保存并重启服务…";
+  const save = $("cfg-save");
+  save.disabled = true;
   try {
+    const pending = pendingTests();
+    if (pending.length) {
+      save.textContent = "测试中…";
+      setCfgStatus("");
+      const results = await Promise.all(pending.map((kind) => testConnection(kind)));
+      if (results.includes(false)) {
+        setCfgStatus("测试没通过，未保存", "bad");
+        return;
+      }
+    }
+    save.textContent = "重启中…";
+    setCfgStatus("正在保存并重启服务…");
     // 账单行名 / 目标模板 / 自动挑选个数搬到「账户与周期」那一步（属于每次生成的选择），
     // 这里只留模型接入。
     const payload = {
@@ -1405,21 +1447,32 @@ async function saveHunterSettings() {
     if (tavily) payload.tavily_api_key = tavily;
     const result = await api("/api/v1/hunter/settings", {
       method: "PUT",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
     fillHunterSettings(result);
     applyHunterStatus(result.status);
     hunterState.loaded = false;
-    $("cfg-status").textContent = result.status?.ready
-      ? "已保存，服务已重启"
-      : "已保存，服务正在启动";
+    setCfgStatus(result.status?.ready ? "已保存，服务已重启" : "已保存，服务正在启动", "ok");
     if (hunterState.view === "hunter") openHunter();
   } catch (error) {
-    $("cfg-status").textContent = error.message;
+    setCfgStatus(error.message, "bad");
   } finally {
     hunterState.busy = false;
     updateSaveGate();
   }
+}
+
+function setCfgStatus(text, tone) {
+  const node = $("cfg-status");
+  node.textContent = text;
+  node.dataset.tone = tone || "";
+}
+
+function setReveal(button, shown) {
+  $(button.dataset.target).type = shown ? "text" : "password";
+  button.textContent = shown ? "隐藏" : "显示";
+  button.setAttribute("aria-pressed", String(shown));
 }
 
 async function restartHunter() {
@@ -1452,22 +1505,32 @@ $("cfg-cancel").addEventListener("click", () =>
 $("cfg-save").addEventListener("click", saveHunterSettings);
 $("cfg-test-llm").addEventListener("click", () => testConnection("llm"));
 $("cfg-test-tavily").addEventListener("click", () => testConnection("tavily"));
-for (const id of ["cfg-base-url", "cfg-api-key", "cfg-model", "cfg-structured"]) {
+const CFG_FIELDS = {
+  "cfg-base-url": "llm",
+  "cfg-api-key": "llm",
+  "cfg-model": "llm",
+  "cfg-structured": "llm",
+  "cfg-tavily": "tavily",
+};
+for (const [id, kind] of Object.entries(CFG_FIELDS)) {
   $(id).addEventListener("input", () => {
-    setTestResult("llm", "字段有改动，需要重测", "");
-    updateSaveGate();
-  });
-  $(id).addEventListener("change", () => {
-    setTestResult("llm", "字段有改动，需要重测", "");
+    setCfgStatus("");
+    refreshTestResult(kind);
     updateSaveGate();
   });
 }
-for (const id of ["cfg-tavily"]) {
-  $(id).addEventListener("input", () => {
-    setTestResult("tavily", "字段有改动，需要重测", "");
-    updateSaveGate();
-  });
+for (const button of document.querySelectorAll(".cfg-reveal")) {
+  button.addEventListener("click", () =>
+    setReveal(button, button.getAttribute("aria-pressed") !== "true"),
+  );
 }
+// 在任一输入框里按回车 = 点主按钮（测试并保存 / 保存并重启）。
+$("hunter-settings-dialog").addEventListener("keydown", (event) => {
+  if (event.key !== "Enter" || event.isComposing) return;
+  if (!(event.target instanceof HTMLInputElement) || event.target.type === "checkbox") return;
+  event.preventDefault();
+  saveHunterSettings();
+});
 $("hunter-restart").addEventListener("click", restartHunter);
 
 async function boot() {

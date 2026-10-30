@@ -1563,67 +1563,255 @@ kbd {
 }
 
 /* ---- 模型配置对话框 --------------------------------------------------- */
+#hunter-settings-dialog {
+  width: min(560px, calc(100vw - 32px));
+  max-width: none;
+  padding: 22px 24px 0;
+}
+#hunter-settings-dialog .dialog-heading {
+  margin-bottom: 6px;
+}
+.cfg-title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.cfg-title h2 {
+  margin: 0;
+}
+.cfg-mode {
+  font-size: 11px;
+  line-height: 18px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: #f6efe1;
+  color: #8a6420;
+}
+.cfg-mode.live {
+  background: var(--accent-light);
+  color: var(--accent);
+}
+#hunter-settings-dialog .cfg-intro {
+  margin: 0 0 16px;
+  font-size: 12px;
+  line-height: 1.7;
+  color: #7b827c;
+}
+.cfg-section {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px 14px 14px;
+  margin-bottom: 12px;
+}
+.cfg-section-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.cfg-section-head h3 {
+  margin: 0 auto 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+}
 .settings-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px 16px;
-  margin: 12px 0 4px;
+  gap: 10px 12px;
 }
 .settings-grid label {
   display: flex;
   flex-direction: column;
   gap: 5px;
+  min-width: 0;
   font-size: 12px;
   color: #4b5852;
 }
 .settings-grid .settings-span {
   grid-column: 1 / -1;
 }
-.settings-grid .settings-wide {
-  grid-column: 1 / -1;
-  flex-direction: row;
-  align-items: center;
-  gap: 8px;
-}
 .settings-grid input[type="text"],
+.settings-grid input[type="url"],
 .settings-grid input[type="password"],
-.settings-grid input[type="number"],
 .settings-grid select {
-  padding: 8px 10px;
+  width: 100%;
+  min-width: 0;
+  height: 34px;
+  padding: 0 10px;
   border: 1px solid #d5d9d0;
-  border-radius: 9px;
+  border-radius: 8px;
   background: #fff;
   font: inherit;
   font-size: 13px;
   color: #17231b;
 }
-.cfg-status {
-  min-height: 18px;
-  margin: 10px 0 0;
-  font-size: 12px;
-  color: #6a756d;
+.settings-grid input:focus-visible,
+.settings-grid select:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  outline-offset: 0;
+  border-color: var(--accent);
 }
-
-/* 模型配置对话框：连通性测试行 + 配置落盘位置提示 */
-.cfg-test-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 10px;
-  padding-top: 4px;
+.settings-grid input::placeholder {
+  color: #a3aaa3;
 }
+.cfg-secret {
+  position: relative;
+  display: block;
+}
+.cfg-secret input {
+  padding-right: 52px !important;
+}
+.cfg-reveal {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  height: 26px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  font: inherit;
+  font-size: 11px;
+  color: #7f877b;
+  cursor: pointer;
+}
+.cfg-reveal:hover {
+  background: #f0f2ec;
+  color: var(--ink);
+}
+.cfg-hint {
+  font-size: 11px;
+  color: #969d95;
+}
+/* 测试结果：一个圆点 + 一行文字，长错误截断，悬停看全文 */
 .cfg-result {
-  font-size: 12px;
-  color: #6a756d;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
   max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+  color: #8b968e;
 }
-.cfg-result.ok {
+.cfg-result::before {
+  content: "";
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #c9cec6;
+}
+.cfg-result[data-tone="ok"] {
   color: #1f7a4d;
 }
-.cfg-result.bad {
+.cfg-result[data-tone="ok"]::before {
+  background: #2f9e64;
+}
+.cfg-result[data-tone="bad"] {
   color: #b3261e;
 }
-.cfg-status.muted {
-  color: #8b968e;
+.cfg-result[data-tone="bad"]::before {
+  background: #d0453b;
+}
+.cfg-result[data-tone="busy"]::before {
+  background: var(--accent);
+  animation: cfg-pulse 0.9s ease-in-out infinite alternate;
+}
+@keyframes cfg-pulse {
+  from {
+    opacity: 0.25;
+  }
+}
+.cfg-detail {
+  margin: 10px 0 0;
+  padding: 7px 10px;
+  border-radius: 7px;
+  background: #fbefed;
+  color: #9c2a20;
+  font-family: var(--mono, ui-monospace, monospace);
   font-size: 11px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+.cfg-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 4px 2px;
+  cursor: pointer;
+}
+.cfg-toggle input {
+  margin: 2px 0 0;
+  width: 15px;
+  height: 15px;
+  accent-color: var(--accent);
+}
+.cfg-toggle span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.cfg-toggle b {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.cfg-toggle small {
+  font-size: 11px;
+  color: #969d95;
+}
+/* 窗口矮时内容滚动，底栏（保存按钮）始终贴在对话框底部 */
+.cfg-footer {
+  position: sticky;
+  bottom: 0;
+  margin-top: 14px;
+  padding: 12px 0 18px;
+  border-top: 1px solid var(--line);
+  background: var(--paper);
+}
+#hunter-settings-dialog .cfg-storage {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: #a0a79f;
+  overflow-wrap: anywhere;
+}
+#hunter-settings-dialog .cfg-storage.bad {
+  color: var(--danger);
+}
+#hunter-settings-dialog .dialog-actions {
+  align-items: center;
+  margin-top: 10px;
+}
+.cfg-status {
+  margin-right: auto;
+  font-size: 12px;
+  color: #6a756d;
+}
+.cfg-status[data-tone="ok"] {
+  color: #1f7a4d;
+}
+.cfg-status[data-tone="bad"] {
+  color: #b3261e;
+}
+#cfg-save {
+  min-width: 96px;
+}
+#cfg-save:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+@media (max-width: 620px) {
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+  .cfg-result {
+    max-width: 140px;
+  }
 }
