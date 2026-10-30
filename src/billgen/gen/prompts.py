@@ -560,6 +560,7 @@ Income policy (hard):
 
 Recurring bills:
 - id, label, kind (rent | utility | subscription | insurance | loan | tax_estimated | payroll | vendor | other), dayRule, amount, account, priority 1-5, factId, txnType (ACH | POS | CHECK | ZELLE).
+- Exactly ONE bill per family per month: one rent (or mortgage), one electricity, one gas, one water, one internet, one phone. Never emit two electricity bills, two rents, or a "rent" plus a "housing" entry — a real statement only shows each of these once.
 - dayRule is one of: dayOfMonth (day 1-28), taxDates, biweekly (weekday 0-6, anchor YYYY-MM-DD).
 - amount is fixed (cents) or seasonal (minCents, maxCents, peakMonths 1-12).
 - priority bands: rent / loan / tax_estimated / insurance 1-2; utilities and phone 2-3; subscriptions 3-4.

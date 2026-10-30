@@ -1087,6 +1087,88 @@ _PLACEHOLDER_WORDS = (
 )
 
 
+#: 同月只该出现一次的账单族：房租、电、气、水、网、手机、保险、车贷、税。
+#: 键是「在 kind 或 label 里出现就算命中」的词，值是族名。
+_BILL_FAMILY_WORDS = (
+    # 先认具体的，再退到 kind="utility" 这种笼统分类：
+    # 「Austin Water」和「So Cal Gas」都是 utility，但它们是两张不同的账单。
+    ("rent", "rent"),
+    ("mortgage", "rent"),
+    ("housing", "rent"),
+    ("landlord", "rent"),
+    ("water", "water"),
+    ("sewer", "water"),
+    ("electric", "electric"),
+    ("power", "electric"),
+    ("gas", "gas"),
+    ("internet", "internet"),
+    ("broadband", "internet"),
+    ("phone", "phone"),
+    ("wireless", "phone"),
+    ("insurance", "insurance"),
+    ("auto loan", "loan"),
+    ("car loan", "loan"),
+    ("student loan", "loan"),
+    ("tax", "tax"),
+    ("utilit", "utility"),
+)
+
+
+def _bill_family(item: Mapping[str, Any]) -> str:
+    """判断这笔固定账单属于哪个「族」；无法归类就返回唯一键（不参与去重）。
+
+    真账单里一个月只有一笔电费、一笔房租；模型经常一口气给出两笔电费
+    （Con Edison + PG&E）或「rent + housing」两条，交付前必须在调度层挡掉。
+    """
+    text = f"{item.get('kind') or ''} {item.get('label') or ''}".lower()
+    for word, family in _BILL_FAMILY_WORDS:
+        if word in text:
+            return family
+    return f"unique:{item.get('id') or id(item)}"
+
+
+def _bill_weight(item: Mapping[str, Any]) -> tuple[int, int, int]:
+    """同一族里保留哪一笔：先看有没有调研事实，再看金额大不大。"""
+    amount = item.get("amount") or {}
+    if str(amount.get("kind") or "fixed") == "seasonal":
+        cents = int((int(amount.get("minCents") or 0) + int(amount.get("maxCents") or 0)) / 2)
+    else:
+        cents = int(amount.get("cents") or 0)
+    return (1 if item.get("factId") else 0, cents, -int((item.get("dayRule") or {}).get("day") or 0))
+
+
+def duplicate_bills(items: Sequence[Mapping[str, Any]]) -> list[tuple[str, list[str]]]:
+    """返回 ``[(族名, [账单 id…]), …]``，每项都是同月出现了不止一次的账单族。"""
+    seen: dict[str, list[str]] = {}
+    for item in items:
+        family = _bill_family(item)
+        if family.startswith("unique:"):
+            continue
+        seen.setdefault(family, []).append(str(item.get("id") or item.get("label") or "?"))
+    return [(family, ids) for family, ids in seen.items() if len(ids) > 1]
+
+
+def _collapse_bills(items: Sequence[Mapping[str, Any]]) -> tuple[list[dict], list[str]]:
+    """同族只留一笔（有事实优先、金额大的优先），返回 ``(保留, 被删的 id)``。"""
+    best: dict[str, Mapping[str, Any]] = {}
+    order: list[str] = []
+    dropped: list[str] = []
+    for item in items:
+        family = _bill_family(item)
+        current = best.get(family)
+        if current is None:
+            best[family] = item
+            order.append(family)
+            continue
+        if _bill_weight(item) > _bill_weight(current):
+            dropped.append(str(current.get("id") or current.get("label") or "?"))
+            best[family] = item
+        else:
+            dropped.append(str(item.get("id") or item.get("label") or "?"))
+    kept = [dict(best[family]) for family in order]
+    return kept, dropped
+
+
 def _model_issues(
     model: Mapping[str, Any],
     facts: Sequence[Mapping[str, Any]],
@@ -1099,6 +1181,10 @@ def _model_issues(
         issues.append("openingBalanceCents 必须是正整数")
     if not model.get("incomeStreams"):
         issues.append("incomeStreams 不能为空")
+    for family, ids in duplicate_bills(model.get("recurring") or []):
+        issues.append(
+            f"recurring 里 {family} 这类账单出现了 {len(ids)} 笔（{', '.join(ids)}），同月同类只能一笔"
+        )
     fact_ids = {str(fact.get("id")) for fact in facts}
     used: set[str] = set()
     for item in model.get("recurring") or []:
@@ -1273,6 +1359,9 @@ def node_schedule(
     loc = norm.get("location") or {}
     rate = float(loc.get("combined_sales_tax_rate") or 0.0)
     rows: list[dict] = []
+    _collapsed_recurring, _dropped_bills = _collapse_bills(model.get("recurring") or [])
+    if _dropped_bills:
+        _log(log, f"schedule：合并同类账单，丢弃 {len(_dropped_bills)} 笔（{', '.join(_dropped_bills[:3])}）", 58)
 
     for month in norm.get("months") or []:
         year, mon = _parse_month(month)
@@ -1306,7 +1395,7 @@ def node_schedule(
                     )
                 )
 
-        for item in model.get("recurring") or []:
+        for item in _collapsed_recurring:
             fact = fact_by_id.get(str(item.get("factId") or ""))
             key = str(item.get("id") or "bill")
             category = str(item.get("kind") or "other")

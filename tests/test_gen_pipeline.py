@@ -691,3 +691,48 @@ def test_pos_rows_never_use_the_research_title_as_merchant():
         assert row["base_description"] in pool, row["base_description"]
         assert "GRAPHIC" not in row["base_description"]
         assert "DESIGN" not in row["base_description"]
+
+
+def test_two_electricity_bills_are_flagged_by_the_self_check():
+    """同一个月的两笔电费要被自检抓出来，模型才有机会改。"""
+    norm = node_normalize(PROFILE, template="chase-personal", months=["2026-09"], seed="dup-1")
+    model = deepcopy(_model())
+    model["recurring"] = list(model["recurring"]) + [
+        {
+            "id": "rec-util-2",
+            "label": "Pacific Gas and Electric",
+            "kind": "utility",
+            "dayRule": {"kind": "dayOfMonth", "day": 18},
+            "amount": {"kind": "fixed", "cents": 9400},
+            "account": "checking",
+            "priority": 2,
+            "factId": "",
+            "txnType": "ACH",
+        }
+    ]
+    issues = pipeline._model_issues(model, [], norm)
+    assert any("同月同类只能一笔" in issue for issue in issues), issues
+
+
+def test_schedule_keeps_only_one_bill_per_family():
+    """就算模型坚持给两笔电费，调度层也只落一笔。"""
+    norm = node_normalize(PROFILE, template="chase-personal", months=["2026-09"], seed="dup-2")
+    model = deepcopy(_model())
+    model["recurring"] = list(model["recurring"]) + [
+        {
+            "id": "rec-util-2",
+            "label": "Pacific Gas and Electric",
+            "kind": "utility",
+            "dayRule": {"kind": "dayOfMonth", "day": 18},
+            "amount": {"kind": "fixed", "cents": 9400},
+            "account": "checking",
+            "priority": 2,
+            "factId": "",
+            "txnType": "ACH",
+        }
+    ]
+    rows = node_schedule(norm, model, [], seed="dup-2")
+    utilities = [row for row in rows if "ELECTRIC" in row["base_description"].upper()]
+    assert len(utilities) == 1, [row["base_description"] for row in utilities]
+    rents = [row for row in rows if int(row["amount_cents"]) == 158000]
+    assert len(rents) == 1, [row["base_description"] for row in rents]
