@@ -53,9 +53,18 @@ save("letter.pdf", {"date": "2026-11-05"})
 
 不想手写 JSON 就用这个：起一个本地小服务，左边填字段、右边实时看 PDF。
 
+两个入口，页面是同一份（`src/billgen/themes/mercury/letter_web.py`）：
+
 ```bash
-.venv/bin/python tools/letter_studio.py --open      # 自动开浏览器，默认 http://127.0.0.1:8770
+# A) 挂在本机 billgen 服务上（推荐：一次起服务，账单编辑器和信件编辑器都在）
+.venv/bin/python -m billgen serve --port 8800
+open http://127.0.0.1:8800/letters/mercury/          # 首页左侧「信件」也有入口
+
+# B) 只想开信件编辑器，不启动整个服务
+.venv/bin/python tools/letter_studio.py --open       # 默认 http://127.0.0.1:8770
 ```
+
+Docker 部署时同样可用：`http://<host>:8800/letters/mercury/`。
 
 页面能做什么：
 
@@ -67,8 +76,8 @@ save("letter.pdf", {"date": "2026-11-05"})
 - 行数或长度超限时，红条里直接说人话，例如
   `公司地址给了 3 行，版式只放得下 2 行（超了会压到分隔线）`。
 
-接口就四个，想接自己的前端也行：`GET /`（编辑器页面）、`GET /api/defaults`（默认数据）、
-`POST /api/render`（JSON → `application/pdf`）、`POST /api/png`（JSON → `image/png`）。
+接口就四个（挂在主服务时前缀是 `/letters/mercury/`），想接自己的前端也行：
+页面、`defaults`（默认数据）、`render`（JSON → `application/pdf`）、`png`（JSON → `image/png`）。
 
 ## 为什么是「空白信纸 + 重绘文字」
 

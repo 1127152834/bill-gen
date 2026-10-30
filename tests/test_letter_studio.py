@@ -55,7 +55,7 @@ def test_index_page_serves_the_editor(base_url: str) -> None:
         body = resp.read().decode()
     assert resp.status == 200
     assert "Mercury 验证信" in body
-    assert "/api/render" in body and "/api/png" in body
+    assert "BASE + 'api/render'" in body and "BASE + 'api/png'" in body
 
 
 def test_defaults_endpoint_returns_letter_fields(base_url: str) -> None:

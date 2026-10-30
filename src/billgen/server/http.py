@@ -13,6 +13,7 @@ from urllib.parse import urlsplit
 
 from ..hunter import HunterProcess, SettingsError, SettingsStore
 from ..hunter.proxy import forward
+from ..themes.mercury import letter_web
 from .application import ApplicationError, ApplicationService
 from .legacy import LegacyMounts
 
@@ -35,6 +36,7 @@ EDITOR_LINKS = (
     ("/merc/", "Mercury / Capital One / SoFi"),
     ("/alliant/", "Alliant"),
     ("/ally/", "Ally"),
+    ("/letters/mercury/", "Mercury 验证信（信件编辑器）"),
 )
 
 
@@ -167,6 +169,57 @@ class Handler(BaseHTTPRequestHandler):
         }
         return job
 
+    # ---- Mercury 验证信编辑器 -------------------------------------------------
+    _LETTER_BASE = "/letters/mercury"
+
+    def _letter(self, path: str):
+        base = self._LETTER_BASE
+        tail = path[len(base):].rstrip("/")
+        if tail == "" and self.command in ("GET", "HEAD"):
+            return self._send(letter_web.PAGE.encode(), "text/html; charset=utf-8")
+        if tail == "/defaults" and self.command == "GET":
+            return self._json(letter_web.defaults())
+        if tail in ("/render", "/png"):
+            if self.command != "POST":
+                return self._error("method_not_allowed", "Method not allowed", 405)
+            payload = self._raw_json()
+            try:
+                body = (
+                    letter_web.render_pdf(payload)
+                    if tail == "/render"
+                    else letter_web.render_png(payload)
+                )
+            except ValueError as err:      # 行数/长度超限：把话说清楚
+                return self._json({"error": str(err)}, 400)
+            if tail == "/render":
+                return self._send(
+                    body,
+                    "application/pdf",
+                    headers={"Content-Disposition": 'inline; filename="mercury-letter.pdf"'},
+                )
+            return self._send(body, "image/png")
+        return self._error("not_found", "Letter endpoint not found", 404)
+
+    def _raw_json(self) -> dict:
+        """信件字段是自由对象的 JSON，不走 `_body()` 的白名单。"""
+        if len(self.headers.get_all("Content-Length", [])) != 1:
+            self.close_connection = True
+            raise ApplicationError("invalid_request", "Expected one Content-Length header", 400)
+        try:
+            length = int(self.headers.get("Content-Length", "0"))
+        except ValueError as exc:
+            raise ApplicationError("invalid_request", "Invalid Content-Length", 400) from exc
+        if length < 1 or length > MAX_BODY:
+            self.close_connection = True
+            raise ApplicationError("invalid_body_size", "JSON body must be 1 byte … 4 MiB", 413)
+        try:
+            value = json.loads(self.rfile.read(length))
+        except (ValueError, UnicodeError) as exc:
+            raise ApplicationError("invalid_json", "Malformed JSON body", 400) from exc
+        if not isinstance(value, dict):
+            raise ApplicationError("invalid_request", "Expected a JSON object", 400)
+        return value
+
     def _dispatch(self):
         self.request_id = uuid.uuid4().hex
         path = urlsplit(self.path).path
@@ -185,6 +238,8 @@ class Handler(BaseHTTPRequestHandler):
                     return self._error("not_found", "Asset not found", 404)
                 content_type = mimetypes.guess_type(name)[0] or "application/octet-stream"
                 return self._send(asset.read_bytes(), content_type + "; charset=utf-8")
+            if path.startswith("/letters/mercury"):
+                return self._letter(path)
             hunter = getattr(self.server, "hunter", None)
             if hunter is not None:
                 if path == "/api/v1/hunter/status" and self.command == "GET":
