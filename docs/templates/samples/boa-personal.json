@@ -1,0 +1,125 @@
+{
+  "template": "personal",
+  "auto": true,
+  "watermark": true,
+  "encrypt": false,
+  "bank": {
+    "name": "Bank of America",
+    "legal": "Bank of America, N.A.",
+    "domain": "bankofamerica.com"
+  },
+  "customer_lines": [
+    "Maya Okafor",
+    "2104 S 1st St",
+    "Austin TX 78704"
+  ],
+  "owner_names": [
+    "Maya Okafor"
+  ],
+  "owner_line": "Maya Okafor",
+  "strip_name": "Maya Okafor",
+  "account_number": "4107 3721 1347",
+  "product": "Advantage Plus Banking",
+  "period": {
+    "label": "January 1, 2027 to January 31, 2027",
+    "begin": "January 1, 2027",
+    "end": "January 31, 2027"
+  },
+  "begin_balance": "1284.73",
+  "deposits": [
+    {
+      "date": "01/04/27",
+      "desc": "KESTREL DESIGN CO PAYROLL PPD",
+      "amount": "1842.17"
+    },
+    {
+      "date": "01/18/27",
+      "desc": "KESTREL DESIGN CO PAYROLL PPD",
+      "amount": "1757.83"
+    }
+  ],
+  "withdrawals": [
+    {
+      "date": "01/03/27",
+      "desc": "CAMDEN PROPERTY MGMT RENT",
+      "amount": "-1650.00"
+    },
+    {
+      "date": "01/08/27",
+      "desc": "WHOLEFDS AUS 10462 AUSTIN TX",
+      "amount": "-92.41"
+    },
+    {
+      "date": "01/11/27",
+      "desc": "WALGREENS #7579 AUSTIN TX",
+      "amount": "-27.59"
+    },
+    {
+      "date": "01/15/27",
+      "desc": "AUSTIN ENERGY UTILITY ACH PMT",
+      "amount": "-228.95"
+    },
+    {
+      "date": "01/21/27",
+      "desc": "ONLINE PMT TO CARD ENDING 8410",
+      "amount": "-1123.44"
+    },
+    {
+      "date": "01/26/27",
+      "desc": "H-E-B #0611 AUSTIN TX",
+      "amount": "-91.85"
+    }
+  ],
+  "fees": [
+    {
+      "date": "01/31/27",
+      "desc": "MONTHLY SERVICE FEE",
+      "amount": "-12.00"
+    }
+  ],
+  "summary": {
+    "begin": "1284.73",
+    "deposits": "3600.00",
+    "withdrawals": "-3214.24",
+    "checks": "-0.00",
+    "fees": "-12.00",
+    "ending": "1658.49"
+  },
+  "totals": {
+    "deposits": "500.00",
+    "withdrawals": "-120.00",
+    "checks": "-0.00",
+    "fees": "0.00"
+  },
+  "daily": [
+    [
+      "01/04",
+      "1,500.00"
+    ],
+    [
+      "01/06",
+      "1,380.00"
+    ]
+  ],
+  "stats": {
+    "items_prev": "0",
+    "days": "31",
+    "avg_ledger": "$1,350.97"
+  },
+  "qualifications": [
+    {
+      "text": "Make at least one qualifying direct deposit of $250 or more each statement period",
+      "met": true
+    },
+    {
+      "text": "Keep a minimum daily balance of $1,500 in this account",
+      "met": true
+    },
+    {
+      "text": "Maintain a combined balance of $20,000 or more across eligible accounts",
+      "met": false
+    }
+  ],
+  "show_daily": true,
+  "min_pages": 4
+}

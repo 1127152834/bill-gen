@@ -1,14 +1,14 @@
 """OpenAI 兼容的 Chat Completions 客户端，带 JSON 修复重试与 token 记账。
 
-这是 ``flow/packages/core/src/llm.ts`` 的 Python 替代。Node 版走 LangChain 的
-``withStructuredOutput``，有 json_schema / function_calling / json_mode 三条路；这边只留一条：
+这是生成引擎自己的模型客户端（早期 Node 版走 LangChain 的 ``withStructuredOutput``，
+有 json_schema / function_calling / json_mode 三条路）；这边只留一条：
 
 1. 把 JSON Schema 以**文本**塞进 system 提示（端点未必支持 ``response_format``，
    也未必支持 ``strict`` 的 json_schema，见 :func:`json_chat` 的说明）；
 2. 模型输出交本地 ``json.loads`` 校验；
 3. 不合法就把「上一次原始输出 + 解析错误」回粘成一条 user 消息再要一次（最多 2 次）。
 
-HTTP 只用 ``urllib``（容器里没有 requests，见 ``hunter/probe.py`` 的同款选择）。
+HTTP 只用 ``urllib``（容器里没有 requests，标准库够用）。
 测试通过 ``http`` 注入假传输层，协议是一个方法：
 
     http.request(method: str, url: str, headers: dict[str, str],

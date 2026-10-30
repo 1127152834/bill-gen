@@ -208,6 +208,7 @@ def make_runner(*, profiles: Path | str | None = None):
 
         repaired: dict[str, dict[str, int]] = {}
         topped: dict[str, dict[str, int]] = {}
+        polished_counts: dict[str, dict[str, int]] = {}
         for outcome in result.months:
             data = getattr(outcome, "data", None)
             if isinstance(data, dict):
@@ -230,6 +231,15 @@ def make_runner(*, profiles: Path | str | None = None):
                 )
                 if any(counts.values()):
                     topped[outcome.month] = counts
+                # 补齐过程会把多笔同类消费抬到同一个数（$43.65 ×4），最后再打散一次
+                polished = {
+                    "decap": postpass.decap_amounts(data, seed=str(job.seed or "")),
+                    "varied": postpass.diversify_amounts(data, seed=f"{job.seed or ''}|{outcome.month}"),
+                    "types": postpass.normalize_types(data),
+                    "sorted": postpass.sort_rows(data),
+                }
+                if any(polished.values()):
+                    polished_counts[outcome.month] = polished
         if topped:
             ctx.log("收尾：低于预算信封的类目已补齐（加油、公用事业、医疗等）", percent=94)
         if any(sum(v.values()) for v in repaired.values()):
@@ -284,6 +294,7 @@ def make_runner(*, profiles: Path | str | None = None):
             "seasonal": seasonal_added,
             "envelope": envelope_problems,
             "topped_up": topped,
+            "polished": polished_counts,
         }
         _write(out_dir / "job-summary.json", summary)
 

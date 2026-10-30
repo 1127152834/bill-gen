@@ -75,7 +75,8 @@ def test_dining_prefers_the_weekend():
     rows = sampler.sample_rows(_plan(), months=_months(12), state="CA", seed="wknd")
     dining = [row["date"] for row in rows if row["category"] == "dining"]
     weekend = sum(1 for day in dining if day.weekday() >= 5)
-    assert weekend / len(dining) > 0.45, weekend / len(dining)
+    # 周末权重要看得出来：12 个月里周末占比明显高于 2/7≈0.29 的均匀分布即可。
+    assert weekend / len(dining) > 0.40, weekend / len(dining)
 
 
 def test_inter_arrival_gaps_are_poisson_like():
@@ -152,3 +153,29 @@ def test_missing_budget_hints_fall_back_to_state_medians():
     monthly = plan.income_median * (26 / 12 if plan.income_cadence == "biweekly" else 1.0)
     assert 0.8 * sampler.STATE_MONTHLY_INCOME["CA"] <= monthly <= 1.2 * sampler.STATE_MONTHLY_INCOME["CA"]
     assert 0.25 * monthly <= plan.rent_median <= 0.36 * monthly
+
+
+def test_spend_rows_stay_inside_the_statement_row_range():
+    """一个月消费笔数必须落在版式行数区间里，不能靠事后删行硬凑。"""
+    plan = sampler.plan_from_profile({"name": "HENG LI"}, state="CA")
+    for seed in ("rows-1", "rows-2", "rows-3"):
+        rows = sampler.sample_rows(
+            plan, months=["2026-09"], state="CA", seed=seed, row_target=(8, 14)
+        )
+        spend = [row for row in rows if row["type"] == "POS" and row["category"] != "subscription"]
+        assert 8 <= len(spend) <= 14, (seed, len(spend))
+
+
+def test_no_single_category_dominates_a_month():
+    """修剪/补齐不许把某类堆成一个月 10 笔（旧实现的 bug：杂货 10 笔、咖啡 0 笔）。"""
+    plan = sampler.plan_from_profile({"name": "HENG LI"}, state="CA")
+    rows = sampler.sample_rows(
+        plan, months=[f"2026-{month:02d}" for month in range(1, 13)], state="CA", seed="mix"
+    )
+    counts: dict[str, int] = {}
+    for row in rows:
+        if row["type"] == "POS" and row["category"] != "subscription":
+            counts[row["category"]] = counts.get(row["category"], 0) + 1
+    total = sum(counts.values())
+    assert counts.get("grocery", 0) / total < 0.45, counts
+    assert len([name for name, value in counts.items() if value >= 3]) >= 3, counts

@@ -1,0 +1,145 @@
+{
+  "_comment": "账户数据。生成: python3 generate.py data.json ../statement.pdf",
+  "bank": {
+    "name": "Wells Fargo",
+    "legal_na": "Wells Fargo Bank, N.A.",
+    "domain": "wellsfargo.com",
+    "phone_name": "1-800-TO-WELLS",
+    "phone_main": "(1-800-869-3557)",
+    "phone_es": "1-877-727-2932",
+    "po_box": "P.O. Box 6995",
+    "po_box2": "PO Box 50947",
+    "mac_code": "MAC F2304-019",
+    "zip_main": "97228-6995",
+    "des_moines": "Des Moines, IA 50340",
+    "copyright_year": 2026,
+    "office_code": "115",
+    "nmlsr_id": "399801"
+  },
+  "customer": {
+    "name": "Maya Okafor",
+    "address_lines": [
+      "2104 S 1st St",
+      "Austin TX 78704"
+    ]
+  },
+  "statement_date": "October 30, 2026",
+  "total_pages": 5,
+  "account": {
+    "product": "Everyday Checking",
+    "number": "410737211347",
+    "primary_label": "(primary account)",
+    "rtn": "121042882"
+  },
+  "summary": {
+    "period_start": "10/1",
+    "period_end": "10/30",
+    "begin_amount": "$2,460.00",
+    "deposits_amount": "1,850.53",
+    "withdrawals_amount": "-  640.35",
+    "ending_amount": "$3,670.18",
+    "auto": true
+  },
+  "transactions": [
+    {
+      "date": "10/05",
+      "desc": "PAYROLL DEPOSIT KESTREL DESIGN CO 261005 DIRECT P0001234",
+      "deposit": "1,850.00",
+      "withdrawal": "",
+      "balance": "4,310.00"
+    },
+    {
+      "date": "10/08",
+      "desc": "GROCERY MARKET AUSTIN 261008 DEBIT CARD PURCH",
+      "deposit": "",
+      "withdrawal": "86.23",
+      "balance": "4,223.77"
+    },
+    {
+      "date": "10/12",
+      "desc": "ELECTRIC UTILITY CO AUTOPAY 261012 ACH D0004567",
+      "deposit": "",
+      "withdrawal": "104.15",
+      "balance": "4,119.62"
+    },
+    {
+      "date": "10/15",
+      "desc": "COFFEE SHOP NO 7 261015 DEBIT CARD PURCHASE 5814",
+      "deposit": "",
+      "withdrawal": "12.50",
+      "balance": "4,107.12"
+    },
+    {
+      "date": "10/17",
+      "desc": "WALGREENS PHARMACY 261017 DEBIT CARD PURCHASE 5411",
+      "deposit": "",
+      "withdrawal": "28.64",
+      "balance": "4,078.48"
+    },
+    {
+      "date": "10/19",
+      "desc": "XFINITY INTERNET SERVICE 261019 AUTOPAY",
+      "deposit": "",
+      "withdrawal": "59.99",
+      "balance": "4,018.49"
+    },
+    {
+      "date": "10/22",
+      "desc": "ONLINE TRANSFER TO SAVINGS 261022 XFR S0007890",
+      "deposit": "",
+      "withdrawal": "93.45",
+      "balance": "3,925.04"
+    },
+    {
+      "date": "10/24",
+      "desc": "RESTAURANT LOCAL KITCHEN 261024 DEBIT CARD 5812",
+      "deposit": "",
+      "withdrawal": "47.80",
+      "balance": "3,877.24"
+    },
+    {
+      "date": "10/26",
+      "desc": "MOBILE PHONE PLAN 261026 AUTOPAY A0003210",
+      "deposit": "",
+      "withdrawal": "55.00",
+      "balance": "3,822.24"
+    },
+    {
+      "date": "10/27",
+      "desc": "BARNES NOBLE BOOKSTORE 261027 DEBIT CARD PURCHASE 5942",
+      "deposit": "",
+      "withdrawal": "23.17",
+      "balance": "3,799.07"
+    },
+    {
+      "date": "10/28",
+      "desc": "FUEL STATION 12 261028 DEBIT CARD PURCHASE 5541",
+      "deposit": "",
+      "withdrawal": "41.30",
+      "balance": "3,757.77"
+    },
+    {
+      "date": "10/29",
+      "desc": "WATER & SEWER DISTRICT 261029 AUTOPAY U0007777",
+      "deposit": "",
+      "withdrawal": "88.12",
+      "balance": "3,669.65"
+    },
+    {
+      "date": "10/30",
+      "desc": "INTEREST PAID 261030",
+      "deposit": "0.53",
+      "withdrawal": "",
+      "balance": "3,670.18"
+    }
+  ],
+  "totals": {
+    "deposits": "$1,850.53",
+    "withdrawals": "$640.35"
+  },
+  "fees": {
+    "period": "09/05/2026 - 09/30/2026",
+    "standard": "$15.00",
+    "paid": "$0.00"
+  }
+}

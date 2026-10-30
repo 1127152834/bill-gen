@@ -1,7 +1,0 @@
-packages:
-  - packages/*
-  - apps/*
-
-allowBuilds:
-  esbuild: true
-  better-sqlite3: true

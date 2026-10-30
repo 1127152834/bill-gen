@@ -1,0 +1,43 @@
+{
+  "period_label": "October 2026",
+  "period_start": "Oct 01, 2026",
+  "period_end": "Oct 31, 2026",
+  "period_days": "31",
+  "timezone": "All dates in UTC",
+  "company": "Okafor Design Studio LLC",
+  "address": [
+    "2104 S 1st St",
+    "Austin TX 78704"
+  ],
+  "ein": "EIN ••3170",
+  "account_type": "Checking",
+  "account_number": "410737211347",
+  "routing_number": "121140399",
+  "beginning_balance": 1000.0,
+  "footer_line1": "Banking services provided by Column N.A., Member FDIC",
+  "footer_line2": "Mercury | help@mercury.com | 2261 Market Street, Suite 86807, San Francisco, CA 94114",
+  "transactions": [
+    {
+      "date": "Oct 2",
+      "desc": "KESTREL DESIGN CO PAYROLL PPD ID:4289126633",
+      "amount": 250.0,
+      "id": "9401882733",
+      "txid": "9401882733",
+      "memo": "",
+      "type": "ACH In",
+      "dir": "in",
+      "icon": "achIn"
+    },
+    {
+      "date": "Oct 7",
+      "desc": "H-E-B #0611 AUSTIN TX",
+      "amount": -35.5,
+      "id": "9401882741",
+      "txid": "9401882741",
+      "memo": "",
+      "type": "Debit",
+      "dir": "out",
+      "icon": "achOut"
+    }
+  ]
+}

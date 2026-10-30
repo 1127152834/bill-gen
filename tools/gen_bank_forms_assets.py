@@ -1,9 +1,10 @@
-"""把每套模板的「可填空表单样例」导出到 `flow/skills/bank-forms/assets/`，字段字典导出到 `flow/skills/bank-forms/fields/`。
+"""把每套模板的「可填空表单样例」导出到 `docs/templates/samples/`，字段字典导出到 `docs/templates/`。
 
     python tools/gen_bank_forms_assets.py            # 覆盖写
     python tools/gen_bank_forms_assets.py --check    # 只比对，不写；有漂移退出码 1
 
-技能里的 assets 必须和引擎的默认数据同源，否则模型照着旧样例填，字段名早改了。
+样例必须和引擎的默认数据同源，否则照着旧样例填、字段名早就改了。
+生成器同时给每套版式一份字段字典（路径 / 类型 / 样例 / 说明），手改 JSON 时照着填。
 """
 from __future__ import annotations
 
@@ -18,8 +19,8 @@ sys.path.insert(0, str(ROOT / "src"))
 from billgen import registry  # noqa: E402
 from billgen.mcp import contract as contracts  # noqa: E402
 
-OUT = ROOT / "flow/skills/bank-forms/assets"
-FIELDS = ROOT / "flow/skills/bank-forms/fields"
+OUT = ROOT / "docs/templates/samples"
+FIELDS = ROOT / "docs/templates"
 SKIP = {"metadata"}  # 输出用，不是表单字段
 
 

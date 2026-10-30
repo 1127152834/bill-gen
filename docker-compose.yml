@@ -3,7 +3,7 @@ services:
     image: billgen:full
     build: .
     ports:
-      # 单一入口：工作台 + 猎手 + 渲染 API 都在 8800
+      # 单一入口：工作台 + 渲染 API 都在 8800
       - "127.0.0.1:${HUB_PORT:-8800}:8800"
     environment:
       BILL_GEN_DATA_DIR: /data/billgen
@@ -13,39 +13,19 @@ services:
       BILLGEN_JOBS_DIR: /data/jobs
       BILLGEN_JOB_WORKERS: ${BILLGEN_JOB_WORKERS:-2}
       BILLGEN_LLM_CONFIG: /data/billgen/llm.json
-      BILLGEN_MCP_CMD: /opt/billgen/bin/billgen
-      # auto = 由推荐器按账本形状挑模板（boa/chase/usbank/... 前 N 名）
-      BILLGEN_TEMPLATES: ${BILLGEN_TEMPLATES:-auto}
-      BILLGEN_AUTO_LIMIT: ${BILLGEN_AUTO_LIMIT:-2}
-      BILLGEN_AI_FILL: ${BILLGEN_AI_FILL:-1}
-      BILLGEN_FLOW_ROOT: /app/flow
-      BILLGEN_HUNTER_PORT: "8797"
-      DATABASE_PATH: /data/flow/app.db
-      WEB_DIST: apps/web/dist
-      HOST: 0.0.0.0
-      PORT: "8797"
-      BANK_DISPLAY_NAME: ${BANK_DISPLAY_NAME:-Harborline Bank}
-      API_KEY: ${API_KEY:-devlocal}
-      # 真实 LLM / 调研：不提供则自动走离线 fixture（LLM_FAKE）
-      LLM_FAKE: ${LLM_FAKE:-1}
-      LLM_BASE_URL: ${LLM_BASE_URL:-}
-      LLM_API_KEY: ${LLM_API_KEY:-}
-      LLM_MODEL: ${LLM_MODEL:-gpt-6.1-sol}
-      LLM_STRUCTURED_MODE: ${LLM_STRUCTURED_MODE:-json_schema}
+      # 真实模型 / 检索凭据（生成引擎直接读这四个）
+      BILLGEN_LLM_BASE_URL: ${BILLGEN_LLM_BASE_URL:-}
+      BILLGEN_LLM_API_KEY: ${BILLGEN_LLM_API_KEY:-}
+      BILLGEN_LLM_MODEL: ${BILLGEN_LLM_MODEL:-gpt-6.1-sol}
       TAVILY_API_KEY: ${TAVILY_API_KEY:-}
     init: true
     volumes:
-      # 绑定挂载而不是命名卷：配置就是仓库旁边的 ./.data/billgen/hunter/settings.json，
+      # 绑定挂载而不是命名卷：配置就是仓库旁边的 ./.data/billgen/，
       # 看得见、能备份、`docker compose down -v` 或清理未使用卷也带不走它。
       - ./.data:/data
     restart: unless-stopped
-    # 一个容器两个进程：任一挂掉容器即退出重启（entrypoint 里互相看护）
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "curl -fsS http://127.0.0.1:8800/healthz >/dev/null && curl -fsS http://127.0.0.1:8800/api/v1/hunter/status >/dev/null",
-        ]
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8800/healthz >/dev/null"]
       interval: 15s
       timeout: 6s
       start_period: 25s

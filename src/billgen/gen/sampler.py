@@ -56,9 +56,9 @@ class CategoryModel:
 
 
 CATEGORIES: dict[str, CategoryModel] = {
-    "grocery": CategoryModel(6.5, 8400, 0.45, weekend=1.8, clamp=(1800, 26000), taxable=False),
-    "dining": CategoryModel(6.0, 2600, 0.45, weekend=2.2, clamp=(900, 12000), taxable=True, tip=True),
-    "coffee": CategoryModel(5.0, 720, 0.30, weekend=1.4, clamp=(350, 1800), taxable=True),
+    "grocery": CategoryModel(6.4, 8600, 0.45, weekend=2.0, clamp=(1800, 26000), taxable=False),
+    "dining": CategoryModel(5.0, 2800, 0.45, weekend=2.6, clamp=(900, 12000), taxable=True, tip=True),
+    "coffee": CategoryModel(4.0, 760, 0.30, weekend=1.5, clamp=(350, 1800), taxable=True),
     "fuel": CategoryModel(3.5, 4200, 0.35, weekend=1.3, pricing="fuel", clamp=(1800, 9500)),
     "pharmacy": CategoryModel(1.2, 2400, 0.60, weekend=0.8, clamp=(500, 12000)),
     "shopping": CategoryModel(2.4, 5400, 0.70, weekend=1.6, clamp=(1200, 32000)),
@@ -300,11 +300,20 @@ def _sample_month(
 
     weights = dict(plan.category_weights or {})
     seasonal = 1.0 + 0.08 * math.sin((mon - 1) / 12 * 2 * math.pi)
+    # 品类占比要贴着模型，但一个月总笔数受版式行数区间约束：先按比例把 λ 缩放到
+    # 区间中点，再各自抽泊松，才不会「先抽 23 笔再砍到 14 笔」（砍完占比就变形）。
+    expected_total = sum(
+        model.per_month * float(weights.get(category, 0.0)) * seasonal
+        for category, model in CATEGORIES.items()
+        if category != "subscription" and float(weights.get(category, 0.0)) > 0
+    )
+    month_mid = max(1.0, (target[0] + target[1]) / 2.0)
+    scale = min(1.0, month_mid / expected_total) if expected_total > 0 else 1.0
     for category, weight in weights.items():
         model = CATEGORIES.get(category)
         if model is None or weight <= 0:
             continue
-        lam = model.per_month * weight * seasonal
+        lam = model.per_month * weight * seasonal * scale
         count = max(0, int(round(rng.gauss(lam, math.sqrt(max(lam, 0.2))))))
         for _ in range(count):
             when = _pick_day(year, mon, model, rng, income_days=[r["date"].day for r in rows if r["type"] == "DEPOSIT"])
@@ -500,30 +509,66 @@ def _balance_count(
 ) -> list[dict[str, Any]]:
     """把笔数收进 [target] 区间：多了删最不重要的消费，少了补日用品。"""
     low, high = target
-    spend = [row for row in rows if row["type"] == "POS" and row["category"] not in {"subscription"}]
-    fixed = [row for row in rows if row not in spend]
-    importance = {"grocery": 3, "fuel": 3, "dining": 2, "coffee": 1, "convenience": 1, "shopping": 1, "rideshare": 1, "pharmacy": 2, "fitness": 1}
-    while len(rows) > high and spend:
-        spend.sort(key=lambda row: importance.get(str(row["category"]), 1))
-        dropped = spend.pop(0)
-        rows.remove(dropped)
-    while len(rows) < low:
-        model = CATEGORIES["convenience"]
+    # 目标口径是「消费笔数」（POS），不是含工资/固定账单的总行数。
+    # 修剪/补齐都按「相对期望笔数的盈余/缺口」来挑类目，这样一份账单的品类占比
+    # 始终贴着模型走；随机挑会把咖啡/便利店系统性清零、杂货堆到 10 笔。
+    spend = [row for row in rows if row["type"] == "POS" and row["category"] != "subscription"]
+
+    def expected_count(category: str) -> float:
+        model = CATEGORIES.get(category)
+        if model is None:
+            return 0.0
+        weight = float((plan.category_weights or {}).get(category, 0.0))
+        return max(0.0, model.per_month * weight * (1.0 + 0.08 * math.sin((mon - 1) / 12 * 2 * math.pi)))
+
+    actual: dict[str, int] = {}
+    for row in spend:
+        actual[str(row["category"])] = actual.get(str(row["category"]), 0) + 1
+
+    def pick(by_deficit: bool) -> str:
+        pool = [name for name in actual] if by_deficit else [name for name in actual if actual[name] > 0]
+        if not pool:
+            pool = ["convenience"]
+        scored = []
+        for name in pool:
+            gap = expected_count(name) - actual.get(name, 0)
+            scored.append((gap if by_deficit else -gap, name))
+        scored.sort(key=lambda item: (-(item[0] + rng.random() * 0.9), item[1]))
+        return scored[0][1]
+
+    while len(spend) > high:
+        category = pick(by_deficit=False)
+        victim = next(row for row in spend if str(row["category"]) == category)
+        rows.remove(victim)
+        spend.remove(victim)
+        actual[category] = actual.get(category, 0) - 1
+
+    while len(spend) < low:
+        category = pick(by_deficit=True)
+        if expected_count(category) <= 0:
+            category = "convenience"
+        model = CATEGORIES[category]
         when = _pick_day(year, mon, model, rng)
-        rows.append(
-            _row(
-                when,
-                "POS",
-                "debit",
-                model.amount(rng),
-                _pick_brand(plan, "convenience", state, rng),
-                "convenience",
-                rng,
-                start,
-                end,
-                state=state,
-            )
+        amount = model.amount(rng)
+        if model.taxable:
+            amount = int(round(amount * (1 + tax_rate)))
+        if model.tip:
+            amount += int(round(amount * rng.uniform(0.15, 0.22)))
+        row = _row(
+            when,
+            "POS",
+            "debit",
+            amount,
+            _pick_brand(plan, category, state, rng),
+            category,
+            rng,
+            start,
+            end,
+            state=state,
         )
+        rows.append(row)
+        spend.append(row)
+        actual[category] = actual.get(category, 0) + 1
     return rows
 
 

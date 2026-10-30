@@ -119,7 +119,7 @@ def _cmd_render(args: argparse.Namespace) -> int:
 
 
 def _cmd_synth_render(args: argparse.Namespace) -> int:
-    """把 flow 的生成结果直接渲染成某个模板的 PDF。"""
+    """把生成结果 JSON 直接渲染成某个模板的 PDF。"""
     from dataclasses import replace
 
     from .synth import from_game_result, render
@@ -182,12 +182,7 @@ def _cmd_parity(args: argparse.Namespace) -> int:
 def _cmd_serve(args: argparse.Namespace) -> int:
     from .server.http import serve
 
-    return serve(
-        args.host,
-        args.port,
-        hunter=not args.no_hunter,
-        hunter_port=args.hunter_port,
-    )
+    return serve(args.host, args.port)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -213,12 +208,12 @@ def main(argv: list[str] | None = None) -> int:
     )
     render.set_defaults(func=_cmd_render)
 
-    synth = sub.add_parser("synth", help="由生成结果（flow）渲染账单 PDF")
+    synth = sub.add_parser("synth", help="由生成结果 JSON 渲染账单 PDF")
     synth_sub = synth.add_subparsers(dest="synth_cmd", required=True)
     synth_render = synth_sub.add_parser("render", help="账本 → 指定模板 PDF")
     synth_render.add_argument("template", help="模板 id，例如 boa-personal")
     synth_render.add_argument(
-        "--from", dest="from_file", required=True, help="flow 的 GenerationResult JSON 路径"
+        "--from", dest="from_file", required=True, help="GenerationResult JSON 路径"
     )
     synth_render.add_argument(
         "--account",
@@ -260,8 +255,6 @@ def main(argv: list[str] | None = None) -> int:
     serve = sub.add_parser("serve", help="启动单进程 Web 编辑器与统一 API")
     serve.add_argument("--host", default="127.0.0.1")
     serve.add_argument("--port", type=int, default=8800)
-    serve.add_argument("--no-hunter", action="store_true", help="不拉起账单猎手（只跑渲染工作台）")
-    serve.add_argument("--hunter-port", type=int, default=8797, help="猎手子进程监听的本机端口")
     serve.set_defaults(func=_cmd_serve)
 
     args = parser.parse_args(argv)

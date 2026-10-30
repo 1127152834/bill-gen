@@ -1,0 +1,51 @@
+{
+  "holder_name": "Maya Okafor",
+  "member_since": "Member since Mar 15, 2025",
+  "address_lines": [
+    "2104 S 1st St",
+    "Austin TX 78704",
+    "",
+    ""
+  ],
+  "account_number": "410737211347",
+  "statement_period": "10/01/2026 - 10/31/2026",
+  "account_type": "Checking",
+  "account_last4": "0001",
+  "current_balance": 1214.5,
+  "current_as_of": "10/31/2026",
+  "monthly_interest": 0.0,
+  "apy": "0.00%",
+  "beginning_balance": 1000.0,
+  "beginning_as_of": "10/01/2026",
+  "ytd_interest": 0.0,
+  "balance_note": "Current balances include the amount of interest paid.",
+  "transactions": [
+    {
+      "date": "10/07/2026",
+      "desc": "H-E-B #0611 AUSTIN TX",
+      "amount": -35.5,
+      "id": "9401882741",
+      "txid": "9401882741",
+      "memo": "",
+      "type": "Withdrawal"
+    },
+    {
+      "date": "10/02/2026",
+      "desc": "KESTREL DESIGN CO PAYROLL PPD ID:4289126633",
+      "amount": 250.0,
+      "id": "9401882733",
+      "txid": "9401882733",
+      "memo": "",
+      "type": "Deposit"
+    }
+  ],
+  "contact_website": "www.sofi.com",
+  "contact_address": [
+    "SoFi Bank, N.A.",
+    "2750 East Cottonwood Parkway #300",
+    "Cottonwood Heights, Utah 84121"
+  ],
+  "contact_phone": "(855) 456-SOFI (7634)",
+  "legal_footer": "SoFi Checking and Savings accounts are offered through SoFi Bank, N.A., Member FDIC",
+  "footnote1": "Interest accrues daily at the rates as described in the SoFi Bank Rate Sheet and is paid on the last day of the Statement Period. The Annual Percentage Yield Earned, as shown on your statement, may reflect account adjustments from previous statement periods."
+}

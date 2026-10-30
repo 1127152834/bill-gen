@@ -54,17 +54,13 @@
             <strong id="breadcrumb-name">文档编辑</strong>
           </div>
           <div class="topbar-actions">
-          <div class="view-switch" role="tablist" aria-label="切换工作区">
-            <button id="view-studio" class="view-tab is-active" role="tab"
-              aria-selected="true" type="button">工作台</button
-            ><button id="view-hunter" class="view-tab" role="tab"
-              aria-selected="false" type="button">账单猎手</button>
+          <div class="view-switch" aria-label="工作区">
+            <span id="view-studio" class="view-tab is-active" aria-current="page"
+              >工作台</span>
           </div>
             <button id="synth-open" class="button small" type="button">
               场景导入
             </button>
-            <button id="hunter-settings-button" class="button small quiet" type="button"
-              title="模型与生成配置">模型配置</button>
             <span class="keyboard-hint">⌘ / Ctrl S 生成预览</span
             ><button
               id="help-button"
@@ -77,25 +73,6 @@
           </div>
         </header>
         <main id="main" class="view-studio">
-        <section id="hunter-pane" class="hunter-pane" hidden>
-          <div class="hunter-head">
-            <div>
-              <div class="eyebrow">BILL HUNTER <span id="hunter-kind">流水生成</span></div>
-              <h1>人设进，账单出</h1>
-              <p>
-                填写人设后由模型生成流水，再经 MCP 调用渲染器出片。模型与渲染参数在「模型配置」里改。
-              </p>
-            </div>
-            <div class="hunter-actions">
-              <span id="hunter-status" class="status" role="status">检查中</span>
-              <button id="hunter-restart" class="button small quiet" type="button">重启服务</button>
-              <a id="hunter-open" class="button small" href="/new" target="_blank"
-                rel="noopener">新窗口 ↗</a>
-            </div>
-          </div>
-          <div id="hunter-message" class="message" role="alert" hidden></div>
-          <iframe id="hunter-frame" class="hunter-frame" title="账单猎手" src="about:blank"></iframe>
-        </section>
           <section class="document-header">
             <div>
               <div class="eyebrow">
@@ -356,67 +333,6 @@
         ><button id="synth-submit" class="button primary" type="button">
           渲染账单
         </button>
-      </div>
-    </dialog>
-    <dialog id="hunter-settings-dialog" aria-labelledby="cfg-title">
-      <div class="dialog-heading">
-        <div class="cfg-title">
-          <h2 id="cfg-title">模型与生成配置</h2>
-          <span id="cfg-mode" class="cfg-mode" hidden></span>
-        </div>
-        <button id="hunter-settings-close" class="icon-button" aria-label="关闭模型配置">×</button>
-      </div>
-      <p class="cfg-intro">
-        地址、模型 Key、Tavily Key 三项齐备走真实模型，缺任何一项自动用本地演示数据。保存后重启猎手服务生效。
-      </p>
-      <section class="cfg-section" aria-labelledby="cfg-llm-heading">
-        <header class="cfg-section-head">
-          <h3 id="cfg-llm-heading">模型接入</h3>
-          <span id="cfg-llm-result" class="cfg-result" role="status">未测试</span>
-          <button id="cfg-test-llm" class="button small" type="button">测试连接</button>
-        </header>
-        <div class="settings-grid">
-          <label class="settings-span">接口地址<input id="cfg-base-url" type="url"
-            placeholder="https://your-proxy/v1" autocomplete="off" spellcheck="false" /></label>
-          <label class="settings-span">API Key
-            <span class="cfg-secret"><input id="cfg-api-key" type="password"
-              autocomplete="new-password" spellcheck="false" placeholder="未配置" /><button
-              class="cfg-reveal" type="button" data-target="cfg-api-key" aria-label="显示 API Key">显示</button></span>
-            <small id="cfg-api-key-hint" class="cfg-hint">密钥只写不读；留空沿用已存的值</small></label>
-          <label>模型名称<input id="cfg-model" type="text" placeholder="gpt-6.1-sol"
-            autocomplete="off" spellcheck="false" /></label>
-          <label>结构化输出<select id="cfg-structured">
-            <option value="json_schema">json_schema</option>
-            <option value="function_calling">function_calling</option>
-            <option value="json_mode">json_mode</option>
-          </select></label>
-        </div>
-        <p id="cfg-llm-detail" class="cfg-detail" hidden></p>
-      </section>
-      <section class="cfg-section" aria-labelledby="cfg-tavily-heading">
-        <header class="cfg-section-head">
-          <h3 id="cfg-tavily-heading">Tavily 调研</h3>
-          <span id="cfg-tavily-result" class="cfg-result" role="status">未测试</span>
-          <button id="cfg-test-tavily" class="button small" type="button">测试连接</button>
-        </header>
-        <div class="settings-grid">
-          <label class="settings-span">Tavily Key
-            <span class="cfg-secret"><input id="cfg-tavily" type="password"
-              autocomplete="new-password" spellcheck="false" placeholder="未配置" /><button
-              class="cfg-reveal" type="button" data-target="cfg-tavily" aria-label="显示 Tavily Key">显示</button></span>
-            <small id="cfg-tavily-hint" class="cfg-hint">真实模式下用于本地化调研；留空沿用已存的值</small></label>
-        </div>
-        <p id="cfg-tavily-detail" class="cfg-detail" hidden></p>
-      </section>
-      <label class="cfg-toggle"><input id="cfg-ai-fill" type="checkbox" />
-        <span><b>让模型自己填模板字段</b><small>关闭则用确定性草稿</small></span></label>
-      <div class="cfg-footer">
-        <p id="cfg-storage" class="cfg-storage" role="note"></p>
-        <div class="dialog-actions">
-          <span id="cfg-status" class="cfg-status" role="status"></span>
-          <button id="cfg-cancel" class="button quiet" type="button">取消</button
-          ><button id="cfg-save" class="button primary" type="button">保存并重启</button>
-        </div>
       </div>
     </dialog>
     <dialog id="help-dialog">

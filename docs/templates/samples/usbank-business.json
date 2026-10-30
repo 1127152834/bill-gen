@@ -1,0 +1,55 @@
+{
+  "template": "usbiz",
+  "auto": true,
+  "encrypt": false,
+  "watermark": true,
+  "begin_balance": "1000.00",
+  "customer_lines": [
+    "Maya Okafor",
+    "2104 S 1st St",
+    "Austin TX 78704"
+  ],
+  "account_display": "000000000001",
+  "period": {
+    "label": "January 01, 2027 through January 31, 2027",
+    "start": "Jan 1, 2027",
+    "end": "Jan 31, 2027"
+  },
+  "imb_serial": "000000000",
+  "deposits": [
+    {
+      "date": "Jan 4",
+      "type": "Deposit",
+      "detail": "KESTREL DESIGN CO PAYROLL PPD",
+      "extra": [],
+      "amount": "500.00"
+    }
+  ],
+  "withdrawals": [
+    {
+      "date": "Jan 6",
+      "type": "Payment",
+      "detail": "CAMDEN PROPERTY MGMT RENT",
+      "extra": [],
+      "amount": "120.00"
+    }
+  ],
+  "summary": {
+    "begin": "1,000.00",
+    "deposits": "500.00",
+    "withdrawals": "-120.00",
+    "ending": "1,380.00"
+  },
+  "daily": [
+    [
+      "Jan 4",
+      "1,500.00"
+    ],
+    [
+      "Jan 6",
+      "1,380.00"
+    ]
+  ],
+  "days": "31",
+  "owner_line": "Maya Okafor"
+}

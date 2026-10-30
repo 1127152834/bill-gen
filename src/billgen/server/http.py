@@ -10,15 +10,11 @@ import os
 import re
 import uuid
 import zipfile
-from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
 from .. import delivery, synth
-from ..hunter import HunterProcess, SettingsError, SettingsStore
-from ..hunter.probe import ProbeError, probe_llm, probe_tavily
-from ..hunter.proxy import forward
 from ..jobs import Job, JobNotFound, JobQueue
 from ..profiles import (
     Profile,
@@ -37,13 +33,8 @@ from .legacy import LegacyMounts
 
 LOG = logging.getLogger(__name__)
 MAX_BODY = 4 * 1024 * 1024
-# 出片目录与猎手共用一个（compose 里 BILLGEN_OUT=/data/renders），出片的 PDF 就在这里面。
+# 出片目录（compose 里 BILLGEN_OUT=/data/renders），出片的 PDF 就在这里面。
 RENDERS_ENV = "BILLGEN_OUT"
-
-# 猎手的 React 产物与页面路由（相对站点根，而不是 /hunter/ 前缀）
-HUNTER_ASSETS = ("/assets/", "/favicon.svg", "/vite.svg")
-HUNTER_PAGES = ("/new", "/history")
-_HUNTER_DETAIL = re.compile(r"/g/[A-Za-z0-9-]+")
 
 EDITOR_LINKS = (
     ("/boa/", "BOA"),
@@ -76,16 +67,6 @@ def _home() -> bytes:
         + "</ul><p>模板注册表：<a href='/api/v1/templates'>/api/v1/templates</a>"
         " · <a href='/healthz'>运行状态</a></p></html>"
     ).encode()
-
-
-def _mask_secret(value: str) -> str:
-    """密钥只回显「前 3 后 4」，够证明存过，不够被拿去用。"""
-    text = (value or "").strip()
-    if not text:
-        return ""
-    if len(text) <= 8:
-        return "•" * len(text)
-    return f"{text[:3]}…{text[-4:]}"
 
 
 # ---- 异步任务队列的进程级单例 ------------------------------------------------
@@ -143,9 +124,6 @@ class BillGenHTTPServer(ThreadingHTTPServer):
     def server_close(self):
         super().server_close()
         self.application.close()
-        hunter = getattr(self, "hunter", None)
-        if hunter is not None:
-            hunter.close()
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -169,7 +147,7 @@ class Handler(BaseHTTPRequestHandler):
             self.wfile.write(body)
 
     def _renders_dir(self) -> Path:
-        """出片目录：和猎手写盘的地方同一个（compose 里 BILLGEN_OUT=/data/renders）。"""
+        """出片目录：compose 里 BILLGEN_OUT=/data/renders，任务产物也落在这下面。"""
         return Path(os.environ.get(RENDERS_ENV) or "renders").expanduser().resolve()
 
     def _render_file(self, raw_name: str):
@@ -239,67 +217,6 @@ class Handler(BaseHTTPRequestHandler):
                 "invalid_request", "Expected object with " + "/".join(allowed) + " fields", 400
             )
         return value
-
-    def _hunter_settings(self, hunter):
-        payload = hunter.store.load().public()
-        payload["status"] = hunter.status()
-        payload["storage"] = self._settings_storage(hunter)
-        return payload
-
-    def _settings_storage(self, hunter):
-        """配置到底存在哪个文件、能不能写、最后改于何时 —— 让人一眼看出「没丢」。"""
-        settings = hunter.store.load()
-        path = Path(hunter.store.path)
-        try:
-            stat = path.stat()
-            saved_at = datetime.fromtimestamp(stat.st_mtime, timezone.utc).isoformat()
-            size = stat.st_size
-        except OSError:
-            saved_at, size = "", 0
-        return {
-            "path": str(path),
-            "saved_at": saved_at,
-            "bytes": size,
-            "writable": os.access(path.parent if path.parent.exists() else path.parent.parent, os.W_OK),
-            "secrets_stored": settings.has_api_key,
-            # 只给「前 3 后 4」的掩码：证明存过，又不把 Key 回显到浏览器。
-            "key_hint": _mask_secret(settings.api_key),
-            "tavily_hint": _mask_secret(settings.tavily_api_key),
-        }
-
-    def _hunter_probe(self, hunter, kind: str):
-        allowed = ("base_url", "api_key", "model", "structured_mode", "tavily_api_key")
-        patch = self._body(allowed, required=False)
-        current = hunter.store.load()
-        try:
-            result = probe_llm(current, patch) if kind == "test-llm" else probe_tavily(current, patch)
-        except ProbeError as exc:
-            # 「没填地址」也算一次测试结果，用 200 + ok:false 回，前端一条路径处理。
-            return self._json({"ok": False, "error": str(exc)})
-        return self._json(result)
-
-    def _hunter_patch(self, hunter):
-        patch = self._body(
-            (
-                "llm_fake",
-                "base_url",
-                "api_key",
-                "model",
-                "structured_mode",
-                "tavily_api_key",
-                "bank_name",
-                "templates",
-                "auto_limit",
-                "ai_fill",
-                "service_key",
-            )
-        )
-        try:
-            hunter.store.patch(patch)
-        except SettingsError as exc:
-            raise ApplicationError("invalid_settings", str(exc), 400) from exc
-        status = hunter.restart() if patch.get("restart", True) is not False else hunter.status()
-        return self._json({**self._hunter_settings(hunter), "status": status})
 
     def _job_links(self, job):
         job = dict(job)
@@ -577,42 +494,6 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(generate_page.page_bytes(), "text/html; charset=utf-8")
             if path.startswith("/api/v1/renders/") and self.command in ("GET", "HEAD"):
                 return self._render_file(path.removeprefix("/api/v1/renders/"))
-            hunter = getattr(self.server, "hunter", None)
-            if hunter is not None:
-                if path == "/api/v1/hunter/status" and self.command == "GET":
-                    return self._json(hunter.status())
-                if path == "/api/v1/hunter/settings":
-                    if self.command == "GET":
-                        return self._json(self._hunter_settings(hunter))
-                    if self.command in ("PUT", "POST"):
-                        return self._hunter_patch(hunter)
-                    return self._error("method_not_allowed", "Method not allowed", 405)
-                if path in ("/api/v1/hunter/test-llm", "/api/v1/hunter/test-tavily") and self.command == "POST":
-                    return self._hunter_probe(hunter, path.rsplit("/", 1)[-1])
-                if path == "/api/v1/hunter/restart" and self.command in ("POST", "PUT"):
-                    self._body((), required=False)
-                    return self._json(hunter.restart())
-                if path == "/hunter" or path.startswith("/hunter/"):
-                    return forward(
-                        self,
-                        hunter.target,
-                        strip_prefix="/hunter",
-                        api_key=hunter.store.load().service_key,
-                    )
-                if path == "/api/generations" or path.startswith("/api/generations/"):
-                    return forward(self, hunter.target, api_key=hunter.store.load().service_key)
-                if path == "/api/health":
-                    return forward(self, hunter.target)
-                # 猎手自己的 API 全在 /api/* 下（/api/personas/random、/api/settings、…），
-                # 只有 /api/v1/* 是 billgen 自己的。不整段放行的话，前端每加一个接口就要在
-                # 这里补一条 —— 漏一条就是「随机生成失败」这种哑巴错误。
-                if path.startswith("/api/") and not path.startswith("/api/v1/"):
-                    return forward(self, hunter.target, api_key=hunter.store.load().service_key)
-                # 猎手前端用的是绝对路径（/assets、/new、/g/:id），同源直通
-                if path in HUNTER_PAGES or path.startswith(HUNTER_ASSETS):
-                    return forward(self, hunter.target)
-                if _HUNTER_DETAIL.fullmatch(path):
-                    return forward(self, hunter.target)
             if path.startswith("/api/v1/"):
                 # 异步任务队列：/api/v1/gen/jobs 系列，未初始化走 503。
                 if path == self._GEN_JOBS or path.startswith(self._GEN_JOBS + "/"):
@@ -716,15 +597,14 @@ class Handler(BaseHTTPRequestHandler):
         LOG.info("%s %s", self.address_string(), fmt % args)
 
 
-def make_server(host="127.0.0.1", port=8800, *, application=None, legacy=None, hunter=None):
+def make_server(host="127.0.0.1", port=8800, *, application=None, legacy=None):
     server = BillGenHTTPServer((host, port), Handler)
     server.application = application or ApplicationService()
     server.legacy = legacy or LegacyMounts()
-    server.hunter = hunter
     return server
 
 
-def serve(host="127.0.0.1", port=8800, *, hunter: bool = False, hunter_port: int = 8797):
+def serve(host="127.0.0.1", port=8800):
     from .bootstrap import prepare_workspace
 
     prepare_workspace()
@@ -740,11 +620,7 @@ def serve(host="127.0.0.1", port=8800, *, hunter: bool = False, hunter_port: int
         make_runner(),
         max_workers=int(os.environ.get("BILLGEN_JOB_WORKERS") or 2),
     )
-    instance = None
-    if hunter:
-        instance = HunterProcess(SettingsStore(), port=hunter_port)
-        instance.start()
-    with make_server(host, port, hunter=instance) as server:
+    with make_server(host, port) as server:
         print(f"BillGen: http://{host}:{server.server_port}", flush=True)
         try:
             server.serve_forever()

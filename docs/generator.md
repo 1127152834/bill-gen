@@ -8,15 +8,66 @@
 ## 一条任务跑过什么
 
 ```
-normalize → planResearch → research(Tavily) → lifeModel → schedule
+normalize → [planResearch → research(Tavily)] → lifeModel → schedule
         → descriptors → validate → audit(↺ lifeModel) → finalize
         → month_artifacts → check_delivered → merge_entry → postpass
 ```
+
+方括号那段只在 `BILLGEN_SCHEDULER=model`（旧链路）里跑。默认的 `sampler` 路径**不查 Tavily**：
+品牌、门店号、价格档位都来自 `src/billgen/gen/sampler.py` 的内置分布表，检索只会多花时间与配额。
 
 - **AI 只负责语义**：这个人做什么工作、住哪、去哪买菜、账单叫什么名字。
 - **钱一分不交给 AI 算**：期初、逐行余额、期末、合计、跨月衔接全部由 `monthpack` 与 `build_ledger()` 重算，
   `期初 + Σ金额 = 期末` 与「上期末 = 下期初」是硬卡，不平就报 `validation-report.json`。
 - **audit 只写 warnings**：模型自审发现的疑点不会拦截交付，只会写进 `warnings` 让你自己看。
+
+## 流水怎么来：模型定形态，代码抽分布
+
+逼真度是**分布**问题，不是文案问题：品类占比、两次消费的间隔、金额分布、星期偏好、
+月度周期（房租 1 号、工资每两周一次、订阅固定日扣）。模型对分布没有稳定记忆，
+所以默认链路里模型只回答「这个人怎么生活」，具体每一笔由 `sampler.py` 从分布里抽：
+
+| 决定项 | 谁定 | 依据 |
+| --- | --- | --- |
+| 笔数 | 采样器 | 泊松式抽样（`CategoryModel.per_month` 为 λ），再按版式行数区间等比缩放 |
+| 金额 | 采样器 | 对数正态（杂货中位 $86、餐饮 $28、咖啡 $7.6、加油 $42），带上下限 |
+| 日期 | 采样器 | 星期偏好 × 周末系数 × 发薪日邻近 1.6 倍加权 |
+| 月度周期 | 采样器 | 房租 1 号、电 14、气 16、水 9、网 7、话费 12、保险 5 |
+| 同族账单每月一笔 | 采样器（构造保证） | 不靠事后去重 |
+| 期初余额 | 采样器 | 按期初往下走，任何时点不透支，且不低于 $250 |
+
+`BILLGEN_SCHEDULER=model` 可切回「模型逐行编 + postpass 事后修」的老链路，仅用于对比与回归。
+
+### 分布验收口径
+
+`tools/distribution_report.py` 把两份月账单 JSON 的分布并排列出来（不是看文案，是看形状）：
+
+```bash
+.venv/bin/python tools/distribution_report.py     .data/jobs/<旧模型单>/mercury-2026-09.json     .data/jobs/<采样单>/mercury-2026-09.json --labels model,sampler
+```
+
+同一份档案（HENG LI，Temple City CA，月入 9000–14000）的两份 2026-09 交付件对比：
+
+| 指标 | model（旧链路） | sampler（默认） |
+| --- | --- | --- |
+| 流水行数 | 24 | 31 |
+| 支出笔数 | 19 | 29 |
+| 支出合计 | 2,308.74 | 4,664.11 |
+| 收入合计 | 3,622.20 | 11,699.02（落进档案档位） |
+| 周末消费占比 | 64% | 50% |
+| 同店同额复读率 | 0% | 0% |
+| 占比 · grocery / dining / fuel | 42% / 32% / 11% | 21% / 28% / 14% |
+| 间隔 CV · grocery | 1.46 | 0.65 |
+| 每月固定账单 | 靠 postpass 去重 | 构造保证各一笔 |
+
+读法：
+
+- **同店同额复读率**：两份都是 0%；旧链路偶尔出现同店同额连刷（如两次 `$27.00` 星巴克）。
+- **间隔 CV**：旧链路杂货 1.46（忽疏忽密），采样单 0.4–0.9，接近泊松的 1.0 但不呆板。
+- **固定账单**：采样单每月每族各一笔；旧链路要靠 `postpass` 去重才不出两份电费。
+- **收入**：旧链路经常与档案档位脱节，采样单按 `monthly_income_hint` 反推单笔金额。
+
+跑这条对比要固定档案与月份，否则差异会混入「人不一样」的噪声。
 
 ## 三层校验
 

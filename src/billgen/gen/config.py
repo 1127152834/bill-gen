@@ -1,6 +1,5 @@
 """账单生成器的模型 / 检索凭据配置。
 
-与 :mod:`billgen.hunter.settings` 的分工：猎手的设置是「一个 JSON 装全部开关、供页面 PATCH」，
 这里的配置只装生成引擎真正要用的四样东西（模型端点、模型 Key、模型名、Tavily Key），
 字段固定、不做局部更新、没有默认的假数据（见 ``docs/DECISIONS.md`` 决策 9：只走真实模型）。
 
