@@ -354,3 +354,14 @@ def test_type_column_only_uses_card_and_ach_forms():
     changed = postpass.normalize_types(data)
     assert changed == 2
     assert [row["type"] for row in data["transactions"]] == ["ACH Out", "Card", "Card"]
+
+
+def test_merchant_purchases_never_stay_ach():
+    data = _mercury_like([
+        {"date": "Dec 16", "desc": "TARGET", "amount": -152.56, "type": "ACH Out"},
+        {"date": "Dec 18", "desc": "PANERA BREAD 8229 TEMPLE CITY CA", "amount": -43.2, "type": "ACH Out"},
+        {"date": "Dec 14", "desc": "SOUTHERN CALIFORNIA EDISON", "amount": -195.0, "type": "ACH Out"},
+    ])
+    assert postpass.normalize_types(data) == 2
+    types = [row["type"] for row in data["transactions"]]
+    assert types[0] == "Card" and types[1] == "Card" and types[2] == "ACH Out"

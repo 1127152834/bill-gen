@@ -487,14 +487,24 @@ _TYPE_ALIASES = {
 }
 
 
+_CARD_CATEGORIES = {"grocery", "groceries", "dining", "fuel", "shopping", "pharmacy", "health", "rideshare", "coffee"}
+
+
 def normalize_types(data: dict[str, Any]) -> int:
-    """Type 列只允许 Card / ACH Out / ACH In 三种写法（Mercury 真账单就这么印）。"""
+    """Type 列只允许 Card / ACH Out / ACH In，并且「刷卡类消费」必须是 Card。
+
+    商家消费被写成 ACH Out 是常见错（TARGET、CHIPOTLE 走的是卡，不是转账）。
+    """
     changed = 0
     for row in _iter_rows(data):
         current = row.get("type")
         if not isinstance(current, str) or not current.strip():
             continue
         fixed = _TYPE_ALIASES.get(current.strip(), current.strip())
+        desc = _row_desc(row)
+        category = _category_of(desc)
+        if category in _CARD_CATEGORIES and fixed != "Card" and not _is_recurring(desc):
+            fixed = "Card"
         if fixed != current:
             row["type"] = fixed
             changed += 1

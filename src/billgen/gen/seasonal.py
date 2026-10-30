@@ -76,7 +76,7 @@ def _easter(year: int) -> _dt.date:
 def us_holidays(year: int) -> list[Event]:
     """联邦假日 + 家家都过的节日（含购物相关的那几个）。"""
     events = [
-        Event("New Year's Day", _dt.date(year, 1, 1), ("dining",), ("CHAMPAGNE BAR",)),
+        Event("New Year's Day", _dt.date(year, 1, 1), ("dining", "groceries"), ("TOTAL WINE", "BEVMO")),
         Event("MLK Day", _nth_weekday(year, 1, 0, 3)),
         Event("Valentine's Day", _dt.date(year, 2, 14), ("dining", "shopping"), ("1-800-FLOWERS", "SEE'S CANDIES")),
         Event("Presidents' Day", _nth_weekday(year, 2, 0, 3), ("shopping",), ("HOME DEPOT",)),
@@ -92,7 +92,7 @@ def us_holidays(year: int) -> list[Event]:
         Event("Thanksgiving", _nth_weekday(year, 11, 3, 4), ("groceries", "dining"), ("KROGER", "TRADER JOE'S")),
         Event("Christmas Eve", _dt.date(year, 12, 24), ("groceries", "dining"), ("TRADER JOE'S",)),
         Event("Christmas", _dt.date(year, 12, 25), ("shopping", "dining"), ("TARGET", "BEST BUY")),
-        Event("New Year's Eve", _dt.date(year, 12, 31), ("dining",), ("CHAMPAGNE BAR",)),
+        Event("New Year's Eve", _dt.date(year, 12, 31), ("groceries", "dining"), ("TOTAL WINE", "BEVMO")),
     ]
     return events
 
