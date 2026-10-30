@@ -540,3 +540,21 @@ def test_settings_file_is_not_world_readable(tmp_path: Path):
     path = Path(store.path)
     store.patch({"api_key": "sk-secret"})
     assert path.stat().st_mode & 0o777 == 0o600
+
+
+def test_every_hunter_api_path_is_reachable_through_the_hub(web):
+    """猎手自己的 /api/* 必须整段转发：漏一条前端就只看到「随机生成失败」。"""
+    origin, _, _ = web
+    for path, method in (
+        ("/api/personas/random", "POST"),
+        ("/api/settings", "GET"),
+        ("/api/settings/test", "POST"),
+    ):
+        request = urllib.request.Request(
+            origin + path,
+            data=b"{}" if method == "POST" else None,
+            headers={"Content-Type": "application/json"} if method == "POST" else {},
+            method=method,
+        )
+        with urllib.request.urlopen(request, timeout=20) as response:
+            assert response.status == 200, path

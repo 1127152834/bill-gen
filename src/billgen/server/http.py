@@ -317,6 +317,11 @@ class Handler(BaseHTTPRequestHandler):
                     return forward(self, hunter.target, api_key=hunter.store.load().service_key)
                 if path == "/api/health":
                     return forward(self, hunter.target)
+                # 猎手自己的 API 全在 /api/* 下（/api/personas/random、/api/settings、…），
+                # 只有 /api/v1/* 是 billgen 自己的。不整段放行的话，前端每加一个接口就要在
+                # 这里补一条 —— 漏一条就是「随机生成失败」这种哑巴错误。
+                if path.startswith("/api/") and not path.startswith("/api/v1/"):
+                    return forward(self, hunter.target, api_key=hunter.store.load().service_key)
                 # 猎手前端用的是绝对路径（/assets、/new、/g/:id），同源直通
                 if path in HUNTER_PAGES or path.startswith(HUNTER_ASSETS):
                     return forward(self, hunter.target)

@@ -848,3 +848,28 @@ chase-business 差异 0 项、usbank-business 差异 0 项。
 
 回滚：`git revert <本轮提交>`；若要从绑定挂载退回命名卷，把 `volumes` 改回 `billgen-data:/data`
 并把 `.data/` 的内容拷回卷（`docker run --rm -v billgen-data:/to -v "$PWD/.data:/from" --entrypoint sh billgen:full -c 'cp -a /from/. /to/'`）。
+
+## 第二十九轮（2026-10-30）：猎手前端「随机生成失败」——主服务只转发了三个 /api 路径
+
+用户点人设表单里的 🎲（含「全部随机」）全部报「随机生成失败，请重试」。
+
+根因（`src/billgen/server/http.py` 的 `_dispatch`）：主服务转发给猎手的路径是**白名单**——
+`/hunter/*`、`/api/generations`、`/api/health`、`HUNTER_PAGES`、`/assets`，而猎手前端用的是
+绝对路径 `POST /api/personas/random`、`GET/PUT /api/settings`、`POST /api/settings/test`
+（`flow/apps/web/src/api.ts`），全都没进白名单 → 主服务回 404 `not_found` →
+`usePersonaRandomizer` 的 `failureMessage()` 把非 `INVALID_LOCATION` 的错误一律压成
+「随机生成失败，请重试」。模型其实好好的：同一时刻 `POST /api/settings/test` 直接打真模型
+回的是 `{"ok":true,"ms":3911,"model":"gpt-6.1-sol","tokens":55}`。
+
+修法：转发规则从「点名列路径」改成「`/api/*` 整段放行，只把 `/api/v1/*` 留给 billgen 自己」
+（`path.startswith("/api/") and not path.startswith("/api/v1/")`）。这样猎手以后再加接口不用
+回来补白名单，也不会再出现「页面不报错、按钮一直失败」这种哑巴故障。
+
+验证：`POST /api/personas/random`（personal → `Adrian Navarro`，business → `Marigold Draft
+Design LLC`）、`GET /api/settings`、`POST /api/settings/test`、`POST /api/batches`（400 校验错，
+说明真的到了上游）全部经主服务可达；`/api/v1/hunter/status`、`/api/v1/templates`、
+`/api/v1/hunter/settings` 仍由 billgen 自己处理。新增
+`tests/test_hunter.py::test_every_hunter_api_path_is_reachable_through_the_hub`（三条路径经主服务
+必须 200）。`pytest` 558 passed / 16 skipped。
+
+回滚：`git revert <本轮提交>`；白名单那段加起来即可（不影响已有 `/api/generations` 转发）。
