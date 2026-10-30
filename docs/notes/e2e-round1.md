@@ -532,3 +532,53 @@ data["bank"] = {"name": name, "legal": f"{name}, N.A.", "domain": "bankofamerica
 `pytest` 566 passed / 16 skipped / 33 subtests；`realism_rules.py` 11 套全绿；`e2e_compare --label personal` 7 套 0 差异。
 
 回滚：`git revert <本轮提交>`（只动 `contract.py::_scaffold`、`server.py::render`、新增一条测试）。
+
+## 第十九轮（Chase 磁码行按底稿重写：DRE 段回来了）
+
+底稿 `src/billgen/themes/chase/assets/chase_static_personal.pdf` 那一行（bl 130.3）是
+**四段 0.24pt 微缩字**，不是我们原来以为的「路由号 + 账号三段」：
+
+| 段 | x | 内容（个人） | 内容（企业） |
+| --- | --- | --- | --- |
+| 1 | 55.4 | `00462377`（账号前 8 位） | `30206041` |
+| 2 | 88.0 | `DRE 703 219 28826 NNNNNNNNNNN` | `DRE 802 219 05926 NNNNNNNNNNN` |
+| 3 | 210.0 | `  1 000000000 09`（期数 + 账号尾九位 + 期末月） | `  3 060411196 09` |
+| 4 | 265.6 | `0000      AT 00`（on-us） | `0000` |
+
+底稿整行**不含路由号**（`021000021` 在全文里根本不出现）。旧实现把第一段塞了 9 位路由、
+第二段塞了 `{前4} {中4} {后4}`，把 DRE 段整段顶掉。
+
+改法：`src/billgen/synth/adapters/chase.py` 加 `_DRE_PREFIX`，`_micr()` 返回
+`acct`/`dre`/`cycle`/`extra`；两个 generate 的发射逻辑取 `acct`。
+新增闸门 `micro_line_problems()`（缺 `DRE ` 或 on-us 就报），附反向单测。
+
+## 第二十轮（usbank-business 的 `Account Summary` 为什么一直印不出来）
+
+三步走才定位到根因，每一步都被前一步的「看起来正常」骗过一次：
+
+1. 在 `_emit_summary()` 里补发标题 —— 出片没有。新开内容段（`append_new_text`，
+   不吃旧段里可能没闭合的 `q … W n` 裁剪）也没有。
+2. 阈值探测：`SUMMARY_TITLE_BL = 441.2 / 445.0` 没有、`448.0 / 470.0` 有 →
+   不是画不出来，是**画完被擦掉**。
+3. monkeypatch `Page.delete_units` 抓栈：擦除来自 `_materialize()` 里续页那一轮
+   `delete_units(155, 712)`。`doc.fullcopy_page(0, -1)` 追加的续页**与主页共用同一条
+   内容流 xref**，对续页整区擦除会改到主页；`for pg in pages: pg.commit()` 又是后写的
+   覆盖前面的。
+
+修法三处：
+- `_detach_contents(doc, page)`：克隆后立刻把克隆页的内容流拆成独立对象，别再互相覆盖；
+- `_stamp_summary_title(pages)`：标题挪到 `_materialize()` 之后单独补（与个人版同一行 441.25）；
+- **真正的元凶**是 `src/billgen/branding.py` 里 `usbank-business` 的 `{legal}` 槽位：
+  底稿那一行在 bl **428.15**，槽位却按个人版写成 437.15、矩形 `(18, 430, 300, 440)`——
+  这个矩形压到了 `Account Summary`（bl 441.25）的包围盒，红章擦除连标题一起抹掉；
+  又因为矩形里找不到原文，`_same_text()` 认不出「已经印过」，于是多印一行
+  `U.S. Bank National Association`（这就是那行重复的来历）。按底稿实测改成
+  `(18, 421, 400, 433.5)` / origin `(20.15, 428.15)` 后，标题回来、重复行消失。
+
+基线重采：`tests/test_usbank_shared.py` 四条 `usbiz-*` GOLDENS；
+`tools/render_regression.py refresh` 8 例。验证：`pytest` 567 passed /
+16 skipped / 33 subtests；`realism_rules.py` 全绿（含 micro_line）；
+`e2e_compare --label business` → usbank-business 页面尺寸/字体/DPI/墨量/三个区块标题全 OK
+（页数 4 vs 2 属数据行数差异，INFO）。
+
+回滚：`git revert <本轮提交>`（磁码 + usbank-business 两处可分开回滚）。

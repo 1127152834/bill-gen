@@ -33,7 +33,8 @@ def _period(ledger: LedgerDocument) -> dict[str, str]:
     }
 
 
-def _base(ledger: LedgerDocument, defaults: dict[str, Any]) -> dict[str, Any]:
+def _base(ledger: LedgerDocument, defaults: dict[str, Any],
+          variant: str = "personal") -> dict[str, Any]:
     d = deep(defaults)
     d.update(
         {
@@ -52,7 +53,7 @@ def _base(ledger: LedgerDocument, defaults: dict[str, Any]) -> dict[str, Any]:
             "bank": bank_block(ledger),
             "period": _period(ledger),
             "metadata": metadata(ledger),
-            "micr": _micr(ledger),
+            "micr": _micr(ledger, variant),
             # 条码里应装「本账户自己的号」，不能留底稿原值（那是别人的账号）
             "barcode_num": barcode_number(ledger),
         }
@@ -60,21 +61,29 @@ def _base(ledger: LedgerDocument, defaults: dict[str, Any]) -> dict[str, Any]:
     return d
 
 
-def _micr(ledger: LedgerDocument) -> dict[str, str]:
-    """MICR 行四段：路由号 / 账号分段 / 周期段 / on-us 段。
+# 磁码行第二段的 `DRE`（Deposit Reference Encoding）是**印厂/处理中心**的号，不是账号：
+# 底稿个人版印 `DRE 703 219 28826 NNNNNNNNNNN`、企业版印 `DRE 802 219 05926 NNNNNNNNNNN`，
+# 同一家银行不同产品各一套。所以照产品抄常量，别自己编，也别把路由号塞进这一行 ——
+# 底稿整行里根本没有 021000021（真实 Chase 磁码行也不印路由号）。
+_DRE_PREFIX = {"personal": "703 219 28826", "business": "802 219 05926"}
 
-    底稿那行原来是 ``00462377``、``DRE 703 219 28826 NNNNNNNNNNN``、``  1 000000000 09``、
-    ``0000      AT 00`` 这种形态 —— 前两段是别人的号，必须逐段换成本账户的；
-    ``extra`` 留空表示沿用底稿的 on-us 段（``0000      AT 00`` 是补白，不含任何账号）。
-    以前这里缺省写死字符串 ``SAMPLE``，MICR 行的可见文本就印成了
-    ``021202337SAMPLE`` —— 真账单的磁码行只有数字。
+
+def _micr(ledger: LedgerDocument, variant: str = "personal") -> dict[str, str]:
+    """磁码行四段：账号前 8 位 / DRE 段 / 周期段 / on-us 段。
+
+    底稿那行是 ``00462377``、``DRE 703 219 28826 NNNNNNNNNNN``、``  1 000000000 09``、
+    ``0000      AT 00`` 四段（字号 0.24pt，纸上几乎看不见，但放大/抽字就能读）。
+    第一段换成**本账户**的号，第二段的 DRE 号按产品抄，第三段用账期与账号尾九位。
+    ``extra`` 留空表示沿用底稿的 on-us 段（``0000      AT 00`` 是补白，不含账号）。
+    以前这里缺省写死字符串 ``SAMPLE``，磁码行的可见文本就印成了 ``021202337SAMPLE``。
     """
     num = ledger.account.number
     cycle = int(ledger.extras.get("cycle_index", 0)) + 1
+    prefix = (num + "0" * 8)[:8]
     return {
-        "routing": ledger.account.routing,
-        "dre": f"{num[:4]} {num[4:8]} {num[8:]}",
-        "cycle": f"  {cycle} {num[:9]} {ledger.period.end.month:02d}",
+        "acct": prefix,
+        "dre": f"DRE {_DRE_PREFIX.get(variant, _DRE_PREFIX['personal'])} NNNNNNNNNNN",
+        "cycle": f"  {cycle} {num[-9:].rjust(9, '0')} {ledger.period.end.month:02d}",
         "extra": "",
     }
 
@@ -146,7 +155,7 @@ def digits_zelle(ledger: LedgerDocument, key: str) -> str:
 
 
 def build_personal(ledger: LedgerDocument, defaults: dict[str, Any]) -> dict[str, Any]:
-    d = _base(ledger, defaults)
+    d = _base(ledger, defaults, "personal")
     transactions = []
     for row in ledger.rows:
         kind = "deposit" if row.direction == "credit" else PERSONAL_TYPES.get(row.type, "electronic")
@@ -207,7 +216,7 @@ def _business_desc(ledger: LedgerDocument, row: LedgerRow, limit: int = DESC_LIM
 
 
 def build_business(ledger: LedgerDocument, defaults: dict[str, Any]) -> dict[str, Any]:
-    d = _base(ledger, defaults)
+    d = _base(ledger, defaults, "business")
     parts = split_rows(ledger)
 
     def row(item, limit: int = DESC_LIMIT) -> dict[str, str]:

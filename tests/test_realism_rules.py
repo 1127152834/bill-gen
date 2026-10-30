@@ -142,3 +142,32 @@ def test_font_parity_rule_catches_stray_base14():
 
     hits = font_parity_problems("capitalone", dirty)
     assert [h["hit"] for h in hits] == ["Helvetica"]
+
+
+def test_micro_line_rule_catches_routing_in_the_magnetic_line(tmp_path):
+    """磁码行第一段是账号前 8 位，不是路由号；DRE 段必须留着。
+
+    早先 `_micr()` 把 9 位路由号塞进第一段、把 DRE 段换成账号分段，整行跟底稿对不上
+    （0.24pt 的字，纸上几乎看不见，但放大或抽文字层一眼就露）。
+    """
+    import fitz
+
+    from tools.realism_rules import micro_line_problems
+
+    doc = fitz.open()
+    page = doc.new_page(width=612, height=792)
+    page.insert_text((55, 130), "021000021 2810 2158 1888", fontsize=0.24)
+    page.insert_text((210, 130), "  1 000000000 09", fontsize=0.24)
+    bad = doc.tobytes()
+
+    doc2 = fitz.open()
+    page2 = doc2.new_page(width=612, height=792)
+    page2.insert_text((55, 130), "28012158", fontsize=0.24)
+    page2.insert_text((88, 130), "DRE 703 219 28826 NNNNNNNNNNN", fontsize=0.24)
+    page2.insert_text((265, 130), "0000      AT 00", fontsize=0.24)
+    good = doc2.tobytes()
+
+    assert [p["rule"] for p in micro_line_problems("chase-personal", bad)] == ["micr-dre"]
+    assert micro_line_problems("chase-personal", good) == []
+    # 别家版式没有这条微缩行，不该被这条规则管
+    assert micro_line_problems("boa-personal", bad) == []

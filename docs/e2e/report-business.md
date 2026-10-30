@@ -21,7 +21,7 @@
 | 字体（共有） | F10, F11, F12, F14, F2, F3, F4, F5, F6, F8, F9, Helvetica, Helvetica-Bold, Symbo | 参考共 15 种 | OK |
 | 字体（仅出片） | 无 | — | INFO |
 | 最低图效 DPI | 600.0 | 600.0 | OK |
-| 第 1 页墨量 % | 11.5 | 12.4 | OK |
+| 第 1 页墨量 % | 11.6 | 12.4 | OK |
 | 区块标题 CHECKING SUMMARY | 有 | 有 | OK |
 | 区块标题 DEPOSITS AND ADDITIONS | 有 | 有 | OK |
 | 参考件身份/占位泄漏 | 无 | — | OK |
@@ -45,11 +45,11 @@
 | 第 1 页墨量 % | 16.1 | 18.3 | OK |
 | 区块标题 Business Statement | 有 | 有 | OK |
 | 区块标题 BUSINESS ESSENTIALS CHECKING | 有 | 有 | OK |
-| 区块标题 Account Summary | 缺 | 有 | DIFF |
+| 区块标题 Account Summary | 有 | 有 | OK |
 | 参考件身份/占位泄漏 | 无 | — | OK |
 | 日期格式 | Mon D, Mon DD, YYYY, Month D, YYYY | MM/DD, Mon D, Mon DD, YYYY, Month D, YYYY | OK |
 
-差异：1 项（区块标题 Account Summary）
+差异：0 项
 
 ![usbank-business](img/usbank-business-compare.png)
 

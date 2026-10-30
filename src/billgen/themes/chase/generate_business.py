@@ -1735,7 +1735,9 @@ def build_pdf(d, out_path, watermark=True):
     micr = d.get("micr")
     if micr:
         micr_spans = [s for s in L[0]["spans"] if s["font"] == "F9" and s["bl"] < 145]
-        parts = [micr.get("routing", ""), micr.get("dre", ""),
+        # 底稿这行是「账号前 8 位 / DRE 段 / 周期段 / on-us 段」，顺序照抄，
+        # 别把路由号塞进第一段（底稿整行没有路由号）。
+        parts = [micr.get("acct") or micr.get("routing", ""), micr.get("dre", ""),
                  micr.get("cycle", ""), micr.get("extra", "")]
         for s, val in zip(micr_spans, parts):
             if val:

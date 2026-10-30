@@ -231,6 +231,16 @@ class Page:
                 return
         self.segs.append(chstream.RawSeg(op))
 
+    def append_new_text(self, raw_units):
+        """新开一个内容段再发射，不并进已有段。
+
+        `append_text()` 会并进最后一个 raw 段，而那段内容可能还处在一个没闭合的
+        `q … W n` 裁剪里：并进去的文字会跟着被裁掉（页 1 的 `Account Summary`
+        小标题就是这么消失的——挪到 448 才出现，正是裁剪带的位置）。
+        """
+        self.dirty = True
+        self.segs.append(chstream.RawSeg(b"q\nBT\n" + raw_units + b"ET\nQ\n"))
+
     def delete_units(self, locs):
         self.dirty = True
         for si, ui in sorted(set(locs), key=lambda t: -t[1]):
@@ -733,9 +743,12 @@ def _plan_lines(plans, d, sum_lines):
 def _emit_summary(pages, d, sum_lines):
     """公户摘要：左栏（Beginning/Other Deposits/Other Withdrawals + #Items 计数列）
     + 右栏天数行 + Ending（缩进 45.7 粗体）。模板带已含天数/#Items 原行（先擦后发）。"""
-    pages[0].delete_units(_band_locs(pages[0], 449.0, 504.0))
-    pages[0].delete_res(449.0, 504.0)
+    pages[0].delete_units(_band_locs(pages[0], 441.0, 504.0))
+    pages[0].delete_res(441.0, 504.0)
     blob = b""
+    # 小标题 `Account Summary` 不在这里发 —— 续页克隆与主页共用内容流，
+    # 之后对续页的整区擦除会把它一起擦掉（实测擦的是 441.2/x20.1 那一条）。
+    # 见 `_stamp_summary_title()`，在 `_materialize` 之后单独补。
     # "# Items" 计数列表头（模板 451.9 实证）
     blob += make_units(0, BOLD_FONT, "# Items", ROW_SIZE, 148.6, SUM_HDR_ITEMS_BL)
     for y, lbl, val, dollar, x, cnt in sum_lines:
@@ -756,9 +769,39 @@ def _emit_summary(pages, d, sum_lines):
     blob += make_units(0, ROW_FONT, dv, ROW_SIZE,
                        SUM_DAYS_VAL_R - text_w(0, ROW_FONT, dv, ROW_SIZE), 461.0)
     if blob:
-        pages[0].append_text(blob)
+        pages[0].append_new_text(blob)
     # 线：类别区与 Ending 之间（模板 488.4 = ending-11.8 实证）
     pages[0].add_line(ending_of(sum_lines) - 11.8, 192.9, 100.8)
+
+
+def _detach_contents(doc, page):
+    """把克隆页的内容流拆成独立对象。
+
+    `doc.fullcopy_page(0, -1)` 追加的续页与主页**共用同一条内容流 xref**：
+    续页那一轮 `delete_units(140/155, 712/730)` 会把主页的内容一起改掉，而
+    `for pg in pages: pg.commit()` 里最后一次写同名 xref 又会覆盖前面的成果
+    （摘要小标题 `Account Summary` 就是这么丢的）。克隆后立刻换成自己的流对象。
+    """
+    xrefs = page.get_contents()
+    if not xrefs:
+        return
+    data = b"".join(doc.xref_stream(x) for x in xrefs)
+    x = doc.get_new_xref()
+    doc.update_object(x, "<< >>")
+    doc.update_stream(x, data)
+    doc.xref_set_key(page.xref, "Contents", f"{x} 0 R")
+
+
+def _stamp_summary_title(pages):
+    """补回摘要小标题 `Account Summary`。
+
+    底稿在 bl 441.25 / x 20.15、Arial-BoldMT 10pt。必须放在 `_materialize()` 之后：
+    续页克隆与主页共用内容流，续页那一轮 `delete_units(155, 712)` 会把主页刚画的
+    这一行一起擦掉（早先诊断结果就是「擦除的正是 441.2 / x 20.1 这条」）。
+    """
+    raw = make_units(0, BOLD_FONT, "Account Summary", 10.0, 20.1, SUMMARY_TITLE_BL)
+    if raw:
+        pages[0].append_new_text(raw)
 
 
 def _del_zebra(pg, lo=140.0, hi=730.0):
@@ -1180,6 +1223,8 @@ def build_pdf(d, out_path, watermark=True):
     extra = n_stmt - 1
     for i in range(extra):
         doc.fullcopy_page(0, -1)             # 追加克隆；位于披露页后索引 2..n_stmt
+    for p in list(doc)[2:]:
+        _detach_contents(doc, p)             # 克隆页脱离主页内容流，别互相覆盖
     n_phys = 2 + extra + (1 if n_stmt >= 2 else 0)
     pages = []
     for p in doc:
@@ -1225,6 +1270,7 @@ def build_pdf(d, out_path, watermark=True):
         blob += make_units(pg_i, BOLD_FONT, acc_ln, 9.0, 452.0, 156.4)
         pages[pg_i].append_text(blob)
     _materialize(doc, pages, plans, d, sum_lines)
+    _stamp_summary_title(pages)
     _replace_fields(pages, d, n_stmt)
     # 尾空白页（物理页数奇时补；个人版 This page intentionally left blank 同款）
     while doc.page_count < n_phys:

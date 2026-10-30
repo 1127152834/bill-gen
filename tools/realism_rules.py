@@ -570,6 +570,35 @@ CROSS_BANK_TOKENS = {
 }
 
 
+# 磁码行：0.24pt 的微缩行，纸上几乎看不见，放大或抽文字层就能读。
+# 底稿形态是「账号前 8 位 / DRE 段 / 周期段 / on-us 段」，其中 DRE 是印厂号、不是路由号 ——
+# 早先我们把 9 位路由号塞在第一段，把 DRE 段换成了账号分段，整行跟真件对不上。
+_MICRO_SIZE = 1.5  # pt；底稿那行是 0.24pt，留点余量
+
+
+def micro_line_problems(template: str, pdf: bytes) -> list[dict[str, str]]:
+    if not template.startswith("chase"):
+        return []
+    with fitz.open(stream=pdf, filetype="pdf") as doc:
+        spans = []
+        for page in doc[:1]:
+            for block in page.get_text("dict")["blocks"]:
+                for line in block.get("lines", []):
+                    for span in line["spans"]:
+                        if span["size"] <= _MICRO_SIZE and span["text"].strip():
+                            spans.append(span["text"])
+    micro = " ".join(spans)
+    problems: list[dict[str, str]] = []
+    if "DRE " not in micro:
+        problems.append({"template": template, "rule": "micr-dre",
+                         "label": "磁码行缺 DRE 段", "hit": micro[:40]})
+    # 个人版底稿最后一段是 `0000      AT 00`，企业版只有 `0000` —— 都算有 on-us 段
+    if not ("AT 00" in micro or "0000" in micro):
+        problems.append({"template": template, "rule": "micr-on-us",
+                         "label": "磁码行缺 on-us 段", "hit": micro[:40]})
+    return problems
+
+
 def cross_bank_problems(template: str) -> list[dict[str, str]]:
     """把这套版式换个行名印一遍，原行名残留 / 新行名没印出来都算问题。"""
     root = template.split("-")[0]
@@ -621,6 +650,7 @@ def check_template(template: str, ledger) -> list[dict[str, str]]:
     problems.extend(summary_arithmetic_problems(template, pdf))
     problems.extend(url_path_problems(template, text))
     problems.extend(font_parity_problems(template, pdf))
+    problems.extend(micro_line_problems(template, pdf))
     for key, label, pattern in COMMON_RULES:
         hit = pattern.search(text)
         if hit:

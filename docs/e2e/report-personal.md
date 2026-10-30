@@ -25,7 +25,7 @@
 | 字体（共有） | F10, F11, F12, F15, F2, F3, F4, F5, F6, F8, F9, Helvetica, Helvetica-Bold, Symbo | 参考共 15 种 | OK |
 | 字体（仅出片） | 无 | — | INFO |
 | 最低图效 DPI | 600.0 | 600.0 | OK |
-| 第 1 页墨量 % | 15.3 | 13.9 | OK |
+| 第 1 页墨量 % | 15.4 | 13.9 | OK |
 | 区块标题 CHECKING SUMMARY | 有 | 有 | OK |
 | 区块标题 CUSTOMER SERVICE INFORMATION | 有 | 有 | OK |
 | 区块标题 TRANSACTION DETAIL | 有 | 有 | OK |
