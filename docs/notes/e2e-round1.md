@@ -942,3 +942,66 @@ Design LLC`）、`GET /api/settings`、`POST /api/settings/test`、`POST /api/ba
 验证：`vitest apps/web` 86 passed（`lib.test.ts` 改成断言 `templates: ['boa-personal']`、
 `defaultRender` 两个主体、`renderError` 拒空与拒 `auto`）、`tsc -p apps/web` 干净、
 `pytest` 560 passed、bundle `index-CjlSexxo.js`。
+
+## 第三十三轮（2026-10-30）：一个月一份独立 PDF + U.S. Bank 续页表头压行
+
+用户给的真实样本目录 `/Users/tian/Downloads/30份个账单`（10 人 × 3 个月 = 30 个 PDF）证实：
+美国的银行**一个月寄一份对账单**，每个月是一个独立 PDF，不是把三个月排进同一个文件。
+用户同时指出两处观感问题：续页的段头/列头压在流水上；只选了一家银行却出了两份账单。
+
+### 1. 出片按月拆开（`flow/packages/core/src/graph/nodes/render.ts`）
+
+- `renderOne(...)` 增加 `cycle` 与 `period` 两个参数：`draft_from_ledger(cycle=i)` 只取第 i 期，
+  文件名 `${templateId}-${accountType}-${YYYY-MM}.pdf`。
+- 新增 `renderMonthly(...)`：一个模板 × 一个账户 → 按 `statement.months` 逐期出片；
+  某个月失败只记该月的 warning，不影响其它月份。
+- 主循环的 worker 从「每目标一份」改为「每目标一组」，`artifacts.push(...slot.artifacts)`。
+- `RenderArtifactSchema` 加 `period`（`YYYY-MM`），结果页 `RendersPanel` 在每行前面显示月份。
+- `templateLimit` 的语义变成「限几套版式」，份数 = 版式数 × 月数（`render.mcp.test.ts` 里那条
+  auto 用例按这个口径改成 `templates.size * months.size`）。
+
+### 2. U.S. Bank 续页段头压住第一行（`src/billgen/themes/usbank/generate_{us,biz}.py`）
+
+- 根因：`if cur_y is None:` 分支里 `row_y = CONT_FIRST if not first_frag else CONT_TITLE`
+  写反了 —— 换页后**首次**起段时行起点用了 `CONT_TITLE`（167.6），而段头与列头正占这 20.9pt，
+  于是「Other Withdrawals」压住第一行流水、`Date/Description…` 压住第二行（用户截图那两处叠字）。
+  改成 `row_y = CONT_FIRST`（188.5 = 167.6 + 10.6 + 10.3）。
+- 公户续页另有一处：客户三行用 `_emit(cust_snap, …, 61.5 - 144.5)` 发射，`dy` 方向写反（会推到
+  227pt），而原位置靠 `delete_units` 只删掉半行（留下一个 `t`）。改为：克隆页先
+  `add_redact_annot((16,138,340,170))` + `apply_redactions(text=REMOVE)` 抹掉第 1 页那份，
+  再在 61.5/70.8/80 直接 `make_units` 写客户三行。
+- 披露页那条 `…54903-3447. In order for us to assist you…` 也顺带修掉：`branding.replace_literals()`
+  现在若被替换文字**同一 span 后面还接着正文**，就把替换串压回原字面量宽度（`_room` 之外再取
+  `min(room, 原字面量宽度)`），并把这条规则的替换名从法务全名改回底稿写的短名（`{name}`），
+  双保险。
+
+### 3. 只选一家银行却出两份账单
+
+不是引擎的问题：那一次是**旧 bundle**（去掉「自动挑」之前）发出的 `templates: ["auto"]` + `autoLimit: 2`，
+推荐器按账户类型挑了两套。新版前端恒定发 `templates: [选中的那一个]`，线上 bundle 已确认搜不到
+「自动挑」。用户需要硬刷新（⌘⇧R）让新 bundle 生效。
+
+### 4. 同批落地「无网关收入 + 一人公司」
+
+- `flow/packages/core/src/prompts/persona.ts`：职业表删掉 Rideshare / Delivery courier / Etsy /
+  Short-term rental / Content creator（都靠平台结算），企业行业删 `E-commerce store`；
+  `PERSONAL_RULES` 写明「self-employed：1099 sole proprietor 或单人 LLC、无雇主无工资、客户只能用
+  ACH / 电汇 / 支票 / Zelle / 现金付款」，`BUSINESS_RULES` 写明「1–2 人、没有网店/结账页/平台结算」。
+- `flow/packages/core/src/prompts/lifeModel.ts`：新增 `INCOME POLICY (hard, non-negotiable)` 一段。
+- `flow/packages/core/src/graph/nodes/lifeModelChecks.ts`：导出 `GATEWAY_FREE_CHANNELS`
+  （`ach_client` / `zelle` / `mobile_deposit` / `card_sales`）与 `ONLINE_PAY_MARKERS`，
+  `checkModel` 拒收越界渠道、个人用 `card_sales`、payerName/label 命中平台名。
+- `flow/packages/core/src/validate.ts`：新增第 15 条 `R15_no_gateway_income`（只看 credit 方向；
+  正则里不含 `card settlement`，门店 POS 批量入账不算违规）。
+- 夹具：`rideshare.json` 进账改 `ach_client` + `Kestrel Property Co`，`cafe-business.json` 改
+  `card_sales` + `Main Street POS`，对应的描述模板同步去品牌化；`persona-business.json` 雇员数 3 → 2。
+
+验证：`pytest` 560 passed / 16 skipped / 33 subtests；`vitest packages/core` 413 passed（含新增
+「3 个月 → 3 个文件、period 分别为 2026-07/08/09」）、`vitest apps/web` 86 passed；两包 `tsc` 干净；
+`render_regression.py refresh` 2 例、`tests/test_usbank_shared.py` 的 `usbiz-multipage` 基线重采。
+
+回滚：
+```bash
+git revert 808fe3b            # 本轮全部改动
+git checkout HEAD~1 -- src/billgen/themes/usbank/generate_us.py src/billgen/themes/usbank/generate_biz.py  # 只回退续页版式
+```
