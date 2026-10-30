@@ -1,0 +1,75 @@
+{
+  "theme": "chase",
+  "why": "Chase 个人/企业对账单都把卡尾印在行末（Card 4499）；企业版行标签用 Deposit/Withdrawal，不是 Card Purchase。",
+  "columns": [
+    "date",
+    "description",
+    "amount",
+    "balance"
+  ],
+  "type_enum": [
+    "Card Purchase",
+    "ACH Credit",
+    "ACH Debit",
+    "Zelle Payment",
+    "Check Paid",
+    "Fee",
+    "Deposit",
+    "Withdrawal"
+  ],
+  "type_aliases": {
+    "ACH": "ACH Debit",
+    "DEBIT": "Card Purchase"
+  },
+  "descriptor": {
+    "card": {
+      "template": "{merchant} {city} {state} Card {last4}",
+      "rules": [
+        "has_card_tail",
+        "has_place"
+      ],
+      "max_len": 90
+    },
+    "ach": {
+      "template": "{payee}",
+      "rules": [
+        "upper"
+      ],
+      "max_len": 90
+    },
+    "zelle": {
+      "template": "Zelle Payment to {party}",
+      "rules": [
+        "upper"
+      ],
+      "max_len": 90
+    },
+    "check": {
+      "template": "Check Paid {date} {number}",
+      "rules": [
+        "upper"
+      ],
+      "max_len": 90
+    }
+  },
+  "row_rules": {
+    "amount_decimals": 2,
+    "date_format": "%m/%d",
+    "balance_chain": true,
+    "page_numbering": "statement-pages-only"
+  },
+  "forbidden_literals": [
+    "SAMPLE",
+    "billgen",
+    "PyMuPDF",
+    "Bank of America"
+  ],
+  "evidence": [
+    "src/billgen/themes/chase/assets/chase_static_personal.pdf#p1",
+    "src/billgen/themes/chase/assets/chase_static_business.pdf#p1",
+    "src/billgen/synth/adapters/chase.py::_personal_desc"
+  ],
+  "card_types": [
+    "Card Purchase"
+  ]
+}

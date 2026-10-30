@@ -1,0 +1,64 @@
+{
+  "theme": "sofi",
+  "why": "SoFi 有 Type 列（Card Purchase / Direct Payment / Transfer…），并且**按时间倒序**打印；内部转账写成 `To Savings - 1943`。",
+  "kind": "deposit",
+  "columns": [
+    "date",
+    "description",
+    "type",
+    "amount",
+    "balance"
+  ],
+  "type_column": true,
+  "type_enum": [
+    "Card Purchase",
+    "Withdrawal",
+    "Check",
+    "Fee",
+    "Interest Earned",
+    "Transfer",
+    "Direct Payment",
+    "Deposit"
+  ],
+  "type_aliases": {
+    "POS": "Card Purchase",
+    "REFUND": "Card Purchase",
+    "ATM": "Withdrawal",
+    "INTEREST": "Interest Earned"
+  },
+  "descriptor": {
+    "card": {
+      "template": "{merchant} {place}",
+      "rules": [
+        "has_place",
+        "no_card_tail"
+      ],
+      "max_len": 90
+    },
+    "transfer": {
+      "template": "To Savings - {last4}",
+      "rules": [],
+      "max_len": 90
+    }
+  },
+  "row_rules": {
+    "amount_decimals": 2,
+    "date_format": "%m/%d/%Y",
+    "balance_chain": true,
+    "order": "newest-first"
+  },
+  "forbidden_literals": [
+    "SAMPLE",
+    "billgen",
+    "PyMuPDF",
+    "Lorem"
+  ],
+  "evidence": [
+    "src/billgen/synth/line_styles.py::_SOFI_TYPES",
+    "src/billgen/synth/line_styles.py::sofi_desc",
+    "src/billgen/themes/sofi/SoFi-Statement-SAMPLE.pdf"
+  ],
+  "card_types": [
+    "Card Purchase"
+  ]
+}

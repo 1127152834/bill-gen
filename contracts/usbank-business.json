@@ -1,0 +1,110 @@
+{
+  "template_id": "usbank-business",
+  "theme": "usbank",
+  "bank_identity": {
+    "legal": "U.S. Bank National Association",
+    "domain": "usbank.com",
+    "phone": "1-800-872-2657",
+    "city_state_zip": "Oshkosh, WI 54903-3528"
+  },
+  "columns": [
+    "date",
+    "description",
+    "type",
+    "ref",
+    "amount"
+  ],
+  "type_enum": [
+    "Purchase",
+    "ATM",
+    "ACH",
+    "Zelle",
+    "Check",
+    "Fee",
+    "Interest",
+    "Transfer",
+    "Payment",
+    "Deposit",
+    "Refund"
+  ],
+  "type_aliases": {
+    "POS": "Purchase",
+    "ZELLE": "Zelle",
+    "FEE": "Fee",
+    "INTEREST": "Interest"
+  },
+  "descriptor": {
+    "card": {
+      "template": "{merchant} {place}",
+      "rules": [
+        "no_card_tail",
+        "upper"
+      ],
+      "max_len": 36
+    },
+    "ach": {
+      "template": "{payee}",
+      "rules": [
+        "upper"
+      ],
+      "max_len": 36
+    }
+  },
+  "card_tail": false,
+  "row_rules": {
+    "amount_decimals": 2,
+    "date_format": "%m/%d",
+    "balance_chain": true,
+    "account_format": "1 964 9173 9161"
+  },
+  "forbidden_literals": [
+    "SAMPLE",
+    "billgen",
+    "PyMuPDF",
+    "Lorem"
+  ],
+  "required_literals": [
+    "usbank.com",
+    "U.S. Bank National Association",
+    "Oshkosh, WI 54903-3528"
+  ],
+  "sample_rows": [
+    "Aug 28 Zelle Instant | On 08/28/26 | PMT From Kiara Walker | PMT ID=COF4W8CDL9ZK | $ | 500.00",
+    "Aug 17 Zelle Instant | On 08/16/26 | PMT To Adrian Aragon | PMT ID=USB4fh5swvPL | $ | 10.00-"
+  ],
+  "extractor": "tools/contract_extract.py",
+  "evidence": [
+    "src/billgen/synth/adapters/usbank.py::TYPE_LABEL",
+    "src/billgen/synth/adapters/usbank.py::_row",
+    "src/billgen/synth/adapters/usbank.py::_usb_account",
+    "src/billgen/themes/usbank/assets/us_static_personal.pdf",
+    "src/billgen/themes/usbank/assets/usbiz_static.pdf"
+  ],
+  "open_questions": [
+    "自动探测的 Type 与人工规则无交集，需复核参考件是否换了版式"
+  ],
+  "kind": "deposit",
+  "type_column": true,
+  "card_types": [
+    "Purchase"
+  ],
+  "why": "U.S. Bank 有 Type 与 Ref 两列；账号是 1-3-4-4 分组（`1 964 9173 9161`），不是掩码；卡尾不进行内。",
+  "curated_keys": [
+    "columns",
+    "type_enum",
+    "type_aliases",
+    "descriptor",
+    "row_rules",
+    "forbidden_literals"
+  ],
+  "detected_type_enum": [
+    "Date",
+    "Ending Balance",
+    "Sep",
+    "Amount",
+    "Other Withdrawals",
+    "Ref Number",
+    "Account Number:",
+    "Statement Period:"
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "persona",
+  "type": "object",
+  "required": ["person", "cashflow", "calendar", "preferences", "assumptions"],
+  "properties": {
+    "person": {
+      "type": "object",
+      "required": ["name", "kind", "home"],
+      "properties": {
+        "name": {"type": "string", "minLength": 2},
+        "kind": {"enum": ["person", "business"]},
+        "occupation": {"type": "string"},
+        "home": {
+          "type": "object",
+          "required": ["street", "city", "state", "zip", "col_tier"],
+          "properties": {
+            "street": {"type": "string"},
+            "city": {"type": "string"},
+            "state": {"type": "string", "pattern": "^[A-Z]{2}$"},
+            "zip": {"type": "string", "pattern": "^[0-9]{5}$"},
+            "col_tier": {"enum": ["low", "mid", "high", "very-high"]}
+          }
+        }
+      }
+    },
+    "cashflow": {
+      "type": "object",
+      "required": ["income", "fixed", "envelopes"],
+      "properties": {
+        "income": {"type": "array", "minItems": 1, "items": {"$ref": "#/definitions/income"}},
+        "fixed": {"type": "array", "items": {"$ref": "#/definitions/fixed"}},
+        "envelopes": {"type": "object", "additionalProperties": {"$ref": "#/definitions/band"}}
+      }
+    },
+    "calendar": {
+      "type": "object",
+      "required": ["paydays"],
+      "properties": {
+        "paydays": {"type": "array", "items": {"type": "integer", "minimum": 1, "maximum": 31}},
+        "obligations": {"type": "array", "items": {"type": "object"}}
+      }
+    },
+    "preferences": {"type": "object"},
+    "assumptions": {"type": "array", "items": {"type": "string"}}
+  },
+  "definitions": {
+    "band": {"type": "array", "minItems": 2, "maxItems": 2,
+             "items": {"type": "number", "minimum": 0}},
+    "income": {
+      "type": "object",
+      "required": ["source", "label", "cadence", "band"],
+      "properties": {
+        "source": {"type": "string"},
+        "label": {"type": "string", "pattern": "^[A-Z0-9 .'&-]{3,40}$"},
+        "cadence": {"enum": ["weekly", "biweekly", "semimonthly", "monthly", "irregular"]},
+        "band": {"$ref": "#/definitions/band"}
+      }
+    },
+    "fixed": {
+      "type": "object",
+      "required": ["kind", "label"],
+      "properties": {
+        "kind": {"type": "string"},
+        "label": {"type": "string"},
+        "amount": {"type": "number", "minimum": 0},
+        "band": {"$ref": "#/definitions/band"},
+        "due_day": {"type": "integer", "minimum": 1, "maximum": 31}
+      }
+    }
+  }
+}

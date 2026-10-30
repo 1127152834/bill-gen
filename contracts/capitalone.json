@@ -1,0 +1,71 @@
+{
+  "template_id": "capitalone",
+  "theme": "capitalone",
+  "bank_identity": {
+    "legal": "Capital One, N.A.",
+    "domain": "capitalone.com",
+    "phone": "1-800-227-4825",
+    "city_state_zip": "City of Industry, CA 91716-0599"
+  },
+  "columns": [
+    "date",
+    "description",
+    "category",
+    "amount",
+    "balance"
+  ],
+  "type_enum": [],
+  "type_aliases": {},
+  "descriptor": {
+    "card": {
+      "template": "{merchant} {place}",
+      "rules": [
+        "has_place",
+        "no_card_tail"
+      ],
+      "max_len": 90
+    },
+    "ach": {
+      "template": "{nacha_text}",
+      "rules": [],
+      "max_len": 90
+    }
+  },
+  "card_tail": false,
+  "row_rules": {
+    "amount_decimals": 2,
+    "date_format": "%m/%d",
+    "balance_chain": true,
+    "category_column": true
+  },
+  "forbidden_literals": [
+    "SAMPLE",
+    "billgen",
+    "PyMuPDF",
+    "Lorem"
+  ],
+  "required_literals": [
+    "capitalone.com"
+  ],
+  "sample_rows": [
+    "Aug 11 | Debit | - $191.79"
+  ],
+  "extractor": "tools/contract_extract.py",
+  "evidence": [
+    "src/billgen/synth/line_styles.py::_with_place",
+    "src/billgen/synth/line_styles.py::capitalone_desc",
+    "src/billgen/themes/capitalone/C1-Personal-Statement-SAMPLE.pdf"
+  ],
+  "open_questions": [],
+  "kind": "deposit",
+  "type_column": false,
+  "why": "Capital One 有 CATEGORY 列（填品类词，不是 Credit/Debit）；卡行是「商户 + 城市州」，ACH 保留 NACHA 原文。",
+  "curated_keys": [
+    "columns",
+    "type_enum",
+    "type_aliases",
+    "descriptor",
+    "row_rules",
+    "forbidden_literals"
+  ]
+}

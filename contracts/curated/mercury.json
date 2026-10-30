@@ -1,5 +1,6 @@
 {
-  "template_id": "mercury-personal",
+  "theme": "mercury",
+  "why": "Mercury 个人/企业同一个版式：卡消费只印商户名，不带城市与卡尾；ACH 只印对方名，不带 PAYMENT 尾巴。",
   "kind": "deposit",
   "columns": [
     "date",
@@ -13,6 +14,13 @@
     "ACH Out",
     "ACH In"
   ],
+  "type_aliases": {
+    "Card Purchase": "Card",
+    "ACH Debit": "ACH Out",
+    "ACH Credit": "ACH In",
+    "DEBIT": "Card",
+    "ACH": "ACH Out"
+  },
   "descriptor": {
     "card": {
       "template": "{merchant}",
@@ -55,11 +63,7 @@
     "src/billgen/themes/mercury/Demo-Bank-Statement-SAMPLE.pdf#p1",
     "src/billgen/synth/line_styles.py#mercury_desc"
   ],
-  "type_aliases": {
-    "Card Purchase": "Card",
-    "ACH Debit": "ACH Out",
-    "ACH Credit": "ACH In",
-    "DEBIT": "Card",
-    "ACH": "ACH Out"
-  }
+  "card_types": [
+    "Card"
+  ]
 }

@@ -1,0 +1,149 @@
+{
+  "version": 1,
+  "pipeline": ["persona-compiler", "life-director", "solver", "cast-merchants", "auditors", "renderer"],
+  "agents": [
+    {
+      "id": "conductor",
+      "title": "总指挥",
+      "prompt": "prompts/00-conductor.md",
+      "inputs": ["persona.schema.json", "plan.schema.json", "findings.schema.json"],
+      "outputs": ["job-state"],
+      "tools": [],
+      "model_tier": "small",
+      "temperature": 0.0,
+      "can_write_numbers": false
+    },
+    {
+      "id": "persona-compiler",
+      "title": "档案编译器",
+      "prompt": "prompts/01-persona-compiler.md",
+      "inputs": ["profile.json"],
+      "outputs": ["persona.schema.json"],
+      "tools": ["web_search", "tax_table"],
+      "model_tier": "medium",
+      "temperature": 0.2,
+      "can_write_numbers": false
+    },
+    {
+      "id": "life-director",
+      "title": "生活导演",
+      "prompt": "prompts/02-life-director.md",
+      "inputs": ["persona.schema.json", "ledger.schema.json", "calendar"],
+      "outputs": ["plan.schema.json"],
+      "tools": ["web_search"],
+      "model_tier": "large",
+      "temperature": 0.7,
+      "can_write_numbers": false
+    },
+    {
+      "id": "solver",
+      "title": "求解器",
+      "prompt": "prompts/03-solver-spec.md",
+      "inputs": ["plan.schema.json", "persona.schema.json"],
+      "outputs": ["ledger.schema.json"],
+      "tools": [],
+      "model_tier": "none",
+      "temperature": 0.0,
+      "can_write_numbers": true
+    },
+    {
+      "id": "cast-merchants",
+      "title": "选角",
+      "prompt": "prompts/04-cast-merchants.md",
+      "inputs": ["ledger.schema.json", "persona.schema.json", "poi_table"],
+      "outputs": ["ledger.schema.json"],
+      "tools": ["web_search", "poi_lookup"],
+      "model_tier": "medium",
+      "temperature": 0.4,
+      "can_write_numbers": false
+    },
+    {
+      "id": "contract-extractor",
+      "title": "契约提取",
+      "prompt": "prompts/05-contract-extractor.md",
+      "inputs": ["sample.pdf"],
+      "outputs": ["contract.json"],
+      "tools": ["pdf_spans", "pdf_text"],
+      "model_tier": "medium",
+      "temperature": 0.1,
+      "can_write_numbers": false
+    },
+    {
+      "id": "audit-accounting",
+      "title": "会计审计",
+      "prompt": "prompts/auditors/a1-accounting.md",
+      "inputs": ["ledger.schema.json"],
+      "outputs": ["findings.schema.json"],
+      "tools": ["python"],
+      "model_tier": "small",
+      "temperature": 0.0,
+      "can_write_numbers": false
+    },
+    {
+      "id": "audit-geography",
+      "title": "地理审计",
+      "prompt": "prompts/auditors/a2-geography.md",
+      "inputs": ["ledger.schema.json", "persona.schema.json"],
+      "outputs": ["findings.schema.json"],
+      "tools": ["poi_lookup", "web_search"],
+      "model_tier": "medium",
+      "temperature": 0.2,
+      "can_write_numbers": false
+    },
+    {
+      "id": "audit-statistics",
+      "title": "统计审计",
+      "prompt": "prompts/auditors/a3-statistics.md",
+      "inputs": ["ledger.schema.json", "persona.schema.json", "distributions"],
+      "outputs": ["findings.schema.json"],
+      "tools": ["python"],
+      "model_tier": "small",
+      "temperature": 0.0,
+      "can_write_numbers": false
+    },
+    {
+      "id": "audit-adversarial",
+      "title": "反诈审计",
+      "prompt": "prompts/auditors/a4-adversarial.md",
+      "inputs": ["ledger.schema.json", "contract.json"],
+      "outputs": ["findings.schema.json"],
+      "tools": ["read_statement"],
+      "model_tier": "large",
+      "temperature": 0.3,
+      "can_write_numbers": false
+    },
+    {
+      "id": "audit-continuity",
+      "title": "跨月一致性审计",
+      "prompt": "prompts/auditors/a5-continuity.md",
+      "inputs": ["ledger.schema.json", "persona.schema.json"],
+      "outputs": ["findings.schema.json"],
+      "tools": ["python"],
+      "model_tier": "small",
+      "temperature": 0.0,
+      "can_write_numbers": false
+    },
+    {
+      "id": "audit-contract",
+      "title": "契约审计",
+      "prompt": "prompts/auditors/a6-format-contract.md",
+      "inputs": ["ledger.schema.json", "contract.json"],
+      "outputs": ["findings.schema.json"],
+      "tools": ["contracts.check"],
+      "model_tier": "small",
+      "temperature": 0.0,
+      "can_write_numbers": false
+    },
+    {
+      "id": "renderer",
+      "title": "渲染",
+      "prompt": "prompts/06-renderer.md",
+      "inputs": ["ledger.schema.json", "contract.json"],
+      "outputs": ["month.json", "pdf"],
+      "tools": ["registry.render"],
+      "model_tier": "none",
+      "temperature": 0.0,
+      "can_write_numbers": false
+    }
+  ]
+}

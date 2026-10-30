@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "plan",
+  "type": "object",
+  "required": ["month", "events"],
+  "properties": {
+    "month": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}$"},
+    "narrative": {"type": "string"},
+    "events": {
+      "type": "array",
+      "minItems": 12,
+      "maxItems": 60,
+      "items": {
+        "type": "object",
+        "required": ["id", "date", "kind", "why", "merchant_class"],
+        "properties": {
+          "id": {"type": "string"},
+          "date": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"},
+          "kind": {"enum": ["rent", "utility", "phone", "insurance", "subscription", "grocery",
+                            "dining", "fuel", "commute", "pharmacy", "retail", "retail_promo",
+                            "holiday_grocery", "gift", "travel", "auto_maintenance", "income",
+                            "transfer", "fee", "tax"]},
+          "why": {"type": "string", "minLength": 4},
+          "merchant_class": {"type": "string"},
+          "constraint": {
+            "type": "object",
+            "properties": {
+              "amount_band": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number"}},
+              "time_of_day": {"enum": ["morning", "midday", "afternoon", "evening", "night", "any"]}
+            }
+          },
+          "depends_on": {"type": "array", "items": {"type": "string"}},
+          "effects": {"type": "object"}
+        }
+      }
+    }
+  }
+}

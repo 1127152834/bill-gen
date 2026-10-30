@@ -1,0 +1,57 @@
+{
+  "theme": "wellsfargo",
+  "why": "Wells Fargo 用动词前缀区分行类：`Card Purchase 12/11 …`、`ATM Withdrawal …`、`Check 1110 …`、`Zelle Payment To …`（大小写混排）；卡尾在表头不进行内。",
+  "kind": "deposit",
+  "columns": [
+    "date",
+    "description",
+    "amount",
+    "balance"
+  ],
+  "type_column": false,
+  "type_enum": [],
+  "type_aliases": {},
+  "descriptor": {
+    "card": {
+      "template": "Card Purchase {mm/dd} {merchant} {place}",
+      "rules": [
+        "no_card_tail",
+        "has_place"
+      ],
+      "max_len": 90
+    },
+    "atm": {
+      "template": "ATM Withdrawal {mm/dd} {place}",
+      "rules": [],
+      "max_len": 90
+    },
+    "check": {
+      "template": "Check {number} {desc}",
+      "rules": [],
+      "max_len": 90
+    },
+    "zelle": {
+      "template": "Zelle {Party Name}",
+      "rules": [],
+      "max_len": 90
+    }
+  },
+  "row_rules": {
+    "amount_decimals": 2,
+    "date_format": "%m/%d",
+    "balance_chain": true
+  },
+  "forbidden_literals": [
+    "SAMPLE",
+    "billgen",
+    "PyMuPDF",
+    "Lorem"
+  ],
+  "evidence": [
+    "src/billgen/synth/line_styles.py::wellsfargo_desc",
+    "src/billgen/themes/wellsfargo/assets"
+  ],
+  "card_types": [
+    "Card Purchase"
+  ]
+}

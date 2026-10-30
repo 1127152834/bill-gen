@@ -1,0 +1,69 @@
+{
+  "theme": "usbank",
+  "why": "U.S. Bank 有 Type 与 Ref 两列；账号是 1-3-4-4 分组（`1 964 9173 9161`），不是掩码；卡尾不进行内。",
+  "kind": "deposit",
+  "columns": [
+    "date",
+    "description",
+    "type",
+    "ref",
+    "amount"
+  ],
+  "type_column": true,
+  "type_enum": [
+    "Purchase",
+    "ATM",
+    "ACH",
+    "Zelle",
+    "Check",
+    "Fee",
+    "Interest",
+    "Transfer",
+    "Payment",
+    "Deposit",
+    "Refund"
+  ],
+  "type_aliases": {
+    "POS": "Purchase",
+    "ZELLE": "Zelle",
+    "FEE": "Fee",
+    "INTEREST": "Interest"
+  },
+  "descriptor": {
+    "card": {
+      "template": "{merchant} {place}",
+      "rules": [
+        "no_card_tail",
+        "upper"
+      ],
+      "max_len": 36
+    },
+    "ach": {
+      "template": "{payee}",
+      "rules": [
+        "upper"
+      ],
+      "max_len": 36
+    }
+  },
+  "row_rules": {
+    "amount_decimals": 2,
+    "date_format": "%m/%d",
+    "balance_chain": true,
+    "account_format": "1 964 9173 9161"
+  },
+  "forbidden_literals": [
+    "SAMPLE",
+    "billgen",
+    "PyMuPDF",
+    "Lorem"
+  ],
+  "evidence": [
+    "src/billgen/synth/adapters/usbank.py::TYPE_LABEL",
+    "src/billgen/synth/adapters/usbank.py::_usb_account",
+    "src/billgen/themes/usbank/assets/us_static_personal.pdf"
+  ],
+  "card_types": [
+    "Purchase"
+  ]
+}

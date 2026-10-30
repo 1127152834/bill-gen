@@ -1,0 +1,104 @@
+{
+  "template_id": "mercury",
+  "theme": "mercury",
+  "bank_identity": {
+    "legal": "Mercury Technologies, Inc.",
+    "domain": "mercury.com",
+    "phone": "1-415-767-0250",
+    "city_state_zip": "San Francisco, CA 94107"
+  },
+  "columns": [
+    "date",
+    "description",
+    "type",
+    "amount",
+    "balance"
+  ],
+  "type_enum": [
+    "Card",
+    "ACH Out",
+    "ACH In"
+  ],
+  "type_aliases": {
+    "Card Purchase": "Card",
+    "ACH Debit": "ACH Out",
+    "ACH Credit": "ACH In",
+    "DEBIT": "Card",
+    "ACH": "ACH Out"
+  },
+  "descriptor": {
+    "card": {
+      "template": "{merchant}",
+      "rules": [
+        "no_city",
+        "no_card_tail",
+        "upper"
+      ],
+      "max_len": 42
+    },
+    "ach": {
+      "template": "{payee}",
+      "rules": [
+        "upper",
+        "no_payment_tail"
+      ],
+      "max_len": 42
+    },
+    "atm": {
+      "template": "ATM WITHDRAWAL {city} {state}",
+      "rules": [
+        "upper"
+      ],
+      "max_len": 42
+    }
+  },
+  "card_tail": false,
+  "row_rules": {
+    "amount_decimals": 2,
+    "date_format": "%b %-d",
+    "balance_chain": true
+  },
+  "forbidden_literals": [
+    "SAMPLE",
+    "billgen",
+    "PyMuPDF",
+    "Bank of America",
+    "Lorem"
+  ],
+  "required_literals": [
+    "mercury.com"
+  ],
+  "sample_rows": [
+    "Sep 9 | AWS EMEA | Card | -$84.32",
+    "Sep 17 | ACME CLIENT WIRE | Wire In | $3,600.00",
+    "Sep 25 | MONTHLY SERVICE FEE | Fee | -$15.00"
+  ],
+  "extractor": "tools/contract_extract.py",
+  "evidence": [
+    "src/billgen/synth/line_styles.py#mercury_desc",
+    "src/billgen/synth/line_styles.py::mercury_desc",
+    "src/billgen/themes/mercury/Demo-Bank-Statement-SAMPLE.pdf",
+    "src/billgen/themes/mercury/Demo-Bank-Statement-SAMPLE.pdf#p1",
+    "src/billgen/themes/mercury/assets/letter/verification_letter_blank.pdf",
+    "src/billgen/themes/mercury/assets/logo.pdf"
+  ],
+  "open_questions": [],
+  "kind": "deposit",
+  "card_types": [
+    "Card"
+  ],
+  "why": "Mercury 个人/企业同一个版式：卡消费只印商户名，不带城市与卡尾；ACH 只印对方名，不带 PAYMENT 尾巴。",
+  "curated_keys": [
+    "columns",
+    "type_enum",
+    "type_aliases",
+    "descriptor",
+    "row_rules",
+    "forbidden_literals"
+  ],
+  "detected_type_enum": [
+    "Account details",
+    "Card",
+    "S A M P L E"
+  ]
+}

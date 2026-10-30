@@ -1,0 +1,47 @@
+{
+  "theme": "capitalone",
+  "why": "Capital One 有 CATEGORY 列（填品类词，不是 Credit/Debit）；卡行是「商户 + 城市州」，ACH 保留 NACHA 原文。",
+  "kind": "deposit",
+  "columns": [
+    "date",
+    "description",
+    "category",
+    "amount",
+    "balance"
+  ],
+  "type_column": false,
+  "type_enum": [],
+  "type_aliases": {},
+  "descriptor": {
+    "card": {
+      "template": "{merchant} {place}",
+      "rules": [
+        "has_place",
+        "no_card_tail"
+      ],
+      "max_len": 90
+    },
+    "ach": {
+      "template": "{nacha_text}",
+      "rules": [],
+      "max_len": 90
+    }
+  },
+  "row_rules": {
+    "amount_decimals": 2,
+    "date_format": "%m/%d",
+    "balance_chain": true,
+    "category_column": true
+  },
+  "forbidden_literals": [
+    "SAMPLE",
+    "billgen",
+    "PyMuPDF",
+    "Lorem"
+  ],
+  "evidence": [
+    "src/billgen/synth/line_styles.py::capitalone_desc",
+    "src/billgen/synth/line_styles.py::_with_place",
+    "src/billgen/themes/capitalone/C1-Personal-Statement-SAMPLE.pdf"
+  ]
+}

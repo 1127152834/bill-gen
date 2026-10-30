@@ -29,19 +29,19 @@ def test_every_shipped_contract_has_evidence():
 
 def test_mercury_card_rows_drop_city_and_payment_tail():
     data = _mercury()
-    shaped = contracts.conform("mercury-personal", data)
+    shaped = contracts.conform("mercury", data)
     assert shaped["cities"] == 1
     assert data["transactions"][0]["desc"] == "RALPHS 7585"
     # 剥完只剩一个词就不剥（"CLIENT PAYMENT" → "CLIENT" 更假），留给收入方命名规则去治
     assert data["transactions"][1]["desc"] == "CLIENT PAYMENT"
-    assert contracts.check("mercury-personal", data) == []
+    assert contracts.check("mercury", data) == []
 
 
 def test_mercury_rejects_unknown_type_and_leading_padding():
     data = _mercury(transactions=[
         {"date": "Nov 26", "desc": "  RALPHS 7585", "type": "ACH", "amount": -169.76},
     ])
-    problems = contracts.check("mercury-personal", data)
+    problems = contracts.check("mercury", data)
     assert any("forbidden" in p or "type-enum" in p or "row-format" in p for p in problems)
 
 
@@ -56,6 +56,7 @@ def test_chase_contract_requires_card_tail_in_row():
 
 
 def test_resolve_maps_renderer_id_to_contract_id():
-    assert contracts.resolve("mercury") == "mercury-personal"
-    assert contracts.resolve("chase") == "chase-personal"
+    # 契约现在一家账户一份，id 就是渲染器 id；老的双后缀写法仍能解析
+    assert contracts.resolve("mercury") == "mercury"
+    assert contracts.resolve("chase-personal") == "chase-personal"
     assert contracts.resolve("wellsfargo") == "wellsfargo"

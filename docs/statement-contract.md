@@ -119,3 +119,22 @@ tools/contract_extract.py --template mercury-personal --sample <pdf> --diff
 
 跑第一遍就抓到真问题：Mercury 交付件里 23 行卡消费带了 `TEMPLE CITY CA`（Mercury 的卡行只印商户），
 另有 2 行 ACH 带了 `PAYMENT` 尾巴——这两类问题以前要靠人眼看。
+
+## 每家账户一份契约 + 一份 skill（落地）
+
+| 产物 | 位置 | 谁读 | 谁写 |
+| --- | --- | --- | --- |
+| 机器契约 | `contracts/<template>.json` | `src/billgen/contracts.py`（`conform`/`check`） | `tools/contract_extract.py` 生成 |
+| 人工规则 | `contracts/curated/<theme>.json` | 提取器合并进契约 | 人（必须带 `evidence` 与 `why`） |
+| 账户 skill | `agents/skills/<template>.md` | 人、agent（写描述符时） | 提取器从契约生成 |
+| 索引 | `agents/skills/README.md` | 人 | 手写（模板增减时同步） |
+
+提取流程：扫 `src/billgen/themes/<theme>/**/*.pdf` → 探列、Type 取值、样例行（含竖排表格拼接）、抬头身份 → 与 `curated/<theme>.json` 合并（人工规则优先）→ 写契约 + skill。
+
+规矩没变，而且现在有测试守着（`tests/test_contract_extract.py`）：
+
+- 每个可渲染模板必须有契约 + skill，契约必须有 `evidence`；
+- `curated` 里每条规则必须有出处与理由；
+- 提取结果必须确定（同一批参考件跑两遍一致）；
+- 规则不许与引擎行为打架（`DEPOSIT` 含 `POS`、`ACH Debit` 含 `DEBIT` 都曾把存款行误判成卡行，现在按整词 + `card_types` 判）；
+- 没有参考件的家（BoA 当前只有字体与图片）**不会**凭空生成规则，只带 `open_questions` 等人拿真件补。

@@ -1,0 +1,65 @@
+{
+  "theme": "boa",
+  "why": "BoA 流水按「存款 / 取款」两张表分栏，没有 Type 列；卡行末尾是 `… 10/13 Card 4499`；ACH 行是 NACHA 结构化描述符，不是商户名。",
+  "kind": "deposit",
+  "columns": [
+    "date",
+    "description",
+    "amount"
+  ],
+  "type_column": false,
+  "type_enum": [],
+  "type_aliases": {},
+  "descriptor": {
+    "card": {
+      "template": "{merchant} {mm/dd} Card {last4}",
+      "rules": [
+        "has_card_tail",
+        "upper"
+      ],
+      "max_len": 90
+    },
+    "ach": {
+      "template": "DES:{des} ID:{ref} INDN:{holder} CO ID:XXXXX{co} {orig}",
+      "rules": [
+        "upper"
+      ],
+      "max_len": 90
+    },
+    "zelle": {
+      "template": "Zelle payment to {party} Conf# {conf}",
+      "rules": [],
+      "max_len": 90
+    },
+    "check": {
+      "template": "CHECK {number} {desc}",
+      "rules": [
+        "upper"
+      ],
+      "max_len": 90
+    }
+  },
+  "row_rules": {
+    "amount_decimals": 2,
+    "date_format": "%m/%d",
+    "balance_chain": true,
+    "sections": [
+      "deposits",
+      "withdrawals"
+    ]
+  },
+  "forbidden_literals": [
+    "SAMPLE",
+    "billgen",
+    "PyMuPDF",
+    "Lorem"
+  ],
+  "evidence": [
+    "src/billgen/synth/adapters/boa.py::_descriptor",
+    "src/billgen/synth/adapters/boa.py::_row",
+    "docs/realism-patterns.md#4.4"
+  ],
+  "card_types": [
+    "Purchase"
+  ]
+}

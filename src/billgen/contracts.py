@@ -115,7 +115,7 @@ def check_data(contract: Mapping[str, Any], data: Mapping[str, Any]) -> list[str
         if isinstance(desc, str):
             if rules.get("no_leading_padding") and desc != desc.lstrip():
                 problems.append(f"row-format: 描述有前导空白 {desc[:24]!r}")
-            spec = descriptors.get("card") if _looks_like_card(row) else descriptors.get("ach")
+            spec = descriptors.get("card") if _looks_like_card(row, contract) else descriptors.get("ach")
             if spec:
                 max_len = spec.get("max_len")
                 if isinstance(max_len, int) and len(desc) > max_len:
@@ -137,9 +137,22 @@ def check_data(contract: Mapping[str, Any], data: Mapping[str, Any]) -> list[str
     return problems
 
 
-def _looks_like_card(row: Mapping[str, Any]) -> bool:
-    text = f"{row.get('type') or ''} {row.get('desc') or row.get('description') or ''}".upper()
-    return any(word in text for word in ("CARD", "PURCHASE", "POS"))
+#: 注意：``DEBIT`` 不算卡行标志 —— ``ACH Debit`` 是 ACH 扣款，不是刷卡。
+_CARD_WORDS: Final[re.Pattern[str]] = re.compile(r"\b(CARD|CARD PURCHASE|PURCHASE|POS)\b")
+
+
+def _looks_like_card(row: Mapping[str, Any], contract: Mapping[str, Any] | None = None) -> bool:
+    """这一行是不是刷卡消费。
+
+    先看契约声明的 ``card_types``（银行自己的 Type 取值），再看词面。
+    词面必须按整词匹配：``DEPOSIT`` 里含 ``POS``，早期用子串判断把存款行误判成卡行。
+    """
+    row_type = str(row.get("type") or "").strip()
+    declared = (contract or {}).get("card_types") or []
+    if declared and row_type:
+        return row_type in declared
+    text = f"{row_type} {row.get('desc') or row.get('description') or ''}".upper()
+    return bool(_CARD_WORDS.search(text))
 
 
 def check(template_id: str, data: Mapping[str, Any]) -> list[str]:
@@ -170,7 +183,7 @@ def conform(template_id: str, data: dict[str, Any]) -> dict[str, int]:
             if fixed != row_type:
                 row["type"] = fixed
                 counts["types"] += 1
-        key = "card" if _looks_like_card(row) else "ach"
+        key = "card" if _looks_like_card(row, contract) else "ach"
         spec = descriptors.get(key) or {}
         rules = spec.get("rules") or []
         desc = row.get("desc") or row.get("description")

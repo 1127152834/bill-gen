@@ -1,0 +1,99 @@
+{
+  "template_id": "sofi",
+  "theme": "sofi",
+  "bank_identity": {
+    "legal": "SoFi Bank, N.A.",
+    "domain": "sofi.com",
+    "phone": "1-855-456-7634",
+    "city_state_zip": "Cottonwood Heights, Utah 84121"
+  },
+  "columns": [
+    "date",
+    "description",
+    "type",
+    "amount",
+    "balance"
+  ],
+  "type_enum": [
+    "Card Purchase",
+    "Withdrawal",
+    "Check",
+    "Fee",
+    "Interest Earned",
+    "Transfer",
+    "Direct Payment",
+    "Deposit"
+  ],
+  "type_aliases": {
+    "POS": "Card Purchase",
+    "REFUND": "Card Purchase",
+    "ATM": "Withdrawal",
+    "INTEREST": "Interest Earned"
+  },
+  "descriptor": {
+    "card": {
+      "template": "{merchant} {place}",
+      "rules": [
+        "has_place",
+        "no_card_tail"
+      ],
+      "max_len": 90
+    },
+    "transfer": {
+      "template": "To Savings - {last4}",
+      "rules": [],
+      "max_len": 90
+    }
+  },
+  "card_tail": false,
+  "row_rules": {
+    "amount_decimals": 2,
+    "date_format": "%m/%d/%Y",
+    "balance_chain": true,
+    "order": "newest-first"
+  },
+  "forbidden_literals": [
+    "SAMPLE",
+    "billgen",
+    "PyMuPDF",
+    "Lorem"
+  ],
+  "required_literals": [
+    "sofi.com",
+    "1-855-456-7634",
+    "SoFi Bank, N.A.",
+    "Cottonwood Heights, Utah 84121"
+  ],
+  "sample_rows": [
+    "Sep 30, 2026 | Interest Earned | Interest earned | Transaction ID: 138-1 | $2.15",
+    "Sep 25, 2026 | Withdrawal | To Savings - 1943 | Transaction ID: 137-38317001 | -$2,000.00",
+    "Sep 17, 2026 | Deposit | STRIPE TRANSFER | Transaction ID: 133-12773001 | $4,216.26",
+    "Sep 3, 2026 | Direct Payment | CHASE CREDIT CRD EPAY | Transaction ID: 132-445765001 | -$568.41"
+  ],
+  "extractor": "tools/contract_extract.py",
+  "evidence": [
+    "src/billgen/synth/line_styles.py::_SOFI_TYPES",
+    "src/billgen/synth/line_styles.py::sofi_desc",
+    "src/billgen/themes/sofi/SoFi-Statement-SAMPLE.pdf",
+    "src/billgen/themes/sofi/assets/logo.pdf"
+  ],
+  "open_questions": [],
+  "kind": "deposit",
+  "type_column": true,
+  "card_types": [
+    "Card Purchase"
+  ],
+  "why": "SoFi 有 Type 列（Card Purchase / Direct Payment / Transfer…），并且**按时间倒序**打印；内部转账写成 `To Savings - 1943`。",
+  "curated_keys": [
+    "columns",
+    "type_enum",
+    "type_aliases",
+    "descriptor",
+    "row_rules",
+    "forbidden_literals"
+  ],
+  "detected_type_enum": [
+    "Checking Account - 4287",
+    "S A M P L E"
+  ]
+}

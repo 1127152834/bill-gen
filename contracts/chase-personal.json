@@ -1,6 +1,12 @@
 {
   "template_id": "chase-personal",
-  "kind": "deposit",
+  "theme": "chase",
+  "bank_identity": {
+    "legal": "JPMorgan Chase Bank, N.A.",
+    "domain": "chase.com",
+    "phone": "1-800-935-9935",
+    "city_state_zip": "San Antonio, TX 78265-9805"
+  },
   "columns": [
     "date",
     "description",
@@ -17,44 +23,117 @@
     "Deposit",
     "Withdrawal"
   ],
+  "type_aliases": {
+    "ACH": "ACH Debit",
+    "DEBIT": "Card Purchase"
+  },
   "descriptor": {
     "card": {
-      "template": "Card Purchase {mm/dd} {merchant} {city} {state} Card {last4}",
+      "template": "{merchant} {city} {state} Card {last4}",
       "rules": [
         "has_card_tail",
-        "upper"
+        "has_place"
       ],
       "max_len": 90
     },
     "ach": {
-      "template": "{kind} {payee}",
+      "template": "{payee}",
+      "rules": [
+        "upper"
+      ],
+      "max_len": 90
+    },
+    "zelle": {
+      "template": "Zelle Payment to {party}",
+      "rules": [
+        "upper"
+      ],
+      "max_len": 90
+    },
+    "check": {
+      "template": "Check Paid {date} {number}",
       "rules": [
         "upper"
       ],
       "max_len": 90
     }
   },
+  "card_tail": "in_row",
   "row_rules": {
     "amount_decimals": 2,
     "date_format": "%m/%d",
     "balance_chain": true,
-    "no_leading_padding": true
+    "page_numbering": "statement-pages-only"
   },
   "forbidden_literals": [
     "SAMPLE",
     "billgen",
     "PyMuPDF",
-    "Bank of America",
-    "Lorem"
+    "Bank of America"
   ],
+  "required_literals": [
+    "chase.com",
+    "1-800-935-9935",
+    "JPMorgan Chase Bank, N.A."
+  ],
+  "sample_rows": [
+    "02/02 | Deposit      1264675874 | 23,000.00",
+    "02/05 | Deposit        29478128 | 20,467.15",
+    "02/05 | Deposit      2173594309 | 13,460.37",
+    "02/05 | Deposit      1261835474 | 8,390.25",
+    "02/05 | Deposit      1290446515 | 5,500.00",
+    "02/05 | Deposit      1290446554 | 4,700.65",
+    "02/06 | Deposit      2170747482 | 30,769.22",
+    "02/06 | Deposit      2170832003 | 11,050.00",
+    "02/06 | Deposit        29813663 | 6,031.36",
+    "02/09 | ATM Check Deposit       02/09 3536 154th St Flushing NY Card 8334 | 16,531.72",
+    "02/09 | Deposit        29559728 | 50,250.00",
+    "02/09 | Deposit      2170832030 | 35,780.00",
+    "02/02 | 02/02 Online Domestic Wire Transfer Via: Dbtco Americas Nyc/021001033 A/C: Elay | International Trade New York NY 10019 US Imad: 0202Mmqfmp2L019146 Trn: 3585096033Es | $49,889.72",
+    "02/05 | 02/05 Online Domestic Wire Transfer Via: Dbtco Americas Nyc/021001033 A/C: Elay | International Trade New York NY 10019 US Imad: 0205Mmqfmp2L022096 Trn: 3403676036Es | 49,690.97",
+    "02/09 | 02/09 Online Domestic Wire Transfer Via: Dbtco Americas Nyc/021001033 A/C: Elay | International Trade New York NY 10019 US Imad: 0209Mmqfmp2K017374 Trn: 3373776040Es | 50,000.00",
+    "02/12 | 02/12 Online Domestic Wire Transfer Via: Dbtco Americas Nyc/021001033 A/C: Elay | International Trade New York NY 10019 US Imad: 0212Mmqfmp2K011659 Trn: 3184316043Es | 49,887.92",
+    "02/17 | 02/17 Online Domestic Wire Transfer Via: Dbtco Americas Nyc/021001033 A/C: Elay | International Trade New York NY 10019 US Imad: 0217Mmqfmp2M021956 Trn: | 3606966048Es | 49,890.81",
+    "02/20 | 02/20 Online Domestic Wire Transfer Via: Dbtco Americas Nyc/021001033 A/C: Elay | International Trade New York NY 10019 US Imad: 0220Mmqfmp2N011382 Trn: 3220416051Es | 49,680.24",
+    "02/02 | Online Domestic Wire Fee | $25.00",
+    "02/05 | Online Domestic Wire Fee | 25.00",
+    "02/09 | Online Domestic Wire Fee | 25.00",
+    "02/12 | Online Domestic Wire Fee | 25.00",
+    "02/17 | Online Domestic Wire Fee | 25.00",
+    "02/20 | Online Domestic Wire Fee | 25.00"
+  ],
+  "extractor": "tools/contract_extract.py",
   "evidence": [
+    "src/billgen/synth/adapters/chase.py#_personal_desc",
+    "src/billgen/synth/adapters/chase.py::_personal_desc",
+    "src/billgen/themes/chase/assets/chase_static_business.pdf",
+    "src/billgen/themes/chase/assets/chase_static_business.pdf#p1",
+    "src/billgen/themes/chase/assets/chase_static_business_prepared.pdf",
+    "src/billgen/themes/chase/assets/chase_static_personal.pdf",
     "src/billgen/themes/chase/assets/chase_static_personal.pdf#p1",
-    "src/billgen/synth/adapters/chase.py#_personal_desc"
+    "src/billgen/themes/chase/assets/chase_static_personal_prepared.pdf"
   ],
-  "type_aliases": {
-    "Card": "Card Purchase",
-    "ACH In": "ACH Credit",
-    "ACH Out": "ACH Debit",
-    "ACH": "ACH Debit"
-  }
+  "open_questions": [],
+  "card_types": [
+    "Card Purchase"
+  ],
+  "why": "Chase 个人/企业对账单都把卡尾印在行末（Card 4499）；企业版行标签用 Deposit/Withdrawal，不是 Card Purchase。",
+  "curated_keys": [
+    "columns",
+    "type_enum",
+    "type_aliases",
+    "descriptor",
+    "row_rules",
+    "forbidden_literals"
+  ],
+  "detected_type_enum": [
+    "Account Number:",
+    "Online Domestic Wire Fee",
+    "Page",
+    "of",
+    "(continued)",
+    "Beginning Balance",
+    "Ending Balance",
+    "*end*summary"
+  ]
 }
