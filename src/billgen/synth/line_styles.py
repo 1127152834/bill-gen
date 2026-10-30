@@ -119,10 +119,19 @@ def _mmdd(row: LedgerRow) -> str:
     return f"{row.date:%m/%d}"
 
 
+def _with_place(ledger: LedgerDocument, text: str) -> str:
+    """给卡行补「城市 州」，商户名里已经带过就不再补（`WALGREENS #5046 AUSTIN TX AUSTIN TX`）。"""
+    place = merchant_location(ledger, text)
+    tail = text.rstrip()
+    if tail.endswith(place) or tail.endswith(place.split(",")[0].strip()):
+        return tail
+    return f"{tail} {place}".strip()
+
+
 def capitalone_desc(ledger: LedgerDocument, row: LedgerRow, text: str) -> str:
     """Capital One：卡行 = 商户 + 城市 + 州；ACH 保留 NACHA 原文。"""
     if _is_card(row):
-        return f"{text} {merchant_location(ledger, text)}".strip()
+        return _with_place(ledger, text)
     return text
 
 
@@ -177,7 +186,7 @@ def amex_desc(ledger: LedgerDocument, row: LedgerRow, text: str) -> str:
 def sofi_desc(ledger: LedgerDocument, row: LedgerRow, text: str) -> str:
     """SoFi：卡行带城市州；转账类用 ``To Savings - 1943`` 这种内部转账口吻。"""
     if _is_card(row):
-        return f"{text} {merchant_location(ledger, text)}".strip()
+        return _with_place(ledger, text)
     if row.type == "TRANSFER" and row.direction == "debit":
         return f"To Savings - {ledger.account.last4}"
     return text

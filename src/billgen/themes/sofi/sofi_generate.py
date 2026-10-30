@@ -9,6 +9,7 @@ SoFi 银行账单模板 — 1:1 排版复刻
 排版：kern 开启（从原稿逐字符提取的 kern 表）
 布局：联系信息位置动态（随交易行数自适应），支持分页
 """
+import datetime as _dt
 import fitz, os, math, json
 
 from copy import deepcopy
@@ -451,6 +452,21 @@ def _tx_table(page, txs, balances, *, ctx=None):
     _tx_rows(page, txs, balances, TX_HDR_TOP + RH, TX_FIRST_BL, False, True)
 
 # ================================================================ 页面
+def _newest_first(txs: list[dict]) -> list[dict]:
+    """SoFi 的流水是**从新到旧**印的（参考件第 1 页 Sep 30 → Sep 3）。
+
+    账本层统一按日期升序（`lint.py` 的 rows_unsorted 也要求升序），所以只在出片这一侧倒过来；
+    余额回推（`current_balance` 往下逐行减）本来就假定这个方向，两者必须同一个顺序。
+    """
+    def key(t: dict) -> tuple:
+        try:
+            return (_dt.datetime.strptime(t.get("date", ""), "%m/%d/%Y"),)
+        except (TypeError, ValueError):
+            return (t.get("date", ""),)
+
+    return sorted(txs, key=key, reverse=True)
+
+
 def page_statement(doc, page_num, total_pages, txs=None, balances=None, *, ctx=None):
     ctx = ctx if ctx is not None else _render_context()
     page = doc.new_page(width=612, height=792)
@@ -847,7 +863,7 @@ def build(meta=None, *, data=None, watermark=None):
     ctx = _render_context(data, watermark)
     doc = fitz.open()
     try:
-        txs = ctx.data["transactions"]
+        txs = _newest_first(ctx.data["transactions"])
         # 全局余额（从最新到最旧回推，跨页一致）
         balances = []
         bal = ctx.data["current_balance"]

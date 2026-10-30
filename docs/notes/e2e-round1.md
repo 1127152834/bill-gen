@@ -332,3 +332,32 @@ renders  [('chase-personal','checking',2), ('usbank-personal','checking',4)]
 Wells Fargo / Amex 都对得上）。
 
 回滚：`git revert <本轮提交>`（只动 `tools/realism_rules.py` 与 `tests/test_realism_rules.py`）。
+
+## 第十三轮（SoFi 流水方向反了 + 卡行城市重复）
+
+**症状**：SoFi 第 1 页的流水从 09/01 排到 09/25，而参考件是 **Sep 30 → Sep 3**（从新到旧）。
+更严重的是余额列：`12,923.98 → 14,578.47 → 12,068.57 → 7,749.69` 上蹿下跳，根本不是一条链。
+
+**两个原因叠在一起**：
+1. 账本层统一按日期**升序**（`src/billgen/synth/lint.py:127` 的 `rows_unsorted` 就要求升序），
+   适配器照抄给 SoFi；
+2. `src/billgen/themes/sofi/sofi_generate.py` 的余额是**从期末往回推**（`bal = current_balance`，
+   逐行 `bal -= amount`），这个算法假定「第一行是最新那天」。方向反了，余额就整体错位
+   ——第一行的余额其实是最后一行的期末。
+
+**修法**：只在出片这一侧倒序，账本层保持升序（否则 lint 的 rows_unsorted 会红）。
+新增 `_newest_first(txs)`（按 `%m/%d/%Y` 解析倒排），`build()` 里 `txs = _newest_first(...)`
+再算余额、再分页。修完 09/25 那行余额 12,923.98，上一行 12,925.89 = 12,923.98 + 1.91，链对上了。
+
+**顺带修**：卡行描述城市重复 —— `WALGREENS #5046 AUSTIN TX AUSTIN TX`（商户名里已经带过城市，
+行文助手又补了一遍）。`src/billgen/synth/line_styles.py` 抽出 `_with_place()` 给 C1/SoFi 共用，
+商户名已含城市/州就不再追加（Amex 上一轮踩过同一个坑，这次统一到一处）。
+
+**测试**：新增 `tests/test_sofi_order.py` —— 逐行解析 `MM/DD/YYYY … -$金额 $余额`，
+断言日期**降序**、且 `余额[i] - 金额[i] == 余额[i+1]`。这条测试在修之前必红（降序断言），
+修之后通过；它同时钉住「方向」和「余额列跟着方向走」两件事。
+
+`pytest` 564 passed / 16 skipped / 33 subtests；`realism_rules.py` 11 套全绿；
+`e2e_compare` 个人 7 套差异 0 项 + 2 套版式漂移 0 段。
+
+回滚：`git revert <本轮提交>`（sofi 倒序 + `_with_place` 在同一提交）。
