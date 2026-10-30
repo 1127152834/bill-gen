@@ -873,3 +873,38 @@ Design LLC`）、`GET /api/settings`、`POST /api/settings/test`、`POST /api/ba
 必须 200）。`pytest` 558 passed / 16 skipped。
 
 回滚：`git revert <本轮提交>`；白名单那段加起来即可（不影响已有 `/api/generations` 转发）。
+
+## 第三十轮（2026-10-30）：生成完成的账单没有 PDF —— 出片从来没在界面上露过面
+
+用户截图：结果页只有流水、月度卡片、14/14 规则校验和审计问题，「PDF 在哪？」
+
+事实：出片一直在生成——`flow/packages/core/src/graph/nodes/render.ts` 把每份 PDF 的
+`{template, account, path, pages, bytes, sha256, attempts, modelFilled}` 塞进 `result.renders`，
+文件落在 `/data/renders/`（compose 里 `BILLGEN_OUT`）。缺的是两截：
+
+1. **没有任何 HTTP 路径能把文件发给浏览器**：主服务只挂 `/web-assets/`、`/letters/`、`/api/v1/*`，
+   `/data/renders` 里的 PDF 只能进容器 `docker cp` 拿出来；
+2. **前端 Result 页压根没读 `result.renders`**（`flow/apps/web/src/pages/Result.tsx` 只渲染流水与审计）。
+
+### 改了什么
+
+1. 主服务新增 `GET /api/v1/renders/<文件名>`（`src/billgen/server/http.py::_render_file`）：只认文件
+   名，`/`、`\`、`..`、非 `.pdf` 一律 404；解析后必须落在 `BILLGEN_OUT` 目录内（`root not in
+   target.parents` 也 404）；回 `application/pdf` + `Content-Disposition: inline`，浏览器直接预览，
+   `download` 属性则另存。
+2. 前端新增 `flow/apps/web/src/components/RendersPanel.tsx`：结果页顶部「PDF 出片」卡片，逐份列出
+   版式中文名 / 账户 / 页数 / 体积 /「模型填字段」还是「确定性草稿」，右侧「新窗口看」「下载」，
+   下方一个 iframe 内嵌预览（点行换文件）。`render.renders` 为空时整块不渲染。
+3. `flow/packages/core/src/schemas/output.ts` 补 `export type RenderArtifact`（前端要引类型）。
+4. 顺手清掉主页 `EDITOR_LINKS` 里还留着的 `/ae/`（amex 模板已下线）。
+
+### 验证
+
+- `pytest` **560 passed** / 16 skipped（新增两条：按文件名发 PDF、路径穿越/非 PDF/不存在一律 404）。
+- `vitest` `apps/web` **86 passed**（新增两条：有出片时列出文件且 `href`/`src` 指向
+  `/api/v1/renders/<文件名>`；无出片时不显示这块）。
+- 线上：`GET /api/v1/renders/sofi-checking-cb9f9469.pdf` → 200、`application/pdf`、644658 字节、
+  3 页 612×792；`..%2F..%2Fetc%2Fpasswd`、`nope.pdf`、`x.txt` 全 404；新 bundle 里能搜到「PDF 出片」。
+
+回滚：`git revert <本轮提交>`（去掉 `_render_file` 路由与 `RendersPanel` 即可，出片文件本来就一直存在
+`./.data/renders/`）。

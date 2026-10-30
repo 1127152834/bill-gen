@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { fixtureGenerationResult } from '@bh/core/testing/result'
-import type { GenerationRequest } from '@bh/core/schemas'
+import type { GenerationRequest, GenerationResult } from '@bh/core/schemas'
 
 vi.mock('../api', async () => {
   const actual = await vi.importActual<typeof import('../api')>('../api')
@@ -278,5 +278,45 @@ describe('Result: non-success states', () => {
   it('does not offer 继续生成 for a completed job', () => {
     renderResult(makeView())
     expect(screen.queryByRole('button', { name: '继续生成' })).not.toBeInTheDocument()
+  })
+})
+
+
+describe('PDF 出片', () => {
+  it('列出每份出货文件，预览指向主服务的出片路由', () => {
+    const view = makeView()
+    const result = view.result as GenerationResult
+    result.renders = [
+      {
+        template: 'chase-personal',
+        account: 'checking',
+        path: '/data/renders/chase-personal-checking-job1.pdf',
+        pages: 2,
+        bytes: 215_040,
+        sha256: 'x'.repeat(64),
+        attempts: 1,
+        modelFilled: false,
+      },
+    ]
+    renderResult(view)
+    const panel = screen.getByRole('region', { name: 'PDF 出片' })
+    expect(within(panel).getByRole('button', { name: '大通银行 · 个人账单' })).toBeInTheDocument()
+    expect(within(panel).getByText(/checking · 2 页 · 210 KB/)).toBeInTheDocument()
+    expect(within(panel).getByRole('link', { name: '下载' })).toHaveAttribute(
+      'href',
+      '/api/v1/renders/chase-personal-checking-job1.pdf',
+    )
+    expect(within(panel).getByTitle('PDF 预览 chase-personal')).toHaveAttribute(
+      'src',
+      '/api/v1/renders/chase-personal-checking-job1.pdf',
+    )
+  })
+
+  it('没有出片时不显示这一块', () => {
+    const view = makeView()
+    const result = view.result as GenerationResult
+    result.renders = []
+    renderResult(view)
+    expect(screen.queryByRole('region', { name: 'PDF 出片' })).not.toBeInTheDocument()
   })
 })

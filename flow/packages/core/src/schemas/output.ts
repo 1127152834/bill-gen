@@ -164,4 +164,5 @@ export const GenerationResultSchema = z.object({
   /** PDFs rendered by the billgen MCP server; empty when rendering was not configured. */
   renders: z.array(RenderArtifactSchema).default([]),
 });
+export type RenderArtifact = z.infer<typeof RenderArtifactSchema>;
 export type GenerationResult = z.infer<typeof GenerationResultSchema>;

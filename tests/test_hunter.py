@@ -5,6 +5,7 @@ from __future__ import annotations
 import io
 import json
 import threading
+import urllib.error
 import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -558,3 +559,34 @@ def test_every_hunter_api_path_is_reachable_through_the_hub(web):
         )
         with urllib.request.urlopen(request, timeout=20) as response:
             assert response.status == 200, path
+
+
+def test_hub_serves_rendered_pdfs_by_filename(web, tmp_path: Path, monkeypatch):
+    """出片的 PDF 由主服务按文件名发出来：/api/v1/renders/<文件名>。"""
+    origin, _, _ = web
+    renders = tmp_path / "renders"
+    renders.mkdir()
+    (renders / "chase-personal-checking-job1.pdf").write_bytes(b"%PDF-1.4 fake")
+    monkeypatch.setenv("BILLGEN_OUT", str(renders))
+
+    with urllib.request.urlopen(origin + "/api/v1/renders/chase-personal-checking-job1.pdf", timeout=20) as response:
+        assert response.status == 200
+        assert response.headers["Content-Type"] == "application/pdf"
+        assert "inline" in response.headers["Content-Disposition"]
+        assert response.read() == b"%PDF-1.4 fake"
+
+
+def test_hub_refuses_to_serve_outside_the_render_directory(web, tmp_path: Path, monkeypatch):
+    origin, _, _ = web
+    renders = tmp_path / "renders"
+    renders.mkdir()
+    secret = tmp_path / "secret.pdf"
+    secret.write_bytes(b"%PDF-1.4 nope")
+    (renders / "notes.txt").write_bytes(b"not a pdf")
+    monkeypatch.setenv("BILLGEN_OUT", str(renders))
+
+    for bad in ("..%2Fsecret.pdf", "..\\secret.pdf", "missing.pdf", "notes.txt", "sub%2Ffile.pdf"):
+        request = urllib.request.Request(origin + f"/api/v1/renders/{bad}")
+        with pytest.raises(urllib.error.HTTPError) as caught:
+            urllib.request.urlopen(request, timeout=20)
+        assert caught.value.code == 404, bad

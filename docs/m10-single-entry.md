@@ -31,6 +31,16 @@ M10 把猎手折进同一个入口，并把模型配置从环境变量搬到页�
 搬进工作台：猎手是独立构建的 SPA，路由（`/new`、`/g/:id`、`/history`）与样式都已成型，
 套进 iframe 只需转发 `/assets` 与这几个路由，零改动它的代码。
 
+## 出片（PDF）
+
+每份账单的 PDF 落在 `$BILLGEN_OUT`（容器里 `/data/renders`，宿主机 `./.data/renders`），文件名形如
+`<版式>-<账户>-<任务号前 8 位>.pdf`。主服务按文件名发出来：`GET /api/v1/renders/<文件名>`
+（只认文件名，`/`、`..`、非 `.pdf` 一律 404；解析后必须落在出片目录内）。
+
+结果页「PDF 出片」卡片把 `result.renders` 逐条列出来（版式 / 账户 / 页数 / 体积 / 模型填字段还是
+确定性草稿），点一行换成内嵌预览，另有「新窗口看」「下载」。这块以前是缺的：PDF 一直生成了，
+但没有接口也没有界面，只能进容器 `docker cp`。
+
 ## 模型配置
 
 配置落在 `$BILL_GEN_DATA_DIR/hunter/settings.json`，容器里就是 **`./.data/billgen/hunter/settings.json`**

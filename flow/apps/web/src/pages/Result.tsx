@@ -1,6 +1,7 @@
 import { StatementSchema, type GenerationResult, type Statement } from '@bh/core/schemas'
 import type { GenerationView } from '../api'
 import AuditPanel from '../components/AuditPanel'
+import RendersPanel from '../components/RendersPanel'
 import ResultActions from '../components/ResultActions'
 import StatementView from '../components/StatementView'
 import { STATUS_LABEL, describeFailure, formatDateTime } from '../lib/format'
@@ -62,6 +63,8 @@ export default function Result({ view, onChanged }: { view: GenerationView; onCh
           </p>
         )}
       </section>
+
+      {full && <RendersPanel renders={full.renders} />}
 
       {statements.length > 0 && (
         <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_20rem]">

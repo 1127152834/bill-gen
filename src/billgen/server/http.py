@@ -22,6 +22,8 @@ from .legacy import LegacyMounts
 
 LOG = logging.getLogger(__name__)
 MAX_BODY = 4 * 1024 * 1024
+# 出片目录与猎手共用一个（compose 里 BILLGEN_OUT=/data/renders），出片的 PDF 就在这里面。
+RENDERS_ENV = "BILLGEN_OUT"
 
 # 猎手的 React 产物与页面路由（相对站点根，而不是 /hunter/ 前缀）
 HUNTER_ASSETS = ("/assets/", "/favicon.svg", "/vite.svg")
@@ -31,7 +33,6 @@ _HUNTER_DETAIL = re.compile(r"/g/[A-Za-z0-9-]+")
 EDITOR_LINKS = (
     ("/boa/", "BOA"),
     ("/wf/", "Wells Fargo"),
-    ("/ae/", "American Express"),
     ("/chase/", "Chase Personal"),
     ("/chasebiz/", "Chase Business"),
     ("/us/", "US Bank Personal"),
@@ -102,6 +103,30 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         if self.command != "HEAD":
             self.wfile.write(body)
+
+    def _renders_dir(self) -> Path:
+        """出片目录：和猎手写盘的地方同一个（compose 里 BILLGEN_OUT=/data/renders）。"""
+        return Path(os.environ.get(RENDERS_ENV) or "renders").expanduser().resolve()
+
+    def _render_file(self, raw_name: str):
+        """把一张出片的 PDF 发给浏览器：只认文件名，路径穿越一律当 404。"""
+        from urllib.parse import unquote
+
+        name = unquote(raw_name).strip()
+        if not name or "/" in name or "\\" in name or ".." in name or not name.lower().endswith(".pdf"):
+            return self._error("not_found", "Render not found", 404)
+        root = self._renders_dir()
+        target = (root / name).resolve()
+        if root not in target.parents or not target.is_file():
+            return self._error("not_found", "Render not found", 404)
+        return self._send(
+            target.read_bytes(),
+            "application/pdf",
+            headers={
+                # inline：点「预览」直接在标签页里看；带 download=1 时浏览器会下载。
+                "Content-Disposition": f'inline; filename="{name}"',
+            },
+        )
 
     def _json(self, value, status=200):
         self._send(
@@ -291,6 +316,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(asset.read_bytes(), content_type + "; charset=utf-8")
             if path.startswith("/letters/mercury"):
                 return self._letter(path)
+            if path.startswith("/api/v1/renders/") and self.command in ("GET", "HEAD"):
+                return self._render_file(path.removeprefix("/api/v1/renders/"))
             hunter = getattr(self.server, "hunter", None)
             if hunter is not None:
                 if path == "/api/v1/hunter/status" and self.command == "GET":
