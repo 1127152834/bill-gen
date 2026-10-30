@@ -630,3 +630,27 @@ Oshkosh, WI 54903-3528.`；`pytest` 567 passed / 16 skipped / 33 subtests；
 `e2e_compare --label personal` 有参考件的 5 套 0 差异、boa/wf 版式漂移 0 段。
 
 回滚：`git revert <本轮提交>`（amex 词标 / chase 槽位 / 别名三处互不依赖）。
+
+## 第二十三轮（长账单分页：8 套个人版式逐套压测）
+
+办法：把一次真跑出来的 checking 流水复制三倍（42 行 / 13 个日期），逐套出片看分页。
+
+| 版式 | 页数 | `(continued)` | `Page k of N` |
+| --- | --- | --- | --- |
+| chase-personal | 2 | 有（`TRANSACTION DETAIL (continued)`） | 2 of 2 |
+| boa-personal | 5 | 有 | 1..4 of 5（第 5 页是 Braille/法律页，不编号） |
+| usbank-personal | 5 | 有（`SAFE DEBIT ACCOUNT (CONTINUED)`） | 1..3 of 3 + 披露页 + 空白页 |
+| wellsfargo | 6 | — | 1..6 |
+| capitalone | 4 | — | 1..4 |
+| mercury | 3 | — | 无页码（底稿本来就没有） |
+| sofi | 4 | — | 1..4 |
+| amex | 5 | 有 | 无页码（底稿本来就没有） |
+
+结论：**没有一行被丢掉**（Chase 42 行全部落在 p1/p2，`Ending Balance` 与账本期末一致），
+续页横幅 / 客户块 / `(CONTINUED)` / 页码范式都与底稿一致。
+
+顺带发现一个「看着像 bug 其实忠实」的点：Chase 续页上有两条 1pt 的隐形标记文字
+`*start*dre portrait disclosure message area` / `*end*…`（`layout_personal.json` 的
+`spans[58]`/`[59]`）。这是**参考件本身就有**的东西（提取底稿时带出来的），肉眼不可见、
+文本层可见。留着是因为它证明「真实出件也会带这种流水线残留」，删掉反而与参考件不一致；
+要删的话必须连 layout json 一起删，否则 layout 比对会报缺 span。

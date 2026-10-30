@@ -73,3 +73,7 @@ docker exec bill-gen-v2-billgen-1 python /app/tools/realism_rules.py
    （`usbank-business` 4 页 vs 底稿 2 页属数据行数差异）。续页横幅、客户块、
    `(CONTINUED)`、`Page k of N` 都已按底稿范式复刻。
 7. **`alliant` / `ally`**：`kind="static-web"`，浏览器端 pdf-lib 渲染，Python 侧无出片路径。
+
+8. **Chase 续页有 1pt 隐形标记**：`*start*dre portrait disclosure message area` /
+   `*end*…`，出自参考件本身（`themes/chase/layout_personal.json` 的 `spans[58]/[59]`），
+   肉眼不可见。删它要连 layout json 一起删，否则 layout 比对会报缺 span。
