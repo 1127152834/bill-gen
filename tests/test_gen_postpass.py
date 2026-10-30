@@ -134,6 +134,7 @@ def test_repair_month_reports_each_category():
         "sorted",
         "recurring",
         "stores",
+        "decap",
     }
 
 
@@ -251,3 +252,14 @@ def test_repair_month_reports_recurring_and_store_fixes():
     report = postpass.repair_month(data, state="CA", city="Temple City")
     assert report["recurring"] == 1
     assert set(report) >= {"utilities", "duplicate_utilities", "online_places", "chains", "budget", "amounts", "sorted", "recurring", "stores"}
+
+
+def test_decap_nudges_amounts_that_sit_exactly_on_the_cap():
+    data = _mercury_like([
+        {"date": "Nov 7", "desc": "PANERA BREAD 4774 TEMPLE CITY CA", "amount": -45.0},
+        {"date": "Nov 20", "desc": "PANERA BREAD 5554 TEMPLE CITY CA", "amount": -20.0},
+    ])
+    changed = postpass.decap_amounts(data, seed="t")
+    assert changed == 1
+    assert abs(data["transactions"][0]["amount"]) < 45.0
+    assert data["transactions"][1]["amount"] == -20.0

@@ -416,6 +416,34 @@ def fix_chains(data: dict[str, Any], *, state: str, city: str = "") -> int:
     return changed
 
 
+def decap_amounts(data: dict[str, Any], *, seed: str = "") -> int:
+    """把「正好等于类目上限」的金额往内挪一点，返回改了几行。
+
+    模型和补齐逻辑都容易把同类消费顶到上限（一顿饭 $45.00 ×4 一眼是机器生成的），
+    真账单的数字几乎不会这么整齐。
+    """
+    changed = 0
+    for row in _iter_rows(data):
+        desc = _row_desc(row)
+        amount = _row_amount(row)
+        if not desc or amount is None:
+            continue
+        category = _category_of(desc)
+        if not category:
+            continue
+        lo, hi = range_for(category)
+        if abs(abs(amount) - hi) > 0.005:
+            continue
+        digest = hashlib.sha256(f"{seed}|{_norm(desc)}|{hi}".encode()).hexdigest()[:6]
+        factor = 0.62 + (int(digest, 16) % 30) / 100.0  # 0.62–0.91
+        new_value = round(hi * factor, 2)
+        _set_amount(row, -new_value if amount < 0 else new_value)
+        changed += 1
+    if changed:
+        _rescale_amounts(data)
+    return changed
+
+
 def dedupe_recurring(data: dict[str, Any]) -> int:
     """固定扣款一个月只留一笔（会员费、保费、话费、水电）。返回删掉几行。"""
     removed = 0
@@ -950,6 +978,7 @@ def repair_month(
         "sorted": sort_rows(data),
         "recurring": dedupe_recurring(data),
         "stores": vary_chain_stores(data),
+        "decap": decap_amounts(data, seed=str(state)),
     }
     return report
 
