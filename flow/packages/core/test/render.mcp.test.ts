@@ -234,6 +234,46 @@ describe.skipIf(!hasBillgen)('render node over MCP', () => {
     }
   }, 240_000);
 
+  it('writes what the model filled, and the model edit reaches the delivered JSON', async () => {
+    // 交付的是模型填出来的那份数据，不是重新跑一遍适配器：改了什么就得在 JSON 里看到什么。
+    const marker = 'SCENARIO FOOTER LINE';
+    const deps = depsWith(
+      stubLlm((draft) => ({ ...draft, customer_lines: [marker, ...((draft.customer_lines as string[]) ?? []).slice(1)] })),
+      'always',
+      ['boa-personal'],
+      'json',
+    );
+    const update = (await renderStep(deps, () => {})(stateWith(result()))) as RenderUpdate;
+    const files = update.result?.monthFiles ?? [];
+    expect(files.length).toBeGreaterThan(0);
+    for (const file of files) {
+      const data = JSON.parse(readFileSync(file.path, 'utf8')) as { customer_lines?: string[] };
+      expect(data.customer_lines?.[0]).toBe(marker);
+    }
+  }, 240_000);
+
+  it('accumulates one report across every month instead of overwriting it', async () => {
+    const base = result();
+    const statement = base.statements.find((s) => s.accountType === 'checking')!;
+    const months = [
+      { cycleStart: '2026-07-24', cycleEnd: '2026-08-23' },
+      { cycleStart: '2026-08-24', cycleEnd: '2026-09-23' },
+      { cycleStart: '2026-09-24', cycleEnd: '2026-10-23' },
+    ].map((m) => ({ ...m, openingBalanceCents: 100000, closingBalanceCents: 120000, totalCreditsCents: 0, totalDebitsCents: 0, transactionCount: 0 }));
+    const value = GenerationResultSchema.parse({ ...base, statements: [{ ...statement, months }] });
+    const deps = depsWith(stubLlm((d) => d), false, ['boa-personal'], 'json');
+    const update = (await renderStep(deps, () => {})(stateWith(value))) as RenderUpdate;
+    const files = update.result?.monthFiles ?? [];
+    expect(files).toHaveLength(3);
+    const dir = dirname(files[0]!.path);
+    const report = JSON.parse(readFileSync(join(dir, 'validation-report.json'), 'utf8')) as {
+      months: { month: string }[];
+      batch: { months: string[] };
+    };
+    expect(report.months.map((m) => m.month)).toEqual(['2026-07', '2026-08', '2026-09']);
+    expect(report.batch.months).toEqual(['2026-07', '2026-08', '2026-09']);
+  }, 240_000);
+
   it('marks a failed month on the file instead of dropping it silently', async () => {
     const deps = depsWith(stubLlm((d) => d), false, ['boa-personal'], 'json');
     const update = (await renderStep(deps, () => {})(stateWith(result()))) as RenderUpdate;
@@ -264,6 +304,7 @@ describe.skipIf(!hasBillgen)('mcp client', () => {
         'list_templates',
         'month_files',
         'month_json',
+        'month_write',
         'preview',
         'recommend_templates',
         'render',

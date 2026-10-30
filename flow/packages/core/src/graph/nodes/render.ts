@@ -57,23 +57,25 @@ const ContractSchema = z.object({
 });
 type Contract = z.infer<typeof ContractSchema>;
 
-const MonthFilesSchema = z.object({
+/** `month_write` 的应答：这一份的结论 + 并进去之后的整批结论。 */
+const MonthWriteSchema = z.object({
   ok: z.boolean().optional(),
   errors: z.array(z.string()).optional(),
-  dir: z.string().optional(),
-  files: z.array(
-    z.object({
-      month: z.string(),
-      path: z.string(),
-      rows: z.number(),
-      bytes: z.number(),
-      sha256: z.string(),
-      ok: z.boolean(),
-    }),
-  ).default([]),
-  batch: z.record(z.string(), z.unknown()).optional(),
+  month: z.string().optional(),
+  path: z.string().optional(),
+  rows: z.number().optional(),
+  bytes: z.number().optional(),
+  sha256: z.string().optional(),
+  structure: z.array(z.record(z.string(), z.unknown())).optional(),
+  content: z.array(z.record(z.string(), z.unknown())).optional(),
+  batch: z.object({
+    ok: z.boolean().optional(),
+    months: z.array(z.string()).default([]),
+    failed: z.array(z.string()).default([]),
+    problems: z.array(z.record(z.string(), z.unknown())).default([]),
+  }).optional(),
 });
-type MonthFilesAnswer = z.infer<typeof MonthFilesSchema>;
+type MonthWriteAnswer = z.infer<typeof MonthWriteSchema>;
 
 const ValidateSchema = z.object({
   ok: z.boolean(),
@@ -294,36 +296,37 @@ async function renderOne(
   const finish = async (): Promise<{ artifact?: RenderArtifact; monthFiles?: MonthFile[]; warning?: string }> => {
     // 默认交付「每月一份模板 JSON」：用户自己导进模板出账单，服务端不再拼 PDF。
     if (deps.billgen?.deliver !== 'pdf') {
-      const answer = await client.callTool<MonthFilesAnswer>('month_files', {
+      // 交付物就是模型填出来的这份数据：落盘、当场校验，报告与清单按月累积。
+      const month = period || statement.periodStart.slice(0, 7);
+      const answer = await client.callTool<MonthWriteAnswer>('month_write', {
         template_id: templateId,
-        result,
-        account: statement.accountType,
-        cycle,
-        ...(bankName && { bank_name: bankName }),
-        ...(period && { months: [period] }),
+        month,
+        data,
       });
       if (answer.errors?.length) {
-        return { warning: `${templateId}${period ? ` ${period}` : ''}: 月度 JSON 失败 (${answer.errors.join('; ')})` };
+        return { warning: `${templateId} ${month}: 月度 JSON 失败 (${answer.errors.join('; ')})` };
       }
-      const files: MonthFile[] = answer.files.map((file) => ({
+      if (!answer.path) return { warning: `${templateId} ${month}: 月度 JSON 没有落盘` };
+      const file: MonthFile = {
         template: templateId,
         account: statement.accountType,
-        month: file.month,
-        path: file.path,
-        rows: file.rows,
-        bytes: file.bytes,
-        sha256: file.sha256,
-        ok: file.ok,
-      }));
-      if (files.length === 0) {
-        return { warning: `${templateId}${period ? ` ${period}` : ''}: 没有月份可交付（账期里没有流水）` };
-      }
-      const failed = files.filter((file) => !file.ok).map((file) => file.month);
+        month: answer.month ?? month,
+        path: answer.path,
+        rows: answer.rows ?? 0,
+        bytes: answer.bytes ?? 0,
+        sha256: answer.sha256 ?? '',
+        ok: answer.ok ?? false,
+      };
+      const problems = [...(answer.structure ?? []), ...(answer.content ?? [])]
+        .map((item) => String(item.rule ?? item.detail ?? ''))
+        .filter(Boolean);
+      const gaps = (answer.batch?.problems ?? []).map((item) => String(item.detail ?? item.rule ?? ''));
       return {
-        monthFiles: files,
-        ...(failed.length > 0 && {
-          warning: `${templateId}: ${failed.join(', ')} 未通过校验（结构/内容/跨月三层，见 validation-report.json）`,
+        monthFiles: [file],
+        ...(!file.ok && {
+          warning: `${templateId} ${file.month} 未通过校验（${problems.slice(0, 3).join('; ') || '见 validation-report.json'}）`,
         }),
+        ...(gaps.length > 0 && { warning: `${templateId}: ${gaps.join('；')}` }),
       };
     }
     const rendered = await client.callTool<z.infer<typeof RenderSchema>>('render', {

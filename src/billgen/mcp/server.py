@@ -380,6 +380,29 @@ def build(*, out_dir: str | None = None):  # noqa: ANN201 - 返回 FastMCP，避
 
     @server.tool(
         description=(
+            "落盘**已经填好的**一份月模板 JSON（模型改过的也行），校验结构与算术后返回结论；"
+            "同时把这份并进 validation-report.json / manifest.json（多月累积，不是覆盖）"
+        )
+    )
+    def month_write(template_id: str, month: str, data: dict[str, Any], out_dir: str = "") -> dict[str, Any]:
+        report = monthpack.check_delivered(template_id, month, data)
+        target = _out_dir(out_dir or None)
+        target.mkdir(parents=True, exist_ok=True)
+        body = {key: item for key, item in data.items() if key not in ("metadata",)}
+        blob = (json.dumps(body, ensure_ascii=False, indent=2) + "\n").encode()
+        path = target / f"{template_id}-{month}.json"
+        path.write_bytes(blob)
+        entry = {
+            **report,
+            "path": str(path),
+            "bytes": len(blob),
+            "sha256": hashlib.sha256(blob).hexdigest(),
+        }
+        merged = delivery.merge_entry(target, template_id, entry)
+        return {"ok": report["ok"], **entry, "batch": merged}
+
+    @server.tool(
+        description=(
             "按自然月落盘每月模板 JSON（另写 validation-report.json 与 manifest.json），返回文件路径 + 三层结论"
         )
     )

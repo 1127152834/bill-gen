@@ -417,6 +417,74 @@ def json_total_issues(artifact: MonthArtifact) -> list[dict[str, str]]:
     return found
 
 
+def check_delivered(template_id: str, month: str, data: dict[str, Any]) -> dict[str, Any]:
+    """校验**已经填好的**一份月 JSON（模型改过的也行），返回结论。
+
+    和 `validate_artifact` 的区别：这里没有账本，所以只做「交付件自己能不能解释自己」——
+    结构（对默认值比字段与形状）、占位词、流水行数、期初+流水=期末。
+    跨月连续性由调用方拿 `opening`/`closing` 自己比。
+    """
+    defaults = registry.get_renderer(template_id).default_data()
+    structure, warnings = _structure_issues(template_id, data)
+    structure.extend(_value_format_issues(defaults, data))
+    rows = json_rows(data)
+    content: list[dict[str, str]] = []
+    if not rows:
+        content.append({"rule": "no_transactions_found", "path": "", "detail": "交付件里找不到流水行"})
+    else:
+        total = sum(cents for _, cents in rows)
+        opening = opening_cents_of(data)
+        closing = closing_cents_of(data)
+        if opening is not None and closing is not None and total != closing - opening:
+            content.append({
+                "rule": "json_total_mismatch",
+                "path": "",
+                "detail": f"流水合计 {total / 100:,.2f} ≠ 期末−期初 {(closing - opening) / 100:,.2f}",
+            })
+    hits = placeholder_hits(json.dumps(data, ensure_ascii=False))
+    for hit in hits:
+        content.append({"rule": "placeholder_text", "path": "", "detail": f"出现占位词 {hit!r}"})
+    return {
+        "month": month,
+        "template": template_id,
+        "ok": not structure and not content,
+        "structure": structure,
+        "content": content,
+        "warnings": warnings,
+        "rows": len(rows),
+        "opening": None if (opening := opening_cents_of(data)) is None else opening / 100,
+        "closing": None if (closing := closing_cents_of(data)) is None else closing / 100,
+    }
+
+
+def opening_cents_of(data: dict[str, Any]) -> int | None:
+    """这份 JSON 自己声明的期初（各家字段名不同，全试一遍）。"""
+    for key in ("begin_balance", "beginning_balance", "opening_balance"):
+        cents = parse_money(data.get(key))
+        if cents is not None:
+            return cents
+    return None
+
+
+def closing_cents_of(data: dict[str, Any]) -> int | None:
+    """这份 JSON 自己声明的期末：优先 summary/closing 类字段，其次最后一行余额。"""
+    for key in ("end_balance", "ending_balance", "closing_balance"):
+        cents = parse_money(data.get(key))
+        if cents is not None:
+            return cents
+    summary = data.get("summary")
+    if isinstance(summary, dict):
+        for key in ("ending_balance", "end_balance", "closing_balance"):
+            cents = parse_money(summary.get(key))
+            if cents is not None:
+                return cents
+    rows = json_rows(data)
+    opening = opening_cents_of(data)
+    if rows and opening is not None:
+        return opening + sum(cents for _, cents in rows)
+    return None
+
+
 # ------------------------------------------------------------------- 内容校验
 def validate_artifact(artifact: MonthArtifact, ledger: LedgerDocument) -> None:
     """给一份已出好的 JSON 补上结构与内容两层结论（原地写进 artifact）。"""
