@@ -198,6 +198,16 @@ MERCHANT_REGIONAL: dict[str, dict[str, list[str]]] = {
         "LA": ["ENTERGY", "CENTERPOINT"],
         "OK": ["OG&E", "ONEOK"],
     },
+    "tax": {
+        "TX": ["IRS", "IRS USATAXPYMT", "TX COMPTROLLER"],
+        "CA": ["IRS", "IRS USATAXPYMT", "FTB CALIFORNIA"],
+        "NY": ["IRS", "IRS USATAXPYMT", "NY STATE TAX"],
+        "MA": ["IRS", "IRS USATAXPYMT", "MASS DOR"],
+        "IL": ["IRS", "IRS USATAXPYMT", "IL DEPT REVENUE"],
+        "PA": ["IRS", "IRS USATAXPYMT", "PA DEPT REVENUE"],
+        "GA": ["IRS", "IRS USATAXPYMT", "GA DOR"],
+        "FL": ["IRS", "IRS USATAXPYMT"],
+    },
     "telecom": {
         "TX": ["AT&T WIRELESS", "VERIZON WIRELESS", "T-MOBILE", "XFINITY", "SPECTRUM"],
         "CA": ["AT&T WIRELESS", "VERIZON WIRELESS", "T-MOBILE", "XFINITY", "COX COMM"],
@@ -577,6 +587,20 @@ Code-enforced rules (a violation is rejected):
 """
 
 
+def budget_line(profile: Mapping[str, Any], norm: Mapping[str, Any]) -> str:
+    """把档案里的收支档写成一句硬约束，别让模型自己发挥量级。"""
+    income = profile.get("monthly_income_hint") or profile.get("incomeHint")
+    rent = profile.get("rent_hint") or profile.get("rentHint")
+    parts = []
+    if income:
+        parts.append(f"每月入账合计必须落在 {income} 美元区间")
+    if rent:
+        parts.append(f"房租一笔必须落在 {rent} 美元区间，一个月只有一笔房租")
+    if not parts:
+        return ""
+    return "Budget constraints (hard): " + "; ".join(parts) + "。"
+
+
 def life_model_messages(
     profile: Mapping[str, Any],
     norm: Mapping[str, Any],
@@ -610,6 +634,7 @@ def life_model_messages(
     user_parts = [
         subject_line(profile),
         location_line(norm),
+        *([budget_line(profile, norm)] if budget_line(profile, norm) else []),
         "Subject and calendar:\n" + json_text(data),
         untrusted("Researched facts", json_text(compact)),
     ]
@@ -864,6 +889,7 @@ def descriptors_messages(
     user_parts = [
         subject_line(profile),
         location_line(norm),
+        *([budget_line(profile, norm)] if budget_line(profile, norm) else []),
         untrusted("Merchants on this statement", payload),
     ]
     problems = [str(item).strip() for item in (feedback or []) if str(item).strip()]

@@ -18,7 +18,7 @@ from billgen.gen import pipeline
 from billgen.gen import prompts as P
 from billgen.gen.prompts import MERCHANT_EXAMPLES, merchant_pool
 from billgen.gen.llm import LlmBadJson
-from billgen.gen.pipeline import build_ledger, generate, node_normalize
+from billgen.gen.pipeline import build_ledger, generate, node_normalize, node_schedule
 from billgen.gen.tavily import TavilyQuotaExceeded, TavilyResult
 from billgen.jobs import JobCancelled
 
@@ -652,3 +652,42 @@ def test_bill_entries_drop_invented_labels():
     norm = {"template": "chase-personal", "seed": "fix-1"}
     assert pipeline._final_description(row, "CON EDISON UTIL BILL", norm) == "CON EDISON"
     assert pipeline._final_description(row, "PPD ID:8837", norm).startswith("CON EDISON PPD ID")
+
+
+def test_pos_rows_never_use_the_research_title_as_merchant():
+    """POS 行的商户名只来自品牌池；事实的 name（搜索标题）不参与。"""
+    contract = " 2026-10-30T00:00:00Z"
+    norm = node_normalize(PROFILE, template="chase-personal", months=["2026-09"], seed="fix-1")
+    model = deepcopy(_model())
+    model["discretionaryPool"] = [
+        {
+            "factId": "f9",
+            "weight": 1.0,
+            "perMonth": {"min": 2, "max": 2},
+            "ticketCents": {"min": 2645, "max": 2645},
+            "pricing": "basket",
+            "taxable": True,
+            "tip": False,
+            "account": "checking",
+            "weekendBias": 0.2,
+            "location": "online",
+        }
+    ]
+    facts = [
+        {
+            "id": "f9",
+            "name": "Best Graphic Design Services In Austin",
+            "category": "graphic_design",
+            "city": "Austin",
+            "state": "TX",
+            "national": False,
+        }
+    ]
+    rows = node_schedule(norm, model, facts, seed="fix-1")
+    pos = [row for row in rows if row["type"] == "POS"]
+    assert pos
+    pool = {name for names in MERCHANT_EXAMPLES.values() for name in names}
+    for row in pos:
+        assert row["base_description"] in pool, row["base_description"]
+        assert "GRAPHIC" not in row["base_description"]
+        assert "DESIGN" not in row["base_description"]

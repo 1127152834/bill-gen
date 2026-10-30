@@ -20,6 +20,7 @@ from typing import Any, Mapping
 
 from ..jobs import JobCancelled, JobContext
 from ..profiles import ProfileStore
+from . import postpass
 from .config import load_config
 from .llm import LlmClient
 from .pipeline import GenResult, generate
@@ -171,6 +172,27 @@ def make_runner(*, profiles: Path | str | None = None):
             ctx.log(f"生成失败：{exc}", percent=100)
             raise
 
+        # 交付前过一遍确定性收尾：跨区公用事业/越区连锁/离谱金额。
+        payload = profile.to_dict().get("payload") or {}
+        address = payload.get("address") or {}
+        state = str(address.get("state") or "")
+        city = str(address.get("city") or "")
+        income_hint = payload.get("monthly_income_hint")
+        rent_hint = payload.get("rent_hint")
+        repaired: dict[str, dict[str, int]] = {}
+        for outcome in result.months:
+            data = getattr(outcome, "data", None)
+            if isinstance(data, dict):
+                repaired[outcome.month] = postpass.repair_month(
+                    data,
+                    state=state,
+                    city=city,
+                    income_hint=income_hint,
+                    rent_hint=rent_hint,
+                )
+        if any(sum(v.values()) for v in repaired.values()):
+            ctx.log("收尾：已按档案所在地修正公用事业/连锁/金额档位", percent=94)
+
         files = _month_files(result, out_dir)
         report = _batch_report(result)
         _write(out_dir / "validation-report.json", report)
@@ -184,6 +206,7 @@ def make_runner(*, profiles: Path | str | None = None):
             "failed_months": report["failed_months"],
             "usage": result.usage,
             "warnings": list(result.warnings),
+            "postpass": repaired,
         }
         _write(out_dir / "job-summary.json", summary)
 
