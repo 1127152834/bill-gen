@@ -1,4 +1,4 @@
-"""Legacy editors keep workspace snapshots atomic; only AE output is per browser."""
+"""Legacy editors keep workspace snapshots atomic across sessions."""
 import copy
 import importlib.util
 import json
@@ -110,55 +110,6 @@ def test_session_ids_are_server_issued_and_expire():
     expired, _ = sessions.resolve(header.split(";", 1)[0])
     assert expired.pdf is None
 
-
-def test_ae_browser_download_save_and_previews_are_isolated(monkeypatch, tmp_path):
-    module, gen = load_editor(monkeypatch, THEMES / "amex/editor.py", "generate_sample_statement")
-    module.SAVE_DIR, module.PV_DIR = str(tmp_path), str(tmp_path / "pages")
-    monkeypatch.setattr(module, "parse_payload", lambda body: body)
-    monkeypatch.setattr(module, "build_warnings", lambda data: ([], {}))
-    monkeypatch.setattr(module, "compute_totals", lambda data: {})
-    monkeypatch.setattr(module, "parse_metadata", lambda data: ({}, ([], {})))
-    monkeypatch.setattr(module, "parse_xmp", lambda data: ({}, ([], {})))
-    def build(data, *a, **kw):
-        doc = fitz.open()
-        doc.new_page().insert_text((20, 20), data["name"])
-        return doc
-    gen.build_pdf = build
-    gen.pdf_bytes = lambda doc, **kw: doc.tobytes()
-    server = ThreadingHTTPServer(("127.0.0.1", 0), module.Handler)
-    server.daemon_threads = True
-    thread = threading.Thread(target=server.serve_forever, daemon=True)
-    thread.start()
-    origin = f"http://127.0.0.1:{server.server_port}"
-    clients = [build_opener(HTTPCookieProcessor(CookieJar())) for _ in range(2)]
-    def request(client, path, data=None):
-        req = Request(origin + path, data=json.dumps(data).encode() if data is not None else None)
-        with client.open(req, timeout=5) as response:
-            return response.read()
-    try:
-        for client in clients:
-            request(client, "/")
-        first = json.loads(request(clients[0], "/api/build", {"name": "FIRST"}))
-        with pytest.raises(HTTPError) as error:
-            request(clients[1], "/api/download")
-        assert error.value.code == 400
-        error.value.close()
-        second = json.loads(request(clients[1], "/api/build", {"name": "SECOND"}))
-        for client, name in zip(clients, ("FIRST", "SECOND"), strict=True):
-            pdf = request(client, "/api/download")
-            with fitz.open(stream=pdf, filetype="pdf") as doc:
-                assert name in doc[0].get_text()
-        for hashes in (first["hashes"], second["hashes"]):
-            assert request(clients[0], "/pv/" + hashes[0] + ".png").startswith(b"\x89PNG")
-        request(clients[0], "/api/save", {"filename": "first.pdf"})
-        with pytest.raises(HTTPError) as error:
-            request(clients[1], "/api/reveal", {"action": "finder"})
-        assert error.value.code == 400
-        error.value.close()
-    finally:
-        server.shutdown()
-        server.server_close()
-        thread.join(timeout=2)
 
 
 def test_portal_explicit_build_and_cross_template_preview_retention(monkeypatch, tmp_path):

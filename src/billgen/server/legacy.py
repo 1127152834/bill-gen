@@ -37,7 +37,6 @@ class Mount:
 
 MOUNTS = (
     Mount('wf', 'Wells Fargo', 'wellsfargo', 'editor/server.py', 'generate'),
-    Mount('ae', 'American Express', 'amex', 'editor.py', 'generate_sample_statement'),
     Mount('merc', 'Mercury / Capital One / SoFi', 'portal', 'editor_server.py'),
     Mount('boa', 'Bank of America', 'boa', 'editor/server.py', 'generate'),
     Mount('chase', 'Chase Personal', 'chase', 'editor_personal/server.py', 'generate_personal'),

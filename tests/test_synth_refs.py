@@ -64,17 +64,6 @@ def test_ledger_assigns_a_reference_to_every_row() -> None:
             assert len(row.reference) == 15
 
 
-def test_amex_prints_trace_not_internal_prefix() -> None:
-    ledger = _ledger()
-    binding = binding_for("amex")
-    data = binding.build(ledger, {})
-    ids = [tx["id"] for tx in data["transactions"]]
-    assert ids and all(value.startswith("ID ") for value in ids)
-    assert not any("BG" in value for value in ids)
-    ach = [tx for tx in data["transactions"] if len(tx["id"].split()[1]) == 15]
-    assert ach, "至少一行应印 15 位 ACH trace"
-
-
 def test_sofi_uses_batch_sequence_transaction_id() -> None:
     ledger = _ledger()
     data = binding_for("sofi").build(ledger, {})

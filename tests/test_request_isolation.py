@@ -41,7 +41,7 @@ def test_default_data_is_a_deep_copy():
 
 
 def test_interleaved_and_threaded_rendering_matches_serial_fingerprints():
-    ids = ["mercury", "amex", "sofi", "boa-personal", "chase-personal", "usbank-personal"]
+    ids = ["mercury", "capitalone", "sofi", "boa-personal", "chase-personal", "usbank-personal"]
     expected = {key: probe(key) for key in ids}
     with ThreadPoolExecutor(max_workers=4) as pool:
         actual = list(pool.map(probe, list(reversed(ids)) + ids))
@@ -89,21 +89,6 @@ def test_failure_restores_import_environment_and_leaves_next_request_usable():
     assert sys.path == before_path
     assert all(sys.modules.get(key) is value for key, value in before_short.items())
     assert renderer.render(renderer.default_data()).pages == 4
-
-
-def test_amex_adapter_does_not_use_temporary_filename_as_dataset_label():
-    renderer = registry.get_renderer("amex")
-    module = renderer._module()
-    original = module.build_pdf
-    calls = []
-
-    def wrapped(data, dataset_label="custom", **kwargs):
-        calls.append(dataset_label)
-        return original(data, dataset_label=dataset_label, **kwargs)
-
-    with patch.object(module, "build_pdf", wrapped):
-        renderer.render(renderer.default_data())
-    assert calls == ["custom"]
 
 
 def test_document_is_closed_when_serialization_fails():

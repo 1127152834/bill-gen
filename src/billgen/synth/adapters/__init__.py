@@ -1,7 +1,7 @@
 """模板绑定表：LedgerDocument → 某个模板的数据字典。
 
 11 个服务端模板共用同一份账本，差异全部收敛在这里的映射函数里。信用卡模板
-（amex 之外）不在此列：13 个模板的版式都是存款账户对账单，信用账户数据无法
+不在此列：13 个模板的版式都是存款账户对账单，信用账户数据无法
 按存款账户字段表达，所以 ``accounts`` 声明得清清楚楚，越界即报错而不是硬塞。
 """
 from __future__ import annotations
@@ -38,7 +38,6 @@ BINDINGS: tuple[Binding, ...] = (
     _b("boa-personal", {DEPOSIT}, boa.build, boa.count_rows),
     _b("boa-business", {BUSINESS}, boa.build, boa.count_rows),
     _b("wellsfargo", {DEPOSIT}, wellsfargo.build, wellsfargo.count_rows),
-    _b("amex", {DEPOSIT}, simple.build_amex, simple.count_rows),
     _b("mercury", {DEPOSIT, BUSINESS}, simple.build_mercury, simple.count_rows),
     _b("capitalone", {DEPOSIT}, simple.build_capitalone, simple.count_rows),
     _b("sofi", {DEPOSIT}, simple.build_sofi, simple.count_rows),

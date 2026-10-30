@@ -29,7 +29,6 @@ TEMPLATE_CHOICES = (
     "usbank-personal",
     "usbank-business",
     "wellsfargo",
-    "amex",
     "mercury",
     "capitalone",
     "sofi",

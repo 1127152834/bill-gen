@@ -40,11 +40,12 @@ def fake():
 def test_inventory_and_static_contract():
     service = ApplicationService()
     items = {item["id"]: item for item in service.list_templates()}
-    assert len(items) == 13
+    assert len(items) == 12
     assert items["ally"]["static_entry"] == "/ally/index.html"
     assert items["ally"]["supports"] == []
     assert items["ally"]["server_render"] is False
-    assert items["amex"]["default_options"]["encrypt"] is True
+    assert all(item["default_options"]["encrypt"] is False
+               for item in items.values() if "default_options" in item)
     assert items["chase-personal"]["default_options"]["encrypt"] is False
     assert "encrypt" not in items["boa-personal"]["supports"]
     for method in (service.default_data, service.preview, service.export_pdf):
@@ -55,18 +56,21 @@ def test_inventory_and_static_contract():
 
 def test_preview_export_options_and_artifacts(fake):
     service = ApplicationService()
-    preview = service.preview("amex", options={"page_dpi": 72}, request_id="req-1")
+    preview = service.preview("chase-personal", options={"page_dpi": 72}, request_id="req-1")
     assert preview["options"]["encrypt"] is False
     assert preview["pdf"]["encrypted"] is False
     assert preview["page_info"][0]["pixel_width"] == 200
     assert service.get_page_png(preview["job_id"], 0).startswith(b"\x89PNG")
     assert service.get_pdf(preview["job_id"]).startswith(b"%PDF")
     assert service.get_job(preview["job_id"])["request_id"] == "req-1"
-    exported = service.export_pdf("amex", request_id="req-1")
-    assert exported["pdf"]["encrypted"] is True
+    exported = service.export_pdf("chase-personal", request_id="req-1")
+    assert exported["pdf"]["encrypted"] is False
+    encrypted = service.export_pdf("chase-personal", request_id="req-1",
+                                   options={"encrypt": True})
+    assert encrypted["pdf"]["encrypted"] is True
     assert exported["job_id"] != preview["job_id"]
     assert service.export_pdf("chase-personal")["options"]["encrypt"] is False
-    assert service.export_pdf("amex", options={"encrypt": False})["pdf"]["encrypted"] is False
+    assert service.export_pdf("chase-personal", options={"encrypt": False})["pdf"]["encrypted"] is False
     with pytest.raises(ApplicationError, match="support encryption"):
         service.export_pdf("boa-personal", options={"encrypt": True})
     preview["pdf"]["metadata"].clear()
@@ -78,7 +82,7 @@ def test_preview_export_options_and_artifacts(fake):
     {"unknown": 1}, []])
 def test_bad_options(options, fake):
     with pytest.raises(ApplicationError) as error:
-        ApplicationService().preview("amex", options=options)
+        ApplicationService().preview("chase-personal", options=options)
     assert error.value.code == "invalid_options"
     assert not fake.calls
 
@@ -86,21 +90,21 @@ def test_bad_options(options, fake):
 @pytest.mark.parametrize("data", [[], "bad", {"value": float("nan")}, {"value": object()}])
 def test_bad_data(data, fake):
     with pytest.raises(ApplicationError) as error:
-        ApplicationService().preview("amex", data)
+        ApplicationService().preview("chase-personal", data)
     assert error.value.code == "invalid_data"
 
 
 def test_request_copies_and_threads(fake):
     service = ApplicationService()
     data = {"customer": {"name": "ALPHA"}}
-    service.preview("amex", data)
+    service.preview("chase-personal", data)
     assert data["customer"]["name"] == "ALPHA"
-    default = service.default_data("amex")
+    default = service.default_data("chase-personal")
     default.clear()
-    assert service.default_data("amex")["customer"]["name"] == "DEFAULT"
+    assert service.default_data("chase-personal")["customer"]["name"] == "DEFAULT"
     names = ["BRAVO", "CHARLIE", "DELTA"]
     with ThreadPoolExecutor(max_workers=4) as pool:
-        jobs = list(pool.map(lambda name: service.preview("amex", {"customer": {"name": name}}), names))
+        jobs = list(pool.map(lambda name: service.preview("chase-personal", {"customer": {"name": name}}), names))
     for job, name in zip(jobs, names, strict=True):
         with fitz.open(stream=service.get_pdf(job["job_id"]), filetype="pdf") as doc:
             assert name in doc[0].get_text()
@@ -109,8 +113,8 @@ def test_request_copies_and_threads(fake):
 def test_cache_count_ttl_bytes_and_close(fake):
     service = ApplicationService(max_jobs=1, ttl_seconds=10)
     with patch("billgen.server.application.time.monotonic", return_value=100):
-        first = service.preview("amex")
-        second = service.preview("amex")
+        first = service.preview("chase-personal")
+        second = service.preview("chase-personal")
         with pytest.raises(ApplicationError) as error:
             service.get_job(first["job_id"])
         assert error.value.code == "job_not_found"
@@ -119,7 +123,7 @@ def test_cache_count_ttl_bytes_and_close(fake):
           pytest.raises(ApplicationError)):
         service.get_pdf(second["job_id"])
     with pytest.raises(ApplicationError) as error:
-        ApplicationService(max_cache_bytes=1).preview("amex")
+        ApplicationService(max_cache_bytes=1).preview("chase-personal")
     assert error.value.code == "artifact_too_large"
     service.close()
     assert not service._jobs
@@ -127,25 +131,25 @@ def test_cache_count_ttl_bytes_and_close(fake):
 
 def test_uniform_errors_and_limits(fake):
     with pytest.raises(ApplicationError) as error:
-        ApplicationService(max_data_bytes=1).preview("amex")
+        ApplicationService(max_data_bytes=1).preview("chase-personal")
     assert error.value.status == 413
     with (patch.object(fake, "render", side_effect=RuntimeError("secret /private/path traceback")),
           pytest.raises(ApplicationError) as error):
-        ApplicationService().preview("amex")
+        ApplicationService().preview("chase-personal")
     assert error.value.to_dict() == {"code": "render_failed", "message": "Template rendering failed"}
     assert error.value.__suppress_context__
     with pytest.raises(ApplicationError) as error:
         ApplicationService().preview("missing")
     assert error.value.status == 404
     service = ApplicationService()
-    job = service.preview("amex")
+    job = service.preview("chase-personal")
     for index in (-1, True, 1, "0"):
         with pytest.raises(ApplicationError) as error:
             service.get_page_png(job["job_id"], index)
         assert error.value.code == "page_not_found"
 
 
-@pytest.mark.parametrize("template_id", ["amex", "chase-personal", "chase-business", "usbank-personal", "usbank-business"])
+@pytest.mark.parametrize("template_id", ["chase-personal", "chase-personal", "chase-business", "usbank-personal", "usbank-business"])
 def test_real_encryption_roundtrip(template_id):
     service = ApplicationService()
     data = service.default_data(template_id)
@@ -158,10 +162,10 @@ def test_real_encryption_roundtrip(template_id):
     assert data["encrypt"] is True
 
 
-@pytest.mark.parametrize("template_id", ["amex", "chase-personal", "chase-business", "usbank-personal", "usbank-business"])
+@pytest.mark.parametrize("template_id", ["chase-personal", "chase-personal", "chase-business", "usbank-personal", "usbank-business"])
 def test_direct_default_and_explicit_encryption_preserve_parity(template_id):
     spec = registry.get_spec(template_id)
-    assert spec.default_options.encrypt is (template_id == "amex")
+    assert spec.default_options.encrypt is False
     plain = probe(template_id, replace(spec.default_options, encrypt=False))
     encrypted = probe(template_id, replace(spec.default_options, encrypt=True))
     assert {key: plain[key] for key in PARITY_KEYS} == {key: encrypted[key] for key in PARITY_KEYS}

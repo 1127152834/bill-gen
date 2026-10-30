@@ -24,7 +24,6 @@ _SUBSET = re.compile(r"^[A-Z]{6}\+")
 # 旧仓 probe 用的 id → 新注册表 id（P0 基线是旧目录下记录的）
 LEGACY_IDS: dict[str, str] = {
     "wf": "wellsfargo",
-    "ae": "amex",
     "merc": "mercury",
     "c1": "capitalone",
     "us-personal": "usbank-personal",

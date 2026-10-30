@@ -1,9 +1,5 @@
 {
   "files": [
-    "AE/assets/logo.png",
-    "AE/fonts/BentonSansAE-Bold.ttf",
-    "AE/fonts/BentonSansAE-Regular.ttf",
-    "AE/fonts/BentonSansAE-RegularItalic.ttf",
     "BOA/statement_template/assets/fonts/Bol.otf",
     "BOA/statement_template/assets/fonts/FG.otf",
     "BOA/statement_template/assets/fonts/HS.otf",
@@ -127,8 +123,6 @@
     "ally bank/private-assets.js"
   ],
   "required": [
-    "AE/assets/logo.png",
-    "AE/fonts/BentonSansAE-Regular.ttf",
     "BOA/statement_template/layout_business.json",
     "BOA/statement_template/layout_personal.json",
     "BOA/statement_template/assets/fonts_meta.json",

@@ -48,7 +48,6 @@ REFERENCES: dict[str, str | None] = {
     "mercury": "src/billgen/themes/mercury/Demo-Bank-Statement-SAMPLE.pdf",
     "sofi": "src/billgen/themes/sofi/SoFi-Statement-SAMPLE.pdf",
     "wellsfargo": None,
-    "amex": None,
 }
 
 #: 这套版式必须出现的区块标题（缺一个就不像这家了）。
@@ -65,7 +64,6 @@ SECTION_LABELS = {
     "mercury": ["Account details", "Account activity", "All Transactions"],
     "sofi": ["Primary Account Holder", "Transaction Details", "Contact Information"],
     "wellsfargo": ["Monthly service fee summary", "Account activity"],
-    "amex": ["Statement Summary", "Interest Summary", "Account Activity"],
 }
 
 #: 参考件里的占位/他人身份，绝不能出现在我们出的件里。
@@ -308,8 +306,7 @@ def layout_reference(template_id: str) -> dict[str, Any] | None:
         "boa-personal": "src/billgen/themes/boa/layout_personal.json",
         "boa-business": "src/billgen/themes/boa/layout_business.json",
         "wellsfargo": "src/billgen/themes/wellsfargo/layout_static.json",
-        "amex": None,
-    }
+        }
     rel = candidates.get(template_id)
     if not rel:
         return None

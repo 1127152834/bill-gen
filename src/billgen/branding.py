@@ -34,10 +34,6 @@ PLACEMENTS: dict[str, tuple[tuple[float, float, float, float], ...]] = {
     "boa-business": ((36.0, 46.8, 205.9, 77.0), (378.0, 55.0, 514.8, 80.2)),
     "wellsfargo": ((516.0, 21.8, 564.8, 70.5),),
     # 只重画方形标（CT 字母块）。底稿右侧那块 65×14 的「AMERICAN EXPRESS」小字标
-    # 与页眉大标题（`{name}® Rewards Checking Statement`，x 从 107.1 起）重叠：
-    # 换家银行时把它一起重画，红章会把大标题的前几个字吃掉（实测印出
-    # `rust Bank® Rewards Checking Statement`）。标题里已经带全名，小字标直接略过。
-    "amex": ((50.4, 26.4, 92.6, 69.1),),
     "mercury": ((38.0, 38.0, 181.0, 74.0),),
     "capitalone": ((57.6, 21.6, 201.6, 72.0),),
     "sofi": ((470.85, 49.85, 574.40, 77.45),),
@@ -376,10 +372,6 @@ TEXT_SLOTS: dict[str, tuple[TextSlot, ...]] = {
         TextSlot((37.0, 85.0, 200.0, 95.0), (39.6, 92.64), 7.0, "{po_box}"),
         TextSlot((37.0, 94.0, 200.0, 104.0), (39.6, 101.52), 7.0, "{city_state_zip}"),
     ),
-    "amex": (
-        TextSlot((360.0, 628.0, 560.0, 640.0), (362.2, 636.85), 8.0, "{phone_service}"),
-        TextSlot((360.0, 642.0, 560.0, 654.0), (362.2, 651.05), 8.0, "{mail_line}"),
-    ),
 }
 
 _SLOT_FIELD = re.compile(r"\{(\w+)\}")
@@ -450,9 +442,6 @@ LITERALS: dict[str, tuple[tuple[str, str], ...]] = {
                    ("97228-6995", "{zip4}"),
                    ("Wells Fargo Bank", "{legal}"),
                    ("Wells Fargo", "{name}")),
-    "amex": (("1-877-221-2639", "{phone_service}"),
-             ("P.O. Box 31492 Salt Lake City, UT 84131", "{mail_line}"),
-             ),
 }
 
 

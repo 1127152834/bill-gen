@@ -180,7 +180,7 @@ def finalize(
         doc = pikepdf.open(io.BytesIO(pdf))
     except Exception:  # 加密 / 结构异常：不动原文件
         return pdf
-    if doc.is_encrypted:  # 加密件（amex 默认）重写会掉加密，宁可不动
+    if doc.is_encrypted:  # 加密件重写会掉加密，宁可不动
         doc.close()
         return pdf
     doc.close()

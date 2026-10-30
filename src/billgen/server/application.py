@@ -36,9 +36,9 @@ from .state import RENDER_LOCK
 __all__ = ["ApplicationError", "ApplicationService"]
 
 # Verified against legacy editor export branches and generator save routines.
-_ENCRYPTABLE = frozenset({"amex", "chase-personal", "chase-business",
+_ENCRYPTABLE = frozenset({"chase-personal", "chase-business",
                           "usbank-personal", "usbank-business"})
-_DEFAULT_ENCRYPT = frozenset({"amex"})
+_DEFAULT_ENCRYPT: frozenset[str] = frozenset()
 
 
 class ApplicationError(Exception):

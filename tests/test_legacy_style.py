@@ -58,7 +58,7 @@ def test_injection_is_idempotent_and_preserves_original_bytes():
     assert decorated.replace(b'\n<link rel="stylesheet" href="/web-assets/legacy.css">\n<script src="/web-assets/legacy.js" defer></script>\n', b'') == prefixed
 
 
-@pytest.mark.parametrize('endpoint', ['/boa/api/data', '/ae/api/presets', '/merc/api/state?tpl=mercury', '/alliant/js/editor.js', '/ally/private-assets.js', '/alliant/assets/editor.css'])
+@pytest.mark.parametrize('endpoint', ['/boa/api/data', '/chase/api/data', '/merc/api/state?tpl=mercury', '/alliant/js/editor.js', '/ally/private-assets.js', '/alliant/assets/editor.css'])
 def test_non_html_responses_never_receive_skin(mounts, endpoint):
     request = Request(endpoint)
     mounts.dispatch(request)

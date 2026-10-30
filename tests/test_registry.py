@@ -1,4 +1,4 @@
-"""注册表与主题目录的契约测试：13 个模板必须齐全且自洽。"""
+"""注册表与主题目录的契约测试：12 个模板必须齐全且自洽。"""
 from __future__ import annotations
 
 import pytest
@@ -6,13 +6,13 @@ import pytest
 from billgen import paths, registry
 
 EXPECTED_IDS = {
-    "boa-personal", "boa-business", "wellsfargo", "amex", "mercury",
+    "boa-personal", "boa-business", "wellsfargo", "mercury",
     "capitalone", "sofi", "chase-personal", "chase-business",
     "usbank-personal", "usbank-business", "alliant", "ally",
 }
 
 
-def test_all_thirteen_templates_registered():
+def test_all_registered_templates():
     assert {spec.id for spec in registry.SPECS} == EXPECTED_IDS
 
 

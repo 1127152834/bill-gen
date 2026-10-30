@@ -37,9 +37,9 @@ def test_index_health_registry(web):
     assert b"BillGen" in get(web, "/")[2]
     assert json.loads(get(web, "/healthz")[2])["status"] == "ok"
     specs = json.loads(get(web, "/api/v1/templates")[2])["templates"]
-    assert len(specs) == 13
+    assert len(specs) == 12
     assert all(any("\u4e00" <= char <= "\u9fff" for char in row["display_name"]) for row in specs)
-    assert sum(row["server_render"] for row in specs) == 11
+    assert sum(row["server_render"] for row in specs) == 10
 
 
 def test_workbench_assets_and_traversal(web):

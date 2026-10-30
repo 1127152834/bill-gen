@@ -29,7 +29,6 @@
 | `usbank-personal` | `usbank.md` | `Uni-Statement` + `Ref Number` 列 + ACH 两行续行 + IMB 条码 |
 | `usbank-business` | `usbank.md` | 同上，标题为 `BUSINESS ESSENTIALS CHECKING` |
 | `wellsfargo` | `wellsfargo.md` | 存/取分列 + `Ending daily balance` 列 + 6 页（含披露页） |
-| `amex` | `amex.md` | Credits / Debits 双列 + `ID` 续行 + `Interest Summary` |
 | `capitalone` | `capitalone.md` | `CATEGORY` 列（品类词，不是 Credit/Debit） |
 | `sofi` | `sofi.md` | `TYPE` 列（Direct Payment / Card Purchase…）+ `Transaction ID:` 续行 |
 | `mercury` | `mercury.md` | `Type` 列（ACH In / Card / Wire In）+ `End of Day Balance` |

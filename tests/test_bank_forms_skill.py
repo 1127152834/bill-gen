@@ -33,7 +33,6 @@ REFERENCE_BY_TEMPLATE = {
     "usbank-personal": "usbank",
     "usbank-business": "usbank",
     "wellsfargo": "wellsfargo",
-    "amex": "amex",
     "capitalone": "capitalone",
     "sofi": "sofi",
     "mercury": "mercury",

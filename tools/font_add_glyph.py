@@ -11,7 +11,7 @@
 
 用法::
 
-    python tools/font_add_glyph.py src/billgen/themes/amex/fonts/BentonSansAE-Regular.ttf
+    python tools/font_add_glyph.py src/billgen/themes/capitalone/fonts/MyFontBold.ttf
     python tools/font_add_glyph.py --char '#' --advance 1200 --stem 180 --height 1460 FONT
     python tools/font_add_glyph.py --check FONT     # 只报告字形表里有没有，不改文件
 

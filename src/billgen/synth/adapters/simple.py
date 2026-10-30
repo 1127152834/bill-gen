@@ -1,7 +1,7 @@
-"""四个「单表流水」模板：美国运通、水星、第一资本、索菲。
+"""三个「单表流水」模板：水星、第一资本、索菲。
 
 它们共用同一形状（期初 + 一维交易数组 + 若干页脚字段），差异只在字段名与日期格式，
-所以放在一个模块里，用四个薄函数分别映射。
+所以放在一个模块里，用三个薄函数分别映射。
 """
 from __future__ import annotations
 
@@ -11,7 +11,6 @@ from typing import Any
 from .. import refs
 from ..ledger import LedgerDocument, LedgerRow
 from ..line_styles import (
-    amex_desc,
     capitalone_category,
     capitalone_desc,
     mercury_desc,
@@ -36,7 +35,7 @@ from ._common import (
     statement_memo,
 )
 
-__all__ = ["build_amex", "build_capitalone", "build_mercury", "build_sofi"]
+__all__ = ["build_capitalone", "build_mercury", "build_sofi"]
 
 DESC_LIMIT = 44
 
@@ -56,55 +55,6 @@ def _absolute(row: LedgerRow) -> float:
 
 def _addr(ledger: LedgerDocument) -> list[str]:
     return address_lines(ledger)
-
-
-def build_amex(ledger: LedgerDocument, defaults: dict[str, Any]) -> dict[str, Any]:
-    d = deep(defaults)
-    d.update(
-        {
-            "customer_name": ledger.holder.name.upper(),
-            "address_lines": _addr(ledger),
-            "account_ending": ledger.account.last4,
-            # Account Summary 那一行是「产品名...卡尾4」（参考件 `360 Checking...5521`）；
-            # 直接用账本里的产品名会印成 `Everyday Checking`，与 360 版式的产品线对不上。
-            "account_name": f"{str(d.get('account_title') or '360 Checking').strip()}...{ledger.account.last4}",
-            "bank": bank_block(ledger),
-            # 出件日 = 期末 + 2 天：真账单是结单后 1–3 个工作日出件，
-            # 和期末同一天等于「当天结单当天寄」。
-            "statement_date": (ledger.period.end + timedelta(days=2)).strftime("%m/%d/%Y"),
-            "period_start": ledger.period.start.strftime("%m/%d/%Y"),
-            "period_end": ledger.period.end.strftime("%m/%d/%Y"),
-            "days_in_period": ledger.period.days,
-            "beginning_balance": cents_to_float(ledger.opening_cents),
-            "transactions": [
-                {
-                    "date": r.date.strftime("%m/%d/%Y"),
-                    "desc": clip(amex_desc(ledger, r, r.description), DESC_LIMIT + 12),
-                    "amount": _signed(r),
-                    "id": f"ID {r.reference}" if r.reference.isdigit() else "ID " + refs.amex_reference(_key(ledger, r)),
-                    "memo": statement_memo(r),
-                    "type": "Deposit" if r.direction == "credit" else "Withdrawal",
-                }
-                for r in ledger.rows
-            ],
-        }
-    )
-    return d
-
-
-MERCURY_TYPE = {
-    "POS": ("Card", "out", "card"),
-    "ATM": ("ATM Withdrawal", "out", "card"),
-    "CHECK": ("Check", "out", "achOut"),
-    "FEE": ("Fee", "out", "achOut"),
-    "ZELLE": ("Transfer Out", "out", "biArrow"),
-    "TRANSFER": ("Transfer Out", "out", "biArrow"),
-    "PAYMENT": ("ACH Out", "out", "achOut"),
-    "ACH": ("ACH Out", "out", "achOut"),
-    "DEPOSIT": ("ACH In", "in", "achIn"),
-    "INTEREST": ("Interest", "in", "infoCircle"),
-    "REFUND": ("ACH In", "in", "achIn"),
-}
 
 
 def build_mercury(ledger: LedgerDocument, defaults: dict[str, Any]) -> dict[str, Any]:

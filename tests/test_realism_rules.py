@@ -189,23 +189,3 @@ def test_fake_contact_rule_catches_555_and_double_brand():
         "chase-personal", "Web site: jpmorgan-jpmorgan-chase.com")
     assert [p["rule"] for p in dup] == ["double-brand"]
 
-
-def test_product_mismatch_rule_catches_card_phone_on_deposit_statement():
-    """amex 存款账单不许印信用卡的 Card Member 服务线，也不许编路径。"""
-    import importlib.util, pathlib, sys
-
-    path = pathlib.Path(__file__).resolve().parents[1] / "tools" / "realism_rules.py"
-    spec = importlib.util.spec_from_file_location("realism_rules_probe2", path)
-    mod = importlib.util.module_from_spec(spec)
-    sys.modules["realism_rules_probe2"] = mod
-    spec.loader.exec_module(mod)
-
-    clean = "Rewards Checking 1-877-221-2639 americanexpress.com/rewardschecking"
-    assert mod.product_mismatch_problems("amex", clean) == []
-    bad = mod.product_mismatch_problems(
-        "amex", "1-800-528-4800 P.O. Box 981540, El Paso, TX 79998-1540")
-    assert [p["rule"] for p in bad] == ["product-mismatch"]
-    invented = mod.product_mismatch_problems("amex", "americanexpress.com/rewardscheckingdashboard")
-    assert invented and invented[0]["hit"] == "rewardscheckingdashboard"
-    # 别的版式不管这套
-    assert mod.product_mismatch_problems("chase-personal", "1-800-528-4800") == []

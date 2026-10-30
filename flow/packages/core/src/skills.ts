@@ -27,7 +27,6 @@ export const REFERENCE_BY_TEMPLATE: Record<string, string> = {
   'usbank-personal': 'usbank',
   'usbank-business': 'usbank',
   'wellsfargo': 'wellsfargo',
-  'amex': 'amex',
   'capitalone': 'capitalone',
   'sofi': 'sofi',
   'mercury': 'mercury',

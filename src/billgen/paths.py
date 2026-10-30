@@ -71,7 +71,6 @@ THEMES = _SRC / "billgen" / "themes"
 
 # 旧逻辑路径前缀 → 新物理路径（相对仓库根）。按前缀长度降序匹配。
 _RELOCATED: dict[str, str] = {
-    "AE": "src/billgen/themes/amex",
     "BOA/statement_template": "src/billgen/themes/boa",
     "USbank/statement_template": "src/billgen/themes/usbank",
     "alliant": "src/billgen/themes/web/alliant",
@@ -88,7 +87,6 @@ _PREFIXES = sorted(_RELOCATED, key=len, reverse=True)
 
 # 主题目录键 → 包内相对目录（不含 src/billgen/themes 前缀）
 _THEME_DIRS: dict[str, str] = {
-    "amex": "amex",
     "boa": "boa",
     "wellsfargo": "wellsfargo",
     "chase": "chase",

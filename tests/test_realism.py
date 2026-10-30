@@ -143,7 +143,7 @@ def test_chase_barcode_encodes_our_own_account():
 
 @pytest.mark.parametrize("template_id", [
     "boa-personal", "wellsfargo", "chase-personal", "usbank-personal",
-    "amex", "mercury", "capitalone", "sofi",
+    "mercury", "capitalone", "sofi",
 ])
 def test_catalog_has_no_structure_markers(template_id):
     """真实账单的 catalog 不带 tagged 结构树；我们连键名都不留。"""

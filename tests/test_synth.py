@@ -177,7 +177,7 @@ def test_ledger_keeps_holder_and_bank_identity(ledger):
 # ---------------------------------------------------------------- 适配器
 
 PERSONAL_TEMPLATES = (
-    "boa-personal", "wellsfargo", "amex", "mercury",
+    "boa-personal", "wellsfargo", "mercury",
     "capitalone", "sofi", "chase-personal", "usbank-personal",
 )
 BUSINESS_TEMPLATES = ("boa-business", "chase-business", "usbank-business")

@@ -45,12 +45,6 @@ SPECS: tuple[TemplateSpec, ...] = (
         default_options=RenderOptions(font_policy="declared"),
     ),
     TemplateSpec(
-        "amex", "美国运通", "from-scratch", "amex", "document",
-        module="generate_sample_statement", entry="build_pdf",
-        supports=_CREDIT_CARD, legacy_prefixes=("/ae",),
-        default_options=RenderOptions(encrypt=True),
-    ),
-    TemplateSpec(
         "mercury", "水星银行", "from-scratch", "mercury", "global",
         module="generate_statement", entry="build",
         supports=_DOCUMENT, legacy_prefixes=("/mercury",),

@@ -20,7 +20,6 @@ from .money import digits
 
 __all__ = [
     "ach_trace",
-    "amex_reference",
     "card_auth",
     "check_number",
     "fedwire_imad",
@@ -86,11 +85,6 @@ def internal_id(seed: str) -> str:
 def sofi_txid(seed: str) -> str:
     """SoFi 的 ``Transaction ID: 133-12773001``：3 位批次 + 8 位序号。"""
     return f"{digits(f'sofi-b:{seed}', 3)}-{digits(f'sofi-s:{seed}', 8)}"
-
-
-def amex_reference(seed: str) -> str:
-    """Amex 存款的 ``ID`` 行：15 位，前 8 位是路由号形状。"""
-    return digits(f"amex-route:{seed}", 8) + digits(f"amex-seq:{seed}", 7)
 
 
 def check_number(seed: str, start: int = 1000) -> str:

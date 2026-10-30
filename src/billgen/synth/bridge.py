@@ -110,7 +110,6 @@ TEMPLATE_BANK = {
     "capitalone": "Capital One",
     "mercury": "Mercury",
     "sofi": "SoFi",
-    "amex": "American Express",
 }
 
 
@@ -198,7 +197,7 @@ def render(
     # 行名留空时先换成模板自带的那家，后续的品牌重绘才知道该画谁。
     ledger = _adopt_template_bank(ledger, renderer.default_data(), template_id)
     data = build_data(template_id, ledger, verify_rows=verify_rows)
-    # 水印是输出选项而不是数据：amex/capitalone/sofi/mercury 只认 opts.watermark，
+    # 水印是输出选项而不是数据：capitalone/sofi/mercury 只认 opts.watermark，
     # 不把账本上的开关传下去，它们就会一直盖 `SAMPLE`（出件形态直接穿帮）。
     opts = options or renderer.spec.default_options
     if options is None and opts.watermark != ledger.watermark:

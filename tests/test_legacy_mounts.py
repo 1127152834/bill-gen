@@ -57,7 +57,7 @@ def test_real_page_for_every_mount(mounts, mount):
 
 
 @pytest.mark.parametrize('mount_id,endpoint', [
-    ('wf', '/api/data'), ('ae', '/api/presets'), ('merc', '/api/state?tpl=mercury'),
+    ('wf', '/api/data'), ('merc', '/api/state?tpl=mercury'),
     ('boa', '/api/data'), ('chase', '/api/data'), ('chasebiz', '/api/data'),
     ('us', '/api/data'), ('usbiz', '/api/data'),
 ])
@@ -66,17 +66,6 @@ def test_real_api_without_referer(mounts, mount_id, endpoint):
     assert mounts.dispatch(req)
     assert req.status == 200
     assert isinstance(req.json(), dict)
-
-
-def test_ae_session_cookie_is_mount_scoped(mounts):
-    req = Request('/ae/')
-    mounts.dispatch(req)
-    cookie = req.response_headers['set-cookie']
-    assert 'Path=/ae/' in cookie
-    repeat = Request('/ae/api/presets', cookie=cookie.split(';', 1)[0])
-    mounts.dispatch(repeat)
-    assert repeat.status == 200
-    assert 'set-cookie' not in repeat.response_headers
 
 
 def test_generation_and_preview(mounts):

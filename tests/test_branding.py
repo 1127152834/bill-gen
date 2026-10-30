@@ -18,7 +18,6 @@ BANK_BY_TEMPLATE = {
     "boa-personal": "Bank of America",
     "boa-business": "Bank of America",
     "wellsfargo": "Wells Fargo",
-    "amex": "American Express",
     "mercury": "Mercury",
     "capitalone": "Capital One",
     "sofi": "SoFi",
@@ -279,8 +278,6 @@ REAL_CONTACT_DIGITS = {
     "chase-personal": ("9359935",),
     "usbank-personal": ("8722657", "3528"),
     "usbank-business": ("8722657", "3528"),
-    # Rewards Checking（存款）口径：1-877-221-2639 / PO Box 31492 Salt Lake City
-    "amex": ("8772212639", "31492"),
 }
 
 

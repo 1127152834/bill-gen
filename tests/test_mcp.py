@@ -201,7 +201,7 @@ def test_contract_skeleton_carries_each_template_own_bank():
     for template_id in (
         "boa-personal", "boa-business", "chase-personal", "chase-business",
         "usbank-personal", "usbank-business", "wellsfargo", "capitalone",
-        "mercury", "sofi", "amex",
+        "mercury", "sofi",
     ):
         root = template_id.split("-")[0]
         bank = skeleton(template_id)["bank"]

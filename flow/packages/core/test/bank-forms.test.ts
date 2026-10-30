@@ -19,7 +19,6 @@ const TEMPLATES = [
   'usbank-personal',
   'usbank-business',
   'wellsfargo',
-  'amex',
   'capitalone',
   'sofi',
   'mercury',

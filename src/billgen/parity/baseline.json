@@ -68,24 +68,6 @@
     ],
     "secs_render": 0.27
   },
-  "amex": {
-    "id": "amex",
-    "name": "美国运通",
-    "kind": "from-scratch",
-    "pages": 2,
-    "size": [
-      612.0,
-      792.0
-    ],
-    "bytes": 81760,
-    "text_sha256_16": "64c2f0ba5ba1def6",
-    "text_chars": 2370,
-    "fonts": [
-      "BentonSans-Bold",
-      "BentonSans-Regular"
-    ],
-    "secs_render": 0.07
-  },
   "mercury": {
     "id": "mercury",
     "name": "水星银行",

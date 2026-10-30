@@ -101,13 +101,7 @@ _TEMPLATE_NOTES: dict[str, dict[str, str]] = {
         "account.rtn": "9 位路由号，ABA 校验位正确",
         "transactions": "流水行 {date:'1/4', desc, deposit, withdrawal, balance}",
         "summary": "auto=true 时重算",
-    },
-    "amex": {
-        "transactions": "流水行 {date:'10/02/2026', desc, amount(带符号浮点), id, txid, memo, type}",
-        "bank": "行名/法律主体/域名；标题与页脚会跟着变",
-        "statement_date": "出单日 MM/DD/YYYY",
-    },
-    "mercury": {
+    },    "mercury": {
         "transactions": "流水行 {date:'Oct 2', desc, amount, id, txid, memo, type, dir:'in'|'out'}",
         "company": "公司名（商业账户）",
         "ein": "雇主识别号，用 12-3456789 形态的虚构值",
