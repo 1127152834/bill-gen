@@ -2,22 +2,36 @@
 
 from __future__ import annotations
 
+import io
 import json
 import logging
 import mimetypes
 import os
 import re
 import uuid
+import zipfile
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import urlsplit
+from urllib.parse import unquote, urlsplit
 
 from .. import delivery, synth
 from ..hunter import HunterProcess, SettingsError, SettingsStore
 from ..hunter.probe import ProbeError, probe_llm, probe_tavily
 from ..hunter.proxy import forward
+from ..jobs import Job, JobNotFound, JobQueue
+from ..profiles import (
+    Profile,
+    ProfileError,
+    ProfileNotFound,
+    ProfileStore,
+    ensure_accounts,
+    import_csv,
+    import_json,
+    validate_profile,
+)
 from ..themes.mercury import letter_web
+from . import generate_page
 from .application import ApplicationError, ApplicationService
 from .legacy import LegacyMounts
 
@@ -42,6 +56,7 @@ EDITOR_LINKS = (
     ("/alliant/", "Alliant"),
     ("/ally/", "Ally"),
     ("/letters/mercury/", "Mercury 验证信（信件编辑器）"),
+    ("/generate/", "账单 JSON 生成器"),
 )
 
 
@@ -71,6 +86,54 @@ def _mask_secret(value: str) -> str:
     if len(text) <= 8:
         return "•" * len(text)
     return f"{text[:3]}…{text[-4:]}"
+
+
+# ---- 异步任务队列的进程级单例 ------------------------------------------------
+# 懒建：测试可以先 `init_jobs(tmp_path, fake_runner)` 注入，再起真服务；
+# 启动路径（serve / CLI）在装配阶段调一次，路由层只读这个变量。
+_JOBS: JobQueue | None = None
+
+
+def init_jobs(root: Path | str, runner, *, max_workers: int = 1) -> JobQueue:
+    """建（或替换）任务队列。重复调用时旧队列停止接活，跑着的任务会自己收尾。"""
+    global _JOBS
+    previous, _JOBS = _JOBS, JobQueue(root, runner, max_workers=max_workers)
+    if previous is not None:
+        previous.shutdown(wait=False)
+    return _JOBS
+
+
+def _build_profile(payload) -> Profile:
+    """把外面塞进来的 dict 变成能入库的档案：校验 + 补账户事实。"""
+    profile = _finalize_profile(Profile.from_dict(payload))
+    return profile
+
+
+def _finalize_profile(profile: Profile) -> Profile:
+    problems = validate_profile(profile)
+    if problems:
+        raise ProfileError("；".join(problems))
+    ensure_accounts(profile)
+    return profile
+
+
+# ---- 人物档案库的进程级单例 --------------------------------------------------
+# 路径优先级：BILLGEN_PROFILES > (BILL_GEN_DATA_DIR 或 ".data")/billgen/profiles.json。
+# 容器里 compose 会给 BILLGEN_PROFILES=/data/billgen/profiles.json（落在挂载卷上）。
+_PROFILES: ProfileStore | None = None
+
+
+def profiles_store(path: Path | str | None = None) -> ProfileStore:
+    """取档案库（首次调用时按环境变量定位并读盘）。"""
+    global _PROFILES
+    if _PROFILES is None or path is not None:
+        target = path or os.environ.get("BILLGEN_PROFILES") or (
+            Path(os.environ.get("BILL_GEN_DATA_DIR") or ".data") / "billgen" / "profiles.json"
+        )
+        store = ProfileStore(target)
+        store.load()
+        _PROFILES = store
+    return _PROFILES
 
 
 class BillGenHTTPServer(ThreadingHTTPServer):
@@ -248,6 +311,190 @@ class Handler(BaseHTTPRequestHandler):
         }
         return job
 
+    # ---- 异步任务队列路由（/api/v1/gen/jobs）---------------------------------
+    _GEN_JOBS = "/api/v1/gen/jobs"
+    _GEN_JOB = re.compile(r"/api/v1/gen/jobs/([A-Za-z0-9_-]+)\Z")
+    _GEN_JOB_ACTION = re.compile(r"/api/v1/gen/jobs/([A-Za-z0-9_-]+)/(cancel|package)\Z")
+    _GEN_JOB_FILE = re.compile(r"/api/v1/gen/jobs/([A-Za-z0-9_-]+)/files/([^/]+)\Z")
+    # 单份下载只放这四种后缀：PDF 出片、月模板 JSON、预览 PNG、日志 TXT。
+    _JOB_FILE_TYPES = {
+        "json": "application/json; charset=utf-8",
+        "pdf": "application/pdf",
+        "png": "image/png",
+        "txt": "text/plain; charset=utf-8",
+    }
+    _MONTH = re.compile(r"\d{4}-(0[1-9]|1[0-2])\Z")
+
+    _PROFILE_ROUTE = re.compile(r"/api/v1/profiles/([0-9a-zA-Z_-]{1,64})\Z")
+
+    def _profiles_api(self, path: str):
+        """`/api/v1/profiles*`：档案库的增删改查 + 批量导入。"""
+        store = profiles_store()
+        if path == "/api/v1/profiles":
+            if self.command in ("GET", "HEAD"):
+                return self._json({"profiles": [p.to_dict() for p in store.all()]})
+            if self.command != "POST":
+                return self._error("method_not_allowed", "Method not allowed", 405)
+            payload = self._raw_json()
+            try:
+                profile = _build_profile(payload)
+            except ProfileError as exc:
+                return self._error("invalid_profile", str(exc), 400)
+            return self._json(store.upsert(profile).to_dict(), 201)
+        if path == "/api/v1/profiles/import":
+            if self.command != "POST":
+                return self._error("method_not_allowed", "Method not allowed", 405)
+            payload = self._raw_json()
+            kind = str(payload.get("kind") or "json").lower()
+            text = payload.get("text")
+            if not isinstance(text, str) or not text.strip():
+                return self._error("invalid_request", "缺少要导入的内容（text）", 400)
+            try:
+                result = import_csv(text) if kind == "csv" else import_json(text)
+            except ProfileError as exc:
+                return self._error("invalid_import", str(exc), 400)
+            saved = []
+            for candidate in result.profiles:
+                try:
+                    saved.append(store.upsert(_finalize_profile(candidate)).to_dict())
+                except ProfileError as exc:
+                    result.errors.append({"row": -1, "error": str(exc)})
+            return self._json({"profiles": saved, "errors": list(result.errors)})
+        match = self._PROFILE_ROUTE.match(path)
+        if not match:
+            return self._error("not_found", "Profile endpoint not found", 404)
+        pid = match.group(1)
+        if self.command in ("GET", "HEAD"):
+            try:
+                return self._json(store.get(pid).to_dict())
+            except ProfileNotFound:
+                return self._error("not_found", "档案不存在", 404)
+        if self.command == "DELETE":
+            try:
+                store.delete(pid)
+            except ProfileNotFound:
+                return self._error("not_found", "档案不存在", 404)
+            return self._json({"deleted": True, "id": pid})
+        if self.command in ("PUT", "PATCH"):
+            payload = self._raw_json()
+            try:
+                current = store.get(pid)
+                merged = {**current.to_dict(), **payload, "id": pid}
+                return self._json(store.upsert(_build_profile(merged)).to_dict())
+            except ProfileNotFound:
+                return self._error("not_found", "档案不存在", 404)
+            except ProfileError as exc:
+                return self._error("invalid_profile", str(exc), 400)
+        return self._error("method_not_allowed", "Method not allowed", 405)
+
+    def _gen_jobs(self, path: str):
+        """`/api/v1/gen/jobs*` 的总入口：未初始化先回 503，再按形状分派。"""
+        queue = _JOBS
+        if queue is None:
+            return self._error("jobs_unavailable", "任务队列未初始化", 503)
+        if path == self._GEN_JOBS:
+            if self.command in ("GET", "HEAD"):
+                return self._json({"jobs": [job.to_dict() for job in queue.list()]})
+            if self.command == "POST":
+                return self._submit_job(queue)
+            return self._error("method_not_allowed", "Method not allowed", 405)
+        match = self._GEN_JOB.match(path)
+        if match:
+            job = self._job_or_404(queue, match.group(1))
+            if self.command in ("GET", "HEAD"):
+                return self._json(job.to_dict())
+            return self._error("method_not_allowed", "Method not allowed", 405)
+        match = self._GEN_JOB_ACTION.match(path)
+        if match:
+            job_id, action = match.groups()
+            if action == "cancel":
+                if self.command != "POST":
+                    return self._error("method_not_allowed", "Method not allowed", 405)
+                self._job_or_404(queue, job_id)
+                return self._json(queue.cancel(job_id).to_dict())
+            if self.command not in ("GET", "HEAD"):
+                return self._error("method_not_allowed", "Method not allowed", 405)
+            return self._job_package(self._job_or_404(queue, job_id))
+        match = self._GEN_JOB_FILE.match(path)
+        if match:
+            if self.command not in ("GET", "HEAD"):
+                return self._error("method_not_allowed", "Method not allowed", 405)
+            return self._job_file(self._job_or_404(queue, match.group(1)), match.group(2))
+        return self._error("not_found", "Job endpoint not found", 404)
+
+    def _submit_job(self, queue: JobQueue):
+        """POST body：``{profile_id, template, months, seed?}`` → 202 + job dict。"""
+        payload = self._body(("profile_id", "template", "months", "seed"))
+        profile_id = payload.get("profile_id")
+        template = payload.get("template")
+        months = payload.get("months")
+        seed = payload.get("seed")
+        if not isinstance(profile_id, str) or not profile_id.strip():
+            raise ApplicationError("invalid_request", "profile_id is required", 400)
+        if not isinstance(template, str) or not template.strip():
+            raise ApplicationError("invalid_request", "template is required", 400)
+        if not isinstance(months, list) or not months:
+            raise ApplicationError("invalid_request", "months 必须是非空数组", 400)
+        for month in months:
+            if not isinstance(month, str) or not self._MONTH.match(month):
+                raise ApplicationError("invalid_request", f"months 里的 {month!r} 不是 YYYY-MM", 400)
+        if seed is not None and not isinstance(seed, str):
+            raise ApplicationError("invalid_request", "seed 必须是字符串", 400)
+        job = queue.submit(profile_id.strip(), template.strip(), list(months), seed=seed)
+        return self._json(job.to_dict(), 202)
+
+    def _job_or_404(self, queue: JobQueue, job_id: str) -> Job:
+        """未知 id 统一 404，别让 LookupError 掉到 500 分支。"""
+        try:
+            return queue.get(job_id)
+        except JobNotFound as exc:
+            raise ApplicationError("job_not_found", f"任务不存在：{job_id}", 404) from exc
+
+    def _job_package(self, job: Job):
+        """把 out_dir 打成 zip 流回；目录没了就是 404（任务被清过）。"""
+        out_dir = Path(job.out_dir)
+        if not out_dir.is_dir():
+            raise ApplicationError("not_found", "任务产物目录不存在", 404)
+        buffer = io.BytesIO()
+        with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as archive:
+            for item in sorted(out_dir.iterdir()):
+                if not item.is_file() or item.name.startswith(".") or item.name.endswith(".tmp"):
+                    continue
+                # 密钥类文件不进包：交付物里不该出现任何 *_api_key* 的东西。
+                if "api_key" in item.name.lower():
+                    continue
+                # 成员名用 basename，解压出来是平铺的一层，不会带出服务器绝对路径。
+                archive.write(item, arcname=os.path.basename(item.name))
+        return self._send(
+            buffer.getvalue(),
+            "application/zip",
+            headers={"Content-Disposition": f'attachment; filename="{job.id}-package.zip"'},
+        )
+
+    def _job_file(self, job: Job, raw_name: str):
+        """单份下载：只认 basename、不认点开头、后缀白名单。"""
+        name = unquote(raw_name).strip()
+        suffix = name.rsplit(".", 1)[-1].lower() if "." in name else ""
+        if (
+            not name
+            or name != os.path.basename(name)
+            or ".." in name
+            or "\\" in name
+            or name.startswith(".")
+            or suffix not in self._JOB_FILE_TYPES
+        ):
+            return self._error("not_found", "Job artifact not found", 404)
+        out_dir = Path(job.out_dir).resolve()
+        target = (out_dir / name).resolve()
+        if out_dir not in target.parents or not target.is_file():
+            return self._error("not_found", "Job artifact not found", 404)
+        disposition = "attachment" if suffix in ("json", "txt") else "inline"
+        return self._send(
+            target.read_bytes(),
+            self._JOB_FILE_TYPES[suffix],
+            headers={"Content-Disposition": f'{disposition}; filename="{name}"'},
+        )
+
     # ---- Mercury 验证信编辑器 -------------------------------------------------
     _LETTER_BASE = "/letters/mercury"
 
@@ -324,6 +571,10 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(asset.read_bytes(), content_type + "; charset=utf-8")
             if path.startswith("/letters/mercury"):
                 return self._letter(path)
+            if path in ("/generate", "/generate/"):
+                if self.command not in ("GET", "HEAD"):
+                    return self._error("method_not_allowed", "Method not allowed", 405)
+                return self._send(generate_page.page_bytes(), "text/html; charset=utf-8")
             if path.startswith("/api/v1/renders/") and self.command in ("GET", "HEAD"):
                 return self._render_file(path.removeprefix("/api/v1/renders/"))
             hunter = getattr(self.server, "hunter", None)
@@ -363,6 +614,11 @@ class Handler(BaseHTTPRequestHandler):
                 if _HUNTER_DETAIL.fullmatch(path):
                     return forward(self, hunter.target)
             if path.startswith("/api/v1/"):
+                # 异步任务队列：/api/v1/gen/jobs 系列，未初始化走 503。
+                if path == self._GEN_JOBS or path.startswith(self._GEN_JOBS + "/"):
+                    return self._gen_jobs(path)
+                if path.startswith("/api/v1/profiles"):
+                    return self._profiles_api(path)
                 if self.command == "GET" and path == "/api/v1/templates":
                     return self._json({"templates": app.list_templates()})
                 if self.command == "GET" and path == "/api/v1/synth/capabilities":
@@ -472,6 +728,18 @@ def serve(host="127.0.0.1", port=8800, *, hunter: bool = False, hunter_port: int
     from .bootstrap import prepare_workspace
 
     prepare_workspace()
+    # 任务队列：产物落 BILLGEN_JOBS_DIR（容器里是 /data/jobs），生成链路走 Python 版 worklow。
+    from ..gen.runner import make_runner
+
+    jobs_root = Path(
+        os.environ.get("BILLGEN_JOBS_DIR")
+        or (Path(os.environ.get("BILL_GEN_DATA_DIR") or "data") / "jobs")
+    )
+    init_jobs(
+        jobs_root,
+        make_runner(),
+        max_workers=int(os.environ.get("BILLGEN_JOB_WORKERS") or 2),
+    )
     instance = None
     if hunter:
         instance = HunterProcess(SettingsStore(), port=hunter_port)
