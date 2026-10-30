@@ -231,6 +231,13 @@ def build(*, out_dir: str | None = None):  # noqa: ANN201 - 返回 FastMCP，避
         renderer = registry.get_renderer(template_id)
         opts = RenderOptions(watermark=watermark, encrypt=encrypt,
                              font_policy=renderer.spec.default_options.font_policy)
+        if isinstance(data, dict):
+            # 模型常常不填行名（`bank.name` 空着）。空着就按这套版式自己的银行补上，
+            # 否则信头/页脚会留一片空白，或者被品牌化那一步换成空串。
+            try:
+                contracts._scaffold(template_id, data)
+            except ValueError:
+                pass
         try:
             result = renderer.render(data, opts)
         except RenderError as err:

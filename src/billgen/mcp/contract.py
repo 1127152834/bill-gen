@@ -11,6 +11,8 @@ import re
 from typing import Any
 
 from .. import registry
+from ..synth.bridge import TEMPLATE_BANK
+from ..synth.ledger import real_traits
 from ..engine.base import RenderError
 
 __all__ = ["CONTRACT_VERSION", "contract", "field_notes", "field_types", "rules_for", "skeleton"]
@@ -205,13 +207,49 @@ def skeleton(template_id: str) -> dict[str, Any]:
     return data
 
 
+_LEGAL_OVERRIDES = {"mercury": "Column N.A."}
+
+
 def _scaffold(template_id: str, data: dict[str, Any]) -> None:
-    bank = data.get("bank") if isinstance(data.get("bank"), dict) else {}
-    name = str(bank.get("name") or "Bank of America")
-    domain = str(bank.get("domain") or "bankofamerica.com")
-    # 这几个模板的引擎把行名当数据读，但默认数据里没给 —— 不补就印原版行名
-    if not isinstance(data.get("bank"), dict):
-        data["bank"] = {"name": name, "legal": f"{name}, N.A.", "domain": domain}
+    """补齐「引擎当数据读、默认数据里却没有」的块。
+
+    行名必须按**这套版式自己的银行**补（`TEMPLATE_BANK`），不能一律写死成一家 ——
+    否则模型读到 `bank.name = Bank of America`，会把它填进 Mercury / U.S. Bank 的
+    信头，品牌化那一步再照着重画 logo，一张假的就更假了。
+    """
+    root = template_id.split("-")[0]
+    default_name = TEMPLATE_BANK.get(root, "")
+    traits = (real_traits(default_name) if default_name else {}) or {}
+    bank = data.get("bank") if isinstance(data.get("bank"), dict) else None
+    if bank is None:
+        bank = {}
+        data["bank"] = bank
+    # Mercury 的信头印的是「Mercury」，但页脚印的是发卡行 Column N.A.（参考件原文：
+    # `Banking services provided by Column N.A., Member FDIC`）——两者不是一家。
+    legal = _LEGAL_OVERRIDES.get(root) or traits.get("legal")
+    filled = {
+        "name": default_name or "Bank of America",
+        "legal": str(legal or f"{default_name or 'Bank of America'}, N.A."),
+        "domain": str(traits.get("domain") or ""),
+    }
+    for key, value in filled.items():
+        if not str(bank.get(key) or "").strip():
+            bank[key] = value
+    # 各家版式对「行名那一块」的字段名不一样（WF 用 `phone_name`/`phone_main`/`legal_na`，
+    # 别家用 `name`/`phone`）。缺哪个就从这套版式自己的默认数据里端过来，不自己编。
+    defaults = registry.get_renderer(template_id).default_data()
+    inherited: dict[str, Any] = {}
+    if isinstance(defaults.get("bank"), dict):
+        inherited.update(defaults["bank"])
+    for key in ("phone_name", "phone_main", "legal_na", "po_box", "city_state_zip",
+                "phone", "phone_service", "phone_es", "phone_intl", "phone_spanish"):
+        if key in defaults:
+            inherited.setdefault(key, defaults[key])
+    for key, value in inherited.items():
+        if not str(bank.get(key) or "").strip():
+            bank[key] = value
+    name = str(bank.get("name"))
+    domain = str(bank.get("domain") or filled["domain"])
     # chase 个人版正文里会出现产品名；不给就会印着原版 "CHASE COLLEGE CHECKING"
     if template_id.startswith("chase"):
         data.setdefault("product", "Everyday Checking")

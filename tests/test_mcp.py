@@ -185,3 +185,31 @@ def test_recommend_templates_runs_and_ranks(srv):
     assert out["ok"] is True, out
     assert out["candidates"], out
     assert out["rows"] >= 1
+
+
+def test_contract_skeleton_carries_each_template_own_bank():
+    """骨架里的行名必须是**这套版式自己的银行**。
+
+    早先 `_scaffold` 一律写死成 Bank of America：模型读 contract 时会拿到
+    `bank.name = Bank of America`，于是把它填进 Mercury / U.S. Bank / SoFi 的信头，
+    品牌化再照着重画 logo —— 一张假账单上印着别家银行名，是最扎眼的一种假。
+    """
+    from billgen.mcp.contract import skeleton
+    from billgen.synth.bridge import TEMPLATE_BANK
+
+    for template_id in (
+        "boa-personal", "boa-business", "chase-personal", "chase-business",
+        "usbank-personal", "usbank-business", "wellsfargo", "capitalone",
+        "mercury", "sofi", "amex",
+    ):
+        root = template_id.split("-")[0]
+        bank = skeleton(template_id)["bank"]
+        # 版式自带的写法（chase 印 `JPMorgan Chase Bank`）优先，只要不跑到别家去
+        assert bank["name"].lower().startswith(TEMPLATE_BANK[root].lower()) \
+            or TEMPLATE_BANK[root].lower().startswith(bank["name"].lower()), (template_id, bank["name"])
+        assert bank["domain"], template_id
+        assert bank["legal"], template_id
+        if root != "boa":
+            assert "Bank of America" not in str(bank), template_id
+    # Mercury 的信头是自己，页脚发卡行是 Column N.A.（参考件原文）
+    assert skeleton("mercury")["bank"]["legal"] == "Column N.A."

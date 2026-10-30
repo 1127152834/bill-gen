@@ -494,3 +494,41 @@ SoFi 参考件逐行比对只剩商户名一类的数据行（不再是版式缺
 `pytest` 565 passed / 16 skipped / 33 subtests；`realism_rules.py` 11 套全绿。
 
 回滚：`git revert <本轮提交>`（只动了 `src/billgen/mcp/server.py::_branded`）。
+
+## 第十八轮（MCP 骨架把行名写死成 Bank of America）
+
+`contract.skeleton()` 是模型看到的「表单说明」，里面带着 `bank` 的默认值。它原来长这样：
+
+```python
+name = str(bank.get("name") or "Bank of America")
+data["bank"] = {"name": name, "legal": f"{name}, N.A.", "domain": "bankofamerica.com"}
+```
+
+也就是**不管哪套版式，一律 Bank of America**。实测 `skeleton()`：
+
+| 模板 | 修前 `bank.name` | 修后 |
+|---|---|---|
+| boa-personal | Bank of America | Bank of America |
+| chase-personal | JPMorgan Chase Bank | JPMorgan Chase Bank |
+| usbank-personal | **Bank of America** | U.S. Bank |
+| usbank-business | **Bank of America** | U.S. Bank |
+| wellsfargo | Wells Fargo（但 `legal` 是 None） | Wells Fargo（legal `Wells Fargo Bank, N.A.`） |
+| capitalone | **Bank of America** | Capital One |
+| mercury | **Bank of America** | Mercury（legal `Column N.A.`） |
+| sofi | **Bank of America** | SoFi |
+| amex | **Bank of America** | American Express |
+
+后果不是「看着别扭」这么轻：模型读 contract 时会看到 `bank.name = Bank of America`，把它抄进 Mercury / U.S. Bank / SoFi 的信头，`_branded()` 再照着重画 logo —— 一张账单上印着别家银行名。
+
+修法（`src/billgen/mcp/contract.py::_scaffold`）：
+- 行名按 `TEMPLATE_BANK[root]` 取这套版式自己的银行，`legal`/`domain` 用 `real_traits()` 的真值填；
+- 已有的非空值不覆盖（chase 版式自带 `JPMorgan Chase Bank` 就保留它的写法）；
+- 缺哪个字段就从这套版式**自己的默认数据**里端（WF 用 `phone_name`/`phone_main`/`legal_na`，只补 `name` 会 `KeyError: 'legal_na'` 再 `'phone_name'`）；
+- `_LEGAL_OVERRIDES = {"mercury": "Column N.A."}` —— Mercury 的信头是 Mercury，页脚发卡行是 Column N.A.（参考件原文 `Banking services provided by Column N.A., Member FDIC`），两者不是一家。
+
+同时 `src/billgen/mcp/server.py::render` 在渲染前也过一遍 `_scaffold`：模型没填行名时，账单自己补上本家行名，而不是留白或被换成空串。
+
+验证：`skeleton()` 九套逐项对表（见上）、`render` 传 `{"bank":{"name":""}}` → wellsfargo / mercury / usbank-personal / sofi 都印出本家行名且无 `Bank of America` 串；`tests/test_mcp.py::test_contract_skeleton_carries_each_template_own_bank` 锁死这张表。
+`pytest` 566 passed / 16 skipped / 33 subtests；`realism_rules.py` 11 套全绿；`e2e_compare --label personal` 7 套 0 差异。
+
+回滚：`git revert <本轮提交>`（只动 `contract.py::_scaffold`、`server.py::render`、新增一条测试）。
