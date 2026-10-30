@@ -223,6 +223,7 @@ async function renderOne(
   result: GenerationResult,
   statement: Statement,
   recommend?: { reasons: string[]; score: number },
+  bankName = '',
 ): Promise<{ artifact?: RenderArtifact; warning?: string }> {
   const contract = await client.callTool<Contract>('template_contract', { template_id: templateId });
 
@@ -231,6 +232,7 @@ async function renderOne(
     result,
     account: statement.accountType,
     cycle: -1,
+    ...(bankName && { bank_name: bankName }),
   });
   if (!draft.ok || !draft.data) {
     return { warning: `${templateId}: ledger draft failed (${(draft.errors ?? []).join('; ') || 'no detail'})` };
@@ -337,10 +339,17 @@ export const renderStep =
   async (s: GraphStateValue): Promise<GraphStateUpdate> => {
     const result = s.result;
     const config = deps.billgen;
-    if (!result || !config || config.templates.length === 0) return {};
+    if (!result || !config) return {};
 
-    const wantsAuto = config.templates.includes(AUTO_TEMPLATES);
-    const pinned = config.templates.filter((id) => id !== AUTO_TEMPLATES);
+    // 这次出哪几套版式：页面里选的优先（`request.templates`），没选才用服务端 `BILLGEN_TEMPLATES`。
+    // 「做哪家银行的账单」是每次生成的业务选择，不该只能靠改进程环境变量。
+    const requested = (s.request?.templates ?? []).map((id) => id.trim()).filter(Boolean);
+    const wanted = requested.length > 0 ? requested : config.templates;
+    if (wanted.length === 0) return {};
+    const bankName = (s.request?.bankName ?? '').trim();
+
+    const wantsAuto = wanted.includes(AUTO_TEMPLATES);
+    const pinned = wanted.filter((id) => id !== AUTO_TEMPLATES);
     const targets: { templateId: string; statement: Statement; recommend?: { reasons: string[]; score: number } }[] = [];
     const skipped = new Set<string>();
     const skipWarnings: string[] = [];
@@ -373,7 +382,7 @@ export const renderStep =
         async (client) => {
           emit({ type: 'node_start', node: 'billgen' });
           if (wantsAuto) {
-            const limit = config.templateLimit ?? AUTO_TEMPLATE_LIMIT;
+            const limit = s.request?.templateLimit ?? config.templateLimit ?? AUTO_TEMPLATE_LIMIT;
             for (const statement of result.statements) {
               if (!RENDERABLE_ACCOUNTS.has(statement.accountType)) continue;
               const picked = await recommendFor(client, result, statement, limit);
@@ -398,7 +407,9 @@ export const renderStep =
             for (let i = cursor++; i < targets.length; i = cursor++) {
               const target = targets[i]!;
               try {
-                slots[i] = await renderOne(deps, emit, client, target.templateId, result, target.statement, target.recommend);
+                slots[i] = await renderOne(
+                  deps, emit, client, target.templateId, result, target.statement, target.recommend, bankName,
+                );
               } catch (err) {
                 slots[i] = { warning: `${target.templateId}: ${err instanceof Error ? err.message : String(err)}` };
               }

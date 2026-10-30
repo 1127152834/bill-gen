@@ -188,4 +188,9 @@ def test_fake_contact_rule_catches_555_and_double_brand():
     dup = mod.fake_contact_problems(
         "chase-personal", "Web site: jpmorgan-jpmorgan-chase.com")
     assert [p["rule"] for p in dup] == ["double-brand"]
+    # 换行名时把「SoFi Bank Rate Sheet」吃成「Cascade Trust Bank Bank Rate Sheet」
+    doubled = mod.fake_contact_problems(
+        "sofi", "... as described in the Cascade Trust Bank Bank Rate Sheet and is paid ...")
+    assert [p["rule"] for p in doubled] == ["double-brand"]
+    assert doubled[0]["hit"].lower() == "bank bank"
 

@@ -215,6 +215,27 @@ function setPath(obj, path, value) {
   cur[keys[keys.length - 1]] = value;
 }
 
+// 深合并：以默认值为底，用本地存的那份覆盖。缺的键从默认值补回来，
+// 这样旧版本存下来的残缺对象（甚至上次报错时存进去的 {"error": …}）不会把表单清空。
+function deepMerge(base, patch) {
+  const out = JSON.parse(JSON.stringify(base));
+  Object.keys(patch || {}).forEach((key) => {
+    const value = patch[key];
+    if (value && typeof value === 'object' && !Array.isArray(value) &&
+        out[key] && typeof out[key] === 'object' && !Array.isArray(out[key])) {
+      out[key] = deepMerge(out[key], value);
+    } else if (value !== undefined) {
+      out[key] = value;
+    }
+  });
+  return out;
+}
+
+function looksLikeLetter(value) {
+  return !!value && typeof value === 'object' && !Array.isArray(value) &&
+    (typeof value.company === 'object' || typeof value.account === 'object' || typeof value.bank === 'object');
+}
+
 function fillForm(data) {
   document.querySelectorAll('[data-path]').forEach((el) => {
     const value = getPath(data, el.dataset.path);
@@ -238,7 +259,6 @@ function readForm() {
 async function renderPdf(blob = true) {
   const data = readForm();
   state.data = data;
-  localStorage.setItem('mercury-letter-data', JSON.stringify(data));
   const seq = ++state.seq;
   setStatus('渲染中…');
   const resp = await fetch(BASE + 'api/render', {
@@ -251,6 +271,9 @@ async function renderPdf(blob = true) {
     showError(msg); setStatus(''); return null;
   }
   showError('');
+  // 只有真出片了才记本地草稿：上一版在请求前就写盘，一次失败就会把
+  // 残缺对象（甚至 {"error": …}）存成草稿，下次打开表单全是空的。
+  localStorage.setItem('mercury-letter-data', JSON.stringify(data));
   const bytes = await resp.blob();
   const url = URL.createObjectURL(bytes);
   if (state.url) URL.revokeObjectURL(state.url);

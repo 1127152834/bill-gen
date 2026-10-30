@@ -66,8 +66,8 @@ class HunterSettings:
 
     @property
     def model_ready(self) -> bool:
-        """真实模型链路是否齐全（假模型永远齐全，只是离线）。"""
-        return self.llm_fake or (bool(self.base_url.strip()) and self.has_api_key)
+        """真实模型链路是否齐全：地址 + Key + 调研 Key。缺任何一项就用本地夹具。"""
+        return bool(self.base_url.strip()) and self.has_api_key and self.has_tavily_key
 
     @property
     def template_list(self) -> list[str]:
@@ -192,6 +192,13 @@ def apply_patch(current: HunterSettings, patch: dict[str, Any]) -> HunterSetting
     merged = replace(current, **update)
     if merged.base_url.endswith("/"):
         merged = replace(merged, base_url=merged.base_url.rstrip("/"))
+    if "llm_fake" not in patch:
+        # 「离线夹具」不再是一个开关：模型地址、Key、调研 Key 三项齐全就走真实模型，
+        # 缺任何一项就用本地夹具（否则页面上配了 Key 还在出假数据，没人能解释得清）。
+        merged = replace(
+            merged,
+            llm_fake=not (merged.base_url and merged.has_api_key and merged.has_tavily_key),
+        )
     return merged
 
 

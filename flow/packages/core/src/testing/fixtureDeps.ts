@@ -43,6 +43,8 @@ export function fixtureRequest(overrides: Partial<GenerationRequest> = {}): Gene
 export type FixtureAnswers = Partial<Record<Exclude<LlmNode, 'extractFacts'>, unknown[]>>;
 
 export type FixtureDepsOptions = {
+  /** 这次要出哪些账户：离线夹具只回答这些账户的流水（只做支票时，信用卡流水的答案会被裁掉）。 */
+  request?: Pick<GenerationRequest, 'accounts'>;
   /** Replaces the answer queue of a node. Answers are used in order and the last one repeats; an `Error` entry is thrown. */
   answers?: FixtureAnswers;
   /** Replaces / adds extraction answers by query category (an `Error` value is thrown for that category). */
@@ -56,6 +58,36 @@ export type FixtureDepsOptions = {
 export type FixtureLlm = StructuredLlm & { calls: { node: LlmNode; messages: LlmMessage[] }[] };
 export type FixtureSearch = SearchClient & { queries: string[]; maxInFlight: number };
 export type FixtureDeps = GraphDeps & { llm: FixtureLlm; search: FixtureSearch };
+
+/**
+ * 把罐头 lifeModel 裁到这次请求要的账户上。
+ *
+ * 离线夹具是一份固定答案，里面同时有 checking 与 credit 的流水；请求只要支票时，校验会报
+ * `recurring item "adobe-cc" uses account "credit", which was not requested` —— 整单失败。
+ * 裁剪只动账户相关的部分：没被请求的账户上的流水全部丢掉，信用卡专属字段清空。
+ */
+export function trimLifeModel(model: Record<string, unknown>, accounts: { checking?: unknown; credit?: unknown }): Record<string, unknown> {
+  const wanted = (account: unknown): boolean =>
+    account === 'checking' ? accounts.checking !== undefined : account === 'credit' ? accounts.credit !== undefined : true;
+  const keep = <T>(rows: T[] | undefined): T[] | undefined =>
+    rows?.filter((row) => wanted((row as { account?: unknown }).account));
+  const trimmed: Record<string, unknown> = { ...model };
+  if (Array.isArray(model.recurring)) trimmed.recurring = keep(model.recurring as unknown[]);
+  if (Array.isArray(model.discretionaryPool)) trimmed.discretionaryPool = keep(model.discretionaryPool as unknown[]);
+  if (!wanted('checking')) {
+    trimmed.incomeStreams = [];
+    delete trimmed.atm;
+    delete trimmed.openingBalanceCents;
+  }
+  if (!wanted('credit')) {
+    delete trimmed.creditLimitCents;
+    delete trimmed.apr;
+    delete trimmed.creditOpeningBalanceCents;
+    delete trimmed.cardPaymentStrategy;
+    delete trimmed.closingDay;
+  }
+  return trimmed;
+}
 
 /** Fresh copies of the default answers (one per node), for tests that tweak one. */
 export function fixtureAnswers(): Required<FixtureAnswers> {
@@ -128,6 +160,9 @@ function fixtureSearch(hits: SearchHit[], delayMs: number): FixtureSearch {
 export function createFixtureDeps(opts: FixtureDepsOptions = {}): FixtureDeps {
   const budget = new Budget(opts.budget, () => FIXTURE_NOW);
   const answers = { ...fixtureAnswers(), ...opts.answers } as Required<FixtureAnswers>;
+  if (opts.request && !opts.answers?.lifeModel) {
+    answers.lifeModel = [trimLifeModel(readFixture('lifeModel.json'), opts.request.accounts)];
+  }
   const extract = { ...readFixture<Record<string, unknown>>('extract.json'), ...opts.extract };
   return {
     llm: fixtureLlm(answers, extract, budget),

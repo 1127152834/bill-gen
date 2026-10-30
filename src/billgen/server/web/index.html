@@ -364,11 +364,10 @@
         <button id="hunter-settings-close" class="icon-button" aria-label="关闭模型配置">×</button>
       </div>
       <p class="synth-intro">
-        保存后会重启猎手服务并在新进程里生效。密钥只写不读：留空表示沿用已存的值。
+        只管模型接入。保存后会重启猎手服务并在新进程里生效；密钥只写不读，留空表示沿用已存的值。
+        三项齐备（地址、Key、Tavily）就走真实模型，缺任何一项自动用本地演示数据。
       </p>
       <div class="settings-grid">
-        <label class="settings-wide"><input id="cfg-fake" type="checkbox" />
-          离线夹具模式（不需要模型与调研 key）</label>
         <label>模型接口地址<input id="cfg-base-url" type="text"
           placeholder="https://your-proxy/v1" autocomplete="off" /></label>
         <label>模型 API Key<input id="cfg-api-key" type="password"
@@ -381,10 +380,6 @@
         </select></label>
         <label class="settings-span">Tavily Key<input id="cfg-tavily" type="password"
           autocomplete="new-password" placeholder="留空沿用；真实模式下用于本地化调研" /></label>
-        <label>账单行名<input id="cfg-bank" type="text" placeholder="Bank of America" /></label>
-        <label>目标模板<input id="cfg-templates" type="text"
-          placeholder="auto 或 boa-personal,chase-personal" /></label>
-        <label>自动挑选个数<input id="cfg-auto-limit" type="number" min="1" max="11" step="1" /></label>
         <label class="settings-wide"><input id="cfg-ai-fill" type="checkbox" />
           让模型自己填模板字段（关闭则用确定性草稿）</label>
       </div>

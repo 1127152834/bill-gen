@@ -636,6 +636,9 @@ def statement_text(template: str, ledger, *, watermark: bool = False) -> str:
 
 _FAKE_CONTACT = re.compile(r"1-8\d\d-555-\d{4}|\b555-\d{4}\b")
 _DOUBLE_BRAND = re.compile(r"jpmorgan-jpmorgan|chase-chase|cascade-trust-bank\w*[A-Za-z]st-bank")
+# 换行名时把「SoFi Bank Rate Sheet」这种组合吃成「Cascade Trust Bank Bank Rate Sheet」：
+# 真行名本身带 Bank，替换后就会出现连写的两个字。单词重复比行名列表更耐打。
+_DOUBLED_WORD = re.compile(r"\b(bank|trust|chase|capital)\s+\1\b", re.IGNORECASE)
 
 
 def fake_contact_problems(template: str, text: str) -> list[dict[str, str]]:
@@ -653,6 +656,10 @@ def fake_contact_problems(template: str, text: str) -> list[dict[str, str]]:
     if hit:
         out.append({"template": template, "rule": "double-brand",
                     "label": "行名/域名被替换叠加成重影", "hit": hit.group(0)})
+    hit = _DOUBLED_WORD.search(text)
+    if hit:
+        out.append({"template": template, "rule": "double-brand",
+                    "label": "换行名后出现连写重复的词", "hit": hit.group(0)})
     return out
 
 

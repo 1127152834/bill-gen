@@ -1233,7 +1233,6 @@ async function loadHunterStatus() {
 }
 
 function fillHunterSettings(settings) {
-  $("cfg-fake").checked = settings.llm_fake !== false;
   $("cfg-base-url").value = settings.base_url || "";
   $("cfg-api-key").value = "";
   $("cfg-api-key").placeholder = settings.has_api_key ? "已配置，留空沿用" : "未配置";
@@ -1243,13 +1242,11 @@ function fillHunterSettings(settings) {
   $("cfg-tavily").placeholder = settings.has_tavily_key
     ? "已配置，留空沿用"
     : "未配置";
-  $("cfg-bank").value = settings.bank_name || "";
-  $("cfg-templates").value = settings.templates || "auto";
-  $("cfg-auto-limit").value = settings.auto_limit ?? 2;
   $("cfg-ai-fill").checked = settings.ai_fill !== false;
-  $("cfg-status").textContent = settings.model_ready
-    ? "当前链路可用"
-    : "离线模式，或模型地址与 Key 不完整";
+  // 「离线夹具」不再是一个开关：三项凭据齐就走真实模型，缺一项用本地演示数据。
+  $("cfg-status").textContent = settings.llm_fake
+    ? "当前用本地演示数据（模型地址 / Key / Tavily 未配齐）"
+    : "当前链路：真实模型";
 }
 
 async function openHunterSettings() {
@@ -1263,14 +1260,12 @@ async function saveHunterSettings() {
   $("cfg-save").disabled = true;
   $("cfg-status").textContent = "正在保存并重启服务…";
   try {
+    // 账单行名 / 目标模板 / 自动挑选个数搬到「账户与周期」那一步（属于每次生成的选择），
+    // 这里只留模型接入。
     const payload = {
-      llm_fake: $("cfg-fake").checked,
       base_url: $("cfg-base-url").value.trim(),
       model: $("cfg-model").value.trim(),
       structured_mode: $("cfg-structured").value,
-      bank_name: $("cfg-bank").value.trim(),
-      templates: $("cfg-templates").value.trim() || "auto",
-      auto_limit: Number($("cfg-auto-limit").value) || 2,
       ai_fill: $("cfg-ai-fill").checked,
     };
     const apiKey = $("cfg-api-key").value.trim();

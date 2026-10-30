@@ -1,5 +1,13 @@
 import { fileURLToPath } from 'node:url';
-import { Budget, createOpenAiStructuredLlm, createTavilyClient, loadSkills, type BudgetLimits, type GraphDeps } from '@bh/core';
+import {
+  Budget,
+  createOpenAiStructuredLlm,
+  createTavilyClient,
+  loadSkills,
+  type BudgetLimits,
+  type GenerationRequest,
+  type GraphDeps,
+} from '@bh/core';
 import { createFixtureDeps } from '@bh/core/testing';
 import { createSqliteCache, type Db } from './db.js';
 import type { Env } from './env.js';
@@ -11,7 +19,7 @@ const SKILLS_DIR = fileURLToPath(new URL('../../../skills/', import.meta.url));
 const todayUtc = (): string => new Date().toISOString().slice(0, 10);
 
 /** Builds the dependencies of one unit of work; `limits` replaces the default per-task budget caps. */
-export type MakeDeps = (limits?: Partial<BudgetLimits>) => GraphDeps;
+export type MakeDeps = (limits?: Partial<BudgetLimits>, accounts?: GenerationRequest['accounts']) => GraphDeps;
 
 /**
  * Returns the factory that builds the dependencies of ONE job. Call it once per job:
@@ -23,13 +31,16 @@ export function makeDeps(env: Env, db: Db): MakeDeps {
   const skills = loadSkills(SKILLS_DIR);
   const cache = createSqliteCache(db);
 
-  return (limits) => {
+  return (limits, accounts) => {
     // 每开一个 job 都重新读一次：页面上刚改完的模型配置立刻生效。
     const eff = resolveLlm(db, env);
     if (!eff.ready || !eff.llm || !eff.tavilyApiKey) {
       // Fixtures have no `render` answers: render the deterministic ledger draft through MCP instead.
       return {
-        ...createFixtureDeps(limits ? { budget: limits } : {}),
+        ...createFixtureDeps({
+          ...(limits && { budget: limits }),
+          ...(accounts && { request: { accounts } }),
+        }),
         ...(env.billgen && { billgen: { ...env.billgen, modelFill: false } }),
       };
     }

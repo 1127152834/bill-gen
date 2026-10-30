@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import { EMPTY_DRAFT, applyField, buildPartial, buildProfile, inputErrors, type Draft } from './profileDraft'
-import { DEFAULT_ACCOUNTS, buildRequest, endMonthError, previousMonth, rangeError } from './requestForm'
+import {
+  DEFAULT_ACCOUNTS,
+  DEFAULT_RENDER,
+  buildRequest,
+  endMonthError,
+  previousMonth,
+  rangeError,
+  renderError,
+} from './requestForm'
 
 const FULL: Draft = {
   ...EMPTY_DRAFT,
@@ -59,6 +67,30 @@ describe('requestForm', () => {
   })
 
   it('builds nothing while no account is ticked', () => {
-    expect(buildRequest({ subjectType: 'business', profile: undefined, accounts: DEFAULT_ACCOUNTS, months: 1, endMonth: '2020-01', seed: '' })).toBeUndefined()
+    const none = { ...DEFAULT_ACCOUNTS, checking: { ...DEFAULT_ACCOUNTS.checking, enabled: false } }
+    expect(buildRequest({ subjectType: 'business', profile: undefined, accounts: none, months: 1, endMonth: '2020-01', seed: '' })).toBeUndefined()
+  })
+
+  it('carries the layout choice and the optional bank name, and drops them when auto is off', () => {
+    const auto = buildRequest({
+      subjectType: 'personal', profile: undefined, accounts: DEFAULT_ACCOUNTS,
+      months: 1, endMonth: '2020-01', seed: '',
+    })
+    expect(auto).toMatchObject({ templates: ['auto'], templateLimit: 2 })
+    expect(auto).not.toHaveProperty('bankName')
+
+    const pinned = buildRequest({
+      subjectType: 'personal', profile: undefined, accounts: DEFAULT_ACCOUNTS, months: 1, endMonth: '2020-01', seed: '',
+      render: { ...DEFAULT_RENDER, template: 'chase-personal', autoLimit: '4', bankName: 'Harborline Bank' },
+    })
+    expect(pinned).toMatchObject({ templates: ['chase-personal'], bankName: 'Harborline Bank' })
+    expect(pinned).not.toHaveProperty('templateLimit')
+  })
+
+  it('rejects an auto pick count outside 1-11', () => {
+    expect(renderError({ ...DEFAULT_RENDER, autoLimit: '0' })).toBe('自动挑选个数要在 1–11 之间')
+    expect(renderError({ ...DEFAULT_RENDER, autoLimit: '' })).toBe('自动挑选个数要在 1–11 之间')
+    expect(renderError({ ...DEFAULT_RENDER, autoLimit: '12' })).toBe('自动挑选个数要在 1–11 之间')
+    expect(renderError({ ...DEFAULT_RENDER, template: 'sofi', autoLimit: '0' })).toBeUndefined()
   })
 })

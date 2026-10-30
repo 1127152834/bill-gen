@@ -7,13 +7,19 @@ import { ProfileForm } from '../components/ProfileForm'
 import { StepIndicator } from '../components/StepIndicator'
 import { EMPTY_DRAFT, buildProfile, hasErrors, inputErrors, type Draft } from '../lib/profileDraft'
 import {
+  AUTO_LIMIT_MAX,
+  AUTO_LIMIT_MIN,
   DEFAULT_ACCOUNTS,
+  DEFAULT_RENDER,
+  TEMPLATE_AUTO,
+  TEMPLATE_CHOICES,
   accountsError,
   buildRequest,
   endMonthError,
   previousMonth,
-  type AccountKey,
+  renderError,
   type AccountsDraft,
+  type RenderDraft,
 } from '../lib/requestForm'
 
 type Step = 1 | 2 | 3
@@ -33,6 +39,7 @@ export default function New() {
   const [systemPersona, setSystemPersona] = useState(false)
   const [showMissing, setShowMissing] = useState(false)
   const [accounts, setAccounts] = useState<AccountsDraft>(DEFAULT_ACCOUNTS)
+  const [render, setRender] = useState<RenderDraft>(DEFAULT_RENDER)
   const [months, setMonths] = useState<1 | 3 | 6>(3)
   const [endMonth, setEndMonth] = useState(() => previousMonth())
   const [seed, setSeed] = useState('')
@@ -65,10 +72,16 @@ export default function New() {
   const profile = subject && !systemPersona ? buildProfile(subject, draft) : undefined
   const request =
     subject && (systemPersona || profile)
-      ? buildRequest({ subjectType: subject, profile, accounts, months, endMonth, seed })
+      ? buildRequest({ subjectType: subject, profile, accounts, months, endMonth, seed, render })
       : undefined
   const noAccount = accountsError(accounts)
   const monthError = endMonthError(endMonth)
+  const templateError = renderError(render)
+  // 换主体类型时，原来选的版式可能不属于它（个人版/企业版是两套底稿）。
+  const templateChoices = TEMPLATE_CHOICES[subject ?? 'personal']
+  const activeTemplate = templateChoices.some((c) => c.id === render.template)
+    ? render.template
+    : TEMPLATE_AUTO
 
   const submit = async (e: FormEvent) => {
     e.preventDefault()
@@ -156,16 +169,66 @@ export default function New() {
           <form onSubmit={submit} noValidate>
             <p className="mb-4 text-sm text-muted">选择要生成的账户，并为每个账户设定每月交易条数。</p>
             <div className="grid gap-3">
-              {(['checking', 'credit'] as const satisfies readonly AccountKey[]).map((key) => (
-                <AccountRangeInput
-                  key={key}
-                  account={key}
-                  value={accounts[key]}
-                  onChange={(v) => setAccounts((a) => ({ ...a, [key]: v }))}
-                />
-              ))}
+              <AccountRangeInput
+                account="checking"
+                value={accounts.checking}
+                onChange={(v) => setAccounts((a) => ({ ...a, checking: v }))}
+              />
             </div>
             {noAccount && <p className="field-error">{noAccount}</p>}
+
+            <fieldset className="m-0 mt-6 min-w-0 border-0 p-0">
+              <legend className="field-label mb-2">出哪家银行的账单</legend>
+              <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-start">
+                <label className="block">
+                  <select
+                    className="input"
+                    aria-label="目标版式"
+                    value={activeTemplate}
+                    onChange={(e) => setRender((r) => ({ ...r, template: e.target.value }))}
+                  >
+                    {templateChoices.map((choice) => (
+                      <option key={choice.id} value={choice.id}>
+                        {choice.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                {activeTemplate === TEMPLATE_AUTO && (
+                  <label className="block">
+                    <span className="field-label mb-1 block">自动挑几套</span>
+                    <input
+                      type="number"
+                      className="input sm:w-28"
+                      min={AUTO_LIMIT_MIN}
+                      max={AUTO_LIMIT_MAX}
+                      step={1}
+                      aria-label="自动挑选个数"
+                      value={render.autoLimit}
+                      onChange={(e) => setRender((r) => ({ ...r, autoLimit: e.target.value }))}
+                    />
+                  </label>
+                )}
+              </div>
+              <label htmlFor="f-bankName" className="field-label mt-3 mb-1 block">
+                账单行名
+              </label>
+              <input
+                id="f-bankName"
+                className="input sm:max-w-72"
+                autoComplete="off"
+                value={render.bankName}
+                onChange={(e) => setRender((r) => ({ ...r, bankName: e.target.value }))}
+                placeholder="留空＝用版式自带的那家银行"
+              />
+              {templateError ? (
+                <p className="field-error">{templateError}</p>
+              ) : (
+                <p className="mt-1 text-xs text-muted">
+                  选一家银行就只出这一套版式；选「自动挑」由推荐器按账户类型打分。行名留空则印版式自带的银行名与联系方式。
+                </p>
+              )}
+            </fieldset>
 
             <fieldset className="m-0 mt-6 min-w-0 border-0 p-0">
               <legend className="field-label mb-2">覆盖月数</legend>

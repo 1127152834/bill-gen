@@ -87,19 +87,21 @@ describe('step 1 and 3: type and accounts', () => {
   it('shows a Chinese error and disables submit when min is greater than max', async () => {
     const user = renderWizard()
     await gotoStep3(user)
-    await user.click(screen.getByLabelText('支票账户'))
     await fill(user, '支票账户 最小值', '9')
     await fill(user, '支票账户 最大值', '8')
     expect(screen.getByText('最小值不能大于最大值')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '生成账单' })).toBeDisabled()
   })
 
-  it('disables submit until an account is ticked', async () => {
+  it('defaults the checking account on, and blocks submit once it is unticked', async () => {
     const user = renderWizard()
     await gotoStep3(user)
+    expect(screen.getByLabelText('支票账户')).toBeChecked()
+    expect(screen.getByRole('button', { name: '生成账单' })).toBeEnabled()
+    await user.click(screen.getByLabelText('支票账户'))
     expect(screen.getByText('请至少选择一个账户')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '生成账单' })).toBeDisabled()
-    await user.click(screen.getByLabelText('信用卡'))
+    await user.click(screen.getByLabelText('支票账户'))
     expect(screen.queryByText('请至少选择一个账户')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: '生成账单' })).toBeEnabled()
   })
@@ -107,8 +109,7 @@ describe('step 1 and 3: type and accounts', () => {
   it('rejects counts outside 1-200', async () => {
     const user = renderWizard()
     await gotoStep3(user)
-    await user.click(screen.getByLabelText('信用卡'))
-    await fill(user, '信用卡 最大值', '201')
+    await fill(user, '支票账户 最大值', '201')
     expect(screen.getByText('请输入 1 到 200 之间的整数')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '生成账单' })).toBeDisabled()
   })
@@ -116,7 +117,6 @@ describe('step 1 and 3: type and accounts', () => {
   it('keeps the two slider thumbs in step with the number inputs', async () => {
     const user = renderWizard()
     await gotoStep3(user)
-    await user.click(screen.getByLabelText('支票账户'))
     await fill(user, '支票账户 最大值', '60')
     expect(screen.getByLabelText('支票账户 最大值滑块')).toHaveValue('60')
   })
@@ -251,7 +251,6 @@ describe('submit', () => {
     createMock.mockResolvedValue({ id: 'abc-123' })
     const user = renderWizard()
     await gotoStep3(user)
-    await user.click(screen.getByLabelText('支票账户'))
     await fill(user, '支票账户 最小值', '10')
     await fill(user, '支票账户 最大值', '30')
     await user.click(screen.getByRole('radio', { name: '6 个月' }))
@@ -264,17 +263,19 @@ describe('submit', () => {
       accounts: { checking: { min: 10, max: 30 } },
       months: 6,
       endMonth: '2026-09',
+      templates: ['auto'],
+      templateLimit: 2,
     })
   })
 
-  it('submits the filled profile, both accounts and an optional seed', async () => {
+  it('submits the filled profile, the chosen layout and an optional seed', async () => {
     createMock.mockResolvedValue({ id: 'xyz' })
     const user = renderWizard()
     await chooseSubject(user, '个人')
     await fillPersonalProfile(user)
     await user.click(screen.getByRole('button', { name: '下一步' }))
-    await user.click(screen.getByLabelText('支票账户'))
-    await user.click(screen.getByLabelText('信用卡'))
+    await user.selectOptions(screen.getByLabelText('目标版式'), 'chase-personal')
+    await fill(user, '账单行名', 'Harborline Bank')
     await user.click(screen.getByText('高级选项'))
     await user.type(screen.getByLabelText('随机种子'), 'demo-1')
     await user.click(screen.getByRole('button', { name: '生成账单' }))
@@ -290,9 +291,11 @@ describe('submit', () => {
         household: { maritalStatus: 'single', children: 0 },
         hobbies: [],
       },
-      accounts: { checking: { min: 20, max: 40 }, credit: { min: 10, max: 25 } },
+      accounts: { checking: { min: 20, max: 40 } },
       months: 3,
       endMonth: '2026-09',
+      templates: ['chase-personal'],
+      bankName: 'Harborline Bank',
       seed: 'demo-1',
     })
   })
@@ -301,7 +304,6 @@ describe('submit', () => {
     createMock.mockRejectedValue(new ApiError(400, 'INFEASIBLE_REQUEST', 'checking max (1) is below the base required count'))
     const user = renderWizard()
     await gotoStep3(user)
-    await user.click(screen.getByLabelText('支票账户'))
     await user.click(screen.getByRole('button', { name: '生成账单' }))
 
     const alert = await screen.findByRole('alert')
@@ -315,7 +317,6 @@ describe('submit', () => {
     createMock.mockReturnValue(new Promise((r) => (resolve = r)))
     const user = renderWizard()
     await gotoStep3(user)
-    await user.click(screen.getByLabelText('信用卡'))
     await user.click(screen.getByRole('button', { name: '生成账单' }))
     expect(screen.getByRole('button', { name: /正在提交/ })).toBeDisabled()
     resolve({ id: 'q' })

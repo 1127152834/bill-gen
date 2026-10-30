@@ -57,7 +57,11 @@ function stubLlm(edit: (data: Record<string, unknown>) => Record<string, unknown
   return llm as unknown as StructuredLlm & { calls: number };
 }
 
-function depsWith(llm: StructuredLlm, modelFill = true, templates: string[] = ['boa-personal']): GraphDeps {
+function depsWith(
+  llm: StructuredLlm,
+  modelFill: boolean | 'always' = true,
+  templates: string[] = ['boa-personal'],
+): GraphDeps {
   return {
     ...createFixtureDeps(),
     llm,
@@ -109,6 +113,7 @@ describe.skipIf(!hasBillgen)('render node over MCP', () => {
     const marker = 'SCENARIO FOOTER LINE';
     const deps = depsWith(
       stubLlm((draft) => ({ ...draft, customer_lines: [marker, ...((draft.customer_lines as string[]) ?? []).slice(1)] })),
+      'always',
     );
     const update = (await renderStep(deps, () => {})(stateWith(result()))) as RenderUpdate;
     const first = update.result?.renders?.[0];
@@ -123,9 +128,12 @@ describe.skipIf(!hasBillgen)('render node over MCP', () => {
     const deps = depsWith(
       stubLlm((draft) => {
         round++;
-        // First answer breaks a hard rule (formatted money), the retry repairs it.
-        return round === 1 ? { ...draft, begin_balance: '$1,000.00' } : draft;
+        // First answer drops a required key, the retry puts it back.
+        const broken = { ...draft };
+        delete (broken as Record<string, unknown>).summary;
+        return round === 1 ? broken : draft;
       }),
+      'always',
     );
     const events: { type: string; message?: string }[] = [];
     const update = (await renderStep(deps, (event) => events.push(event as { type: string; message?: string }))(
@@ -161,12 +169,26 @@ describe.skipIf(!hasBillgen)('render node over MCP', () => {
     expect(templates.length).toBeGreaterThan(1);
   }, 240_000);
 
+  it('lets the request pick the layout and the bank name', async () => {
+    // 页面上的「做哪家银行的账单 / 账单行名」属于这一次请求，不该只能靠进程环境变量。
+    const deps = depsWith(stubLlm((d) => d), false, ['boa-personal']);
+    const state = {
+      result: result(),
+      request: { templates: ['chase-personal'], bankName: 'Cascade Trust Bank' },
+    } as unknown as GraphStateValue;
+    const update = (await renderStep(deps, () => {})(state)) as RenderUpdate;
+    const first = update.result?.renders?.[0];
+    expect(first?.template).toBe('chase-personal');
+    expect(pdfText(first!.path)).toContain('Cascade Trust Bank');
+  }, 240_000);
+
   it('reports a warning instead of throwing when the server cannot start', async () => {
     const deps = depsWith(stubLlm((d) => d), false);
     deps.billgen = { ...deps.billgen!, command: join(outDir, 'does-not-exist') };
     const update = (await renderStep(deps, () => {})(stateWith(result()))) as RenderUpdate;
     expect(update.result?.renders ?? []).toHaveLength(0);
-    expect(update.warnings?.[0]).toContain('mcp unavailable');
+    // 跳过出片的提示也在这份 warnings 里，别假设它是第一行。
+    expect(update.warnings?.some((w) => w.includes('mcp unavailable'))).toBe(true);
   }, 60_000);
 });
 

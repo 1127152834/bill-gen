@@ -4,14 +4,14 @@ export const COUNT_MIN = 1
 export const COUNT_MAX = 200
 
 export type RangeDraft = { enabled: boolean; min: string; max: string }
-export type AccountKey = 'checking' | 'credit'
+/** 只出存款账户版式，所以页面只提供支票账户；`credit` 仍留在请求类型里兼容历史数据。 */
+export type AccountKey = 'checking'
 export type AccountsDraft = Record<AccountKey, RangeDraft>
 
-export const ACCOUNT_LABELS: Record<AccountKey, string> = { checking: '支票账户', credit: '信用卡' }
+export const ACCOUNT_LABELS: Record<AccountKey, string> = { checking: '支票账户' }
 
 export const DEFAULT_ACCOUNTS: AccountsDraft = {
-  checking: { enabled: false, min: '20', max: '40' },
-  credit: { enabled: false, min: '10', max: '25' },
+  checking: { enabled: true, min: '20', max: '40' },
 }
 
 const isCount = (s: string) => /^\d+$/.test(s.trim()) && Number(s) >= COUNT_MIN && Number(s) <= COUNT_MAX
@@ -23,7 +23,50 @@ export function rangeError(r: RangeDraft): string | undefined {
 }
 
 export function accountsError(accounts: AccountsDraft): string | undefined {
-  return accounts.checking.enabled || accounts.credit.enabled ? undefined : '请至少选择一个账户'
+  return accounts.checking.enabled ? undefined : '请至少选择一个账户'
+}
+
+/** 版式选项：`auto` 交给推荐器打分，其余是钉死一家银行（按账单主体分个人/企业版）。 */
+export type TemplateChoice = { id: string; label: string }
+
+export const TEMPLATE_AUTO = 'auto'
+
+export const TEMPLATE_CHOICES: Record<SubjectType, readonly TemplateChoice[]> = {
+  personal: [
+    { id: 'auto', label: '自动挑（按推荐器打分）' },
+    { id: 'boa-personal', label: '美国银行 · 个人账单' },
+    { id: 'chase-personal', label: '大通银行 · 个人账单' },
+    { id: 'usbank-personal', label: '美国合众银行 · 个人账单' },
+    { id: 'wellsfargo', label: '富国银行' },
+    { id: 'capitalone', label: '第一资本银行' },
+    { id: 'mercury', label: '水星银行' },
+    { id: 'sofi', label: '索菲银行' },
+  ],
+  business: [
+    { id: 'auto', label: '自动挑（按推荐器打分）' },
+    { id: 'boa-business', label: '美国银行 · 商业账单' },
+    { id: 'chase-business', label: '大通银行 · 商业账单' },
+    { id: 'usbank-business', label: '美国合众银行 · 商业账单' },
+  ],
+}
+
+/** 账单行名（印在信头上的银行名）。留空 = 用版式自带的那家银行。 */
+export type RenderDraft = { template: string; autoLimit: string; bankName: string }
+
+export const DEFAULT_RENDER: RenderDraft = { template: TEMPLATE_AUTO, autoLimit: '2', bankName: '' }
+
+export const AUTO_LIMIT_MIN = 1
+export const AUTO_LIMIT_MAX = 11
+
+export function renderError(draft: RenderDraft): string | undefined {
+  if (draft.template === TEMPLATE_AUTO && !draft.template) return '请选择要出的账单版式'
+  if (draft.template === TEMPLATE_AUTO) {
+    const n = Number(draft.autoLimit)
+    if (!/^\d+$/.test(draft.autoLimit.trim()) || n < AUTO_LIMIT_MIN || n > AUTO_LIMIT_MAX) {
+      return `自动挑选个数要在 ${AUTO_LIMIT_MIN}–${AUTO_LIMIT_MAX} 之间`
+    }
+  }
+  return undefined
 }
 
 /** `YYYY-MM` of the month before `now` (local time: it is the user's calendar that counts). */
@@ -45,26 +88,32 @@ export type RequestInput = {
   months: 1 | 3 | 6
   endMonth: string
   seed: string
+  /** 出哪套版式、auto 时挑几套、账单上印哪家银行名 —— 都属于这一次生成。 */
+  render?: RenderDraft
 }
 
 /** The request body, or `undefined` while anything on the form is invalid. */
 export function buildRequest(input: RequestInput): GenerationRequest | undefined {
   const { accounts } = input
-  if (accountsError(accounts) || endMonthError(input.endMonth)) return undefined
+  const render = input.render ?? DEFAULT_RENDER
+  if (accountsError(accounts) || endMonthError(input.endMonth) || renderError(render)) return undefined
   const ranges: GenerationRequest['accounts'] = {}
-  for (const key of ['checking', 'credit'] as const) {
-    const r = accounts[key]
-    if (!r.enabled) continue
-    if (rangeError(r)) return undefined
-    ranges[key] = { min: Number(r.min), max: Number(r.max) }
+  const checking = accounts.checking
+  if (checking.enabled) {
+    if (rangeError(checking)) return undefined
+    ranges.checking = { min: Number(checking.min), max: Number(checking.max) }
   }
   const seed = input.seed.trim()
+  const bankName = render.bankName.trim()
   const parsed = GenerationRequestSchema.safeParse({
     subjectType: input.subjectType,
     ...(input.profile && { profile: input.profile }),
     accounts: ranges,
     months: input.months,
     endMonth: input.endMonth,
+    templates: [render.template],
+    ...(render.template === TEMPLATE_AUTO && { templateLimit: Number(render.autoLimit) }),
+    ...(bankName !== '' && { bankName }),
     ...(seed !== '' && { seed }),
   })
   return parsed.success ? parsed.data : undefined

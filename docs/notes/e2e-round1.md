@@ -756,3 +756,52 @@ chase-business 差异 0 项、usbank-business 差异 0 项。
 `vitest run` 411 passed / 7 skipped。
 
 回滚：`git revert 77d9d89`（模板文件与资产会一起回来）。
+
+## 第二十七轮（2026-10-30）：把「做哪家银行」搬进账户与周期，去掉信用卡与离线夹具开关
+
+用户看完「模型与配置」对话框后提的要求：离线夹具开关看不懂要删掉；账单行名 / 目标模板 /
+自动挑选个数不知道怎么用；**做哪个银行的账单应该在「账户与周期」里选，而不是在设置里填**；
+并且不要信用卡账单。
+
+### 改了什么
+
+1. **信用卡整条链路从界面消失**：`flow/apps/web/src/lib/requestForm.ts` 的
+   `AccountKey` 收成 `'checking'`，`ACCOUNT_LABELS`/`DEFAULT_ACCOUNTS`/`accountsError`
+   只认支票；`AccountRangeInput` 的 `HINT` 去掉 `credit`；`New.tsx` 第 3 步只渲染一个账户卡。
+   （请求 schema 里的 `credit` 留着兼容历史数据。）
+2. **版式与行名改成「这一次生成」的参数**：`GenerationRequestSchema` 新增
+   `templates` / `templateLimit` / `bankName`（`flow/packages/core/src/schemas/request.ts`）；
+   `render.ts` 里 `requested` 优先于进程级 `BILLGEN_TEMPLATES`，`renderOne` 把
+   `bankName` 透给 MCP 的 `draft_from_ledger(bank_name=…)`。
+3. **界面搬位置**：第 3 步新增「出哪家银行的账单」fieldset（`目标版式` 下拉 7 套个人 /
+   3 套企业 + `auto`；auto 时给 `自动挑选个数`；`账单行名` 留空＝用版式自带银行）。
+4. **设置对话框只留模型接入**：删掉 `离线夹具模式` / `账单行名` / `目标模板` / `自动挑选个数`
+   四个控件（`index.html`）与对应的读写（`app.js`）。
+   `hunter/settings.py::apply_patch` 现在**推导** `llm_fake`：`base_url` + `api_key` +
+   `tavily_api_key` 三项齐才走真实模型，缺一项自动回落本地夹具；`model_ready` 同步改成
+   「真实链路是否齐全」。显式传 `llm_fake` 仍以传入值为准（运维脚本用）。
+5. **离线夹具按账户裁剪答案**：`fixtureDeps.ts` 新增 `trimLifeModel()` 与
+   `FixtureDepsOptions.request`；`deps.ts` / `jobs.ts` 把这次请求的 `accounts` 传进去。
+   此前只要支票账户时，罐头 lifeModel 里的 `adobe-cc`（挂在 credit 上）会让校验抛
+   `LifeModelError`，整单 `LIFE_MODEL_INVALID` —— 去掉信用卡勾选后会变成「什么都生成不出来」。
+6. **换行名连词修复**：`_common.py` 的 sofi 词表补 `SoFi Bank Rate Sheet` → `{name} Rate Sheet`
+   与 `SoFi Bank` → `{name}`，否则印出 `Cascade Trust Bank Bank Rate Sheet`；
+   `tools/realism_rules.py` 新增 `_DOUBLED_WORD`（`\b(bank|trust|chase|capital)\s+\1\b`）进
+   `fake_contact_problems`，单测覆盖。
+
+### 验证
+
+- `pytest` 547 passed / 16 skipped / 33 subtests；`tools/realism_rules.py` 全部规则通过。
+- `flow/packages/core`：413 passed / 8 skipped（新增「只请求支票也能完整出单」与
+  「两份账户都请求时信用卡流水仍在」两条 e2e）；`flow/apps/web` 84 passed；
+  `flow/apps/server` 85 passed；`tsc --noEmit` 三个包都干净。
+- 线上（容器重建后）：`POST /api/generations` 只给 checking + `templates:["sofi"]` +
+  `bankName:"Cascade Trust Bank"` → `status completed`、`warnings []`、
+  `renders [('sofi','checking',3)]`；出片第 1 页词标 `CASCADE TRUST BANK`、联系块
+  `www.cascade-trust-bank.com` / `P O Box 50842 / Minneapolis, MN 55402`，
+  `SoFi` 与 `sofi.com` 残留 0，`Bank Bank` 0。
+- 工作台 `/` 已无 `cfg-fake` / `cfg-bank` / `cfg-templates` / `cfg-auto-limit`；
+  `/assets/index-h-sXj_3X.js` 含「出哪家银行的账单」，不含「信用卡消费与还款」。
+
+回滚：`git revert <本轮提交>`；模板侧只有 `_common.py` 词表与 `realism_rules` 的变化，
+`request.ts` / `render.ts` 的字段都是**可选**，老请求照旧能跑。

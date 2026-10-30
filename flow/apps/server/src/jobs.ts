@@ -8,6 +8,7 @@ import {
   randomPersona,
   runGeneration,
   tee,
+  type BudgetLimits,
   type GenerationRequest,
   type GraphDeps,
 } from '@bh/core';
@@ -44,7 +45,8 @@ export type JobRunnerOptions = {
   logResearch?: boolean;
   db: Db;
   /** Fresh dependencies for every job: each job has its own `Budget` and model client. */
-  makeDeps: () => GraphDeps;
+  /** 建一个 job 的依赖；`accounts` 告诉离线夹具这次要出哪些账户。 */
+  makeDeps: (limits?: Partial<BudgetLimits>, accounts?: GenerationRequest['accounts']) => GraphDeps;
   concurrency: number;
   bus: EventBus;
   /** Defaults to a `SqliteSaver` on `db`, so checkpoints live in the same database file. */
@@ -128,7 +130,12 @@ export function createJobRunner(opts: JobRunnerOptions): JobRunner {
     setStatus(db, id, 'running');
     let deps: GraphDeps | undefined;
     try {
-      deps = opts.makeDeps();
+      // 建 deps 之前先取一次存储的请求：离线夹具要按这次要的账户裁剪答案（只做支票时不回答信用卡）。
+      const stored = getGeneration(db, id);
+      const accounts = stored
+        ? (JSON.parse(stored.request_json) as { accounts?: GenerationRequest['accounts'] }).accounts
+        : undefined;
+      deps = opts.makeDeps(undefined, accounts);
       const request = await completeRequest(id, deps);
       const toBus = (e: Parameters<typeof bus.emit>[1]) => bus.emit(id, e);
       const onEvent =

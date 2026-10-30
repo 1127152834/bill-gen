@@ -78,6 +78,15 @@ export const GenerationRequestSchema = z
     checkingAnchorDay: z.number().int().min(1).max(28).optional(),
     endMonth: MonthStringSchema.optional(),
     seed: z.string().optional(),
+    /**
+     * 出片版式（按顺序尝试）。省略 = 用服务端 `BILLGEN_TEMPLATES`；含 `auto` 时交给推荐器。
+     * 页面上的「做哪家银行的账单」就是这一项，所以它可以按次指定，不该只藏在进程环境里。
+     */
+    templates: z.array(z.string().min(1)).max(6).optional(),
+    /** `auto` 时每个账户保留几套版式。 */
+    templateLimit: z.number().int().min(1).max(11).optional(),
+    /** 账单上印的银行名；给了就覆盖版式自带的行名（联系方式按这个名字派生）。 */
+    bankName: z.string().min(1).max(60).optional(),
   })
   .superRefine((req, ctx) => {
     if (!req.accounts.checking && !req.accounts.credit) {

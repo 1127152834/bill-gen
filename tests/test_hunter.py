@@ -84,6 +84,25 @@ def test_patch_rejects_unknown_fields_and_bad_values(tmp_path: Path):
         apply_patch(store.load(), {"llm_fake": "yes"})
 
 
+def test_llm_fake_follows_the_credentials_instead_of_a_switch():
+    """页面上不再有「离线夹具模式」开关：三项凭据齐就走真模型，掉一项自动回落。"""
+    fresh = HunterSettings()
+    assert fresh.llm_fake is True
+    assert fresh.model_ready is False
+
+    full = apply_patch(
+        fresh,
+        {"base_url": "https://proxy.example/v1", "api_key": "sk-1", "tavily_api_key": "tvly-1"},
+    )
+    assert full.llm_fake is False
+    assert full.model_ready is True
+
+    # 少一项就不再是真实链路，自动回到本地夹具（不用人再点开关）。
+    assert apply_patch(full, {"base_url": ""}).llm_fake is True
+    # 显式传值仍然优先，便于运维脚本钉死一种模式。
+    assert apply_patch(full, {"llm_fake": True}).llm_fake is True
+
+
 def test_patch_strips_trailing_slash(tmp_path: Path):
     settings = apply_patch(HunterSettings(), {"base_url": "https://proxy.example/v1/"})
     assert settings.base_url == "https://proxy.example/v1"

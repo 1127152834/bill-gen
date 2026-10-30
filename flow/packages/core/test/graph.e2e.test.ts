@@ -80,6 +80,19 @@ describe('runGeneration with fixture dependencies', () => {
     expect(deps.budget.usage().llmCalls).toBe(17);
   });
 
+  it('支票账户单独出单：离线夹具按请求账户裁剪答案，不会因为缺信用卡整单失败', async () => {
+    const request = fixtureRequest({ accounts: { checking: { min: 8, max: 13 } } });
+    const { result } = await run(createFixtureDeps({ request }), request);
+    expect(result.status).toBe('completed');
+    expect(result.statements.map((s) => s.accountType)).toEqual(['checking']);
+    expect(result.statements[0]!.transactions.length).toBeGreaterThan(0);
+  });
+
+  it('不裁剪时（两份账户都请求）夹具答案原样使用，信用卡流水仍在', async () => {
+    const { result } = await run();
+    expect(result.statements.map((s) => s.accountType).sort()).toEqual(['checking', 'credit']);
+  });
+
   it('a first life model that breaks a lifeModel-target rule (R7 travel share) is sent back once with the violations', async () => {
     // R6 cannot be broken by a schema-valid model (the scheduler draws amounts from the ranges R6
     // checks), so the lifeModel-target rule broken here is R7: travel above 10% of debits.

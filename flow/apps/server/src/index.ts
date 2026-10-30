@@ -27,7 +27,7 @@ function main(): void {
   const runner = createJobRunner({
     db,
     bus,
-    makeDeps: () => deps(),
+    makeDeps: (limits, accounts) => deps(limits, accounts),
     concurrency: 2,
     logProgress: env.logProgress,
     logResearch: env.logResearch,

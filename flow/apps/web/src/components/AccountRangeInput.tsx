@@ -8,7 +8,6 @@ type Props = {
 
 const HINT: Record<AccountKey, string> = {
   checking: '日常收支账户，含工资/收款与各项扣款',
-  credit: '信用卡消费与还款',
 }
 
 function asCount(s: string): number | undefined {

@@ -242,6 +242,10 @@ _TEMPLATE_TOKENS: dict[str, dict[str, str]] = {
         "1-855-456-7634": "{phone}",
         "www.sofi.com": "www.{domain}",
         "SoFi Bank, N.A.": "{legal}",
+        # 「SoFi Bank Rate Sheet」这类组合要先整体吃掉，否则换成新行名会读出
+        # 「Cascade Trust Bank Bank Rate Sheet」（真行名里本来就带 Bank）。
+        "SoFi Bank Rate Sheet": "{name} Rate Sheet",
+        "SoFi Bank": "{name}",
         "SoFi": "{name}",
     },
     "mercury": {

@@ -37,13 +37,20 @@ M10 把猎手折进同一个入口，并把模型配置从环境变量搬到页�
 
 | 字段 | 作用 | 落到的环境变量 |
 |---|---|---|
-| `llm_fake` | 离线夹具（不调模型） | `LLM_FAKE` |
 | `base_url` / `api_key` / `model` | OpenAI 兼容端点 | `LLM_BASE_URL` / `LLM_API_KEY` / `LLM_MODEL` |
 | `structured_mode` | `json_schema` / `function_calling` / `json_mode` | `LLM_STRUCTURED_MODE` |
 | `tavily_api_key` | 本地化调研 | `TAVILY_API_KEY` |
-| `bank_name` | 账单上的发行行名 | `BANK_DISPLAY_NAME` |
-| `templates` / `auto_limit` | `auto` 或模板 id 列表；自动挑选个数 | `BILLGEN_TEMPLATES` / `BILLGEN_AUTO_LIMIT` |
 | `ai_fill` | 让模型自己填模板字段 | `BILLGEN_AI_FILL` |
+
+界面里只剩模型接入。「离线夹具」不是一个开关：`base_url` + `api_key` + `tavily_api_key`
+三项齐备就走真实模型，缺任何一项自动落回本地演示数据（`llm_fake` 由 `apply_patch` 推导，
+只有显式传 `llm_fake` 才以传入值为准）。
+
+**账单行名 / 目标模板 / 自动挑选个数已经搬出这里**：它们属于「这一次生成」，做在猎手的
+「账户与周期」那一步（`templates` / `templateLimit` / `bankName` 随 `POST /api/generations`
+一起进请求，见 `flow/packages/core/src/schemas/request.ts`）。`hunter/settings.json` 里
+`bank_name` / `templates` / `auto_limit` 仍作为**默认值**导出成 `BANK_DISPLAY_NAME` /
+`BILLGEN_TEMPLATES` / `BILLGEN_AUTO_LIMIT`，请求没指定时才用它们。
 
 规则：
 

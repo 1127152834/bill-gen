@@ -73,6 +73,10 @@ BODY_TAIL = (
     '("Mercury"). Mercury is providing this letter in its capacity as a service provider.'
 )
 
+# 参考件（`~/Downloads/mercury-bank-letter-7658.pdf`）的页脚是静态的，底稿里已经印着；
+# 数据里的 footer 与它相同就别再画一遍，否则文本层会出现两遍同一句话。
+BASE_FOOTER = "Banking services provided by Column N.A., Member FDIC."
+
 DEFAULT_DATA: dict[str, Any] = {
     "date": "October 28, 2026",
     "salutation": "To Whom It May Concern:",
@@ -228,6 +232,16 @@ def _load_base() -> bytes:
         return handle.read()
 
 
+def _base_text() -> str:
+    """底稿里已经印好的静态文字（判断「这句话底稿有没有」用，结果缓存）。"""
+    cached = getattr(_base_text, "_cache", None)
+    if cached is None:
+        with fitz.open(stream=_load_base(), filetype="pdf") as doc:
+            cached = " ".join(doc[0].get_text().split())
+        _base_text._cache = cached
+    return cached
+
+
 def _document() -> fitz.Document:
     return fitz.open(stream=_load_base(), filetype="pdf")
 
@@ -311,13 +325,25 @@ def build(data: dict[str, Any] | None = None, *, watermark: bool | None = None) 
 
     # 页脚
     footer = _as_text(merged.get("footer"))
-    if footer:
-        _draw_line(page, FOOTER_X, FOOTER_BL, footer, FONT_TEXT, SIZE, C_FOOTER)
+    if footer != BASE_FOOTER:
+        # 底稿里那行是参考件的静态页脚，已经印好了；不等才擦掉重画，
+        # 否则同一句话会进两次文本层（搜 FDIC 命中两条，复制出来也是两遍）。
+        if BASE_FOOTER in _base_text():
+            page.add_redact_annot(fitz.Rect(FOOTER_X - 2.0, FOOTER_BL - 11.0, RIGHT, FOOTER_BL + 4.0))
+            page.apply_redactions(images=fitz.PDF_REDACT_IMAGE_NONE,
+                                  graphics=fitz.PDF_REDACT_LINE_ART_NONE)
+        if footer:
+            _draw_line(page, FOOTER_X, FOOTER_BL, footer, FONT_TEXT, SIZE, C_FOOTER)
 
     show_watermark = merged.get("watermark") if watermark is None else watermark
     if show_watermark:
         page.insert_text((170.0, 700.0), "SAMPLE", fontname="helv", fontsize=64.0,
                          color=(0.93, 0.93, 0.95), rotate=0)
+
+    # 参考件的 PDF 元数据是 react-pdf 生成的（producer/creator 都是 "react-pdf"，
+    # title/author 为空）；不设的话 PyMuPDF 会留空，`pdfinfo` 一看就知道换了工具。
+    doc.set_metadata({"producer": "react-pdf", "creator": "react-pdf",
+                      "title": "", "author": "", "subject": "", "keywords": ""})
 
     pdf = doc.tobytes(garbage=4, deflate=True)
     doc.close()
