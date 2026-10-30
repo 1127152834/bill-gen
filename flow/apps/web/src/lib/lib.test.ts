@@ -71,19 +71,19 @@ describe('requestForm', () => {
     expect(buildRequest({ subjectType: 'business', profile: undefined, accounts: none, months: 1, endMonth: '2020-01', seed: '' })).toBeUndefined()
   })
 
-  it('carries the layout choice and the optional bank name, and drops them when auto is off', () => {
+  it('carries the layout choice, and drops the auto count when a bank is pinned', () => {
     const auto = buildRequest({
       subjectType: 'personal', profile: undefined, accounts: DEFAULT_ACCOUNTS,
       months: 1, endMonth: '2020-01', seed: '',
     })
     expect(auto).toMatchObject({ templates: ['auto'], templateLimit: 2 })
-    expect(auto).not.toHaveProperty('bankName')
 
     const pinned = buildRequest({
       subjectType: 'personal', profile: undefined, accounts: DEFAULT_ACCOUNTS, months: 1, endMonth: '2020-01', seed: '',
-      render: { ...DEFAULT_RENDER, template: 'chase-personal', autoLimit: '4', bankName: 'Harborline Bank' },
+      render: { ...DEFAULT_RENDER, template: 'chase-personal', autoLimit: '4' },
     })
-    expect(pinned).toMatchObject({ templates: ['chase-personal'], bankName: 'Harborline Bank' })
+    expect(pinned).toMatchObject({ templates: ['chase-personal'] })
+    expect(pinned).not.toHaveProperty('bankName')
     expect(pinned).not.toHaveProperty('templateLimit')
   })
 

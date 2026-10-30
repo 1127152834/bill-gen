@@ -59,11 +59,14 @@ os.replace`，掉电不会留半截，权限不给同机其它用户读）。界
 三项齐备就走真实模型，缺任何一项自动落回本地演示数据（`llm_fake` 由 `apply_patch` 推导，
 只有显式传 `llm_fake` 才以传入值为准）。
 
-**账单行名 / 目标模板 / 自动挑选个数已经搬出这里**：它们属于「这一次生成」，做在猎手的
-「账户与周期」那一步（`templates` / `templateLimit` / `bankName` 随 `POST /api/generations`
-一起进请求，见 `flow/packages/core/src/schemas/request.ts`）。`hunter/settings.json` 里
-`bank_name` / `templates` / `auto_limit` 仍作为**默认值**导出成 `BANK_DISPLAY_NAME` /
-`BILLGEN_TEMPLATES` / `BILLGEN_AUTO_LIMIT`，请求没指定时才用它们。
+**目标版式 / 自动挑选个数已经搬出这里**：它们属于「这一次生成」，做在猎手的「账户与周期」
+那一步（`templates` / `templateLimit` 随 `POST /api/generations` 一起进请求，见
+`flow/packages/core/src/schemas/request.ts`）。`hunter/settings.json` 里 `templates` /
+`auto_limit` 仍作为**默认值**导出成 `BILLGEN_TEMPLATES` / `BILLGEN_AUTO_LIMIT`，请求没指定时才用。
+
+**「账单行名」输入框已删**：本场景下版式和银行是同一个东西——选了「美国银行」就是出美国银行的
+账单，印版式自带的真行名、真电话、真信箱，不存在「用 A 的版式印 B 的银行」。引擎里保留
+`request.bankName`（`draft_from_ledger` 的 `bank_name` 参数）作为测试与离线探针用的能力，界面不再暴露。
 
 规则：
 

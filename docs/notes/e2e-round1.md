@@ -908,3 +908,18 @@ Design LLC`）、`GET /api/settings`、`POST /api/settings/test`、`POST /api/ba
 
 回滚：`git revert <本轮提交>`（去掉 `_render_file` 路由与 `RendersPanel` 即可，出片文件本来就一直存在
 `./.data/renders/`）。
+
+## 第三十一轮（2026-10-30）：删掉「账单行名」输入框
+
+用户判断：本场景下版式和银行是一回事，选了「美国银行」就出美国银行的账单，不存在「用 A 的版式
+印 B 的银行」这种需求。于是把第 3 步的「账单行名」输入框删掉。
+
+改了：`flow/apps/web/src/pages/New.tsx` 去掉 `f-bankName` 输入与「行名留空则…」的说明（换成
+「版式和银行是同一个东西」）；`flow/apps/web/src/lib/requestForm.ts` 的 `RenderDraft` 去掉
+`bankName`、`buildRequest` 不再输出该字段；`New.test.tsx` / `lib.test.ts` 去掉对应断言。
+
+保留：`GenerationRequestSchema.bankName` 与 `render.ts` 里「请求给了行名就传给
+`draft_from_ledger(bank_name)`」的通路——那是给离线探针/闸门（换行名查品牌渗漏）用的能力，
+只是界面不再暴露。真生成时 `bank_name` 恒为空，出片用版式自带的真行名、真电话、真信箱。
+
+验证：`vitest apps/web` 86 passed、`tsc -p apps/web` 干净、bundle 重建（`index-SLjFHYdO.js`）。

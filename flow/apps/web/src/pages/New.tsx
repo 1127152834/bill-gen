@@ -210,22 +210,11 @@ export default function New() {
                   </label>
                 )}
               </div>
-              <label htmlFor="f-bankName" className="field-label mt-3 mb-1 block">
-                账单行名
-              </label>
-              <input
-                id="f-bankName"
-                className="input sm:max-w-72"
-                autoComplete="off"
-                value={render.bankName}
-                onChange={(e) => setRender((r) => ({ ...r, bankName: e.target.value }))}
-                placeholder="留空＝用版式自带的那家银行"
-              />
               {templateError ? (
                 <p className="field-error">{templateError}</p>
               ) : (
                 <p className="mt-1 text-xs text-muted">
-                  选一家银行就只出这一套版式；选「自动挑」由推荐器按账户类型打分。行名留空则印版式自带的银行名与联系方式。
+                  选一家银行就只出这一套版式（版式和银行是同一个东西）；选「自动挑」由推荐器按账户类型打分。
                 </p>
               )}
             </fieldset>

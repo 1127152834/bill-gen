@@ -275,7 +275,6 @@ describe('submit', () => {
     await fillPersonalProfile(user)
     await user.click(screen.getByRole('button', { name: '下一步' }))
     await user.selectOptions(screen.getByLabelText('目标版式'), 'chase-personal')
-    await fill(user, '账单行名', 'Harborline Bank')
     await user.click(screen.getByText('高级选项'))
     await user.type(screen.getByLabelText('随机种子'), 'demo-1')
     await user.click(screen.getByRole('button', { name: '生成账单' }))
@@ -295,7 +294,6 @@ describe('submit', () => {
       months: 3,
       endMonth: '2026-09',
       templates: ['chase-personal'],
-      bankName: 'Harborline Bank',
       seed: 'demo-1',
     })
   })

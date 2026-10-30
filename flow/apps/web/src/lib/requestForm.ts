@@ -50,10 +50,10 @@ export const TEMPLATE_CHOICES: Record<SubjectType, readonly TemplateChoice[]> = 
   ],
 }
 
-/** 账单行名（印在信头上的银行名）。留空 = 用版式自带的那家银行。 */
-export type RenderDraft = { template: string; autoLimit: string; bankName: string }
+/** 出片选择：钉死一家银行的版式，或者交给推荐器自动挑（再定挑几套）。 */
+export type RenderDraft = { template: string; autoLimit: string }
 
-export const DEFAULT_RENDER: RenderDraft = { template: TEMPLATE_AUTO, autoLimit: '2', bankName: '' }
+export const DEFAULT_RENDER: RenderDraft = { template: TEMPLATE_AUTO, autoLimit: '2' }
 
 export const AUTO_LIMIT_MIN = 1
 export const AUTO_LIMIT_MAX = 11
@@ -104,7 +104,6 @@ export function buildRequest(input: RequestInput): GenerationRequest | undefined
     ranges.checking = { min: Number(checking.min), max: Number(checking.max) }
   }
   const seed = input.seed.trim()
-  const bankName = render.bankName.trim()
   const parsed = GenerationRequestSchema.safeParse({
     subjectType: input.subjectType,
     ...(input.profile && { profile: input.profile }),
@@ -113,7 +112,6 @@ export function buildRequest(input: RequestInput): GenerationRequest | undefined
     endMonth: input.endMonth,
     templates: [render.template],
     ...(render.template === TEMPLATE_AUTO && { templateLimit: Number(render.autoLimit) }),
-    ...(bankName !== '' && { bankName }),
     ...(seed !== '' && { seed }),
   })
   return parsed.success ? parsed.data : undefined
