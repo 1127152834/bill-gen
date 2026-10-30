@@ -171,3 +171,43 @@ def test_rechain_is_a_noop_when_the_chain_already_lines_up() -> None:
     ]
     assert postpass.rechain(months) == 0
     assert postpass.month_totals(months[1]) == (450.0, 550.0)
+
+
+def test_top_up_lifts_under_spent_categories_into_the_envelope():
+    """加油只有几笔小额时，抬进信封区间，但不越过单笔上限。"""
+    data = _mercury_like([
+        {"date": "Nov 5", "desc": "ARCO 6261 TEMPLE CITY CA", "amount": -25.08},
+        {"date": "Nov 11", "desc": "ARCO 8521 TEMPLE CITY CA", "amount": -34.26},
+    ])
+    env = {"fuel": (25200, 50400)}
+    counts = postpass.top_up_to_envelope(data, env, state="CA", city="Temple City")
+    total = sum(-row["amount"] for row in data["transactions"])
+    assert counts["scaled"] >= 1
+    assert total >= 252.0 * 0.9
+    hi = postpass.range_for("fuel")[1]
+    assert all(abs(row["amount"]) <= hi for row in data["transactions"])
+
+
+def test_top_up_leaves_healthy_categories_alone():
+    data = _mercury_like([{"date": "Nov 5", "desc": "VONS 1392 TEMPLE CITY CA", "amount": -950.0}])
+    before = data["transactions"][0]["amount"]
+    counts = postpass.top_up_to_envelope(data, {"groceries": (90800, 136200)}, state="CA", city="Temple City")
+    assert counts == {"scaled": 0, "added": 0}
+    assert data["transactions"][0]["amount"] == before
+
+
+def test_top_up_adds_the_missing_utility_when_only_one_bill_exists():
+    """真账单电、气各一张：只有电费时把燃气补上。"""
+    data = _mercury_like([{"date": "Nov 14", "desc": "SOUTHERN CALIFORNIA EDISON", "amount": -60.0}])
+    counts = postpass.top_up_to_envelope(
+        data, {"utilities": (25200, 50400)}, state="CA", city="Temple City"
+    )
+    descs = [row["desc"] for row in data["transactions"]]
+    assert counts["added"] == 1
+    assert any("GAS" in desc for desc in descs), descs
+    assert any("EDISON" in desc for desc in descs)
+
+
+def test_range_for_accepts_plural_envelope_names():
+    assert postpass.range_for("utilities") == postpass.CATEGORY_RANGES["utility"]
+    assert postpass.range_for("groceries") == postpass.CATEGORY_RANGES["grocery"]

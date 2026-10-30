@@ -17,6 +17,8 @@ Austin 的户头上会出现 Con Edison，Temple City 的加油记录会是 $3.4
 from __future__ import annotations
 
 import re
+import hashlib
+import random
 from typing import Any, Iterable, Mapping
 
 __all__ = [
@@ -428,31 +430,70 @@ def top_up_to_envelope(
         ]
         lo_range, hi_range = range_for(category)
         deficit = low * 1.05 - actual
-        for row in rows:
+        # 多跑几轮：每轮给每行留一点余量地抬，直到补够或所有行都顶到单笔上限。
+        for _ in range(6):
             if deficit <= 0:
                 break
-            amount = abs(float(_row_amount(row) or 0.0))
-            room = hi_range - amount
-            if room <= 1.0:
-                continue
-            lift = min(deficit / 100.0 / max(len(rows), 1), room)
-            if lift <= 0.5:
-                continue
-            _set_amount(row, -(round(amount + lift, 2)))
-            deficit -= int(round(lift * 100))
-            counts["scaled"] += 1
+            progressed = False
+            for row in rows:
+                if deficit <= 0:
+                    break
+                amount = abs(float(_row_amount(row) or 0.0))
+                room = hi_range - amount
+                if room <= 1.0:
+                    continue
+                lift = min(deficit / 100.0 / max(len(rows), 1), room)
+                if lift <= 0.5:
+                    continue
+                _set_amount(row, -(round(amount + lift, 2)))
+                deficit -= int(round(lift * 100))
+                counts["scaled"] += 1
+                progressed = True
+            if not progressed:
+                break
+        # 高频小额类目：抬到顶还不够就是「这个月少跑了几趟」，补一两笔新消费更真实。
+        if category in {"fuel", "groceries", "dining", "shopping"} and deficit > 0:
+            arrays = list(_iter_arrays(data))
+            if arrays and rows:
+                rng = random.Random(hashlib.sha256(f"{seed}|{category}|topup".encode()).hexdigest())
+                while deficit > 0 and counts["added"] < 3:
+                    base = rows[rng.randrange(len(rows))]
+                    amount = round(rng.uniform(lo_range, min(hi_range, deficit / 100.0)), 2)
+                    if amount < lo_range:
+                        break
+                    day = rng.randrange(3, 27)
+                    arrays[0].append(
+                        {
+                            "date": f"{base.get('date', '')[:3]} {day}",
+                            "desc": _row_desc(base),
+                            "amount": -amount,
+                            "type": base.get("type", "Card"),
+                        }
+                    )
+                    deficit -= int(round(amount * 100))
+                    counts["added"] += 1
+
         # 公用事业：缺一家就补另一家（电/气各一张）
         if category == "utilities" and deficit > 0:
             pair = _utilities_for(state, city)
-            present = " ".join(_norm(_row_desc(row)) for row in rows)
+            present_words = {word for row in rows for word in re.findall(r"[A-Z]+", _norm(_row_desc(row)))}
             missing = ""
             if pair:
                 for name in pair:
-                    if not any(word in present for word in _norm(name).split()[:2]):
+                    need = [word for word in re.findall(r"[A-Z]+", _norm(name)) if len(word) > 1]
+                    if not all(word in present_words for word in need[:2]):
                         missing = name
                         break
             if missing:
-                amount = round(min(max(deficit / 100.0, lo_range), hi_range), 2)
+                # 给「另一家公用事业」留位置：已有那张先压到 75% 上限，再按余额补
+                for row in rows:
+                    amount_now = abs(float(_row_amount(row) or 0.0))
+                    cap = hi_range * 0.75
+                    if amount_now > cap:
+                        _set_amount(row, -round(cap, 2))
+                        deficit += int(round((amount_now - cap) * 100))
+                want = min(max(deficit / 100.0, lo_range * 1.6), hi_range * 0.6)
+                amount = round(want, 2)
                 day = str(rows[0].get("date") or "").strip() if rows else ""
                 row = {
                     "date": day or "15",
@@ -460,7 +501,9 @@ def top_up_to_envelope(
                     "amount": -amount,
                     "type": "ACH",
                 }
-                _iter_arrays(data)[0].append(row)
+                arrays = list(_iter_arrays(data))
+                if arrays:
+                    arrays[0].append(row)
                 deficit -= int(round(amount * 100))
                 counts["added"] += 1
     if counts["scaled"] or counts["added"]:

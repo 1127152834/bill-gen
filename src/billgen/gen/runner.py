@@ -205,6 +205,7 @@ def make_runner(*, profiles: Path | str | None = None):
             ctx.log("收尾：按节日/季节补了本地消费（感恩节采购、黑五、礼品等）", percent=93)
 
         repaired: dict[str, dict[str, int]] = {}
+        topped: dict[str, dict[str, int]] = {}
         for outcome in result.months:
             data = getattr(outcome, "data", None)
             if isinstance(data, dict):
@@ -215,6 +216,19 @@ def make_runner(*, profiles: Path | str | None = None):
                     income_hint=income_hint,
                     rent_hint=rent_hint,
                 )
+                # 信封补齐：低于下限的类目把已有行抬进区间，公用事业缺一家就补一张
+                try:
+                    year, month = (int(part) for part in str(outcome.month).split("-"))
+                except ValueError:
+                    continue
+                month_env = seasonal.envelope_for_month(base_env, year, month)
+                counts = postpass.top_up_to_envelope(
+                    data, month_env, seed=str(job.seed or ""), state=state, city=city
+                )
+                if any(counts.values()):
+                    topped[outcome.month] = counts
+        if topped:
+            ctx.log("收尾：低于预算信封的类目已补齐（加油、公用事业、医疗等）", percent=94)
         if any(sum(v.values()) for v in repaired.values()):
             ctx.log("收尾：已按档案所在地修正公用事业/连锁/金额档位", percent=94)
 
@@ -266,6 +280,7 @@ def make_runner(*, profiles: Path | str | None = None):
             "postpass": repaired,
             "seasonal": seasonal_added,
             "envelope": envelope_problems,
+            "topped_up": topped,
         }
         _write(out_dir / "job-summary.json", summary)
 
