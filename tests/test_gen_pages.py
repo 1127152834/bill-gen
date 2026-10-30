@@ -139,3 +139,27 @@ def test_unknown_profile_returns_404(server: str):
     status, body = _call(server + "/api/v1/profiles/deadbeef0000", "GET")
     assert status == 404
     assert body["error"]["code"] == "not_found"
+
+
+def test_hunter_routes_are_gone():
+    """猎手下线后，旧入口必须是 404，而不是挂着一个空转发。"""
+    import http.client
+    import json as _json
+
+    from billgen.server import http as H
+
+    server = H.make_server("127.0.0.1", 0)
+    port = server.server_address[1]
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        for path in ("/hunter/", "/api/v1/hunter/status", "/api/generations"):
+            conn = http.client.HTTPConnection("127.0.0.1", port, timeout=5)
+            conn.request("GET", path)
+            response = conn.getresponse()
+            body = response.read()
+            assert response.status == 404, (path, response.status, body[:80])
+            conn.close()
+    finally:
+        server.shutdown()
+        server.server_close()

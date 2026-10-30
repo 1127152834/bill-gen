@@ -41,3 +41,13 @@
 4. 页面：`/generate`（档案库 + 提交 + 进度 + 下载），与现有 `/letters/mercury/` 同级的服务端渲染。
 5. 护栏：`monthpack.check_delivered()` 为硬卡来源；`audit` 结果只落 warnings。
 6. 猎手删除放在 1–5 跑通并对比过一单之后。
+
+## 2026-10-31 猎手下线
+
+- 决策 13「猎手删除时机」已执行：整个 `flow/`（Node/LangGraph + React 工作台）与
+  `src/billgen/hunter/`（进程监管、设置、代理）连同 `/hunter/*`、`/api/generations` 转发一并删除。
+- 生成能力全部落在 Python：`src/billgen/gen/`（LLM + 采样 + 收尾）、`src/billgen/jobs.py`（任务队列）、
+  `/generate/`（工作台）与 `/api/v1/gen/jobs`。
+- 镜像因此只保留一个运行时（`python:3.11-bookworm-slim`），不再有 Node 构建阶段；
+  `docker compose build` 从「先拉 node 基础镜像再 pnpm 构建」变成单阶段 pip 安装。
+- 模板字段字典改由 `tools/gen_bank_forms_assets.py` 生成到 `docs/templates/`（原来给 LangGraph 当技能用）。
