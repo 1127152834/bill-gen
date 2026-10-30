@@ -732,3 +732,27 @@ chase-business 差异 0 项、usbank-business 差异 0 项。
 `e2e_compare --label personal` 里 amex 仍为「无参考件只自检」。amex 的六个文本/像素基线已重采。
 
 回滚：`git revert <本轮提交>`（只动 amex 的 traits、主题路径与一个新闸门）。
+
+## 第二十六轮（2026-10-30）：下线 amex 模板
+
+用户决定放弃 amex 版式（公开可得的真实 amex PDF 都是**信用卡**账单，与仓库的
+`Rewards Checking` 存款版式不是同一产品，无法当基线）。整条链路摘除：
+
+- 引擎：`registry` 的 `TemplateSpec`、`adapters.simple.build_amex`、
+  `line_styles.amex_desc`、`refs.amex_reference`、`synth/profile` 元数据、
+  `mcp/contract` 契约、`hunter/settings`、`server/legacy` 的 `/ae` 挂载、
+  `server/application._ENCRYPTABLE`、`branding` 的 `PLACEMENTS/TEXT_SLOTS/LITERAL_SUBS`、
+  `paths` 搬迁映射、`synth/bridge.TEMPLATE_BANK`、`synth/ledger` 的
+  `CALENDAR_MONTH_TEMPLATES` / traits / 别名、`parity/baseline`
+- 资产：`src/billgen/themes/amex/`、`flow/skills/bank-forms/{references/amex.md,assets/amex.json}`、
+  `scripts/private-assets.json` 的 `AE/*`
+- 工具：`tools/e2e_compare.py` 的参考件与区块标签、`tools/realism_rules.py` 的
+  `BANK_RULES/FORBIDDEN_PER_BANK/EXPECTED_PRODUCER/CROSS_BANK_TOKENS` 与产品串味闸门
+- 测试：模板数 13→12（服务端可渲染 11→10），amex 参数换成 `chase-personal`，
+  `/ae` 挂载与 amex 字体用例删除，打包清单同步
+
+验证：`pytest` 全绿、`tools/realism_rules.py` 全部规则通过、
+`tools/gen_bank_forms_assets.py --check` 一致、`tsc --noEmit -p packages/core` 干净、
+`vitest run` 411 passed / 7 skipped。
+
+回滚：`git revert 77d9d89`（模板文件与资产会一起回来）。

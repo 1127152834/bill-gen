@@ -139,12 +139,3 @@
 
 - 版式漂移：0 段（容差 2.5pt）
 - 页数：6；墨量：[7.8, 10.1, 6.3, 6.0, 9.7, 10.1]；字体：Helvetica, Helvetica-Bold, MyriadPro-Black, MyriadPro-Bold, MyriadPro-BoldIt, MyriadPro-It, MyriadPro-Regular, SymbolMT,
-
-无参考件（无 PDF、无 layout json）：本轮只做自检指标与区块标题检查。
-
-## amex
-
-无参考件（无 PDF、无 layout 底稿）：本轮只做自检指标与区块标题检查。
-
-- 页数：3；墨量：[7.9, 4.5, 5.0]；字体：BentonSans-Bold, BentonSans-Regular, BentonSans-RegularItalic, Helvetica
-
