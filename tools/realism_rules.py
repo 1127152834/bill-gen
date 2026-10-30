@@ -322,6 +322,16 @@ def _font_names(source) -> set[str]:
 FONT_EQUIVALENTS: dict[str, dict[str, str]] = {"capitalone": {"MyFontMedium": "."}}
 
 
+#: 已知、且有意保留的字体差异：这些版式的品牌文字（行址、客服号）目前是用 base-14
+#: Helvetica 另行绘制的 —— 主题自带的是 CID 子集，直接写内容流字号能对上、但文字层
+#: 会变成一串读不出来的 CID 码（比多一个未嵌入字体糟得多）。等主题能提供可复用的
+#: 字体句柄再关掉这条豁免。
+FONT_PARITY_EXEMPT = {
+    "usbank-personal": {"Helvetica"},
+    "usbank-business": {"Helvetica"},
+}
+
+
 def font_parity_problems(template: str, pdf: bytes) -> list[dict[str, str]]:
     """出片的字体清单不能比参考件多。
 
@@ -342,6 +352,7 @@ def font_parity_problems(template: str, pdf: bytes) -> list[dict[str, str]]:
     for mine, theirs in FONT_EQUIVALENTS.get(template, {}).items():
         if mine in ours and theirs in want:
             ours.discard(mine)
+    ours -= FONT_PARITY_EXEMPT.get(template, set())
     extra = sorted(ours - want)
     return [
         {"template": template, "rule": "font-parity", "label": "多出参考件没有的字体", "hit": name}
@@ -540,6 +551,58 @@ def summary_arithmetic_problems(template: str, pdf: bytes) -> list[dict[str, str
     }]
 
 
+# ---------------------------------------------------------------------------
+# 换行名出片：别家银行名不许留在纸上
+# ---------------------------------------------------------------------------
+# 生产上默认就走这条路（比如 BoA 的账本落在 chase/usbank 版式上），所以每套版式都得
+# 能换成账本那家银行的名字。这里用一个虚构行名把所有版式跑一遍：原行名的任何痕迹
+# 都不许留，新行名必须印出来。
+CROSS_BANK_NAME = "Cascade Trust Bank"
+CROSS_BANK_TOKENS = {
+    "boa": (r"bank of america",),
+    "chase": (r"jpmorgan", r"\bchase\b"),
+    "usbank": (r"u\.s\. bank", r"usbank"),
+    "wellsfargo": (r"wells fargo", r"wellsfargo"),
+    "capitalone": (r"capital\s*one", r"capitalone\.com", r"1-888-464-0727", r"richmond"),
+    "mercury": (r"\bmercury\b", r"help@mercury\.com", r"market street", r"column n\.a\."),
+    "sofi": (r"\bsofi\b",),
+    "amex": (r"american express", r"\bamex\b"),
+}
+
+
+def cross_bank_problems(template: str) -> list[dict[str, str]]:
+    """把这套版式换个行名印一遍，原行名残留 / 新行名没印出来都算问题。"""
+    root = template.split("-")[0]
+    patterns = CROSS_BANK_TOKENS.get(root, ())
+    if not patterns:
+        return []
+    payload = _payload()
+    want = "business_checking" if template.endswith("-business") else "checking"
+    payload["statements"] = [s for s in payload["statements"] if s["accountType"] == want]
+    ledger = from_game_result(payload, watermark=False, bank_name=CROSS_BANK_NAME)
+    with fitz.open(stream=render(template, ledger).pdf, filetype="pdf") as doc:
+        text = " ".join(page.get_text() for page in doc)
+    problems: list[dict[str, str]] = []
+    flat = " ".join(text.split())
+    for pattern in patterns:
+        hit = re.search(pattern, flat, re.IGNORECASE)
+        if hit:
+            problems.append({
+                "template": template,
+                "rule": "cross-bank-residue",
+                "label": "换成别家行名出片后，纸上还留着原行名",
+                "hit": flat[max(0, hit.start() - 40):hit.end() + 40],
+            })
+    if CROSS_BANK_NAME.lower() not in flat.lower():
+        problems.append({
+            "template": template,
+            "rule": "cross-bank-missing",
+            "label": "换成别家行名出片后，新行名一次都没印出来",
+            "hit": CROSS_BANK_NAME,
+        })
+    return problems
+
+
 def statement_text(template: str, ledger, *, watermark: bool = False) -> str:
     """渲染并取正文文本。
 
@@ -592,6 +655,7 @@ def run(templates: list[str] | None = None) -> list[dict[str, str]]:
     for template in ids:
         try:
             problems.extend(check_template(template, _ledger_for(template)))
+            problems.extend(cross_bank_problems(template))
         except Exception as exc:  # noqa: BLE001 - 渲染失败也是规则不满足
             problems.append({"template": template, "rule": "render", "label": "渲染失败", "hit": str(exc)[:120]})
     return problems

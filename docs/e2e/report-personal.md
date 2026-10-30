@@ -34,8 +34,6 @@
 
 差异：0 项
 
-![chase-personal](img/chase-personal-compare.png)
-
 ## chase-business
 
 跳过：`结果包里没有账户 'business_checking'，现有：['checking', 'credit']`
@@ -51,7 +49,7 @@
 | 字体（共有） | Arial-BoldItalicMT, Arial-BoldMT, Arial-ItalicMT, ArialMT, C0000365_T1001140_0,  | 参考共 9 种 | OK |
 | 字体（仅出片） | 无 | — | INFO |
 | 最低图效 DPI | 240.4 | 240.4 | OK |
-| 第 1 页墨量 % | 14.6 | 13.3 | OK |
+| 第 1 页墨量 % | 13.7 | 13.3 | OK |
 | 区块标题 Uni-Statement | 有 | 有 | OK |
 | 区块标题 SAFE DEBIT ACCOUNT | 有 | 有 | OK |
 | 区块标题 Account Summary | 有 | 有 | OK |
@@ -61,8 +59,6 @@
 | 日期格式 | Mon D, Mon DD, YYYY, Month D, YYYY | MM/DD, Mon D, Month D, YYYY | OK |
 
 差异：0 项
-
-![usbank-personal](img/usbank-personal-compare.png)
 
 ## usbank-business
 
@@ -88,8 +84,6 @@
 
 差异：0 项
 
-![capitalone](img/capitalone-compare.png)
-
 ## mercury
 
 参考件：`src/billgen/themes/mercury/Demo-Bank-Statement-SAMPLE.pdf`（2p，612.0×792.0）
@@ -109,8 +103,6 @@
 
 差异：0 项
 
-![mercury](img/mercury-compare.png)
-
 ## sofi
 
 参考件：`src/billgen/themes/sofi/SoFi-Statement-SAMPLE.pdf`（2p，612.0×792.0）
@@ -122,7 +114,7 @@
 | 字体（共有） | Montserrat-Thin, TTNormsBold, TTNormsRegular | 参考共 3 种 | OK |
 | 字体（仅出片） | 无 | — | INFO |
 | 最低图效 DPI | 全矢量 | 78.6 | OK |
-| 第 1 页墨量 % | 31.9 | 29.2 | OK |
+| 第 1 页墨量 % | 32.3 | 29.2 | OK |
 | 区块标题 Primary Account Holder | 有 | 有 | OK |
 | 区块标题 Transaction Details | 有 | 有 | OK |
 | 区块标题 Contact Information | 有 | 有 | OK |
@@ -130,8 +122,6 @@
 | 日期格式 | MM/DD, MM/DD/YYYY, Mon D, Mon DD, YYYY | Mon D, Mon DD, YYYY, Month D, YYYY | OK |
 
 差异：0 项
-
-![sofi](img/sofi-compare.png)
 
 ## wellsfargo
 
@@ -146,5 +136,5 @@
 
 无参考件（无 PDF、无 layout 底稿）：本轮只做自检指标与区块标题检查。
 
-- 页数：3；墨量：[7.9, 4.5, 5.0]；字体：BentonSans-Bold, BentonSans-Regular, BentonSans-RegularItalic
+- 页数：3；墨量：[8.0, 4.5, 5.0]；字体：BentonSans-Bold, BentonSans-Regular, BentonSans-RegularItalic, Helvetica
 

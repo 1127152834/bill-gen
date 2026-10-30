@@ -26,7 +26,15 @@ from ..money import (
     fmt_month_year,
     fmt_slash_year,
 )
-from ._common import address_lines, bank_block, clip, customer_lines, deep, statement_memo
+from ._common import (
+    address_lines,
+    bank_block,
+    clip,
+    customer_lines,
+    deep,
+    rebrand_literals,
+    statement_memo,
+)
 
 __all__ = ["build_amex", "build_capitalone", "build_mercury", "build_sofi"]
 
@@ -131,7 +139,7 @@ def build_mercury(ledger: LedgerDocument, defaults: dict[str, Any]) -> dict[str,
             "transactions": transactions,
         }
     )
-    return d
+    return rebrand_literals(d, ledger, "mercury")
 
 
 def build_capitalone(ledger: LedgerDocument, defaults: dict[str, Any]) -> dict[str, Any]:
@@ -174,7 +182,7 @@ def build_capitalone(ledger: LedgerDocument, defaults: dict[str, Any]) -> dict[s
             ],
         }
     )
-    return d
+    return rebrand_literals(d, ledger, "capitalone")
 
 
 def build_sofi(ledger: LedgerDocument, defaults: dict[str, Any]) -> dict[str, Any]:
@@ -216,7 +224,7 @@ def build_sofi(ledger: LedgerDocument, defaults: dict[str, Any]) -> dict[str, An
             ],
         }
     )
-    return d
+    return rebrand_literals(d, ledger, "sofi")
 
 
 def count_rows(data: dict[str, Any]) -> int:

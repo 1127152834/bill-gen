@@ -128,14 +128,17 @@ def test_font_parity_rule_catches_stray_base14():
     import json
 
     payload = json.loads((ROOT / "tests/fixtures/synth_result.json").read_text())
-    ledger = from_game_result(payload, watermark=False, template="usbank-personal")
-    clean = render("usbank-personal", ledger).pdf
-    assert font_parity_problems("usbank-personal", clean) == []
+    # 用 Capital One 做样本：它的参考件全是 MyFont 子集，凭空多一个既非嵌入、
+    # 也不在参考件里的 Helvetica 就是硬破绽（U.S. Bank 有一条已声明的豁免，见
+    # `FONT_PARITY_EXEMPT`）。
+    ledger = from_game_result(payload, watermark=False, template="capitalone")
+    clean = render("capitalone", ledger).pdf
+    assert font_parity_problems("capitalone", clean) == []
 
     doc = fitz.open(stream=clean, filetype="pdf")
     doc[0].insert_text(fitz.Point(72, 700), "HELLO", fontsize=12, fontname="helv")
     dirty = doc.tobytes()
     doc.close()
 
-    hits = font_parity_problems("usbank-personal", dirty)
+    hits = font_parity_problems("capitalone", dirty)
     assert [h["hit"] for h in hits] == ["Helvetica"]

@@ -427,3 +427,44 @@ Wells Fargo / Amex 都对得上）。
 SoFi 参考件逐行比对只剩商户名一类的数据行（不再是版式缺失）。
 
 回滚：`git revert <本轮提交>`（branding 字体分流 + TEMPLATE_BANK + sofi 三处 + 基线）。
+
+## 第十六轮（换家银行出片：Mercury / Capital One / SoFi 原来根本不改名）
+
+生产上默认就走「别家银行名 + 这套版式」这一步：BoA 的账本落在 chase / usbank 版式上，
+所以每套版式都必须能把行名换成账本那家。用一个虚构行名 `Cascade Trust Bank` 把 11 套
+各印一遍，查出三处：
+
+1. **Mercury**：`build_data('mercury')` 里根本没有 `bank` 键 —— 主题把行名、邮箱、
+   地址都写死在 `footer_line1`/`footer_line2` 两个数据字段里，没有替换通道。出片页脚
+   印的还是 `Mercury | help@mercury.com | 2261 Market Street…`。
+2. **Capital One**：`bank` 字典是对的（名字、legal、域名、电话、信箱都在），但标语
+   `Thanks for saving with Capital One 360®`、页脚 `capitalone.com / 1-888-464-0727 /
+   P.O. Box 85123, Richmond, VA 23285` 全是主题默认数据里的自家字面量。
+3. **SoFi**：联系方式块仍印 `www.sofi.com` / `SoFi Bank, N.A.` / `2750 East Cottonwood
+   Parkway #300`（`_brand_texts()` 只管法务段落那几处）。
+
+修法：`src/billgen/synth/adapters/_common.py` 新增
+`_TEMPLATE_TOKENS`（模板 → 它写死的自家字面量）、`_TEMPLATE_BRAND`（模板 → 它自己那家
+银行）、`same_bank()`、`rebrand_literals()`。三个适配器组完数据后过一遍：
+- **同一家银行直接原样返回**（参考件的原样，不许动一个字节）；
+- 换行名时按长到短替换：Mercury 的 `Column N.A.`→`{legal}`、`help@mercury.com`→
+  `help@{domain}`、街道地址→`{po_box}, {city_state_zip}`；C1 的 `capitalone.com`、
+  `1-888-464-0727`、Richmond 信箱、连同 `Capital One`→`{name}`（标语因此变成
+  `Thanks for saving with Cascade Trust Bank 360®`）；SoFi 的 `www.sofi.com`、
+  `SoFi Bank, N.A.`、`2750 East Cottonwood Parkway #300`、`(855) 456-SOFI (7634)`。
+
+新增闸门 `tools/realism_rules.py::cross_bank_problems(template)`：11 套各换成一个虚构
+行名重印，① 原行名的任何痕迹（`jpmorgan`、`wells fargo`、`capitalone.com`、`help@mercury.com`、
+`column n.a.` 等）都不许留；② 新行名必须至少印出来一次。首跑就是这个规则抓出上面三处。
+
+顺带处理 U.S. Bank 的字体豁免：`FONT_PARITY_EXEMPT` 里显式写着「usbank-personal/business
+允许 Helvetica」。理由是试过用主题自带的 CID 字体重写（`cid_bytes()` + 追加内容流），
+字形对得上但**文字层会变成一串读不出来的 CID 码**（续页字体资源名按页记账，写进去的
+2 字节码与那一页的 ToUnicode 对不齐），比「多一个未嵌入字体」糟得多，已回退。等主题能
+提供可复用的字体句柄再关掉这条豁免。
+
+验证：`pytest` 565 passed / 16 skipped / 33 subtests；`realism_rules.py` 11 套全绿
+（含新规则）；`e2e_compare --label personal` 7 套差异 0 项 + boa/wf 版式漂移 0 段。
+
+回滚：`git revert <本轮提交>`（三个适配器 + `_common` 的替换表 + 新闸门在同一提交里；
+`FONT_PARITY_EXEMPT` 与本轮无关，可单独保留）。

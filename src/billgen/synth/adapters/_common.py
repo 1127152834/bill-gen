@@ -219,3 +219,91 @@ def money_grouped(cents: int) -> str:
 
 def money_float(cents: int) -> float:
     return cents_to_float(cents)
+
+
+# ---------------------------------------------------------------------------
+# 换行名出片：这家主题里写死的自家字面量
+# ---------------------------------------------------------------------------
+# 有些版式（Mercury / Capital One）把行名、客服电话、寄送地址直接写进默认数据，
+# 没有槽位可换。账本换一家银行出片时，这些串会原样印在别人家的账单上。这里按
+# 「模板 → 该替换的字面量」列清楚，只在**不是同一家银行**时动手，同一家时一个
+# 字节都不碰（同一家必须是参考件的原样）。
+_TEMPLATE_TOKENS: dict[str, dict[str, str]] = {
+    "capitalone": {
+        "P.O. Box 85123, Richmond, VA 23285": "{po_box}, {city_state_zip}",
+        "1-888-464-0727": "{phone}",
+        "capitalone.com": "{domain}",
+        "Capital One": "{name}",
+    },
+    "sofi": {
+        "2750 East Cottonwood Parkway #300": "{po_box}",
+        "Cottonwood Heights, Utah 84121": "{city_state_zip}",
+        "(855) 456-SOFI (7634)": "{phone}",
+        "1-855-456-7634": "{phone}",
+        "www.sofi.com": "www.{domain}",
+        "SoFi Bank, N.A.": "{legal}",
+        "SoFi": "{name}",
+    },
+    "mercury": {
+        "2261 Market Street, Suite 86807, San Francisco, CA 94114": "{po_box}, {city_state_zip}",
+        "help@mercury.com": "help@{domain}",
+        "Column N.A.": "{legal}",
+        "Mercury": "{name}",
+    },
+}
+
+# 主题→它自己那家银行（用于判断「换名了没有」）
+_TEMPLATE_BRAND = {"capitalone": "capital one", "mercury": "mercury", "sofi": "sofi"}
+
+
+def same_bank(ledger, template_id: str) -> bool:
+    """账本里的行名是不是就是这套版式那家银行。"""
+    want = _TEMPLATE_BRAND.get(template_id)
+    if not want:
+        return True
+    have = " ".join((ledger.bank.name or "").lower().replace(",", " ").split())
+    have = " ".join(w for w in have.split() if w not in {"bank", "n.a.", "na", "n.a", "inc."})
+    return have == want or have.startswith(want)
+
+
+def _walk_strings(node):
+    if isinstance(node, str):
+        yield node
+    elif isinstance(node, dict):
+        for value in node.values():
+            yield from _walk_strings(value)
+    elif isinstance(node, (list, tuple)):
+        for value in node:
+            yield from _walk_strings(value)
+
+
+def rebrand_literals(data, ledger, template_id: str):
+    """把默认数据里写死的自家字面量换成账本那家银行；同一家时原样返回。"""
+    tokens = _TEMPLATE_TOKENS.get(template_id)
+    if not tokens or same_bank(ledger, template_id):
+        return data
+    bank = ledger.bank
+    values = {
+        "name": bank.name or "",
+        "legal": bank.legal or bank.name or "",
+        "domain": bank.domain or "",
+        "phone": bank.phone_service or bank.phone or "",
+        "po_box": bank.po_box or "",
+        "city_state_zip": bank.city_state_zip or "",
+    }
+    mapping = {src: dst.format(**values).strip(" ,") for src, dst in tokens.items()}
+    mapping = {k: v for k, v in mapping.items() if v and k != v}
+
+    def fix(node):
+        if isinstance(node, str):
+            out = node
+            for src in sorted(mapping, key=len, reverse=True):
+                out = out.replace(src, mapping[src])
+            return out
+        if isinstance(node, dict):
+            return {k: fix(v) for k, v in node.items()}
+        if isinstance(node, list):
+            return [fix(v) for v in node]
+        return node
+
+    return fix(data)
