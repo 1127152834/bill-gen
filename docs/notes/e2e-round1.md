@@ -678,3 +678,17 @@ chase-business: draft failed validation (electronic_withdrawals[2].amount = '2,4
 验证：`pytest` 569 passed / 16 skipped / 33 subtests；`realism_rules.py` 全部规则通过。
 
 回滚：`git revert <本轮提交>`（只动 MCP 层校验，不涉及渲染与闸门）。
+
+## 第二十四轮补充（线上复验：企业账单三套齐了）
+
+重建镜像后真跑 `subjectType: business`（job `5e5543aa-91ad-43dd-ada1-e9911302dfff`）：
+
+```
+completed | warnings: ['credit: 服务端没有该账户类型的版式，跳过出片（只有存款账户版式）']
+renders: chase-business business_checking 3p / usbank-business business_checking 4p
+```
+
+`chase-business` 这次出来了——归一化生效。落盘件里金额是 `$8,060.41` / `$4,772.53` /
+`$1,650.00` 这类正常写法，没有 `$` 残留成列、也没有 `NaN`。
+`e2e_compare --label business` 用这份账本重跑：boa-business 版式漂移 0 段、
+chase-business 差异 0 项、usbank-business 差异 0 项。
