@@ -257,7 +257,8 @@ def extract(template_id: str) -> dict[str, Any]:
     if curated_path.is_file():
         curated = json.loads(curated_path.read_text(encoding="utf-8"))
         kept: list[str] = []
-        for key in ("columns", "type_enum", "type_aliases", "descriptor", "row_rules", "forbidden_literals"):
+        for key in ("columns", "type_enum", "type_aliases", "descriptor", "row_rules",
+                    "forbidden_literals", "desc_has_label", "sections_note"):
             if key in curated:  # 空列表也算人工结论（例如「这一版没有 Type 列」）
                 contract[key] = curated[key]
                 kept.append(key)

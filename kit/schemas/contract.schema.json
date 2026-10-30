@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/contract.schema.json",
+  "title": "账单契约（statement contract）",
+  "type": "object",
+  "required": ["template_id", "columns", "descriptor", "row_rules", "forbidden_literals", "evidence"],
+  "properties": {
+    "template_id": {"type": "string", "description": "账户/版式 id，例如 chase-personal"},
+    "theme": {"type": "string"},
+    "kind": {"type": "string", "enum": ["deposit", "credit", "static-web"]},
+    "bank_identity": {
+      "type": "object",
+      "properties": {
+        "name": {"type": "string"},
+        "legal": {"type": "string"},
+        "domain": {"type": "string"},
+        "phone": {"type": "string"},
+        "city_state_zip": {"type": "string"}
+      }
+    },
+    "columns": {
+      "type": "array",
+      "items": {"type": "string", "enum": ["date", "description", "type", "ref", "category", "amount", "balance"]},
+      "description": "实际打印的列，顺序即列序"
+    },
+    "type_column": {"type": "boolean", "description": "是否有独立的 Type 列"},
+    "desc_has_label": {"type": "boolean", "description": "desc 字段里是否还含行标签与对齐空档（如 Chase）"},
+    "card_tail": {"enum": ["in_row", "header", false], "description": "卡号后四位印在哪"},
+    "card_types": {"type": "array", "items": {"type": "string"}},
+    "type_enum": {"type": "array", "items": {"type": "string"}},
+    "type_aliases": {"type": "object", "additionalProperties": {"type": "string"}},
+    "descriptor": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["template"],
+        "properties": {
+          "template": {"type": "string", "description": "占位符骨架，如 '{merchant} {city} {state} Card {last4}'"},
+          "rules": {
+            "type": "array",
+            "items": {"enum": ["has_card_tail", "no_card_tail", "has_place", "no_city", "no_payment_tail", "upper", "no_leading_padding"]}
+          },
+          "max_len": {"type": "integer"}
+        }
+      }
+    },
+    "row_rules": {
+      "type": "object",
+      "properties": {
+        "amount_decimals": {"type": "integer"},
+        "date_format": {"type": "string"},
+        "balance_chain": {"type": "boolean"},
+        "order": {"enum": ["asc", "newest-first"]},
+        "sections": {"type": "array", "items": {"type": "string"}},
+        "account_format": {"type": "string"},
+        "page_numbering": {"enum": ["statement-pages-only", "all-pages"]},
+        "category_column": {"type": "boolean"},
+        "no_leading_padding": {"type": "boolean"}
+      }
+    },
+    "forbidden_literals": {"type": "array", "items": {"type": "string"}},
+    "required_literals": {"type": "array", "items": {"type": "string"}},
+    "sample_rows": {"type": "array", "items": {"type": "string"}},
+    "evidence": {
+      "description": "每条规则的出处：真实样本路径#页 或 代码符号",
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "curated_keys": {"type": "array", "items": {"type": "string"}},
+    "open_questions": {"type": "array", "items": {"type": "string"}},
+    "why": {"type": "string"}
+  }
+}

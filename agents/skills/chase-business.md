@@ -47,6 +47,7 @@
 ## 出处
 - `src/billgen/synth/adapters/chase.py::_business_desc`
 - `src/billgen/synth/adapters/chase.py::_personal_desc`
+- `src/billgen/synth/adapters/chase.py::build_data（label + SUB_PAD 与 desc 拼在同一字段）`
 - `src/billgen/themes/chase/assets/chase_static_business.pdf`
 - `src/billgen/themes/chase/assets/chase_static_business.pdf#p1`
 - `src/billgen/themes/chase/assets/chase_static_business_prepared.pdf`
@@ -61,7 +62,7 @@
 - city_state_zip: `San Antonio, TX 78265-9805`
 
 ## 为什么这样写
-- Chase 个人/企业对账单都把卡尾印在行末（Card 4499）；企业版行标签用 Deposit/Withdrawal，不是 Card Purchase。
+- Chase 个人/企业对账单都把卡尾印在行末（Card 4499）；企业版行标签用 Deposit/Withdrawal，不是 Card Purchase。；desc 字段带行标签与对齐空档，校验前要先切出描述符本体
 
 ## 字段字典
 - [chase-business.md](../../docs/templates/chase-business.md)（每个顶层键的类型与样例）
