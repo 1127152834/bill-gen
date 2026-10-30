@@ -2553,10 +2553,17 @@ def generate(
     norm["bank_name"] = norm.get("bank_name") or bridge.TEMPLATE_BANK.get(template.split("-")[0], "")
 
     _check(ctx)
-    queries = node_plan_research(norm, profile, llm=llm, usage=usage, warnings=warnings, log=ctx)
+    if _scheduler() == "sampler":
+        # 采样模式不需要外部调研：品牌、门店号、价格都来自 sampler 的内置分布表，
+        # 检索结果只喂描述模板，纯属多花时间与配额。
+        queries: list[dict] = []
+        facts: list[dict] = []
+        _log(ctx, "research：采样模式跳过外部检索（品牌与价格走内置分布表）", 30)
+    else:
+        queries = node_plan_research(norm, profile, llm=llm, usage=usage, warnings=warnings, log=ctx)
 
-    _check(ctx)
-    facts = node_research(norm, queries, tavily=tavily, usage=usage, warnings=warnings, log=ctx)
+        _check(ctx)
+        facts = node_research(norm, queries, tavily=tavily, usage=usage, warnings=warnings, log=ctx)
 
     model: dict = {}
     rows: list[dict] = []

@@ -371,7 +371,8 @@ def test_audit_high_only_warns(tmp_path, monkeypatch):
     assert llm.life_calls == 2
 
 
-def test_research_quota_degrades(tmp_path):
+def test_research_quota_degrades(tmp_path, monkeypatch):
+    monkeypatch.setenv("BILLGEN_SCHEDULER", "model")  # 这条测的是模型逐行生成的老链路
     res = _gen(tmp_path, tavily=FakeTavily(max_calls=2))
 
     assert len(res.months) == 3
@@ -380,7 +381,8 @@ def test_research_quota_degrades(tmp_path):
     assert all(item.data for item in res.months)
 
 
-def test_llm_bad_json_retried(tmp_path):
+def test_llm_bad_json_retried(tmp_path, monkeypatch):
+    monkeypatch.setenv("BILLGEN_SCHEDULER", "model")  # 这条测的是模型逐行生成的老链路
     llm = FakeLlm(bad_json_once=True)
     res = _gen(tmp_path, llm=llm)
 
@@ -746,3 +748,14 @@ def test_schedule_keeps_only_one_bill_per_family():
     assert len(utilities) == 1, [row["base_description"] for row in utilities]
     rents = [row for row in rows if int(row["amount_cents"]) == 158000]
     assert len(rents) == 1, [row["base_description"] for row in rents]
+
+
+def test_sampler_mode_skips_external_research(tmp_path, monkeypatch):
+    """采样模式不查 Tavily：品牌与价格来自内置分布表，检索纯属浪费配额。"""
+    monkeypatch.delenv("BILLGEN_SCHEDULER", raising=False)
+    tavily = FakeTavily()
+    res = _gen(tmp_path, tavily=tavily)
+
+    assert res.usage["tavilyQueries"] == 0
+    assert getattr(tavily, "searched", []) == []
+    assert all(item.ok for item in res.months)
