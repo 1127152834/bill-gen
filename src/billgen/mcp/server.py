@@ -19,6 +19,7 @@ from typing import Any
 import fitz
 
 from .. import audit, branding, paths, registry, synth
+from ..synth.bridge import TEMPLATE_BANK
 from ..engine.base import RenderError
 from ..spec import RenderOptions
 from . import contract as contracts
@@ -72,12 +73,28 @@ def _money_problems(data: Any, template_id: str = "") -> list[str]:
 
 
 def _branded(pdf: bytes, template_id: str, data: Any) -> bytes:
-    """把版式里烙死的真实行标/行址/电话换成数据里那家银行自己的。"""
+    """把版式里烙死的真实行标/行址/电话换成数据里那家银行自己的。
+
+    两个「不许动」的情形：
+    1. 数据里没有行名（模型没填 / 空串）：拿空名字去重画，会把 Wells Fargo 的红黄
+       行标换成一块空白，比不换糟得多；
+    2. 行名就是这套版式那家银行：原稿的图形行标是真的（WF 那个红黄方块、BoA 的旗），
+       重画成纯文字词标反而一眼假。
+    """
     if not isinstance(data, dict) or template_id not in branding.PLACEMENTS:
         return pdf
+    bank = data.get("bank") if isinstance(data.get("bank"), dict) else {}
+    name = str(bank.get("name") or data.get("bankName") or "").strip()
+    if not name:
+        return pdf
+    root = template_id.split("-")[0]
+    want = (TEMPLATE_BANK.get(root) or "").lower().replace(",", " ")
+    have = " ".join(name.lower().replace(",", " ").split())
+    have = " ".join(w for w in have.split() if w not in {"bank", "n.a.", "n.a", "na", "inc."})
+    same = bool(want) and have.startswith(" ".join(want.split()))
     brand = branding.brand_from_data(data)
     with fitz.open(stream=pdf, filetype="pdf") as doc:
-        branding.apply(doc, template_id, brand)
+        branding.apply(doc, template_id, brand, redraw_logo=not same)
         return doc.tobytes(garbage=3, deflate=True)
 
 

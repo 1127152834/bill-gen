@@ -468,3 +468,29 @@ SoFi 参考件逐行比对只剩商户名一类的数据行（不再是版式缺
 
 回滚：`git revert <本轮提交>`（三个适配器 + `_common` 的替换表 + 新闸门在同一提交里；
 `FONT_PARITY_EXEMPT` 与本轮无关，可单独保留）。
+
+## 第十七轮（线上那两份 WF 账单：行标被换成「WF」方块、`©2027 , N.A.`）
+
+看线上真跑的落盘件时发现的，跟模板无关、是**服务端品牌化调用**的问题：
+
+1. `wellsfargo-checking-*.pdf` 页眉的 Wells Fargo 红黄方块，变成了一块深蓝底、
+   写着 `WF` 的方块（我们 `wordmark_png()` 造的文字词标）；标题还挤成
+   `Wells FargoEveryday Checking`。
+2. 同一份的页脚变成 `©2027 , N.A. All rights reserved.` —— 行名整段被空串换掉。
+
+根因：`src/billgen/mcp/server.py::_branded()` 拿**模型给的 data** 造 brand，
+然后 `branding.apply(doc, template_id, brand)` 走默认 `redraw_logo=True`：
+- `data["bank"]["name"]` 是空串（模型没填行名，只给了 `bankName: ""`）→ 用空名字
+  重画 logo（得到一块空白/占位词标）、把正文槽位换成空串（`©2027 , N.A.` 就是这么来的）；
+- 就算行名填对了（`Wells Fargo`），**同一家银行也会被重画**，凭空把真行标换掉。
+
+修法（`_branded`）：① 没有行名就整段跳过，原样返回；② 行名与这套版式那家银行相同
+（`bridge.TEMPLATE_BANK` 归一化比较，去掉 `bank`/`N.A.`/`Inc.` 尾巴）时
+`apply(..., redraw_logo=False)`，只换文字槽、不碰图形行标。
+
+验证（`_branded(raw, "wellsfargo", data)` 对比原稿页眉图字节）：
+`{"bank":{"name":""}}` → 原标保留 ✅；`{"bank":{"name":"Wells Fargo"}}` → 原标保留 ✅；
+`{"bank":{"name":"Cascade Trust Bank"}}` → 重画成词标 ✅（换家银行仍要换标）。
+`pytest` 565 passed / 16 skipped / 33 subtests；`realism_rules.py` 11 套全绿。
+
+回滚：`git revert <本轮提交>`（只动了 `src/billgen/mcp/server.py::_branded`）。
