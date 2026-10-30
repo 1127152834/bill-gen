@@ -69,6 +69,25 @@ curl -s -H 'Authorization: Bearer devlocal' -o out.zip http://127.0.0.1:8800/api
 
 批量导入：`POST /api/v1/profiles/import`，`{"text": "...", "format": "json"|"csv"}`，逐行报错（行号从 1 起）。
 
+## 预算信封与节日/季节（`gen/envelope.py` + `gen/seasonal.py`）
+
+流水「真不真」首先是分布问题，不是措辞问题。所以每月先按收入档算一张预算信封，再按美国日历缩放：
+
+1. **信封**：`CATEGORY_SHARES` 把净收入的固定比例分给 rent / groceries / dining / fuel / utilities /
+   phone / insurance / subscription / shopping / health；`col_tier` 再按地区调一档。填了 `rent_hint`
+   就直接用，房租不随季节变。
+2. **季节**：`ENVELOPE_FACTORS` 按月份缩放（7–8 月水电气 ×1.35、11 月购物 ×1.9、12 月 ×2.0、
+   11 月食材 ×1.35…）。每月信封与「本月节日」一起写进 lifeModel 提示词，模型据此安排叙事。
+3. **节日日历**：`us_holidays()`（感恩节 = 11 月第 4 个周四、复活节用 Computus、母亲节/父亲节按第几个周日…）
+   + `retail_events()`（超级碗、报税日、返校、Prime Day、黑五、网一、圣诞礼品）。
+4. **交付前补齐**（`postpass.top_up_to_envelope`）：低于信封下限的类目先抬已有行（单笔受
+   `CATEGORY_RANGES` 约束），抬到顶还不够就补几笔同类消费；公用事业缺一家时把该州另一家补上
+   ——真账单本来就是电、气各一张。`job-summary.json` 里 `envelope` 记录偏差、`topped_up` 记录补齐动作。
+5. **节日消费**（`seasonal.inject_event_rows`）：某类目还有余额时补 1 笔当月事件消费
+   （感恩节食材、黑五 TARGET/BEST BUY、12 月礼品），金额不越信封上限。
+
+改完金额一律 `_rescale_amounts()` + `sort_rows()`，保证「期初 + 流水 = 期末」且日期不倒序。
+
 ## 测试
 
 ```bash
