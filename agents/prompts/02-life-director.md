@@ -49,3 +49,9 @@
 - [ ] 期末预估余额 ≥ 0（按区间中位数粗算）
 - [ ] `calendar` 的节日全部覆盖
 - [ ] 没有两个事件同一天同一 `kind` 同一 `merchant_class`（除餐饮）
+
+## 契约（读什么）
+- `type_enum`：计划里每个事件的行类必须落在这个枚举里。枚举里没有的行类，换个表达方式，别硬塞。
+- `descriptor.<kind>.template`：骨架里的 `{...}` 就是事件必须带齐的字段（例如 `Zelle Payment to {party}` 必须有对方姓名；`DES:{des} ID:{ref} INDN:{holder}` 必须有 NACHA 那几段）。
+
+契约里没有的字段 → 回清单里补，不许让下游「先占位后补」。

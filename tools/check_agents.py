@@ -44,9 +44,19 @@ def check(root: Path = ROOT) -> list[str]:
         for section in REQUIRED_SECTIONS:
             if section not in text:
                 problems.append(f"{agent_id}: 缺少小节 {section}")
+        if "contracts_read" not in entry:
+            problems.append(f"{agent_id}: 没有声明 contracts_read（这个阶段读契约的哪些字段）")
+        if "stage" not in entry:
+            problems.append(f"{agent_id}: 没有声明 stage")
         for schema in entry.get("inputs", []):
             if schema.endswith(".schema.json") and not (agents_dir / "schemas" / schema).is_file():
                 problems.append(f"{agent_id}: 缺少输入 schema {schema}")
+
+    pipeline = manifest.get("pipeline") or []
+    known = {entry.get("id") for entry in manifest.get("agents", [])}
+    for stage_name in pipeline:
+        if stage_name not in known:
+            problems.append(f"pipeline 里的 {stage_name} 没有对应 agent")
 
     for schema_file in sorted((agents_dir / "schemas").glob("*.schema.json")):
         try:

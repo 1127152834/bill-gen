@@ -23,3 +23,10 @@
 ## 硬规则
 - 契约缺失 → 输出 `severity: high, code: contract_missing`，不许放行。
 - 不许「按经验」判格式：所有判据必须来自契约文件。
+
+## 契约（判据来源）
+- `contracts.check_data(contract, data)`：唯一判据，返回的问题列表就是 findings
+- `open_questions` 非空的家：任何实现都算「未证规则」，只能标 warning，不许当已证规则用
+
+## 证据行格式
+`{"rule": "...", "row": <index>, "expected": "...", "actual": "...", "evidence": "contracts/<template>.json#<path>"}`

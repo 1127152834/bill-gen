@@ -42,3 +42,14 @@
 - [ ] 门店号无重复滥用（规则 3）
 - [ ] 线上类目 `place == null`
 - [ ] 与上月 `recent` 对比：老主顾该重复出现（真实的人会重复去同一家），不能全是新店
+
+## 契约（读写边界）
+这是全链路**唯一**允许拼描述符的地方，读：
+- `descriptor.<kind>.template`：骨架
+- `descriptor.<kind>.rules`：`no_city` / `has_card_tail` / `has_place` / `no_payment_tail` / `upper`
+- `descriptor.<kind>.max_len`：长度上限
+- `card_types`：哪些行算刷卡（决定要不要卡尾）
+- `forbidden_literals`：不许出现的字面量
+- `bank_identity`：电话 / 域名 / 地址原样取契约
+
+拼完不许自己裁：整形交给 `contracts.conform()`，校验交给 `contracts.check()`。

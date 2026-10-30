@@ -23,3 +23,8 @@
 
 ## 输入
 `ledger/<YYYY-MM>.jsonl` + `contracts/<template>.json` + `monthpack` 字段字典
+
+## 契约（执行顺序）
+1. `contracts.conform(template_id, data)` —— 唯一整形点（去城市 / 去 PAYMENT 尾巴 / 截断 / 归一 Type），返回计数
+2. `contracts.check(template_id, data)` —— 非空就**拒绝出片**，把 findings 抛回审计团
+3. 渲染 PDF / 月 JSON；`manifest.json` 记 `contract_sha256`

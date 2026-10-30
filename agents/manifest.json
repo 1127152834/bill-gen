@@ -1,149 +1,374 @@
 {
   "version": 1,
-  "pipeline": ["persona-compiler", "life-director", "solver", "cast-merchants", "auditors", "renderer"],
+  "pipeline": [
+    "account-picker",
+    "persona-compiler",
+    "life-director",
+    "solver",
+    "cast-merchants",
+    "audit-accounting",
+    "audit-geography",
+    "audit-statistics",
+    "audit-adversarial",
+    "audit-continuity",
+    "audit-contract",
+    "renderer"
+  ],
   "agents": [
     {
       "id": "conductor",
       "title": "总指挥",
       "prompt": "prompts/00-conductor.md",
-      "inputs": ["persona.schema.json", "plan.schema.json", "findings.schema.json"],
-      "outputs": ["job-state"],
+      "inputs": [
+        "persona.schema.json",
+        "plan.schema.json",
+        "findings.schema.json"
+      ],
+      "outputs": [
+        "job-state"
+      ],
       "tools": [],
       "model_tier": "small",
       "temperature": 0.0,
-      "can_write_numbers": false
+      "can_write_numbers": false,
+      "stage": 0,
+      "contracts_read": [],
+      "status": "planned"
+    },
+    {
+      "id": "account-picker",
+      "title": "选账户",
+      "prompt": "prompts/00b-account-picker.md",
+      "inputs": [
+        "profile.json",
+        "contracts/*.json"
+      ],
+      "outputs": [
+        "account.json"
+      ],
+      "tools": [
+        "contracts.load"
+      ],
+      "model_tier": "none",
+      "temperature": 0.0,
+      "can_write_numbers": false,
+      "stage": 1,
+      "contracts_read": [
+        "kind",
+        "columns",
+        "row_rules.account_format",
+        "bank_identity",
+        "open_questions"
+      ],
+      "status": "planned"
     },
     {
       "id": "persona-compiler",
       "title": "档案编译器",
       "prompt": "prompts/01-persona-compiler.md",
-      "inputs": ["profile.json"],
-      "outputs": ["persona.schema.json"],
-      "tools": ["web_search", "tax_table"],
+      "inputs": [
+        "profile.json"
+      ],
+      "outputs": [
+        "persona.schema.json"
+      ],
+      "tools": [
+        "web_search",
+        "tax_table"
+      ],
       "model_tier": "medium",
       "temperature": 0.2,
-      "can_write_numbers": false
+      "can_write_numbers": false,
+      "stage": 2,
+      "contracts_read": [
+        "row_rules.account_format",
+        "bank_identity"
+      ],
+      "status": "planned"
     },
     {
       "id": "life-director",
       "title": "生活导演",
       "prompt": "prompts/02-life-director.md",
-      "inputs": ["persona.schema.json", "ledger.schema.json", "calendar"],
-      "outputs": ["plan.schema.json"],
-      "tools": ["web_search"],
+      "inputs": [
+        "persona.schema.json",
+        "ledger.schema.json",
+        "calendar"
+      ],
+      "outputs": [
+        "plan.schema.json"
+      ],
+      "tools": [
+        "web_search"
+      ],
       "model_tier": "large",
       "temperature": 0.7,
-      "can_write_numbers": false
+      "can_write_numbers": false,
+      "stage": 3,
+      "contracts_read": [
+        "type_enum",
+        "descriptor.*.template"
+      ],
+      "status": "planned"
     },
     {
       "id": "solver",
       "title": "求解器",
       "prompt": "prompts/03-solver-spec.md",
-      "inputs": ["plan.schema.json", "persona.schema.json"],
-      "outputs": ["ledger.schema.json"],
+      "inputs": [
+        "plan.schema.json",
+        "persona.schema.json"
+      ],
+      "outputs": [
+        "ledger.schema.json"
+      ],
       "tools": [],
       "model_tier": "none",
       "temperature": 0.0,
-      "can_write_numbers": true
+      "can_write_numbers": true,
+      "stage": 4,
+      "contracts_read": [
+        "row_rules.amount_decimals",
+        "row_rules.order",
+        "row_rules.sections",
+        "row_rules.balance_chain"
+      ],
+      "status": "planned"
     },
     {
       "id": "cast-merchants",
       "title": "选角",
       "prompt": "prompts/04-cast-merchants.md",
-      "inputs": ["ledger.schema.json", "persona.schema.json", "poi_table"],
-      "outputs": ["ledger.schema.json"],
-      "tools": ["web_search", "poi_lookup"],
+      "inputs": [
+        "ledger.schema.json",
+        "persona.schema.json",
+        "poi_table"
+      ],
+      "outputs": [
+        "ledger.schema.json"
+      ],
+      "tools": [
+        "web_search",
+        "poi_lookup"
+      ],
       "model_tier": "medium",
       "temperature": 0.4,
-      "can_write_numbers": false
+      "can_write_numbers": false,
+      "stage": 5,
+      "contracts_read": [
+        "descriptor.*.template",
+        "descriptor.*.rules",
+        "descriptor.*.max_len",
+        "forbidden_literals",
+        "bank_identity",
+        "card_types"
+      ],
+      "status": "planned"
     },
     {
       "id": "contract-extractor",
       "title": "契约提取",
       "prompt": "prompts/05-contract-extractor.md",
-      "inputs": ["sample.pdf"],
-      "outputs": ["contract.json"],
-      "tools": ["pdf_spans", "pdf_text"],
+      "inputs": [
+        "sample.pdf"
+      ],
+      "outputs": [
+        "contract.json"
+      ],
+      "tools": [
+        "pdf_spans",
+        "pdf_text"
+      ],
       "model_tier": "medium",
       "temperature": 0.1,
-      "can_write_numbers": false
+      "can_write_numbers": false,
+      "stage": 8,
+      "contracts_read": [
+        "*"
+      ],
+      "status": "partial"
     },
     {
       "id": "audit-accounting",
       "title": "会计审计",
       "prompt": "prompts/auditors/a1-accounting.md",
-      "inputs": ["ledger.schema.json"],
-      "outputs": ["findings.schema.json"],
-      "tools": ["python"],
+      "inputs": [
+        "ledger.schema.json"
+      ],
+      "outputs": [
+        "findings.schema.json"
+      ],
+      "tools": [
+        "python"
+      ],
       "model_tier": "small",
       "temperature": 0.0,
-      "can_write_numbers": false
+      "can_write_numbers": false,
+      "stage": 6,
+      "contracts_read": [
+        "row_rules.balance_chain",
+        "row_rules.amount_decimals"
+      ],
+      "status": "planned"
     },
     {
       "id": "audit-geography",
       "title": "地理审计",
       "prompt": "prompts/auditors/a2-geography.md",
-      "inputs": ["ledger.schema.json", "persona.schema.json"],
-      "outputs": ["findings.schema.json"],
-      "tools": ["poi_lookup", "web_search"],
+      "inputs": [
+        "ledger.schema.json",
+        "persona.schema.json"
+      ],
+      "outputs": [
+        "findings.schema.json"
+      ],
+      "tools": [
+        "poi_lookup",
+        "web_search"
+      ],
       "model_tier": "medium",
       "temperature": 0.2,
-      "can_write_numbers": false
+      "can_write_numbers": false,
+      "stage": 6,
+      "contracts_read": [
+        "bank_identity"
+      ],
+      "status": "planned"
     },
     {
       "id": "audit-statistics",
       "title": "统计审计",
       "prompt": "prompts/auditors/a3-statistics.md",
-      "inputs": ["ledger.schema.json", "persona.schema.json", "distributions"],
-      "outputs": ["findings.schema.json"],
-      "tools": ["python"],
+      "inputs": [
+        "ledger.schema.json",
+        "persona.schema.json",
+        "distributions"
+      ],
+      "outputs": [
+        "findings.schema.json"
+      ],
+      "tools": [
+        "python"
+      ],
       "model_tier": "small",
       "temperature": 0.0,
-      "can_write_numbers": false
+      "can_write_numbers": false,
+      "stage": 6,
+      "contracts_read": [
+        "row_rules.amount_decimals"
+      ],
+      "status": "planned"
     },
     {
       "id": "audit-adversarial",
       "title": "反诈审计",
       "prompt": "prompts/auditors/a4-adversarial.md",
-      "inputs": ["ledger.schema.json", "contract.json"],
-      "outputs": ["findings.schema.json"],
-      "tools": ["read_statement"],
+      "inputs": [
+        "ledger.schema.json",
+        "contract.json"
+      ],
+      "outputs": [
+        "findings.schema.json"
+      ],
+      "tools": [
+        "read_statement"
+      ],
       "model_tier": "large",
       "temperature": 0.3,
-      "can_write_numbers": false
+      "can_write_numbers": false,
+      "stage": 6,
+      "contracts_read": [
+        "forbidden_literals"
+      ],
+      "status": "planned"
     },
     {
       "id": "audit-continuity",
       "title": "跨月一致性审计",
       "prompt": "prompts/auditors/a5-continuity.md",
-      "inputs": ["ledger.schema.json", "persona.schema.json"],
-      "outputs": ["findings.schema.json"],
-      "tools": ["python"],
+      "inputs": [
+        "ledger.schema.json",
+        "persona.schema.json"
+      ],
+      "outputs": [
+        "findings.schema.json"
+      ],
+      "tools": [
+        "python"
+      ],
       "model_tier": "small",
       "temperature": 0.0,
-      "can_write_numbers": false
+      "can_write_numbers": false,
+      "stage": 6,
+      "contracts_read": [
+        "row_rules.order",
+        "row_rules.sections"
+      ],
+      "status": "planned"
     },
     {
       "id": "audit-contract",
       "title": "契约审计",
       "prompt": "prompts/auditors/a6-format-contract.md",
-      "inputs": ["ledger.schema.json", "contract.json"],
-      "outputs": ["findings.schema.json"],
-      "tools": ["contracts.check"],
+      "inputs": [
+        "ledger.schema.json",
+        "contract.json"
+      ],
+      "outputs": [
+        "findings.schema.json"
+      ],
+      "tools": [
+        "contracts.check"
+      ],
       "model_tier": "small",
       "temperature": 0.0,
-      "can_write_numbers": false
+      "can_write_numbers": false,
+      "stage": 6,
+      "contracts_read": [
+        "type_enum",
+        "descriptor.*.rules",
+        "forbidden_literals",
+        "required_literals",
+        "open_questions"
+      ],
+      "status": "planned"
     },
     {
       "id": "renderer",
       "title": "渲染",
       "prompt": "prompts/06-renderer.md",
-      "inputs": ["ledger.schema.json", "contract.json"],
-      "outputs": ["month.json", "pdf"],
-      "tools": ["registry.render"],
+      "inputs": [
+        "ledger.schema.json",
+        "contract.json"
+      ],
+      "outputs": [
+        "month.json",
+        "pdf"
+      ],
+      "tools": [
+        "registry.render"
+      ],
       "model_tier": "none",
       "temperature": 0.0,
-      "can_write_numbers": false
+      "can_write_numbers": false,
+      "stage": 7,
+      "contracts_read": [
+        "descriptor.*.rules",
+        "descriptor.*.max_len",
+        "type_aliases",
+        "required_literals"
+      ],
+      "status": "partial"
     }
-  ]
+  ],
+  "stages": {
+    "0": "选账户（读契约 columns/account_format）",
+    "2": "档案编译器",
+    "3": "生活导演（只出事件）",
+    "4": "求解器（唯一产地）",
+    "5": "选角（唯一拼描述符的地方）",
+    "6": "审计团（只否决）",
+    "7": "投影（conform → check → 渲染）",
+    "8": "契约提取/维护"
+  }
 }
