@@ -263,3 +263,55 @@ def test_decap_nudges_amounts_that_sit_exactly_on_the_cap():
     assert changed == 1
     assert abs(data["transactions"][0]["amount"]) < 45.0
     assert data["transactions"][1]["amount"] == -20.0
+
+
+def test_top_up_rows_keep_the_template_row_shape():
+    """新补的行必须带上同组行的固定字段（mercury 的 dir/icon），否则渲染器 KeyError。"""
+    data = {
+        "company": "HENG LI",
+        "transactions": [
+            {"date": "Sep 1", "desc": "AVALON MGMT", "amount": -2600.0, "dir": "out", "icon": "achOut"},
+            {"date": "Sep 6", "desc": "CHIPOTLE 1234 TEMPLE CITY CA", "amount": -14.38, "dir": "out", "icon": "card"},
+        ],
+    }
+    counts = postpass.top_up_to_envelope(data, {"dining": (14000, 36000)}, state="CA", city="Temple City")
+    assert counts["added"] >= 1
+    for row in data["transactions"]:
+        assert "dir" in row and row["dir"] in {"in", "out"}
+        assert "icon" in row
+
+
+def test_every_template_can_render_after_top_up_adds_a_row():
+    """补行不能破坏任何一家版式的行形状：补完必须还能出片。"""
+    import json as _json
+
+    from billgen import registry
+    from billgen.spec import RenderOptions
+
+    for spec in registry.SPECS:
+        if getattr(spec, "kind", "") == "static-web":
+            continue  # 浏览器端 pdf-lib 模板，Python 侧没有出片路径
+        renderer = registry.get_renderer(spec.id)
+        data = _json.loads(_json.dumps(renderer.default_data()))
+        arrays = [
+            value
+            for value in data.values()
+            if isinstance(value, list) and value and isinstance(value[0], dict) and "date" in value[0]
+        ]
+        if not arrays:
+            continue
+        postpass.top_up_to_envelope(data, {"dining": (40000, 90000)}, state="CA", city="Temple City")
+        renderer.render(data, RenderOptions(watermark=False))  # 不抛就算过
+
+
+def test_injected_rows_carry_the_keys_the_theme_needs():
+    """补出来的行必须带 dir/icon/memo，否则版式渲染直接 KeyError: 'dir'。"""
+    data = _mercury_like([
+        {"date": "Nov 5", "desc": "ARCO 6261 TEMPLE CITY CA", "amount": -25.08,
+         "type": "Card", "dir": "out", "icon": "card", "id": "1", "memo": ""},
+    ])
+    postpass.top_up_to_envelope(data, {"fuel": (25200, 50400)}, seed="t", state="CA", city="Temple City")
+    assert len(data["transactions"]) > 1
+    for row in data["transactions"]:
+        assert row.get("dir") in {"in", "out"}
+        assert "amount" in row and "date" in row and "desc" in row

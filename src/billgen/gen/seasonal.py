@@ -248,13 +248,16 @@ def inject_event_rows(
         local = category in {"groceries", "fuel", "dining"} and merchant not in {"AMAZON.COM", "1-800-FLOWERS", "TURBOTAX"}
         place = f" {city.upper()} {state.upper()}" if local and city and state else ""
         day = min(event.date.day + rng.randrange(0, 3), 28)
+        from . import postpass as _pp
+
+        base_row = target[0] if target else {}
         target.append(
-            {
-                "date": f"{calendar.month_abbr[month]} {day}",
-                "desc": f"{merchant}{place}",
-                "amount": -amount,
-                "type": "Card",
-            }
+            _pp._shape_row(
+                base_row,
+                date=f"{calendar.month_abbr[month]} {day}",
+                desc=f"{merchant}{place}",
+                amount=-amount,
+            )
         )
         added += 1
     if added:

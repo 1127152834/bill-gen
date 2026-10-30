@@ -488,6 +488,25 @@ def vary_chain_stores(data: dict[str, Any], *, seed: str = "") -> int:
     return changed
 
 
+# 各版式给流水行带了不同的固定字段（mercury 要 `dir`/`icon`，boa 要 `detail`，
+# usbank 要 `ref`）。新补的行必须跟着同一套形状，否则渲染器会 KeyError。
+_ROW_SHAPE_KEYS = ("dir", "icon", "channel", "type", "memo", "ref")
+
+
+def _shape_row(base: Mapping[str, Any] | None, row: dict[str, Any]) -> dict[str, Any]:
+    """按同组已有行的形状补齐固定字段；金额符号决定 `dir`。"""
+    shaped = dict(row)
+    if isinstance(base, Mapping):
+        for key in _ROW_SHAPE_KEYS:
+            if key in base and key not in shaped:
+                shaped[key] = base[key]
+    if "dir" in shaped:
+        amount = float(shaped.get("amount") or shaped.get("withdrawal") or shaped.get("deposit") or 0.0)
+        positive = float(shaped.get("deposit") or 0.0) > 0 or amount > 0
+        shaped["dir"] = "in" if positive else "out"
+    return shaped
+
+
 def _row_index(row: Mapping[str, Any]) -> int:
     """一个稳定的行序号（拿不到就用描述长度），只为了给「顶到上限」加确定性抖动。"""
     try:
@@ -580,12 +599,15 @@ def top_up_to_envelope(
                         day = rng.randrange(3, 27)
                     used.append((month_tag, desc))
                     arrays[0].append(
-                        {
-                            "date": f"{month_tag} {day}",
-                            "desc": desc,
-                            "amount": -amount,
-                            "type": base.get("type", "Card"),
-                        }
+                        _shape_row(
+                            base,
+                            {
+                                "date": f"{month_tag} {day}",
+                                "desc": desc,
+                                "amount": -amount,
+                                "type": base.get("type", "Card"),
+                            },
+                        )
                     )
                     deficit -= int(round(amount * 100))
                     counts["added"] += 1
@@ -612,12 +634,15 @@ def top_up_to_envelope(
                 want = min(max(deficit / 100.0, lo_range * 1.6), hi_range * 0.6)
                 amount = round(want, 2)
                 day = str(rows[0].get("date") or "").strip() if rows else ""
-                row = {
-                    "date": day or "15",
-                    "desc": missing,
-                    "amount": -amount,
-                    "type": "ACH",
-                }
+                row = _shape_row(
+                    rows[0] if rows else None,
+                    {
+                        "date": day or "15",
+                        "desc": missing,
+                        "amount": -amount,
+                        "type": "ACH",
+                    },
+                )
                 arrays = list(_iter_arrays(data))
                 if arrays:
                     arrays[0].append(row)
@@ -627,6 +652,31 @@ def top_up_to_envelope(
         _rescale_amounts(data)
         sort_rows(data)
     return counts
+
+
+_ROW_DEFAULTS = {"memo": "", "icon": "card"}
+
+
+def _shape_row(template_row: Mapping[str, Any], *, date: str, desc: str, amount: float) -> dict[str, Any]:
+    """按已有行的字段形状造一行（版式读 `dir`/`icon` 之类的键，缺了就渲染崩）。"""
+    row: dict[str, Any] = {key: template_row[key] for key in ("memo", "id", "icon") if key in template_row}
+    for key, value in _ROW_DEFAULTS.items():
+        row.setdefault(key, value)
+    direction = "in" if amount > 0 else "out"
+    row.update(
+        {
+            "date": date,
+            "desc": desc,
+            "amount": round(amount, 2),
+            "type": template_row.get("type") or "Card",
+            "dir": direction,
+        }
+    )
+    if "icon" in template_row:
+        row["icon"] = "card"
+    digest = hashlib.sha256(f"{desc}|{date}|{amount}".encode()).hexdigest()[:14]
+    row["id"] = str(int(digest, 16))[:14]
+    return row
 
 
 def _rescale_amounts(data: dict[str, Any]) -> None:
