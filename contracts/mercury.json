@@ -84,6 +84,7 @@
   ],
   "open_questions": [],
   "kind": "deposit",
+  "type_column": true,
   "card_types": [
     "Card"
   ],

@@ -114,6 +114,7 @@
     "src/billgen/themes/chase/assets/chase_static_personal_prepared.pdf"
   ],
   "open_questions": [],
+  "type_column": false,
   "card_types": [
     "Card Purchase"
   ],

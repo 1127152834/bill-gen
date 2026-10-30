@@ -6,7 +6,7 @@
 ## 一句话
 - 版式主题：`chase`；列：date, description, amount, balance
 - 卡尾 4 位：印在行尾（`… Card 4499`）
-- 有 Type 列：是
+- 有 Type 列：否
 
 ## 类型枚举（Type / 行种类）
 - Card Purchase

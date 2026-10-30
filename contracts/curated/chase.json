@@ -71,5 +71,6 @@
   ],
   "card_types": [
     "Card Purchase"
-  ]
+  ],
+  "type_column": false
 }
