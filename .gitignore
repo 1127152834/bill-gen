@@ -22,6 +22,8 @@ test-results.xml
 **/fonts/**
 **/*.pdf
 **/*.png
+# 端到端对比的并排图是交付证据，要进仓库
+!docs/e2e/img/*.png
 **/*.jpg
 **/*.jpeg
 **/*.ttf

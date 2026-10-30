@@ -34,6 +34,8 @@
 
 差异：0 项
 
+![chase-personal](img/chase-personal-compare.png)
+
 ## chase-business
 
 跳过：`结果包里没有账户 'business_checking'，现有：['checking', 'credit']`
@@ -60,6 +62,8 @@
 
 差异：0 项
 
+![usbank-personal](img/usbank-personal-compare.png)
+
 ## usbank-business
 
 跳过：`usbank-business 账本自检未通过（1 项）：account_mismatch: usbank-business 只接受 ['business_checking']，账本是 checking`
@@ -84,6 +88,8 @@
 
 差异：0 项
 
+![capitalone](img/capitalone-compare.png)
+
 ## mercury
 
 参考件：`src/billgen/themes/mercury/Demo-Bank-Statement-SAMPLE.pdf`（2p，612.0×792.0）
@@ -102,6 +108,8 @@
 | 日期格式 | Mon D, Mon DD, YYYY | Mon D, Month D, YYYY | OK |
 
 差异：0 项
+
+![mercury](img/mercury-compare.png)
 
 ## sofi
 
@@ -122,6 +130,8 @@
 | 日期格式 | MM/DD, MM/DD/YYYY, Mon D, Mon DD, YYYY | Mon D, Mon DD, YYYY, Month D, YYYY | OK |
 
 差异：0 项
+
+![sofi](img/sofi-compare.png)
 
 ## wellsfargo
 

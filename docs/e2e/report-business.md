@@ -8,7 +8,7 @@
 无参考 PDF，改用 layout json 做结构比对（13 段文字）
 
 - 版式漂移：0 段（容差 2.5pt）
-- 页数：5；墨量：[14.1, 13.3, 12.7, 5.3, 6.0]；字体：ConnectionsBold_CZEX0AA0, ConnectionsIta_CZEX0AC0, Connections_CZEX0A60, Connections_Medium_CZEX0A80, Helvetica, HigherS
+- 页数：5；墨量：[14.0, 13.3, 12.7, 5.3, 6.0]；字体：Connections PDF Rebuilt Regular, ConnectionsBold_CZEX0AA0, ConnectionsIta_CZEX0AC0, Connections_CZEX0A60, Connections_Me
 
 ## chase-business
 
@@ -40,16 +40,16 @@
 | 页面尺寸 | (612.0, 792.0) | (612.0, 792.0) | OK |
 | 页数 | 4 | 2 | INFO |
 | 字体（共有） | Arial-BoldItalicMT, Arial-BoldMT, Arial-ItalicMT, ArialMT, C0000365_T1001140_0,  | 参考共 9 种 | OK |
-| 字体（仅出片） | Helvetica-Bold | — | INFO |
+| 字体（仅出片） | 无 | — | INFO |
 | 最低图效 DPI | 240.4 | 240.4 | OK |
-| 第 1 页墨量 % | 17.8 | 18.3 | OK |
+| 第 1 页墨量 % | 16.1 | 18.3 | OK |
 | 区块标题 Business Statement | 有 | 有 | OK |
 | 区块标题 BUSINESS ESSENTIALS CHECKING | 有 | 有 | OK |
-| 区块标题 Account Summary | 有 | 有 | OK |
+| 区块标题 Account Summary | 缺 | 有 | DIFF |
 | 参考件身份/占位泄漏 | 无 | — | OK |
 | 日期格式 | Mon D, Mon DD, YYYY, Month D, YYYY | MM/DD, Mon D, Mon DD, YYYY, Month D, YYYY | OK |
 
-差异：0 项
+差异：1 项（区块标题 Account Summary）
 
 ![usbank-business](img/usbank-business-compare.png)
 
