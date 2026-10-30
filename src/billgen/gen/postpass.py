@@ -207,6 +207,8 @@ _CATEGORY_TOKENS: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("rideshare", ("UBER", "LYFT")),
     ("phone", ("VERIZON", "T-MOBILE", "AT&T", "MINT MOBILE")),
     ("insurance", ("GEICO", "PROGRESSIVE", "STATE FARM", "USAA")),
+    ("shopping", ("TARGET", "AMAZON.COM", "BEST BUY", "MACY", "NORDSTROM", "IKEA", "HOME DEPOT",
+                  "LOWES", "OLD NAVY", "STAPLES", "PARTY CITY", "TOTAL WINE", "BEVMO", "WALMART.COM")),
 )
 
 
