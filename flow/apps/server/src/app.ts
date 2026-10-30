@@ -96,7 +96,7 @@ export function createApp(deps: AppDeps): Hono {
     },
   );
 
-  app.route('/', miscRoutes({ db, runner, makeDeps: deps.makeDeps, today }));
+  app.route('/', miscRoutes({ db, runner, makeDeps: deps.makeDeps, today, outDir: deps.env.billgenOut }));
   app.route('/', settingsRoutes({ db, env: deps.env }));
 
   app.get('/api/generations/:id', (c) => {

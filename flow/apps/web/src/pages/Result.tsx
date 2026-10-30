@@ -1,6 +1,7 @@
 import { StatementSchema, type GenerationResult, type Statement } from '@bh/core/schemas'
 import type { GenerationView } from '../api'
 import AuditPanel from '../components/AuditPanel'
+import MonthFilesPanel from '../components/MonthFilesPanel'
 import RendersPanel from '../components/RendersPanel'
 import ResultActions from '../components/ResultActions'
 import StatementView from '../components/StatementView'
@@ -64,6 +65,7 @@ export default function Result({ view, onChanged }: { view: GenerationView; onCh
         )}
       </section>
 
+      {full && <MonthFilesPanel files={full.monthFiles} />}
       {full && <RendersPanel renders={full.renders} />}
 
       {statements.length > 0 && (

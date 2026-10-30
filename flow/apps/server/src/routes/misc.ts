@@ -1,4 +1,7 @@
 import { randomUUID } from 'node:crypto';
+import { createReadStream, statSync } from 'node:fs';
+import { basename, join } from 'node:path';
+import { Readable } from 'node:stream';
 import { Hono } from 'hono';
 import { z } from 'zod';
 import {
@@ -35,7 +38,16 @@ export type MiscRoutesDeps = {
   makeDeps: MakeDeps;
   /** `YYYY-MM-DD` for the feasibility pre-check. */
   today: () => string;
+  /** billgen 写文件的目录（PDF / 每月 JSON / 校验报告都在这一层）。 */
+  outDir?: string;
 };
+
+/** 只有这几种才发：出片目录里还可能躺着 ledger 中间件，别把目录整个暴露出去。 */
+const SERVABLE = new Map<string, string>([
+  ['.pdf', 'application/pdf'],
+  ['.json', 'application/json; charset=utf-8'],
+  ['.png', 'image/png'],
+]);
 
 /** A persona is one model call; this leaves room for a retry and a repair, and no more. */
 const PERSONA_MAX_LLM_CALLS = 4;
@@ -69,7 +81,7 @@ function upstreamMessage(err: unknown): string | undefined {
   return undefined;
 }
 
-export function miscRoutes({ db, runner, makeDeps, today }: MiscRoutesDeps): Hono {
+export function miscRoutes({ db, runner, makeDeps, today, outDir }: MiscRoutesDeps): Hono {
   const app = new Hono();
 
   app.post('/api/personas/random', limitBody(), async (c) => {
@@ -159,6 +171,35 @@ export function miscRoutes({ db, runner, makeDeps, today }: MiscRoutesDeps): Hon
     return c.body(JSON.stringify(result, null, 2), 200, {
       'Content-Type': 'application/json; charset=utf-8',
       'Content-Disposition': `attachment; filename="statement-${row.id}.json"`,
+    });
+  });
+
+  /**
+   * 交付文件下载。billgen 把每月 JSON、`validation-report.json`、`manifest.json` 写在出片目录，
+   * 主服务按文件名发出来；只认一层文件名 + 白名单后缀，`..` 一律当找不到。
+   */
+  app.get('/api/v1/renders/:name', (c) => {
+    const name = basename(c.req.param('name'));
+    if (!name || name !== c.req.param('name') || name.startsWith('.')) {
+      return c.json(fail('NOT_FOUND', 'File not found'), 404);
+    }
+    const type = SERVABLE.get(name.slice(name.lastIndexOf('.')).toLowerCase());
+    if (!type) return c.json(fail('NOT_FOUND', 'File not found'), 404);
+    if (!outDir) return c.json(fail('NOT_FOUND', 'File not found'), 404);
+    const path = join(outDir, name);
+    let size: number;
+    try {
+      const info = statSync(path);
+      if (!info.isFile()) return c.json(fail('NOT_FOUND', 'File not found'), 404);
+      size = info.size;
+    } catch {
+      return c.json(fail('NOT_FOUND', 'File not found'), 404);
+    }
+    const body = Readable.toWeb(createReadStream(path)) as ReadableStream<Uint8Array>;
+    return c.body(body, 200, {
+      'Content-Type': type,
+      'Content-Length': String(size),
+      'Content-Disposition': `attachment; filename="${name}"`,
     });
   });
 

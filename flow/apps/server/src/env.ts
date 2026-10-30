@@ -8,6 +8,8 @@ export type Env = {
   tavilyApiKey?: string;
   /** Key remote clients send as `X-API-Key`. */
   apiKey: string;
+  /** billgen 写文件的目录（PDF、每月 JSON、校验报告、清单）。 */
+  billgenOut: string;
   /** How to reach billgen's MCP server; omitted = statements are generated but not rendered. */
   billgen?: {
     command: string;
@@ -97,6 +99,8 @@ export function loadEnv(source: Record<string, string | undefined> = process.env
     }),
     ...(v.TAVILY_API_KEY && { tavilyApiKey: v.TAVILY_API_KEY }),
     apiKey: v.API_KEY,
+    /** 出片/交付目录：即使 MCP 没配（只生成不渲染），下载路由也能定位文件。 */
+    billgenOut: v.BILLGEN_OUT,
     ...(v.BILLGEN_MCP_CMD && {
       billgen: {
         command: v.BILLGEN_MCP_CMD,

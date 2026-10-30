@@ -431,3 +431,37 @@ describe('web dist mounting', () => {
     expect(res.status).toBe(404);
   });
 });
+
+
+describe('交付文件下载 /api/v1/renders/:name', () => {
+  it('serves a month JSON and the validation report out of the billgen directory', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'bh-renders-'));
+    writeFileSync(join(dir, 'chase-personal-2027-01.json'), '{"hello":"world"}');
+    writeFileSync(join(dir, 'validation-report.json'), '{"ok":true}');
+    const h = setup({ billgenOut: dir });
+    try {
+      const one = await h.call('/api/v1/renders/chase-personal-2027-01.json');
+      expect(one.status).toBe(200);
+      expect(one.headers.get('content-type')).toContain('application/json');
+      expect(await one.text()).toBe('{"hello":"world"}');
+      expect((await h.call('/api/v1/renders/validation-report.json')).status).toBe(200);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses traversal, dotfiles and suffixes that are not deliverables', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'bh-renders-'));
+    writeFileSync(join(dir, 'secret.txt'), 'nope');
+    writeFileSync(join(dir, 'notes.json'), '{}');
+    const h = setup({ billgenOut: dir });
+    try {
+      expect((await h.call('/api/v1/renders/..%2Fpackage.json')).status).toBe(404);
+      expect((await h.call('/api/v1/renders/secret.txt')).status).toBe(404);
+      expect((await h.call('/api/v1/renders/missing.json')).status).toBe(404);
+      expect((await h.call('/api/v1/renders/notes.json')).status).toBe(200);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});

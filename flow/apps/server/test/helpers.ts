@@ -30,6 +30,8 @@ export type HarnessOptions = {
   concurrency?: number;
   /** Built web UI to serve (production single-port deploy). Omitted in tests by default. */
   webDist?: string;
+  /** billgen 的交付目录（每月 JSON、校验报告）；默认走 env 的 `./data/renders`。 */
+  billgenOut?: string;
 };
 
 export function setup(opts: HarnessOptions = {}): Harness {
@@ -45,7 +47,7 @@ export function setup(opts: HarnessOptions = {}): Harness {
   });
   const app = createApp({
     db,
-    env: loadEnv({ LLM_FAKE: '1', API_KEY }),
+    env: loadEnv({ LLM_FAKE: '1', API_KEY, ...(opts.billgenOut && { BILLGEN_OUT: opts.billgenOut }) }),
     runner,
     bus,
     makeDeps,

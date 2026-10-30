@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { fixtureGenerationResult } from '@bh/core/testing/result'
-import type { GenerationRequest, GenerationResult } from '@bh/core/schemas'
+import type { GenerationRequest, GenerationResult, MonthFile } from '@bh/core/schemas'
 
 vi.mock('../api', async () => {
   const actual = await vi.importActual<typeof import('../api')>('../api')
@@ -281,6 +281,62 @@ describe('Result: non-success states', () => {
   })
 })
 
+
+describe('模板 JSON 交付', () => {
+  const file = (over: Partial<MonthFile> = {}): MonthFile => ({
+    template: 'chase-personal',
+    account: 'checking',
+    month: '2027-01',
+    path: '/data/renders/chase-personal-2027-01.json',
+    rows: 12,
+    bytes: 4096,
+    sha256: 'y'.repeat(64),
+    ok: true,
+    ...over,
+  })
+
+  it('一个月一份，列出行数、校验状态与下载链接', () => {
+    const view = makeView()
+    const result = view.result as GenerationResult
+    result.monthFiles = [file(), file({ month: '2027-02', path: '/data/renders/chase-personal-2027-02.json', rows: 9 })]
+    renderResult(view)
+
+    const panel = screen.getByRole('region', { name: '模板 JSON 交付' })
+    expect(within(panel).getByText(/2 份 · 2 个月 · 每月一份/)).toBeInTheDocument()
+    expect(within(panel).getByText('2027-01')).toBeInTheDocument()
+    expect(within(panel).getByText(/12 行 · 4 KB/)).toBeInTheDocument()
+    const links = within(panel).getAllByRole('link', { name: '下载 JSON' })
+    expect(links[0]).toHaveAttribute('href', '/api/v1/renders/chase-personal-2027-01.json')
+    expect(within(panel).getByRole('link', { name: /校验报告/ })).toHaveAttribute(
+      'href',
+      '/api/v1/renders/validation-report.json',
+    )
+    expect(within(panel).getByRole('link', { name: /清单/ })).toHaveAttribute(
+      'href',
+      '/api/v1/renders/manifest.json',
+    )
+  })
+
+  it('没过校验的月份照样列出，并说清是哪几份', () => {
+    const view = makeView()
+    const result = view.result as GenerationResult
+    result.monthFiles = [file(), file({ month: '2027-02', ok: false })]
+    renderResult(view)
+
+    const panel = screen.getByRole('region', { name: '模板 JSON 交付' })
+    expect(within(panel).getByText(/1 份未通过校验/)).toBeInTheDocument()
+    expect(within(panel).getByText('未通过（见报告）')).toBeInTheDocument()
+    expect(within(panel).getByRole('status')).toHaveTextContent('chase-personal 2027-02')
+  })
+
+  it('没有月度文件时不显示这一块', () => {
+    const view = makeView()
+    const result = view.result as GenerationResult
+    result.monthFiles = []
+    renderResult(view)
+    expect(screen.queryByRole('region', { name: '模板 JSON 交付' })).not.toBeInTheDocument()
+  })
+})
 
 describe('PDF 出片', () => {
   it('列出每份出货文件，预览指向主服务的出片路由', () => {
