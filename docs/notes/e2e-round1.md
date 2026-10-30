@@ -582,3 +582,26 @@ data["bank"] = {"name": name, "legal": f"{name}, N.A.", "domain": "bankofamerica
 （页数 4 vs 2 属数据行数差异，INFO）。
 
 回滚：`git revert <本轮提交>`（磁码 + usbank-business 两处可分开回滚）。
+
+## 第二十一轮（U.S. Bank 披露页曾印出一整句鬼画符）
+
+线上 `usbank-business-…-813ed296.pdf` 第 2 页肉眼可见：
+
+```
+… or write to us at 6 4 # BOL / B U JPB O F " 5 " UU P E JB U P O 1 o …
+```
+
+正文整句变成乱码。根因是 `src/billgen/branding.py` 里 `_THEME_FONTS` 还留着
+`"usbank": "F6"`：`replace_literals()` 先把原文擦掉，再用 `cid_bytes()` 把替换串
+按 CID 直写进 `/F6` 内容流。字形看着凑合，但**续页的资源表是按页记账的**，
+2 字节 CID 与该页 ToUnicode 对不齐 → 文字层与肉眼都是鬼画符。
+
+决策：把 usbank 从 `_THEME_FONTS` 删掉（只留 BoA 的 `Reg`，它的 `txt()` 自带宽度与
+编码处理），U.S. Bank 回到 base-14。代价是字体表多一个未嵌入 Helvetica——
+这个窟窿由 `FONT_PARITY_EXEMPT` 显式豁免并留注释，比「正文乱码」轻得多。
+
+验证：第 2 页恢复成 `… or write to us at U.S. Bank National Association, P O Box 3528
+Oshkosh, WI 54903-3528.`；`pytest` 567 passed / 16 skipped / 33 subtests；
+`realism_rules.py` 全绿；`e2e_compare --label personal` 7 套 0 差异。
+
+回滚：`git revert <本轮提交>`（只删一行 `_THEME_FONTS` 与 `_theme_module()` 的 usbank 分支）。

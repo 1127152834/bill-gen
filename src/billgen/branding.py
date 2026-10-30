@@ -461,7 +461,12 @@ def _spans(page: fitz.Page) -> list[dict]:
 #: 各主题「自带字体」的正文绘制器。品牌替换默认用 base-14 Helvetica，但那会在
 #: 一份全是嵌入子集字体的账单里凭空多出一个非嵌入字体（`pdffonts` 一眼可见）。
 #: 有主题字体就用主题字体画，字宽也用它量。
-_THEME_FONTS = {"boa": "Reg", "usbank": "F6"}
+# 只有 BoA 的主题字体可以整段复用（`txt()` 自带宽度与编码处理）。
+# U.S. Bank 试过 CID 直写（`cid_bytes` + /F6 内容流）：字形看着对，但**文字层是乱码**
+# （续页的资源表按页记账、2 字节 CID 与该页 ToUnicode 对不齐），出片上一整句变成
+# `6 4 # BOL / B U JPB O F …` 这种鬼画符。宁可用 base-14（多一个未嵌入 Helvetica），
+# 也不能让正文变成乱码——字体表的窟窿见 FONT_PARITY_EXEMPT。
+_THEME_FONTS = {"boa": "Reg"}
 
 
 def _theme_module(template_id: str):
@@ -473,12 +478,6 @@ def _theme_module(template_id: str):
     try:
         if root == "boa":
             from .themes.boa import generate as module
-        elif root == "usbank":
-            biz = template_id.endswith("business")
-            module = __import__(
-                f"billgen.themes.usbank.generate_{'biz' if biz else 'us'}",
-                fromlist=["cid_bytes"],
-            )
         else:  # pragma: no cover - 目前只有这两家有自带字体
             return None
         return module, fname
