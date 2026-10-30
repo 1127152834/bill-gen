@@ -170,7 +170,7 @@ CATEGORY_RANGES: dict[str, tuple[float, float]] = {
     "fuel": (24.0, 95.0),
     "grocery": (12.0, 260.0),
     "coffee": (3.5, 14.0),
-    "dining": (8.0, 85.0),
+    "dining": (8.0, 45.0),
     "pharmacy": (5.0, 90.0),
     "subscription": (4.99, 26.0),
     "utility": (28.0, 260.0),
@@ -456,11 +456,10 @@ def top_up_to_envelope(
             arrays = list(_iter_arrays(data))
             if arrays and rows:
                 rng = random.Random(hashlib.sha256(f"{seed}|{category}|topup".encode()).hexdigest())
-                while deficit > 0 and counts["added"] < 3:
+                while deficit > 0 and counts["added"] < 10:
                     base = rows[rng.randrange(len(rows))]
-                    amount = round(rng.uniform(lo_range, min(hi_range, deficit / 100.0)), 2)
-                    if amount < lo_range:
-                        break
+                    ceiling = max(min(hi_range, deficit / 100.0), lo_range * 1.2)
+                    amount = round(rng.uniform(lo_range * 1.2, min(ceiling, hi_range * 0.92)), 2)
                     day = rng.randrange(3, 27)
                     arrays[0].append(
                         {

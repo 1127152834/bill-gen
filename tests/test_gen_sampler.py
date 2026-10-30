@@ -125,3 +125,30 @@ def test_parse_hint_accepts_three_shapes():
     assert sampler._parse_hint("$2,600-$3,200") == (260_000, 320_000)
     assert sampler._parse_hint(2600) == (260_000, 260_000)
     assert sampler._parse_hint("") is None
+
+
+def test_brand_carries_no_store_number_of_its_own():
+    """门店号只由描述层补一次：采样器自己再补就会印成两串数字。"""
+    rows = sampler.sample_rows(_plan(), months=_months(2), state="CA", seed="store")
+    pos = [row for row in rows if row["type"] == "POS" and row["category"] != "subscription"]
+    assert pos
+    for row in pos:
+        assert not row["base_description"].split()[-1].isdigit(), row["base_description"]
+
+
+def test_subscription_rows_are_online_not_local():
+    """订阅是线上扣款，不能带持卡人城市。"""
+    rows = sampler.sample_rows(_plan(), months=_months(1), state="CA", seed="subs")
+    subs = [row for row in rows if row["category"] == "subscription"]
+    assert subs
+    for row in subs:
+        assert row["location"] == "online"
+        assert not row["city"]
+
+
+def test_missing_budget_hints_fall_back_to_state_medians():
+    """档案没填收支档时按州的中位收入兜底，房租落在收入的 28–33%。"""
+    plan = sampler.plan_from_profile({"name": "NO HINTS"}, state="CA")
+    monthly = plan.income_median * (26 / 12 if plan.income_cadence == "biweekly" else 1.0)
+    assert 0.8 * sampler.STATE_MONTHLY_INCOME["CA"] <= monthly <= 1.2 * sampler.STATE_MONTHLY_INCOME["CA"]
+    assert 0.25 * monthly <= plan.rent_median <= 0.36 * monthly

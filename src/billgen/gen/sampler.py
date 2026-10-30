@@ -93,13 +93,13 @@ STATE_UTILITIES: dict[str, dict[str, str]] = {
 #: 州 → 常见零售品牌（用于把品类落成具体门店名）。
 STATE_BRANDS: dict[str, dict[str, tuple[str, ...]]] = {
     "CA": {
-        "grocery": ("TRADER JOE'S", "VONS", "FOOD 4 LESS", "RALPHS"),
+        "grocery": ("TRADER JOE'S", "VONS", "FOOD 4 LESS", "RALPHS", "SPROUTS FARMERS MKT", "WHOLEFDS MKT"),
         "coffee": ("STARBUCKS", "PEET'S COFFEE", "BLUE BOTTLE"),
         "fuel": ("SHELL", "CHEVRON", "ARCO"),
         "pharmacy": ("CVS PHARMACY", "WALGREENS"),
         "dining": ("CHIPOTLE", "IN-N-OUT", "PANERA BREAD", "SWEETGREEN"),
         "shopping": ("TARGET", "MARSHALLS", "BEST BUY"),
-        "convenience": ("7-ELEVEN", "CIRCLE K"),
+        "convenience": ("7-ELEVEN", "CIRCLE K", "CHEVRON EXTRA MILE", "WALGREENS"),
         "rideshare": ("UBER", "LYFT"),
         "fitness": ("EQUINOX", "PLANET FITNESS"),
     },
@@ -142,6 +142,19 @@ STORE_NUMBER_RANGE: dict[str, tuple[int, int]] = {
 PAYROLL_WEEKDAY = 4
 
 
+DEFAULT_CATEGORY_WEIGHTS: dict[str, float] = {
+    "grocery": 1.0,
+    "dining": 1.0,
+    "coffee": 0.9,
+    "fuel": 1.0,
+    "pharmacy": 0.5,
+    "shopping": 0.9,
+    "rideshare": 0.5,
+    "convenience": 0.6,
+    "fitness": 0.3,
+}
+
+
 @dataclass
 class Plan:
     """模型该回答的那部分（其余由采样器决定）。"""
@@ -160,6 +173,19 @@ class Plan:
     opening_cents: int = 0
 
 
+STATE_MONTHLY_INCOME: dict[str, int] = {
+    "CA": 780_000,
+    "NY": 820_000,
+    "WA": 760_000,
+    "MA": 790_000,
+    "TX": 660_000,
+    "FL": 640_000,
+    "IL": 670_000,
+    "GA": 620_000,
+}
+DEFAULT_MONTHLY_INCOME = 640_000
+
+
 def plan_from_profile(
     profile: Mapping[str, Any],
     *,
@@ -170,6 +196,14 @@ def plan_from_profile(
     plan = Plan()
     income = _parse_hint(profile.get("monthly_income_hint"))
     rent = _parse_hint(profile.get("rent_hint"))
+    if not income:
+        # 档案没填收支档：按州的中位收入兜底，而不是写死一个数字。
+        fallback = STATE_MONTHLY_INCOME.get(state.upper(), DEFAULT_MONTHLY_INCOME)
+        income = (int(fallback * 0.85), int(fallback * 1.15))
+    if not rent:
+        # 房租按收入的 28–33% 走，这也是真实家庭最常见的负担区间。
+        monthly_mid = (income[0] + income[1]) / 2.0
+        rent = (int(monthly_mid * 0.28), int(monthly_mid * 0.33))
     if income:
         monthly = (income[0] + income[1]) / 2.0
         plan.income_sigma = 0.12
@@ -199,6 +233,8 @@ def plan_from_profile(
         {"brand": "NETFLIX.COM", "amount": 1999, "day": 9},
         {"brand": "SPOTIFY USA", "amount": 1199, "day": 15},
     ]
+    if not plan.category_weights:
+        plan.category_weights = dict(DEFAULT_CATEGORY_WEIGHTS)
     return plan
 
 
@@ -364,7 +400,9 @@ def _sample_subscriptions(plan: Plan, year: int, mon: int, *, rng: random.Random
         when = date(year, mon, max(1, min(last, day)))
         brand = str(sub.get("brand") or "SUBSCRIPTION")
         amount = int(sub.get("amount") or 1599)
-        rows.append(_row(when, "POS", "debit", amount, brand, "subscription", rng, start, end, state="", city=""))
+        row = _row(when, "POS", "debit", amount, brand, "subscription", rng, start, end, state="", city="")
+        row["location"] = "online"
+        rows.append(row)
     return rows
 
 
@@ -406,11 +444,9 @@ def _pick_brand(plan: Plan, category: str, state: str, rng: random.Random) -> st
     pool = plan.brands.get(category) or STATE_BRANDS.get(state.upper(), {}).get(category) or DEFAULT_BRANDS.get(category)
     if not pool:
         return category.upper()
-    brand = rng.choice(list(pool))
-    low, high = STORE_NUMBER_RANGE.get(category, (0, 0))
-    if high:
-        return f"{brand} {rng.randint(low, high)}"
-    return brand
+    # 只给品牌名：门店号由描述层按 merchant_key 确定性补一次，
+    # 采样器自己再补就会印成 `VONS 5624 3335` 两串数字。
+    return rng.choice(list(pool))
 
 
 def _row(
