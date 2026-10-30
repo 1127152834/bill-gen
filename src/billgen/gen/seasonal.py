@@ -252,7 +252,7 @@ def inject_event_rows(
 
         base_row = target[0] if target else {}
         target.append(
-            _pp._shape_row(
+            _pp._make_row(
                 base_row,
                 date=f"{calendar.month_abbr[month]} {day}",
                 desc=f"{merchant}{place}",

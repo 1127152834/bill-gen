@@ -657,7 +657,7 @@ def top_up_to_envelope(
 _ROW_DEFAULTS = {"memo": "", "icon": "card"}
 
 
-def _shape_row(template_row: Mapping[str, Any], *, date: str, desc: str, amount: float) -> dict[str, Any]:
+def _make_row(template_row: Mapping[str, Any], *, date: str, desc: str, amount: float) -> dict[str, Any]:
     """按已有行的字段形状造一行（版式读 `dir`/`icon` 之类的键，缺了就渲染崩）。"""
     row: dict[str, Any] = {key: template_row[key] for key in ("memo", "id", "icon") if key in template_row}
     for key, value in _ROW_DEFAULTS.items():
