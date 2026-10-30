@@ -35,6 +35,8 @@ _CARD_TAIL = re.compile(r"Card\s+(\d{4})")
 _PLACE = re.compile(r"\b([A-Z][A-Za-z .'-]{2,20})\s+([A-Z]{2})\b")
 _MONEY = re.compile(r"-?\$?\d[\d,]*\.\d\d")
 _PAGE_NO = re.compile(r"Page\s+(\d+)\s+of\s+(\d+)")
+_TYPE_SHAPE = re.compile(r"^[A-Za-z][A-Za-z /&-]{1,20}$")
+
 _DATEISH = re.compile(r"\b\d{1,2}/\d{1,2}\b|^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{1,2}\b")
 _NOISE = (" you ", " your ", "dispute", "statement period", "balance subject", "annual percentage")
 
@@ -119,9 +121,11 @@ def _detect_types(rows: list[str]) -> list[str]:
             continue
         if row.isupper() and len(row.split()) <= 2:  # 大标题（ACCOUNT DETAILS）
             continue
+        if not _TYPE_SHAPE.match(row) or row.split()[0].lower() in ("date", "amount", "page", "account", "ref"):
+            continue
         counter[row] = counter.get(row, 0) + 1
     ordered = sorted(counter.items(), key=lambda kv: (-kv[1], kv[0]))
-    return [name for name, hits in ordered if hits >= 2][:8]
+    return [name for name, hits in ordered if hits >= 3][:8]
 
 
 def _stacked_rows(text: str, limit: int = 6) -> list[str]:
@@ -195,13 +199,14 @@ def extract(template_id: str) -> dict[str, Any]:
             if card_rows:
                 break
     tail_policy = CARD_TAIL_POLICY.get(template_id, "unknown")
-    if tail_policy == "in_row" and not any(_CARD_TAIL.search(row) for row in rows):
+    if tail_policy == "in_row" and samples and not any(_CARD_TAIL.search(row) for row in rows):
         open_questions.append("卡尾 4 位应在行内，但参考件没探到（需人工核对样例行）")
     if tail_policy is False and any(_CARD_TAIL.search(row) for row in rows):
         open_questions.append("参考件行内出现卡号，与「卡号在表头」的结论冲突，需人工裁决")
 
-    types = _detect_types(rows)
-    if not types and not (CURATED / f"{theme}.json").is_file():
+    curated_file = CURATED / f"{theme}.json"
+    types = [] if curated_file.is_file() else _detect_types(rows)
+    if not types and not curated_file.is_file():
         open_questions.append("未从参考件探到 Type 列取值，需人工核对（可能该版式没有 Type 列）")
     if not samples:
         open_questions.append("该主题没有参考 PDF：规则只能来自适配器实现，必须拿真实账单核对后才能当契约用")
@@ -272,7 +277,7 @@ def extract(template_id: str) -> dict[str, Any]:
             )
             if not overlap:
                 open_questions.append("自动探测的 Type 与人工规则无交集，需复核参考件是否换了版式")
-        if curated.get("type_enum"):
+        if types:
             contract["detected_type_enum"] = types
     return contract
 

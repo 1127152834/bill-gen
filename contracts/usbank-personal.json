@@ -80,9 +80,7 @@
     "src/billgen/themes/usbank/assets/us_static_personal.pdf",
     "src/billgen/themes/usbank/assets/usbiz_static.pdf"
   ],
-  "open_questions": [
-    "自动探测的 Type 与人工规则无交集，需复核参考件是否换了版式"
-  ],
+  "open_questions": [],
   "kind": "deposit",
   "type_column": true,
   "card_types": [
@@ -96,15 +94,5 @@
     "descriptor",
     "row_rules",
     "forbidden_literals"
-  ],
-  "detected_type_enum": [
-    "Date",
-    "Ending Balance",
-    "Sep",
-    "Amount",
-    "Other Withdrawals",
-    "Ref Number",
-    "Account Number:",
-    "Statement Period:"
   ]
 }

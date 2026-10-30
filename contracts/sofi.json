@@ -91,9 +91,5 @@
     "descriptor",
     "row_rules",
     "forbidden_literals"
-  ],
-  "detected_type_enum": [
-    "Checking Account - 4287",
-    "S A M P L E"
   ]
 }

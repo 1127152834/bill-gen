@@ -33,3 +33,7 @@ PYTHONPATH=.:src .venv/bin/python tools/contract_extract.py --templates mercury,
 ```
 
 交付前那条链路里，`contracts.conform()` 按契约整形、`contracts.check()` 校验；契约里 `open_questions` 非空的家，等于「这份规则还没被真件证过」，得先补证据再信它。
+
+## 不算账户的两套
+
+`alliant`、`ally` 在 registry 里是 `kind="static-web"`（浏览器端 pdf-lib，Python 侧没有出片路径），所以没有流水契约，也不在这份索引的账户表里。要给它们做 skill 之前，得先有服务端渲染或至少一份真实对账单。

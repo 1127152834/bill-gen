@@ -46,9 +46,6 @@ Aug 17 Zelle Instant | On 08/16/26 | PMT To Adrian Aragon | PMT ID=USB4fh5swvPL 
 - `src/billgen/themes/usbank/assets/us_static_personal.pdf`
 - `src/billgen/themes/usbank/assets/usbiz_static.pdf`
 
-## 待人工核对（不许凭记忆补）
-- 自动探测的 Type 与人工规则无交集，需复核参考件是否换了版式
-
 ## 抬头身份（必须原样）
 - legal: `U.S. Bank National Association`
 - domain: `usbank.com`

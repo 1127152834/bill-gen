@@ -95,10 +95,5 @@
     "descriptor",
     "row_rules",
     "forbidden_literals"
-  ],
-  "detected_type_enum": [
-    "Account details",
-    "Card",
-    "S A M P L E"
   ]
 }

@@ -125,15 +125,5 @@
     "descriptor",
     "row_rules",
     "forbidden_literals"
-  ],
-  "detected_type_enum": [
-    "Account Number:",
-    "Online Domestic Wire Fee",
-    "Page",
-    "of",
-    "(continued)",
-    "Beginning Balance",
-    "Ending Balance",
-    "*end*summary"
   ]
 }

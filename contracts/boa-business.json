@@ -68,7 +68,6 @@
     "src/billgen/synth/adapters/boa.py::_row"
   ],
   "open_questions": [
-    "卡尾 4 位应在行内，但参考件没探到（需人工核对样例行）",
     "该主题没有参考 PDF：规则只能来自适配器实现，必须拿真实账单核对后才能当契约用"
   ],
   "kind": "deposit",
