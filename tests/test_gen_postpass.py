@@ -132,6 +132,8 @@ def test_repair_month_reports_each_category():
         "budget",
         "amounts",
         "sorted",
+        "recurring",
+        "stores",
     }
 
 
@@ -211,3 +213,41 @@ def test_top_up_adds_the_missing_utility_when_only_one_bill_exists():
 def test_range_for_accepts_plural_envelope_names():
     assert postpass.range_for("utilities") == postpass.CATEGORY_RANGES["utility"]
     assert postpass.range_for("groceries") == postpass.CATEGORY_RANGES["grocery"]
+
+
+def test_recurring_charges_are_deduped_to_one_a_month():
+    """会员费/保费/话费一个月就一笔，模型多开几笔要收掉。"""
+    data = _mercury_like([
+        {"date": "Nov 2", "desc": "EQUINOX TEMPLE CITY CA", "amount": -46.67},
+        {"date": "Nov 15", "desc": "EQUINOX TEMPLE CITY CA", "amount": -41.73},
+        {"date": "Nov 25", "desc": "EQUINOX TEMPLE CITY CA", "amount": -41.53},
+        {"date": "Nov 6", "desc": "NETFLIX.COM", "amount": -23.4},
+        {"date": "Nov 20", "desc": "NETFLIX.COM", "amount": -23.4},
+    ])
+    removed = postpass.dedupe_recurring(data)
+    assert removed == 3
+    assert len([r for r in data["transactions"] if "EQUINOX" in r["desc"]]) == 1
+    assert len([r for r in data["transactions"] if "NETFLIX" in r["desc"]]) == 1
+
+
+def test_same_store_number_is_renumbered_after_two_visits():
+    data = _mercury_like([
+        {"date": "Nov 1", "desc": "CHEVRON 7087", "amount": -41.83},
+        {"date": "Nov 3", "desc": "CHEVRON 7087", "amount": -42.84},
+        {"date": "Nov 5", "desc": "CHEVRON 7087", "amount": -28.8},
+        {"date": "Nov 7", "desc": "CHEVRON 7087", "amount": -95.0},
+    ])
+    changed = postpass.vary_chain_stores(data, seed="t")
+    stores = [row["desc"] for row in data["transactions"]]
+    assert changed == 2
+    assert len({desc for desc in stores}) == 3
+
+
+def test_repair_month_reports_recurring_and_store_fixes():
+    data = _mercury_like([
+        {"date": "Nov 2", "desc": "NETFLIX.COM", "amount": -23.4},
+        {"date": "Nov 20", "desc": "NETFLIX.COM", "amount": -23.4},
+    ])
+    report = postpass.repair_month(data, state="CA", city="Temple City")
+    assert report["recurring"] == 1
+    assert set(report) >= {"utilities", "duplicate_utilities", "online_places", "chains", "budget", "amounts", "sorted", "recurring", "stores"}

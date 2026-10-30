@@ -30,6 +30,8 @@ __all__ = [
     "fix_amounts",
     "fix_online_places",
     "dedupe_utilities",
+    "dedupe_recurring",
+    "vary_chain_stores",
     "repair_month",
 ]
 
@@ -231,6 +233,21 @@ def _is_gas(desc: str) -> bool:
     return any(token in up for token in _GAS_TOKENS)
 
 
+#: 一个月只该出现一次的固定扣款（会员费/保费/话费/宽带/房租/水电）。
+_RECURRING_TOKENS = (
+    "NETFLIX", "SPOTIFY", "HULU", "DISNEY", "ADOBE", "ICLOUD", "YOUTUBE",
+    "EQUINOX", "PLANET FITNESS", "GYM", "MEMBERSHIP",
+    "USAA", "GEICO", "PROGRESSIVE", "STATE FARM",
+    "VERIZON", "T-MOBILE", "AT&T", "XFINITY", "COMCAST", "SPECTRUM",
+    "EDISON", "GAS", "WATER", "POWER", "ENERGY",
+)
+
+
+def _is_recurring(desc: str) -> bool:
+    up = _norm(desc)
+    return any(token in up for token in _RECURRING_TOKENS)
+
+
 _RENT_TOKENS = (
     "RENT",
     "MGMT",
@@ -399,6 +416,50 @@ def fix_chains(data: dict[str, Any], *, state: str, city: str = "") -> int:
     return changed
 
 
+def dedupe_recurring(data: dict[str, Any]) -> int:
+    """固定扣款一个月只留一笔（会员费、保费、话费、水电）。返回删掉几行。"""
+    removed = 0
+    for array in _iter_arrays(data):
+        seen: dict[str, dict[str, Any]] = {}
+        keep: list[dict[str, Any]] = []
+        for row in array:
+            desc = _row_desc(row)
+            amount = _row_amount(row) or 0.0
+            if _is_recurring(desc) and amount < 0:
+                key = " ".join(re.findall(r"[A-Z]+", _norm(desc))[:2])
+                if key in seen:
+                    if abs(amount) > abs(_row_amount(seen[key]) or 0.0):
+                        keep[keep.index(seen[key])] = row
+                        seen[key] = row
+                    removed += 1
+                    continue
+                seen[key] = row
+            keep.append(row)
+        array[:] = keep
+    return removed
+
+
+def vary_chain_stores(data: dict[str, Any], *, seed: str = "") -> int:
+    """同一家店同一个月出现 3 次以上就换门店号（人不会天天跑同一家 7087）。"""
+    changed = 0
+    for array in _iter_arrays(data):
+        counts: dict[str, int] = {}
+        for row in array:
+            desc = _row_desc(row)
+            match = re.match(r"([A-Z0-9][A-Z0-9' .&-]{2,})\s+(\d{3,5})\b", _norm(desc))
+            if not match:
+                continue
+            brand, store = match.group(1), match.group(2)
+            counts[brand] = counts.get(brand, 0) + 1
+            if counts[brand] <= 2:
+                continue
+            digest = hashlib.sha256(f"{seed}|{brand}|{counts[brand]}".encode()).hexdigest()[:6]
+            new_store = str(1000 + int(digest, 16) % 8999)
+            _set_desc(row, desc.replace(store, new_store, 1))
+            changed += 1
+    return changed
+
+
 def top_up_to_envelope(
     data: dict[str, Any],
     env: Mapping[str, Any],
@@ -451,20 +512,34 @@ def top_up_to_envelope(
                 progressed = True
             if not progressed:
                 break
-        # 高频小额类目：抬到顶还不够就是「这个月少跑了几趟」，补一两笔新消费更真实。
-        if category in {"fuel", "groceries", "dining", "shopping"} and deficit > 0:
+        # 高频小额类目：抬到顶还不够就是「这个月少跑了几趟」，补几笔新消费更真实。
+        # 但固定扣款（会员费/保费/话费/水电）一个月就一笔，绝不复制。
+        recurring = all(_is_recurring(_row_desc(row)) for row in rows) if rows else False
+        if category in {"fuel", "groceries", "dining", "shopping"} and deficit > 0 and not recurring:
             arrays = list(_iter_arrays(data))
             if arrays and rows:
                 rng = random.Random(hashlib.sha256(f"{seed}|{category}|topup".encode()).hexdigest())
-                while deficit > 0 and counts["added"] < 10:
-                    base = rows[rng.randrange(len(rows))]
+                pool = [row for row in rows if not _is_recurring(_row_desc(row))]
+                used: list[tuple[str, str]] = []
+                while deficit > 0 and counts["added"] < 10 and pool:
+                    base = pool[rng.randrange(len(pool))]
                     ceiling = max(min(hi_range, deficit / 100.0), lo_range * 1.2)
                     amount = round(rng.uniform(lo_range * 1.2, min(ceiling, hi_range * 0.92)), 2)
+                    desc = _row_desc(base)
+                    store = re.search(r"\b(\d{3,5})\b", desc)
+                    if store:  # 换一个门店号，别让同一个月出现同一个店五次
+                        desc = desc.replace(store.group(1), f"{rng.randrange(1000, 9999)}", 1)
                     day = rng.randrange(3, 27)
+                    month_tag = str(base.get("date", ""))[:3]
+                    for _ in range(8):
+                        if (month_tag, desc) not in used:
+                            break
+                        day = rng.randrange(3, 27)
+                    used.append((month_tag, desc))
                     arrays[0].append(
                         {
-                            "date": f"{base.get('date', '')[:3]} {day}",
-                            "desc": _row_desc(base),
+                            "date": f"{month_tag} {day}",
+                            "desc": desc,
                             "amount": -amount,
                             "type": base.get("type", "Card"),
                         }
@@ -721,6 +796,21 @@ def dedupe_utilities(data: dict[str, Any], *, state: str, city: str) -> int:
     return 0
 
 
+#: 一个月只该出现一次的固定扣款（会员费/保费/话费/宽带/房租/水电）。
+_RECURRING_TOKENS = (
+    "NETFLIX", "SPOTIFY", "HULU", "DISNEY", "ADOBE", "ICLOUD", "YOUTUBE",
+    "EQUINOX", "PLANET FITNESS", "GYM", "MEMBERSHIP",
+    "USAA", "GEICO", "PROGRESSIVE", "STATE FARM",
+    "VERIZON", "T-MOBILE", "AT&T", "XFINITY", "COMCAST", "SPECTRUM",
+    "EDISON", "GAS", "WATER", "POWER", "ENERGY",
+)
+
+
+def _is_recurring(desc: str) -> bool:
+    up = _norm(desc)
+    return any(token in up for token in _RECURRING_TOKENS)
+
+
 _RENT_TOKENS = ("RENT", "MGMT", "MANAGEMENT", "PROPERTY", "APARTMENTS", "RESIDENTIAL", "HOUSING", "LEASING", "REALTY")
 
 
@@ -843,6 +933,8 @@ def repair_month(
         "budget": fix_budget(data, income_hint=income_hint, rent_hint=rent_hint),
         "amounts": fix_amounts(data) if fix_money else 0,
         "sorted": sort_rows(data),
+        "recurring": dedupe_recurring(data),
+        "stores": vary_chain_stores(data),
     }
     return report
 
