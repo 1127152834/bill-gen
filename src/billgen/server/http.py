@@ -110,22 +110,29 @@ class Handler(BaseHTTPRequestHandler):
         return Path(os.environ.get(RENDERS_ENV) or "renders").expanduser().resolve()
 
     def _render_file(self, raw_name: str):
-        """把一张出片的 PDF 发给浏览器：只认文件名，路径穿越一律当 404。"""
+        """把一份出片发给浏览器：PDF、月模板 JSON、预览 PNG 都走这里。
+
+        只认文件名，路径穿越一律当 404。后缀决定 content-type —— 交付物已经改成
+        「每月一份 JSON」，只放 PDF 会让页面上的下载按钮全部 404。
+        """
         from urllib.parse import unquote
 
         name = unquote(raw_name).strip()
-        if not name or "/" in name or "\\" in name or ".." in name or not name.lower().endswith(".pdf"):
+        suffix = name.rsplit(".", 1)[-1].lower() if "." in name else ""
+        types = {"pdf": "application/pdf", "json": "application/json; charset=utf-8", "png": "image/png"}
+        if not name or "/" in name or "\\" in name or ".." in name or suffix not in types:
             return self._error("not_found", "Render not found", 404)
         root = self._renders_dir()
         target = (root / name).resolve()
         if root not in target.parents or not target.is_file():
             return self._error("not_found", "Render not found", 404)
+        disposition = "attachment" if suffix == "json" else "inline"
         return self._send(
             target.read_bytes(),
-            "application/pdf",
+            types[suffix],
             headers={
-                # inline：点「预览」直接在标签页里看；带 download=1 时浏览器会下载。
-                "Content-Disposition": f'inline; filename="{name}"',
+                # inline：点「预览」直接在标签页里看；JSON 用 attachment，别让浏览器当页面渲染。
+                "Content-Disposition": f'{disposition}; filename="{name}"',
             },
         )
 

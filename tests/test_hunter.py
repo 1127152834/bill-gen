@@ -576,6 +576,25 @@ def test_hub_serves_rendered_pdfs_by_filename(web, tmp_path: Path, monkeypatch):
         assert response.read() == b"%PDF-1.4 fake"
 
 
+def test_hub_serves_month_json_and_preview_png(web, tmp_path: Path, monkeypatch):
+    """交付物是每月一份 JSON：下载按钮打的就是这两个后缀，只放行 PDF 会全线 404。"""
+    origin, _, _ = web
+    renders = tmp_path / "renders"
+    renders.mkdir()
+    (renders / "chase-personal-2026-08.json").write_text('{"transactions": []}', encoding="utf-8")
+    (renders / "chase-personal-2026-08.png").write_bytes(b"\x89PNG\r\n\x1a\n fake")
+    monkeypatch.setenv("BILLGEN_OUT", str(renders))
+
+    with urllib.request.urlopen(origin + "/api/v1/renders/chase-personal-2026-08.json", timeout=20) as response:
+        assert response.status == 200
+        assert response.headers["Content-Type"].startswith("application/json")
+        assert "attachment" in response.headers["Content-Disposition"]
+
+    with urllib.request.urlopen(origin + "/api/v1/renders/chase-personal-2026-08.png", timeout=20) as response:
+        assert response.status == 200
+        assert response.headers["Content-Type"] == "image/png"
+
+
 def test_hub_refuses_to_serve_outside_the_render_directory(web, tmp_path: Path, monkeypatch):
     origin, _, _ = web
     renders = tmp_path / "renders"
